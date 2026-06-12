@@ -1,31 +1,93 @@
-This is a Kotlin Multiplatform project targeting Android, iOS.
+# Itinera
 
-* [/iosApp](./iosApp/iosApp) contains an iOS application. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+A cross-platform travel itinerary and ticket organizer for Android and iOS, built with **Kotlin Multiplatform** and **Compose Multiplatform**. One shared Kotlin codebase drives the full UI and logic on both platforms.
 
-* [/shared](./shared/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./shared/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./shared/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./shared/src/jvmMain/kotlin)
-    folder is the appropriate location.
+Itinera helps frequent travellers keep every trip in one place — plan day-by-day legs and places to visit, track tickets and documents, convert currencies with live exchange rates, and run a pre-departure checklist, all with a clean, themeable interface available in 40+ languages.
 
-### Running the apps
 
-Use the run configurations provided by the run widget in your IDE's toolbar. You can also use these commands and options:
+## Features
 
-- Android app: `./gradlew :androidApp:assembleDebug`
-- iOS app: open the [/iosApp](./iosApp) directory in Xcode and run it from there.
+- **Truly cross-platform** — a single `shared` module written in Kotlin renders the entire UI and business logic on both Android and iOS via Compose Multiplatform.
+- **Trip planning** — organize trips into day-numbered legs (travel between places) and activities (places to visit), grouped automatically by date.
+- **Swipe-to-reveal actions** — pin, edit, archive, or delete trips with custom anchored-drag gestures and spring animations.
+- **Live currency conversion** — real-time exchange rates from the [Frankfurter API](https://frankfurter.dev) (European Central Bank data), with swap, loading, and error states.
+- **Remote trip imagery** — trip cover photos fetched by destination from the Unsplash API, with a graceful colour fallback.
+- **Documents & tickets** — keep booking references and travel documents attached to each trip.
+- **Pre-departure checklist** — add items with keyword-based category suggestions.
+- **Appearance** — full light / dark / system theming wired to a single theme source.
+- **Localization** — UI translated across 40+ languages with an English fallback layer.
+- **Profile & settings** — editable profile, language and currency preferences, and an archived-trips view.
 
-### Running tests
+## Tech stack
 
-Use the run button in your IDE's editor gutter, or run tests using Gradle tasks:
+| Area | Technology |
+|------|------------|
+| Language | Kotlin (Multiplatform) |
+| UI | Compose Multiplatform, Material 3 |
+| Networking | Ktor client (OkHttp on Android, Darwin on iOS) |
+| Serialization | kotlinx.serialization |
+| Images | Coil 3 (with Ktor network loader) |
+| Dates | kotlinx-datetime |
+| Concurrency | kotlinx.coroutines |
+| Build | Gradle (Kotlin DSL) with version catalog |
 
-- Android tests: `./gradlew :shared:testAndroidHostTest`
-- iOS tests: `./gradlew :shared:iosSimulatorArm64Test`
+## Project structure
 
----
+```
+shared/                      # Shared Kotlin Multiplatform module
+  src/commonMain/            # UI + logic shared by both platforms
+    kotlin/com/itinera/app/
+      data/                  # Repository, sample data, API clients
+      i18n/                  # Strings & localization
+      model/                 # Data models
+      ui/screens/            # All app screens (Compose)
+      ui/components/         # Shared UI components
+      ui/theme/              # Theme
+  src/androidMain/           # Android-specific actuals
+  src/iosMain/               # iOS-specific actuals
+androidApp/                  # Android application entry point
+iosApp/                      # iOS application (Xcode project)
+```
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+## Building and running
+
+### Prerequisites
+
+- A recent **JDK** (17+)
+- **Android Studio** (latest stable) for the Android app
+- **Xcode** (on macOS) for the iOS app
+
+### Android
+
+1. Clone the repo and open the project root in Android Studio.
+2. Let Gradle sync.
+3. Select the `androidApp` run configuration and run it on an emulator or device.
+
+Or from the command line:
+
+```bash
+./gradlew :androidApp:installDebug
+```
+
+### iOS
+
+1. Open `iosApp/iosApp.xcodeproj` in Xcode.
+2. Select an iOS Simulator (or a connected device) and run.
+
+Gradle builds the shared framework automatically as part of the Xcode build.
+
+### Unsplash API key (optional)
+
+Trip cover photos use the Unsplash API. Without a key the app runs fine — trip cards simply show a colour fallback instead of photos.
+
+To enable photos, add your free [Unsplash access key](https://unsplash.com/developers) to `local.properties` (which is gitignored and never committed):
+
+```properties
+unsplashAccessKey=your_access_key_here
+```
+
+The build reads this value and generates a `Secrets` object at compile time, so the key stays out of source control.
+
+## License
+
+Released under the [MIT License](LICENSE).
