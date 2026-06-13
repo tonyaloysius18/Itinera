@@ -8,12 +8,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.CloudQueue
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Euro
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -23,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.UserProfile
 import com.itinera.app.ui.components.TopBar
@@ -100,12 +98,12 @@ fun SettingsScreen(
             }
         }
 
-        Spacer(Modifier.weight(1f))
-
         // Log out — bright red rounded button
+        Spacer(Modifier.height(120.dp))
+
         Button(
             onClick = onLogOut,
-            modifier = Modifier.fillMaxWidth().height(52.dp).padding(horizontal = 55.dp),
+            modifier = Modifier.fillMaxWidth().height(52.dp).padding(horizontal = 60.dp),
             shape = RoundedCornerShape(14.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = AccentRed,
@@ -114,9 +112,10 @@ fun SettingsScreen(
         ) {
             Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null, modifier = Modifier.size(20.dp))
             Spacer(Modifier.width(8.dp))
-            Text(s.logOut, fontWeight = FontWeight.SemiBold)
+            Text(s.logOut, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
         }
-        Spacer(Modifier.height(20.dp))
+
+        Spacer(Modifier.weight(1f))
     }
 }
 }

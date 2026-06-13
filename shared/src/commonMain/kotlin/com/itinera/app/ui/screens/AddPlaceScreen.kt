@@ -4,7 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Schedule
@@ -46,22 +45,22 @@ fun AddPlaceScreen(
     Column(Modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onClose) { Icon(Icons.Filled.Close, contentDescription = "Close") }
-            Text(if (existing == null) "New place" else "Edit place", style = MaterialTheme.typography.titleLarge)        }
+            Text(if (existing == null) s.newPlace else s.editPlace, style = MaterialTheme.typography.titleLarge)        }
 
         Column(
             Modifier.weight(1f).padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             OutlinedTextField(
-                title, { title = it },
-                label = { Text("Place") },
+                title, { title = it.replaceFirstChar{ if (it.isLowerCase()) it.uppercase() else it.toString() } },
+                label = { Text(s.place) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = textFieldShape,
             )
             OutlinedTextField(
-                location, { location = it },
-                label = { Text("Landmark (optional)") },
+                location, { location = it.replaceFirstChar{ if (it.isLowerCase()) it.uppercase() else it.toString() } },
+                label = { Text(s.landmark) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = textFieldShape,
@@ -146,8 +145,8 @@ fun AddPlaceScreen(
             onClick = { if (title.isNotBlank() && date != null) onSave(date!!, title.trim(), time, location.trim()) },
             enabled = title.isNotBlank() && date != null,
             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 120.dp),
-        ) { Text("Save place") }
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 40.dp).padding(bottom = 16.dp),
+        ) { Text(s.savePlace) }
         }
     }
 }
@@ -163,29 +162,29 @@ fun AddPlaceScreen(
 //    Text("Add", style = MaterialTheme.typography.bodyMedium)
 //}
 // Shared Day dropdown — used by both AddPlaceScreen and AddLegScreen (same package)
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DayPickerField(
-    day: Int,
-    onDayChange: (Int) -> Unit,
-    modifier: Modifier = Modifier,
-    maxDays: Int = 14,
-) {
-    var expanded by remember { mutableStateOf(false) }
-    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }, modifier = modifier) {
-        OutlinedTextField(
-            value = "Day $day",
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("Day") },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.menuAnchor().fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-        )
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            (1..maxDays).forEach { d ->
-                DropdownMenuItem(text = { Text("Day $d") }, onClick = { onDayChange(d); expanded = false })
-            }
-        }
-    }
-}
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Composable
+//fun DayPickerField(
+//    day: Int,
+//    onDayChange: (Int) -> Unit,
+//    modifier: Modifier = Modifier,
+//    maxDays: Int = 14,
+//) {
+//    var expanded by remember { mutableStateOf(false) }
+//    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }, modifier = modifier) {
+//        OutlinedTextField(
+//            value = "Day $day",
+//            onValueChange = {},
+//            readOnly = true,
+//            label = { Text("Day") },
+//            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+//            modifier = Modifier.menuAnchor().fillMaxWidth(),
+//            shape = RoundedCornerShape(12.dp),
+//        )
+//        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+//            (1..maxDays).forEach { d ->
+//                DropdownMenuItem(text = { Text("Day $d") }, onClick = { onDayChange(d); expanded = false })
+//            }
+//        }
+//    }
+//}

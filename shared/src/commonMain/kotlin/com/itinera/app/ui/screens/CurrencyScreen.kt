@@ -92,7 +92,7 @@ fun CurrencyScreen() {
             visible = toast != null,
             enter = fadeIn(),
             exit = fadeOut(),
-            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 80.dp),
+            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 160.dp), // Increased from 80.dp
         ) {
             Surface(
                 shape = RoundedCornerShape(24.dp),
@@ -112,7 +112,7 @@ fun CurrencyScreen() {
         TopBar(s.currency)
         Column(Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
 
-            Spacer(Modifier.height(12.dp))
+//            Spacer(Modifier.height(5.dp))
 
             OutlinedTextField(
                 value = amount,
@@ -149,7 +149,7 @@ fun CurrencyScreen() {
             Button(
                 onClick = { convert() },
                 enabled = !loading,
-                modifier = Modifier.fillMaxWidth().height(50.dp).padding(horizontal = 130.dp),
+                modifier = Modifier.fillMaxWidth().height(50.dp).padding(horizontal = 100.dp),
             ) {
                 if (loading) {
                     CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onPrimary)

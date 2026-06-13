@@ -1,5 +1,7 @@
 package com.itinera.app.i18n
 
+import com.itinera.app.deviceLanguageCode
+
 /**
  * Languages offered in the app. SYSTEM follows the device locale; the rest force
  * a specific language. Add more by adding an entry here and a Strings map below.
@@ -105,7 +107,7 @@ data class Strings(
 
 
     val add: String, val addToItinerary: String, val travel: String, val place: String,
-    val newPlace: String, val savePlace: String, val searchTrips: String,
+    val newPlace: String, val editPlace: String, val landmark: String, val savePlace: String, val searchTrips: String,
     val newTrip: String, val renameTrip: String, val create: String, val save: String,
     val pin: String, val unpin: String, val edit: String, val archive: String, val unarchive: String,
     val delete: String, val deleteTripQ: String, val deletePlaceQ: String, val deleteLegQ: String,
@@ -131,7 +133,7 @@ private val EN = Strings(
 
 
     add = "Add", addToItinerary = "Add to itinerary", travel = "Travel", place = "Place",
-    newPlace = "New place", savePlace = "Save place", searchTrips = "Search trips",
+    newPlace = "New place", editPlace = "Edit Place", landmark = "Landmark (optional)", savePlace = "Save place", searchTrips = "Search trips",
     newTrip = "New trip", renameTrip = "Rename trip", create = "Create", save = "Save",
     pin = "Pin", unpin = "Unpin", edit = "Edit", archive = "Archive", unarchive = "Unarchive",
     delete = "Delete", deleteTripQ = "Delete trip?", deletePlaceQ = "Delete place?", deleteLegQ = "Delete leg?",
@@ -157,7 +159,7 @@ private val FR = EN.copy(
     amount = "Montant", validAmount = "Entrez un montant valide", couldntFetch = "Impossible de récupérer le taux. Vérifiez votre connexion.",
     
     add = "Ajouter", addToItinerary = "Ajouter à l'itinéraire", travel = "Voyage", place = "Lieu", 
-    newPlace = "Nouveau lieu", savePlace = "Enregistrer le lieu", searchTrips = "Rechercher des voyages", 
+    newPlace = "Nouveau lieu", editPlace = "Modifier le lieu", landmark = "Point de repère (facultatif)", savePlace = "Enregistrer le lieu", searchTrips = "Rechercher des voyages", 
     newTrip = "Nouveau voyage", renameTrip = "Renommer le voyage", create = "Créer", save = "Enregistrer", 
     pin = "Épingler", unpin = "Désépingler", edit = "Modifier", archive = "Archiver", unarchive = "Déarchiver", 
     delete = "Supprimer", deleteTripQ = "Supprimer le voyage?", deletePlaceQ = "Supprimer le lieu?", deleteLegQ = "Supprimer le trajet?", 
@@ -183,7 +185,7 @@ private val ES = EN.copy(
     amount = "Monto", validAmount = "Ingrese un monto válido", couldntFetch = "No se pudo obtener la tasa. Verifique su conexión.",
 
     add = "Añadir", addToItinerary = "Añadir al itinerario", travel = "Viaje", place = "Lugar",
-    newPlace = "Nuevo lugar", savePlace = "Guardar lugar", searchTrips = "Buscar viajes",
+    newPlace = "Nuevo lugar", editPlace = "Editar lugar", landmark = "Punto de referencia (opcional)", savePlace = "Guardar lugar", searchTrips = "Buscar viajes",
     newTrip = "Nuevo viaje", renameTrip = "Renombrar viaje", create = "Crear", save = "Guardar",
     pin = "Fijar", unpin = "Desfijar", edit = "Editar", archive = "Archivar", unarchive = "Desarchivar", 
     delete = "Eliminar", deleteTripQ = "¿Eliminar viaje?", deletePlaceQ = "¿Eliminar lugar?", deleteLegQ = "¿Eliminar tramo?", 
@@ -209,7 +211,7 @@ private val DE = EN.copy(
     amount = "Betrag", validAmount = "Geben Sie eine gültige Menge ein", couldntFetch = "Konnte den Kurs nicht abrufen. Überprüfen Sie Ihre Verbindung.",
 
     add = "Hinzufügen", addToItinerary = "Zum Reiseplan hinzufügen", travel = "Reise", place = "Ort",
-    newPlace = "Neuer Ort", savePlace = "Ort speichern", searchTrips = "Reisen suchen",
+    newPlace = "Neuer Ort", editPlace = "Ort bearbeiten", landmark = "Wahrzeichen (optional)", savePlace = "Ort speichern", searchTrips = "Reisen suchen",
     newTrip = "Neue Reise", renameTrip = "Reise umbenennen", create = "Erstellen", save = "Speichern",
     pin = "Anheften", unpin = "Lösen", edit = "Bearbeiten", archive = "Archivieren", unarchive = "Dearchivieren",
     delete = "Löschen", deleteTripQ = "Reise löschen?", deletePlaceQ = "Ort löschen?", deleteLegQ = "Etappe löschen?",
@@ -236,7 +238,7 @@ private val IT = EN.copy(
 
 
     add = "Aggiungi", addToItinerary = "Aggiungi all'itinerario", travel = "Viaggio", place = "Luogo",
-    newPlace = "Nuovo luogo", savePlace = "Salva luogo", searchTrips = "Cerca viaggi",
+    newPlace = "Nuovo luogo", editPlace = "Modifica luogo", landmark = "Punto di riferimento (opzionale)", savePlace = "Salva luogo", searchTrips = "Cerca viaggi",
     newTrip = "Nuovo viaggio", renameTrip = "Rinomina viaggio", create = "Crea", save = "Salva",
     pin = "Fissa", unpin = "Rimuovi fissa", edit = "Modifica", archive = "Archivia", unarchive = "Ripristina", 
     delete = "Elimina", deleteTripQ = "Elimina viaggio?", deletePlaceQ = "Elimina luogo?", deleteLegQ = "Elimina tratta?", 
@@ -264,7 +266,7 @@ private val PT = EN.copy(
     amount = "Montante", validAmount = "Insira um montante válido", couldntFetch = "Não foi possível obter a taxa. Verifique a sua conexão.",
 
     add = "Adicionar", addToItinerary = "Adicionar ao itinerário", travel = "Viagem", place = "Lugar",
-    newPlace = "Novo lugar", savePlace = "Salvar lugar", searchTrips = "Pesquisar viagens",
+    newPlace = "Novo lugar", editPlace = "Editar lugar", landmark = "Ponto de referência (opcional)", savePlace = "Salvar lugar", searchTrips = "Pesquisar viagens",
     newTrip = "Nova viagem", renameTrip = "Renomear viagem", create = "Criar", save = "Salvar",
     pin = "Fixar", unpin = "Desafixar", edit = "Editar", archive = "Arquivar", unarchive = "Desarquivar",
     delete = "Excluir", deleteTripQ = "Excluir viagem?", deletePlaceQ = "Excluir lugar?", deleteLegQ = "Excluir leg?",
@@ -290,7 +292,7 @@ private val NL = EN.copy(
     amount = "Bedrag", validAmount = "Geef een geldig bedrag", couldntFetch = "Kon de kurs niet ophalen. Controleer uw verbinding.",
 
     add = "Toevoegen", addToItinerary = "Toevoegen aan reisplan", travel = "Reis", place = "Plaats",
-    newPlace = "Nieuwe plaats", savePlace = "Plaats opslaan", searchTrips = "Reizen zoeken",
+    newPlace = "Nieuwe plaats", editPlace = "Plaats bewerken", landmark = "Bezienswaardigheid (optioneel)", savePlace = "Plaats opslaan", searchTrips = "Reizen zoeken",
     newTrip = "Nieuwe reis", renameTrip = "Reis hernoemen", create = "Maken", save = "Opslaan",
     pin = "Vastzetten", unpin = "Losmaken", edit = "Bewerken", archive = "Archiveren", unarchive = "Dearchiveren",
     delete = "Verwijderen", deleteTripQ = "Reis verwijderen?", deletePlaceQ = "Plaats verwijderen?", deleteLegQ = "Leg verwijderen?",
@@ -317,7 +319,7 @@ private val PL = EN.copy(
 
 
     add = "Dodaj", addToItinerary = "Dodaj do planu podróży", travel = "Podróż", place = "Miejsce",
-    newPlace = "Nowe miejsce", savePlace = "Zapisz miejsce", searchTrips = "Szukaj podróży",
+    newPlace = "Nowe miejsce", editPlace = "Edytuj miejsce", landmark = "Punkt orientacyjny (opcjonalnie)", savePlace = "Zapisz miejsce", searchTrips = "Szukaj podróży",
     newTrip = "Nowa podróż", renameTrip = "Zmień nazwę podróży", create = "Utwórz", save = "Zapisz",
     pin = "Przypnij", unpin = "Odepnij", edit = "Edytuj", archive = "Archiwizuj", unarchive = "Przywróć z archiwum", 
     delete = "Usuń", deleteTripQ = "Usunąć podróż?", deletePlaceQ = "Usunąć miejsce?", deleteLegQ = "Usunąć odcinek?", 
@@ -340,7 +342,7 @@ private val ZH = EN.copy(
 
 
     add = "添加", addToItinerary = "添加到行程", travel = "旅行", place = "地点",
-    newPlace = "新地点", savePlace = "保存地点", searchTrips = "搜索行程",
+    newPlace = "新地点", editPlace = "编辑地点", landmark = "地标（可选）", savePlace = "保存地点", searchTrips = "搜索行程",
     newTrip = "新行程", renameTrip = "重命名行程", create = "创建", save = "保存",
     pin = "固定", unpin = "取消固定", edit = "编辑", archive = "归档", unarchive = "取消归档", 
     delete = "删除", deleteTripQ = "删除行程？", deletePlaceQ = "删除地点？", deleteLegQ = "删除行程段？", 
@@ -365,7 +367,7 @@ private val JP = EN.copy(
     
 
     add = "追加", addToItinerary = "旅程に追加", travel = "旅行", place = "場所",
-    newPlace = "新しい場所", savePlace = "場所を保存", searchTrips = "旅を検索",
+    newPlace = "新しい場所", editPlace = "場所を編集", landmark = "目印（オプション）", savePlace = "場所を保存", searchTrips = "旅を検索",
     newTrip = "新しい旅", renameTrip = "旅の名前を変更", create = "作成", save = "保存",
     pin = "ピン留め", unpin = "ピン留めを解除", edit = "編集", archive = "アーカイブ", unarchive = "アーカイブを解除", 
     delete = "削除", deleteTripQ = "旅を削除しますか？", deletePlaceQ = "場所を削除しますか？", deleteLegQ = "経路を削除しますか？", 
@@ -390,7 +392,7 @@ private val KR = EN.copy(
     amount = "금액", validAmount = "유효한 금액을 입력하세요", couldntFetch = "환율을 가져올 수 없습니다. 연결을 확인하세요.",
 
     add = "추가", addToItinerary = "일정에 추가", travel = "여행", place = "장소",
-    newPlace = "새 장소", savePlace = "장소 저장", searchTrips = "여행 검색",
+    newPlace = "새 장소", editPlace = "장소 편집", landmark = "랜드마크 (선택 사항)", savePlace = "장소 저장", searchTrips = "여행 검색",
     newTrip = "새 여행", renameTrip = "여행 이름 바꾸기", create = "만들기", save = "저장",
     pin = "고정", unpin = "고정 해제", edit = "편집", archive = "보관", unarchive = "보관 취소", 
     delete = "삭제", deleteTripQ = "여행을 삭제할까요?", deletePlaceQ = "장소를 삭제할까요?", deleteLegQ = "경로를 삭제할까요?", 
@@ -418,7 +420,7 @@ private val RU = EN.copy(
     amount = "Сумма", validAmount = "Введите действительную сумму", couldntFetch = "Не удалось получить курс. Проверьте соединение.",
 
     add = "Добавить", addToItinerary = "Добавить в маршрут", travel = "Путешествие", place = "Место",
-    newPlace = "Новое место", savePlace = "Сохранить место", searchTrips = "Поиск путешествий",
+    newPlace = "Новое место", editPlace = "Редактировать место", landmark = "Достопримечательность (необязательно)", savePlace = "Сохранить место", searchTrips = "Поиск путешествий",
     newTrip = "Новое путешествие", renameTrip = "Переименовать путешествие", create = "Создать", save = "Сохранить",
     pin = "Закрепить", unpin = "Открепить", edit = "Редактировать", archive = "Архивировать", unarchive = "Разархивировать", 
     delete = "Удалить", deleteTripQ = "Удалить путешествие?", deletePlaceQ = "Удалить место?", deleteLegQ = "Удалить путь?", 
@@ -449,7 +451,7 @@ private val TAM = EN.copy(
     amount = "தொகை", validAmount = "செல்லுபடியாகும் தொகையை உள்ளிடவும்", couldntFetch = "விகிதத்தைப் பெற முடியவில்லை. உங்கள் இணைப்பைச் சரிபார்க்கவும்.", 
 
     add = "சேர்", addToItinerary = "பயணத்திட்டத்தில் சேர்", travel = "பயணம்", place = "இடம்",
-    newPlace = "புதிய இடம்", savePlace = "இடத்தைச் சேமி", searchTrips = "பயணங்களைத் தேடு",
+    newPlace = "புதிய இடம்", editPlace = "இடத்தைத் திருத்து", landmark = "அடையாளம் (விருப்பத்திற்குரியது)", savePlace = "இடத்தைச் சேமி", searchTrips = "பயணங்களைத் தேடு",
     newTrip = "புதிய பயணம்", renameTrip = "பயணப் பெயரை மாற்று", create = "உருவாக்கு", save = "சேமி",
     pin = "பின் செய்", unpin = "பின்னை நீக்கு", edit = "திருத்து", archive = "காப்பகப்படுத்து", unarchive = "காப்பகத்திலிருந்து எடு",
     delete = "நீக்கு", deleteTripQ = "பயணத்தை நீக்கவா?", deletePlaceQ = "இடத்தை நீக்கவா?", deleteLegQ = "பயணத்தை நீக்கவா?",
@@ -481,7 +483,7 @@ private val HI = EN.copy(
     amount = "राशि", validAmount = "एक वैध राशि दर्ज करें", couldntFetch = "दर प्राप्त नहीं हो सकी। अपना कनेक्शन जांचें।", 
 
     add = "जोड़ें", addToItinerary = "यात्रा कार्यक्रम में जोड़ें", travel = "यात्रा", place = "स्थान",
-    newPlace = "नया स्थान", savePlace = "स्थान सहेजें", searchTrips = "यात्राएं खोजें",
+    newPlace = "नया स्थान", editPlace = "स्थान संपादित करें", landmark = "लैंडमार्क (वैकल्पिक)", savePlace = "स्थान सहेजें", searchTrips = "यात्राएं खोजें",
     newTrip = "नई यात्रा", renameTrip = "यात्रा का नाम बदलें", create = "बनाएं", save = "सहेजें",
     pin = "पिन करें", unpin = "अनपिन करें", edit = "संपादित करें", archive = "संग्रह करें", unarchive = "संग्रह से निकालें",
     delete = "मिटाएं", deleteTripQ = "यात्रा मिटाएं?", deletePlaceQ = "स्थान मिटाएं?", deleteLegQ = "पड़ाव मिटाएं?",
@@ -507,7 +509,7 @@ private val UKR = EN.copy(
     amount = "Сума", validAmount = "Введіть коректну суму", couldntFetch = "Не вдалося отримати курс. Перевірте з'єднання.", 
 
     add = "Додати", addToItinerary = "Додати до маршруту", travel = "Подорож", place = "Місце",
-    newPlace = "Нове місце", savePlace = "Зберегти місце", searchTrips = "Пошук подорожей",
+    newPlace = "Нове місце", editPlace = "Редагувати місце", landmark = "Орієнтир (необов'язково)", savePlace = "Зберегти місце", searchTrips = "Пошук подорожей",
     newTrip = "Нова подорож", renameTrip = "Перейменувати подорож", create = "Створити", save = "Зберегти",
     pin = "Закріпити", unpin = "Відкріпити", edit = "Редагувати", archive = "Архівувати", unarchive = "Розархівувати",
     delete = "Видалити", deleteTripQ = "Видалити подорож?", deletePlaceQ = "Видалити місце?", deleteLegQ = "Видалити лінію?",
@@ -533,7 +535,7 @@ private val HUN = EN.copy(
     amount = "Összeg", validAmount = "Adjon meg egy érvényes összeget", couldntFetch = "Nem sikerült lekérni az árfolyamot. Ellenőrizze a kapcsolatot.", 
 
     add = "Hozzáadás", addToItinerary = "Hozzáadás az útitervhez", travel = "Utazás", place = "Hely",
-    newPlace = "Új hely", savePlace = "Hely mentése", searchTrips = "Utazások keresése",
+    newPlace = "Új hely", editPlace = "Hely szerkesztése", landmark = "Nevezetesség (opcionális)", savePlace = "Hely mentése", searchTrips = "Utazások keresése",
     newTrip = "Új utazás", renameTrip = "Utazás átnevezése", create = "Létrehozás", save = "Mentés",
     pin = "Rögzítés", unpin = "Rögzítés feloldása", edit = "Szerkesztés", archive = "Archiválás", unarchive = "Visszaállítás",
     delete = "Törlés", deleteTripQ = "Törli az utazást?", deletePlaceQ = "Törli a helyet?", deleteLegQ = "Törli az utat?",
@@ -559,7 +561,7 @@ private val RO = EN.copy(
     amount = "Sumă", validAmount = "Introduceți o sumă validă", couldntFetch = "Nu s-a putut obține cursul. Verificați conexiunea.",
 
     add = "Adaugă", addToItinerary = "Adaugă la itinerar", travel = "Călătorie", place = "Loc",
-    newPlace = "Loc nou", savePlace = "Salvează locul", searchTrips = "Caută călătorii",
+    newPlace = "Loc nou", editPlace = "Editează locul", landmark = "Punct de reper (opțional)", savePlace = "Salvează locul", searchTrips = "Caută călătorii",
     newTrip = "Călătorie nouă", renameTrip = "Redenumește călătoria", create = "Creează", save = "Salvează",
     pin = "Fixează", unpin = "Anulează fixarea", edit = "Editează", archive = "Arhivează", unarchive = "Dezarhivează",
     delete = "Șterge", deleteTripQ = "Ștergi călătoria?", deletePlaceQ = "Ștergi locul?", deleteLegQ = "Ștergi etapa?",
@@ -585,7 +587,7 @@ private val GR = EN.copy(
     amount = "Ποσό", validAmount = "Εισαγάγετε ένα έγκυρο ποσό", couldntFetch = "Δεν ήταν δυνατή η ανάκτηση της ισοτιμίας. Ελέγξτε τη σύνδεσή σας.",
 
     add = "Προσθήκη", addToItinerary = "Προσθήκη στο δρομολόγιο", travel = "Ταξίδι", place = "Τοποθεσία",
-    newPlace = "Νέα τοποθεσία", savePlace = "Αποθήκευση τοποθεσίας", searchTrips = "Αναζήτηση ταξιδιών",
+    newPlace = "Νέα τοποθεσία", editPlace = "Επεξεργασία τοποθεσίας", landmark = "Ορόσημο (προαιρετικό)", savePlace = "Αποθήκευση τοποθεσίας", searchTrips = "Αναζήτηση ταξιδιών",
     newTrip = "Νέο ταξίδι", renameTrip = "Μετονομασία ταξιδιού", create = "Δημιουργία", save = "Αποθήκευση",
     pin = "Καρφίτσωμα", unpin = "Ξεκαρφίτσωμα", edit = "Επεξεργασία", archive = "Αρχειοθέτηση", unarchive = "Αποαρχειοθέτηση",
     delete = "Διαγραφή", deleteTripQ = "Διαγραφή ταξιδιού;", deletePlaceQ = "Διαγραφή τοποθεσίας;", deleteLegQ = "Διαγραφή σκέλους;",
@@ -611,7 +613,7 @@ private val KA = EN.copy(
     amount = "თანხა", validAmount = "შეიყვანეთ სწორი თანხა", couldntFetch = "კურსის მიღება ვერ მოხერხდა. შეამოწმეთ კავშირი.",
 
     add = "დამატება", addToItinerary = "მარშრუტში დამატება", travel = "მგზავრობა", place = "ადგილი",
-    newPlace = "ახალი ადგილი", savePlace = "ადგილის შენახვა", searchTrips = "მოგზაურობის ძებნა",
+    newPlace = "ახალი ადგილი", editPlace = "ადგილის რედაქტირება", landmark = "ღირსშესანიშნაობა (არასავალდებულო)", savePlace = "ადგილის შენახვა", searchTrips = "მოგზაურობის ძებნა",
     newTrip = "ახალი მოგზაურობა", renameTrip = "მოგზაურობის გადარქმევა", create = "შექმნა", save = "შენახვა",
     pin = "ჩამაგრება", unpin = "მოხსნა", edit = "რედაქტირება", archive = "არქივირება", unarchive = "ამოარქივება",
     delete = "წაშლა", deleteTripQ = "წაიშალოს მოგზაურობა?", deletePlaceQ = "წაიშალოს ადგილი?", deleteLegQ = "წაიშალოს ეტაპი?",
@@ -637,7 +639,7 @@ private val BG = EN.copy(
     amount = "Сума", validAmount = "Въведете валидна сума", couldntFetch = "Неуспешно извличане на курса. Проверете връзката си.",
 
     add = "Добави", addToItinerary = "Добави към маршрута", travel = "Пътуване", place = "Място",
-    newPlace = "Ново място", savePlace = "Запази мястото", searchTrips = "Търсене на пътувания",
+    newPlace = "Ново място", editPlace = "Редактирай мястото", landmark = "Забележителност (по избор)", savePlace = "Запази мястото", searchTrips = "Търсене на пътувания",
     newTrip = "Ново пътуване", renameTrip = "Преименувай пътуването", create = "Създай", save = "Запази",
     pin = "Закачи", unpin = "Откачи", edit = "Редактирай", archive = "Архивирай", unarchive = "Разархивирай",
     delete = "Изтрий", deleteTripQ = "Изтриване на пътуването?", deletePlaceQ = "Изтриване на мястото?", deleteLegQ = "Изтриване на етапа?",
@@ -663,7 +665,7 @@ private val CZ = EN.copy(
     amount = "Částka", validAmount = "Zadejte platnou částku", couldntFetch = "Nepodařilo se načíst kurz. Zkontrolujte připojení.",
 
     add = "Přidat", addToItinerary = "Přidat do itineráře", travel = "Cesta", place = "Místo",
-    newPlace = "Nové místo", savePlace = "Uložit místo", searchTrips = "Hledat cesty",
+    newPlace = "Nové místo", editPlace = "Upravit místo", landmark = "Záchytný bod (volitelné)", savePlace = "Uložit místo", searchTrips = "Hledat cesty",
     newTrip = "Nová cesta", renameTrip = "Přejmenovat cestu", create = "Vytvořit", save = "Uložit",
     pin = "Připnout", unpin = "Odepnout", edit = "Upravit", archive = "Archivovat", unarchive = "Obnovit z archivu",
     delete = "Smazat", deleteTripQ = "Smazat cestu?", deletePlaceQ = "Smazat místo?", deleteLegQ = "Smazat etapu?",
@@ -689,7 +691,7 @@ private val LV = EN.copy(
     amount = "Summa", validAmount = "Ievadiet derīgu summu", couldntFetch = "Neizdevās iegūt kursu. Pārbaudiet savienojumu.",
 
     add = "Pievienot", addToItinerary = "Pievienot maršrutam", travel = "Ceļojums", place = "Vieta",
-    newPlace = "Jauna vieta", savePlace = "Saglabāt vietu", searchTrips = "Meklēt ceļojumus",
+    newPlace = "Jauna vieta", editPlace = "Rediģēt vietu", landmark = "Ievērojama vieta (neobligāti)", savePlace = "Saglabāt vietu", searchTrips = "Meklēt ceļojumus",
     newTrip = "Jauns ceļojums", renameTrip = "Pārdēvēt ceļojumu", create = "Izveidot", save = "Saglabāt",
     pin = "Piespraust", unpin = "Atspraust", edit = "Rediģēt", archive = "Arhivēt", unarchive = "Atarhivēt",
     delete = "Dzēst", deleteTripQ = "Dzēst ceļojumu?", deletePlaceQ = "Dzēst vietu?", deleteLegQ = "Dzēst posmu?",
@@ -715,7 +717,7 @@ private val LT = EN.copy(
     amount = "Suma", validAmount = "Įveskite galiojančią sumą", couldntFetch = "Nepavyko gauti kurso. Patikrinkite ryšį.",
 
     add = "Pridėti", addToItinerary = "Pridėti į maršrutą", travel = "Kelionė", place = "Vieta",
-    newPlace = "Nauja vieta", savePlace = "Išsaugoti vietą", searchTrips = "Ieškoti kelionių",
+    newPlace = "Nauja vieta", editPlace = "Redaguoti vietą", landmark = "Lankytina vieta (nebūtina)", savePlace = "Išsaugoti vietą", searchTrips = "Ieškoti kelionių",
     newTrip = "Nauja kelionė", renameTrip = "Pervadinti kelionę", create = "Sukurti", save = "Išsaugoti",
     pin = "Prisegti", unpin = "Atsegti", edit = "Redaguoti", archive = "Archyvuoti", unarchive = "Išarchyvuoti",
     delete = "Ištrinti", deleteTripQ = "Ištrinti kelionę?", deletePlaceQ = "Ištrinti vietą?", deleteLegQ = "Ištrinti etapą?",
@@ -741,7 +743,7 @@ private val SK = EN.copy(
     amount = "Suma", validAmount = "Zadajte platnú sumu", couldntFetch = "Nepodarilo sa načítať kurz. Skontrolujte pripojenie.",
 
     add = "Pridať", addToItinerary = "Pridať do itinerára", travel = "Cesta", place = "Miesto",
-    newPlace = "Nové miesto", savePlace = "Uložiť miesto", searchTrips = "Hľadať cesty",
+    newPlace = "Nové miesto", editPlace = "Upraviť miesto", landmark = "Záchytný bod (voliteľné)", savePlace = "Uložiť miesto", searchTrips = "Hľadať cesty",
     newTrip = "Nová cesta", renameTrip = "Premenovať cestu", create = "Vytvoriť", save = "Uložiť",
     pin = "Pripnúť", unpin = "Odpnúť", edit = "Upraviť", archive = "Archivovať", unarchive = "Obnoviť z archívu",
     delete = "Zmazať", deleteTripQ = "Zmazať cestu?", deletePlaceQ = "Zmazať miesto?", deleteLegQ = "Zmazať etapu?",
@@ -767,7 +769,7 @@ private val SL = EN.copy(
     amount = "Znesek", validAmount = "Vnesite veljaven znesek", couldntFetch = "Ni bilo mogoče pridobiti tečaja. Preverite povezavo.",
 
     add = "Dodaj", addToItinerary = "Dodaj v načrt poti", travel = "Potovanje", place = "Kraj",
-    newPlace = "Nov kraj", savePlace = "Shrani kraj", searchTrips = "Išči potovanja",
+    newPlace = "Nov kraj", editPlace = "Uredi kraj", landmark = "Znamenitost (neobvezno)", savePlace = "Shrani kraj", searchTrips = "Išči potovanja",
     newTrip = "Novo potovanje", renameTrip = "Preimenuj potovanje", create = "Ustvari", save = "Shrani",
     pin = "Pripni", unpin = "Odpni", edit = "Uredi", archive = "Arhiviraj", unarchive = "Obnovi",
     delete = "Izbriši", deleteTripQ = "Izbrišem potovanje?", deletePlaceQ = "Izbrišem kraj?", deleteLegQ = "Izbrišem etapo?",
@@ -793,7 +795,7 @@ private val SR = EN.copy(
     amount = "Износ", validAmount = "Унесите важећи износ", couldntFetch = "Није могуће преузети курс. Проверите везу.",
 
     add = "Dodaj", addToItinerary = "Dodaj u plan puta", travel = "Putovanje", place = "Mesto",
-    newPlace = "Novo mesto", savePlace = "Sačuvaj mesto", searchTrips = "Pretraži putovanja",
+    newPlace = "Novo mesto", editPlace = "Izmeni mesto", landmark = "Obeležje (opciono)", savePlace = "Sačuvaj mesto", searchTrips = "Pretraži putovanja",
     newTrip = "Novo putovanje", renameTrip = "Preimenuj putovanje", create = "Napravi", save = "Sačuvaj",
     pin = "Zakači", unpin = "Otkači", edit = "Izmeni", archive = "Arhiviraj", unarchive = "Povrati",
     delete = "Obriši", deleteTripQ = "Obrisati putovanje?", deletePlaceQ = "Obrisati mesto?", deleteLegQ = "Obrisati etapu?",
@@ -819,7 +821,7 @@ private val SQ = EN.copy(
     amount = "Shuma", validAmount = "Vendosni një shumë të vlefshme", couldntFetch = "Nuk u mor dot kursi. Kontrolloni lidhjen.",
 
     add = "Shto", addToItinerary = "Shto në itinerar", travel = "Udhëtim", place = "Vendi",
-    newPlace = "Vend i ri", savePlace = "Ruaj vendin", searchTrips = "Kërko udhëtime",
+    newPlace = "Vend i ri", editPlace = "Edito vendin", landmark = "Pikë referimi (opsionale)", savePlace = "Ruaj vendin", searchTrips = "Kërko udhëtime",
     newTrip = "Udhëtim i ri", renameTrip = "Riemëro udhëtimin", create = "Krijo", save = "Ruaj",
     pin = "Fikso", unpin = "Hiq fiksimin", edit = "Edito", archive = "Arkivo", unarchive = "Hiq nga arkiva",
     delete = "Fshij", deleteTripQ = "Fshij udhëtimin?", deletePlaceQ = "Fshij vendin?", deleteLegQ = "Fshij etapën?",
@@ -845,7 +847,7 @@ private val MK = EN.copy(
     amount = "Износ", validAmount = "Внесете валиден износ", couldntFetch = "Не може да се преземе курсот. Проверете ја врската.",
 
     add = "Додај", addToItinerary = "Додај во итинерарот", travel = "Патување", place = "Место",
-    newPlace = "Ново место", savePlace = "Зачувај место", searchTrips = "Пребарај патувања",
+    newPlace = "Ново место", editPlace = "Уреди место", landmark = "Знаменитост (опционално)", savePlace = "Зачувај место", searchTrips = "Пребарај патувања",
     newTrip = "Ново патување", renameTrip = "Преименувај патување", create = "Креирај", save = "Зачувај",
     pin = "Закачи", unpin = "Откачи", edit = "Уреди", archive = "Архивирај", unarchive = "Врати од архива",
     delete = "Избриши", deleteTripQ = "Избриши патување?", deletePlaceQ = "Избриши место?", deleteLegQ = "Избриши етапа?",
@@ -871,7 +873,7 @@ private val MO = EN.copy(
     amount = "Sumă", validAmount = "Introduceți o sumă validă", couldntFetch = "Nu s-a putut obține cursul. Verificați conexiunea.",
 
     add = "Adaugă", addToItinerary = "Adaugă la itinerar", travel = "Călătorie", place = "Loc",
-    newPlace = "Loc nou", savePlace = "Salvează locul", searchTrips = "Caută călătorii",
+    newPlace = "Loc nou", editPlace = "Editează locul", landmark = "Punct de reper (opțional)", savePlace = "Salvează locul", searchTrips = "Caută călătorii",
     newTrip = "Călătorie nouă", renameTrip = "Redenumește călătoria", create = "Creează", save = "Salvează",
     pin = "Fixează", unpin = "Anulează fixarea", edit = "Editează", archive = "Arhivează", unarchive = "Dezarhivează",
     delete = "Șterge", deleteTripQ = "Ștergi călătoria?", deletePlaceQ = "Ștergi locul?", deleteLegQ = "Ștergi etapa?",
@@ -897,7 +899,7 @@ private val NO = EN.copy(
     amount = "Beløp", validAmount = "Skriv inn et gyldig beløp", couldntFetch = "Kunne ikke hente kurs. Sjekk tilkoblingen.",
 
     add = "Legg til", addToItinerary = "Legg til i reiseplan", travel = "Reise", place = "Sted",
-    newPlace = "Nytt sted", savePlace = "Lagre sted", searchTrips = "Søk i reiser",
+    newPlace = "Nytt sted", editPlace = "Rediger sted", landmark = "Landemerke (valgfritt)", savePlace = "Lagre sted", searchTrips = "Søk i reiser",
     newTrip = "Ny reise", renameTrip = "Gi reisen nytt navn", create = "Opprett", save = "Lagre",
     pin = "Fest", unpin = "Løsne", edit = "Rediger", archive = "Arkiver", unarchive = "Gjenopprett",
     delete = "Slett", deleteTripQ = "Slett reisen?", deletePlaceQ = "Slett stedet?", deleteLegQ = "Slett etappen?",
@@ -923,7 +925,7 @@ private val FI = EN.copy(
     amount = "Summa", validAmount = "Syötä kelvollinen summa", couldntFetch = "Kurssia ei voitu noutaa. Tarkista yhteys.",
 
     add = "Lisää", addToItinerary = "Lisää matkaohjelmaan", travel = "Matka", place = "Paikka",
-    newPlace = "Uusi paikka", savePlace = "Tallenna paikka", searchTrips = "Hae matkoja",
+    newPlace = "Uusi paikka", editPlace = "Muokkaa paikkaa", landmark = "Maamerkki (valinnainen)", savePlace = "Tallenna paikka", searchTrips = "Hae matkoja",
     newTrip = "Uusi matka", renameTrip = "Nimeä matka uudelleen", create = "Luo", save = "Tallenna",
     pin = "Kiinnitä", unpin = "Irrota", edit = "Muokkaa", archive = "Arkistoi", unarchive = "Palauta arkistosta",
     delete = "Poista", deleteTripQ = "Poista matka?", deletePlaceQ = "Poista paikka?", deleteLegQ = "Poista osuus?",
@@ -949,7 +951,7 @@ private val SV = EN.copy(
     amount = "Belopp", validAmount = "Ange ett giltigt belopp", couldntFetch = "Kunde inte hämta växelkurs. Kontrollera anslutningen.",
 
     add = "Lägg till", addToItinerary = "Lägg till i resplan", travel = "Resa", place = "Plats",
-    newPlace = "Ny plats", savePlace = "Spara plats", searchTrips = "Sök resor",
+    newPlace = "Ny plats", editPlace = "Redigera plats", landmark = "Landmärke (valfritt)", savePlace = "Spara plats", searchTrips = "Sök resor",
     newTrip = "Ny resa", renameTrip = "Byt namn på resa", create = "Skapa", save = "Spara",
     pin = "Fäst", unpin = "Lossa", edit = "Redigera", archive = "Arkivera", unarchive = "Återställ",
     delete = "Ta bort", deleteTripQ = "Ta bort resa?", deletePlaceQ = "Ta bort plats?", deleteLegQ = "Ta bort etapp?",
@@ -975,7 +977,7 @@ private val DA = EN.copy(
     amount = "Beløb", validAmount = "Indtast et gyldigt beløb", couldntFetch = "Kunne ikke hente kurs. Tjek din forbindelse.",
 
     add = "Tilføj", addToItinerary = "Tilføj til rejseplan", travel = "Rejse", place = "Sted",
-    newPlace = "Nyt sted", savePlace = "Gem sted", searchTrips = "Søg rejser",
+    newPlace = "Nyt sted", editPlace = "Rediger sted", landmark = "Landemærke (valgfritt)", savePlace = "Gem sted", searchTrips = "Søg rejser",
     newTrip = "Ny rejse", renameTrip = "Omdøb rejse", create = "Opret", save = "Gem",
     pin = "Fastgør", unpin = "Frigør", edit = "Rediger", archive = "Arkiver", unarchive = "Gendan",
     delete = "Slet", deleteTripQ = "Slet rejse?", deletePlaceQ = "Slet sted?", deleteLegQ = "Slet etape?",
@@ -1001,7 +1003,7 @@ private val ET = EN.copy(
     amount = "Summa", validAmount = "Sisestage kehtiv summa", couldntFetch = "Kurssi ei õnnestunud pärida. Kontrollige ühendust.",
 
     add = "Lisa", addToItinerary = "Lisa teekonnale", travel = "Reis", place = "Koht",
-    newPlace = "Uus koht", savePlace = "Salvesta koht", searchTrips = "Otsi reise",
+    newPlace = "Uus koht", editPlace = "Muuda kohta", landmark = "Maamärk (valikuline)", savePlace = "Salvesta koht", searchTrips = "Otsi reise",
     newTrip = "Uus reis", renameTrip = "Nimeta reis ümber", create = "Loo", save = "Salvesta",
     pin = "Kinnita", unpin = "Eemalda kinnitus", edit = "Muuda", archive = "Arhiveeri", unarchive = "Taasta arhiivist",
     delete = "Kustuta", deleteTripQ = "Kustuta reis?", deletePlaceQ = "Kustuta koht?", deleteLegQ = "Kustuta etapp?",
@@ -1027,7 +1029,7 @@ private val AR = EN.copy(
     amount = "المبلغ", validAmount = "أدخل مبلغاً صالحاً", couldntFetch = "تعذر جلب السعر. تحقق من اتصالك.",
 
     add = "إضافة", addToItinerary = "إضافة إلى المسار", travel = "سفر", place = "مكان",
-    newPlace = "مكان جديد", savePlace = "حفظ المكان", searchTrips = "بحث عن رحلات",
+    newPlace = "مكان جديد", editPlace = "تعديل المكان", landmark = "معلم (اختياري)", savePlace = "حفظ المكان", searchTrips = "بحث عن رحلات",
     newTrip = "رحلة جديدة", renameTrip = "إعادة تسمية الرحلة", create = "إنشاء", save = "حفظ",
     pin = "تثبيت", unpin = "إلغاء التثبيت", edit = "تعديل", archive = "أرشفة", unarchive = "إلغاء الأرشفة",
     delete = "حذف", deleteTripQ = "حذف الرحلة؟", deletePlaceQ = "حذف المكان؟", deleteLegQ = "حذف المرحلة؟",
@@ -1053,7 +1055,7 @@ private val TR = EN.copy(
     amount = "Tutar", validAmount = "Geçerli bir tutar girin", couldntFetch = "Kur alınamadı. Bağlantınızı kontrol edin.",
 
     add = "Ekle", addToItinerary = "Seyahat planına ekle", travel = "Seyahat", place = "Yer",
-    newPlace = "Yeni yer", savePlace = "Yeri kaydet", searchTrips = "Gezilerde ara",
+    newPlace = "Yeni yer", editPlace = "Yeri düzenle", landmark = "Önemli yer (isteğe bağlı)", savePlace = "Yeri kaydet", searchTrips = "Gezilerde ara",
     newTrip = "Yeni gezi", renameTrip = "Geziyi yeniden adlandır", create = "Oluştur", save = "Kaydet",
     pin = "Sabitle", unpin = "Sabitlemeyi kaldır", edit = "Düzenle", archive = "Arşivle", unarchive = "Arşivden çıkar",
     delete = "Sil", deleteTripQ = "Geziyi sil?", deletePlaceQ = "Yeri sil?", deleteLegQ = "Etabı sil?",
@@ -1079,7 +1081,7 @@ private val VI = EN.copy(
     amount = "Số tiền", validAmount = "Nhập số tiền hợp lệ", couldntFetch = "Không thể lấy tỷ giá. Kiểm tra kết nối của bạn.",
 
     add = "Thêm", addToItinerary = "Thêm vào hành trình", travel = "Du lịch", place = "Địa điểm",
-    newPlace = "Địa điểm mới", savePlace = "Lưu địa điểm", searchTrips = "Tìm kiếm chuyến đi",
+    newPlace = "Địa điểm mới", editPlace = "Chỉnh sửa địa điểm", landmark = "Địa danh (tùy chọn)", savePlace = "Lưu địa điểm", searchTrips = "Tìm kiếm chuyến đi",
     newTrip = "Chuyến đi mới", renameTrip = "Đổi tên chuyến đi", create = "Tạo", save = "Lưu",
     pin = "Ghim", unpin = "Bỏ ghim", edit = "Chỉnh sửa", archive = "Lưu trữ", unarchive = "Bỏ lưu trữ",
     delete = "Xóa", deleteTripQ = "Xóa chuyến đi?", deletePlaceQ = "Xóa địa điểm?", deleteLegQ = "Xóa chặng?",
@@ -1105,7 +1107,7 @@ private val ID = EN.copy(
     amount = "Jumlah", validAmount = "Masukkan jumlah yang valid", couldntFetch = "Tidak dapat mengambil kurs. Periksa koneksi Anda.",
 
     add = "Tambah", addToItinerary = "Tambah ke rencana perjalanan", travel = "Perjalanan", place = "Tempat",
-    newPlace = "Tempat baru", savePlace = "Simpan tempat", searchTrips = "Cari perjalanan",
+    newPlace = "Tempat baru", editPlace = "Edit tempat", landmark = "Landmark (opsional)", savePlace = "Simpan tempat", searchTrips = "Cari perjalanan",
     newTrip = "Perjalanan baru", renameTrip = "Ganti nama perjalanan", create = "Buat", save = "Simpan",
     pin = "Sematkan", unpin = "Lepas sematan", edit = "Edit", archive = "Arsip", unarchive = "Buka arsip",
     delete = "Hapus", deleteTripQ = "Hapus perjalanan?", deletePlaceQ = "Hapus tempat?", deleteLegQ = "Hapus tahap?",
@@ -1131,7 +1133,7 @@ private val TH = EN.copy(
     amount = "จำนวน", validAmount = "กรุณาใส่จำนวนเงินที่ถูกต้อง", couldntFetch = "ไม่สามารถดึงข้อมูลอัตราแลกเปลี่ยนได้ โปรดตรวจสอบการเชื่อมต่อของคุณ",
 
     add = "เพิ่ม", addToItinerary = "เพิ่มในแผนการเดินทาง", travel = "การเดินทาง", place = "สถานที่",
-    newPlace = "สถานที่ใหม่", savePlace = "บันทึกสถานที่", searchTrips = "ค้นหาการเดินทาง",
+    newPlace = "สถานที่ใหม่", editPlace = "แก้ไขสถานที่", landmark = "สถานที่สำคัญ (เลือกได้)", savePlace = "บันทึกสถานที่", searchTrips = "ค้นหาการเดินทาง",
     newTrip = "การเดินทางใหม่", renameTrip = "เปลี่ยนชื่อการเดินทาง", create = "สร้าง", save = "บันทึก",
     pin = "ปักหมุด", unpin = "ถอนหมุด", edit = "แก้ไข", archive = "เก็บถาวร", unarchive = "ยกเลิกการเก็บถาวร",
     delete = "ลบ", deleteTripQ = "ลบการเดินทาง?", deletePlaceQ = "ลบสถานที่?", deleteLegQ = "ลบช่วง?",
@@ -1157,7 +1159,7 @@ private val HE = EN.copy(
     amount = "סכום", validAmount = "הזן סכום תקין", couldntFetch = "לא ניתן היה לקבל שער חליפין. בדוק את החיבור שלך.",
 
     add = "הוספה", addToItinerary = "הוספה למסלול", travel = "נסיעה", place = "מקום",
-    newPlace = "מקום חדש", savePlace = "שמירת מקום", searchTrips = "חיפוש טיולים",
+    newPlace = "מקום חדש", editPlace = "עריכת מקום", landmark = "נקודת ציון (אופציונלי)", savePlace = "שמירת מקום", searchTrips = "חיפוש טיולים",
     newTrip = "טיול חדש", renameTrip = "שינוי שם הטיול", create = "יצירה", save = "שמירה",
     pin = "נעיצה", unpin = "ביטול נעיצה", edit = "עריכה", archive = "ארכוב", unarchive = "ביטול ארכוב",
     delete = "מחיקה", deleteTripQ = "למחוק את הטיול?", deletePlaceQ = "למחוק את המקום?", deleteLegQ = "למחוק את המקטע?",
@@ -1183,7 +1185,7 @@ private val BN = EN.copy(
     amount = "পরিমাণ", validAmount = "একটি সঠিক পরিমাণ লিখুন", couldntFetch = "রেট পাওয়া যায়নি। আপনার সংযোগ পরীক্ষা করুন।",
 
     add = "যোগ করুন", addToItinerary = "ভ্রমণসূচীতে যোগ করুন", travel = "ভ্রমণ", place = "স্থান",
-    newPlace = "নতুন স্থান", savePlace = "স্থান সংরক্ষণ করুন", searchTrips = "ভ্রমণ খুঁজুন",
+    newPlace = "নতুন স্থান", editPlace = "স্থান সম্পাদনা করুন", landmark = "ল্যান্ডমার্ক (ঐচ্ছিক)", savePlace = "স্থান সংরক্ষণ করুন", searchTrips = "ভ্রমণ খুঁজুন",
     newTrip = "নতুন ভ্রমণ", renameTrip = "ভ্রমণের নাম পরিবর্তন করুন", create = "তৈরি করুন", save = "সংরক্ষণ করুন",
     pin = "পিন করুন", unpin = "আনপিন করুন", edit = "সম্পাদনা করুন", archive = "আর্কাইভ করুন", unarchive = "আর্কাইভ থেকে সরান",
     delete = "মুছে ফেলুন", deleteTripQ = "ভ্রমণটি কি মুছে ফেলবেন?", deletePlaceQ = "স্থানটি কি মুছে ফেলবেন?", deleteLegQ = "পর্যায়টি কি মুছে ফেলবেন?",
@@ -1214,7 +1216,7 @@ private val TG = EN.copy(
     amount = "Halaga", validAmount = "Maglagay ng wastong halaga", couldntFetch = "Hindi makuha ang rate. Suriin ang iyong koneksyon.",
 
     add = "Idagdag", addToItinerary = "Idagdag sa itinerary", travel = "Paglalakbay", place = "Lugar",
-    newPlace = "Bagong lugar", savePlace = "I-save ang lugar", searchTrips = "Maghanap ng mga biyahe",
+    newPlace = "Bagong lugar", editPlace = "I-edit ang lugar", landmark = "Landmark (opsyonal)", savePlace = "I-save ang lugar", searchTrips = "Maghanap ng mga biyahe",
     newTrip = "Bagong biyahe", renameTrip = "Palitan ang pangalan ng biyahe", create = "Gumawa", save = "I-save",
     pin = "I-pin", unpin = "I-unpin", edit = "I-edit", archive = "I-archive", unarchive = "I-unarchive",
     delete = "I-delete", deleteTripQ = "I-delete ang biyahe?", deletePlaceQ = "I-delete ang lugar?", deleteLegQ = "I-delete ang yugto?",
@@ -1227,7 +1229,56 @@ private val TG = EN.copy(
  * Portuguese and Dutch fall back to English for now — add full
  * tables the same way FR/ES/DE/IT/PL are defined above. SYSTEM resolves upstream.
  */
+fun systemLanguage(): Language = when (deviceLanguageCode().lowercase()) {
+    "fr" -> Language.FRENCH
+    "es" -> Language.SPANISH
+    "de" -> Language.GERMAN
+    "it" -> Language.ITALIAN
+    "pt" -> Language.PORTUGUESE
+    "nl" -> Language.DUTCH
+    "pl" -> Language.POLISH
+    "zh" -> Language.CHINESE
+    "ja" -> Language.JAPANESE
+    "ko" -> Language.KOREAN
+    "ru" -> Language.RUSSIAN
+    "ta" -> Language.TAMIL
+    "hi" -> Language.HINDI
+    "uk" -> Language.UKRAINIAN
+    "hu" -> Language.HUNGARIAN
+    "ro" -> Language.ROMANIAN
+    "el" -> Language.GREEK
+    "ka" -> Language.GEORGIAN
+    "bg" -> Language.BULGARIAN
+    "cs" -> Language.CZECH
+    "lv" -> Language.LATVIAN
+    "lt" -> Language.LITHUANIAN
+    "sk" -> Language.SLOVAK
+    "sl" -> Language.SLOVENIAN
+    "sr" -> Language.SERBIAN
+    "sq" -> Language.ALBANIAN
+    "mk" -> Language.MACEDONIAN
+    "no", "nb", "nn" -> Language.NORWEGIAN
+    "fi" -> Language.FINNISH
+    "sv" -> Language.SWEDISH
+    "da" -> Language.DANISH
+    "et" -> Language.ESTONIAN
+    "ar" -> Language.ARABIC
+    "tr" -> Language.TURKISH
+    "vi" -> Language.VIETNAMESE
+    "id", "in" -> Language.INDONESIAN
+    "th" -> Language.THAI
+    "he", "iw" -> Language.HEBREW
+    "bn" -> Language.BENGALI
+    "tl", "fil" -> Language.TAGALOG
+    else -> Language.ENGLISH
+}
+
+/**
+ * Resolves the active Strings table for a language.
+ */
 fun stringsFor(language: Language): Strings = when (language) {
+    Language.SYSTEM -> stringsFor(systemLanguage())
+    Language.ENGLISH -> EN
     Language.FRENCH -> FR
     Language.SPANISH -> ES
     Language.GERMAN -> DE
@@ -1269,6 +1320,4 @@ fun stringsFor(language: Language): Strings = when (language) {
     Language.HEBREW -> HE
     Language.BENGALI -> BN
     Language.TAGALOG -> TG
-    Language.SYSTEM -> EN
-    else -> EN
 }

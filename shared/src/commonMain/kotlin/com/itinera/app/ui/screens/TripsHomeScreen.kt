@@ -104,7 +104,7 @@ fun TripsHomeScreen(
             if (searchActive) {
                 OutlinedTextField(
                     value = query,
-                    onValueChange = { query = it },
+                    onValueChange = { query = it.replaceFirstChar{ if (it.isLowerCase()) it.uppercase() else it.toString() } },
                     placeholder = { Text(s.searchTrips) },
                     singleLine = true,
                     leadingIcon = { Icon(Icons.Filled.Search, null) },
@@ -142,7 +142,7 @@ fun TripsHomeScreen(
             onClick = { showAddDialog = true },
             modifier = Modifier
                 .align(Alignment.BottomEnd).offset(x = (-25).dp, y = 60.dp)
-                .padding(end = 20.dp, bottom = 90.dp),
+                .padding(end = 20.dp, bottom = 220.dp),
             containerColor = MaterialTheme.colorScheme.primary,
             shape = CircleShape,
         ) {

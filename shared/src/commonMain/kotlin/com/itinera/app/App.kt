@@ -36,11 +36,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.animation.core.Spring
+import androidx.compose.foundation.gestures.detectTapGestures
 import com.itinera.app.data.imageQueryForTrip
 import com.itinera.app.ui.theme.ThemeMode
 import kotlin.math.abs
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import kotlinx.coroutines.launch
+import com.itinera.app.i18n.systemLanguage
+
+
 
 /**
  * App root. Owns the three pieces of global state — auth flag, chosen language,
@@ -57,7 +69,7 @@ fun App() {
     // SYSTEM falls back to English here; in production resolve the device locale
     // via an expect/actual platform call and map it to a Language.
     val activeStrings = remember(language) {
-        stringsFor(if (language == Language.SYSTEM) Language.ENGLISH else language)
+        stringsFor(if (language == Language.SYSTEM) systemLanguage() else language)   // ⬅ CHANGED
     }
 
     val darkTheme = when (themeMode) {
@@ -80,7 +92,6 @@ private data class NavItem(
     val label: String,
     val screen: Screen,
 )
-private val topLevel = setOf(Screen.Home, Screen.Documents, Screen.Calendar, Screen.Currency, Screen.Settings)
 
 @Composable
 private fun AppContent(
@@ -93,8 +104,32 @@ private fun AppContent(
 ) {
     val s = LocalStrings.current
     val current = navigator.current
+    val focusManager = LocalFocusManager.current
 
     val scope = rememberCoroutineScope()
+    val topLevel = remember { setOf(Screen.Home, Screen.Documents, Screen.Calendar, Screen.Currency, Screen.Settings) }
+
+    // Scroll-to-shrink logic
+    var barScale by remember { mutableStateOf(1f) }
+    val animatedScale by animateFloatAsState(
+        targetValue = barScale,
+        animationSpec = spring(stiffness = Spring.StiffnessLow),
+        label = "barScale"
+    )
+
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                // When scrolling down (available.y < 0), shrink. When up, expand.
+                if (available.y < -5) {
+                    barScale = 0.85f
+                } else if (available.y > 5) {
+                    barScale = 1f
+                }
+                return Offset.Zero
+            }
+        }
+    }
 
     if (current == Screen.Login) {
         LoginScreen(
@@ -114,35 +149,24 @@ private fun AppContent(
 
     val showBottomBar = current in topLevel
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background,
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        bottomBar = {
-            if (showBottomBar) {
-                val items = listOf(
-                    NavItem(Icons.Filled.Flight, s.myTrips, Screen.Home),
-                    NavItem(Icons.Filled.Description, s.documents, Screen.Documents),
-                    NavItem(Icons.Filled.CalendarMonth, s.calendar, Screen.Calendar),
-                    NavItem(Icons.Filled.CurrencyExchange, s.currencyUnits, Screen.Currency),
-                    NavItem(Icons.Filled.Settings, s.settings, Screen.Settings),
-                )
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    SlidingPillBar(current = current, items = items) { navigator.resetTo(it) }
-                }
+    // ⬅ CHANGED: replaced Scaffold with a Box so content fills the whole screen
+    //    and the pill bar floats on top instead of reserving space below it.
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {                    // ⬅ ADD
+                detectTapGestures(onTap = { focusManager.clearFocus() })
             }
-        },
-    ) { padding ->
+            .background(MaterialTheme.colorScheme.background)
+            .nestedScroll(nestedScrollConnection),
+    ) {
+        // ⬅ CHANGED: content now fills the entire height (no Scaffold bottom padding,
+        //    no navigationBarsPadding here — the floating bar handles that itself).
         Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .statusBarsPadding()
-                .navigationBarsPadding(),
-            color = MaterialTheme.colorScheme.background
+                .statusBarsPadding(),
+            color = MaterialTheme.colorScheme.background,
         ) {
             when (val screen = current) {
                 Screen.Login -> LoginScreen(
@@ -296,6 +320,37 @@ private fun AppContent(
                 else -> {}
             }
         }
+
+        // ⬅ CHANGED: pill bar moved OUT of Scaffold.bottomBar and overlaid here.
+        //    .align(BottomCenter) floats it at the bottom; .navigationBarsPadding()
+        //    keeps it clear of the home indicator. Content scrolls underneath.
+        if (showBottomBar) {
+            val items = listOf(
+                NavItem(Icons.Filled.Flight, s.myTrips, Screen.Home),
+                NavItem(Icons.Filled.Description, s.documents, Screen.Documents),
+                NavItem(Icons.Filled.CalendarMonth, s.calendar, Screen.Calendar),
+                NavItem(Icons.Filled.CurrencyExchange, s.currencyUnits, Screen.Currency),
+                NavItem(Icons.Filled.Settings, s.settings, Screen.Settings),
+            )
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 20.dp)
+                    .graphicsLayer {
+                        scaleX = animatedScale
+                        scaleY = animatedScale
+                        alpha = androidx.compose.ui.graphics.lerp(
+                            start = Color.White.copy(alpha = 0.6f),
+                            stop = Color.White,
+                            fraction = (animatedScale - 0.85f) / 0.15f
+                        ).alpha
+                    },
+                contentAlignment = Alignment.Center,
+            ) {
+                SlidingPillBar(current = current, items = items) { navigator.resetTo(it) }
+            }
+        }
     }
 }
 
@@ -351,6 +406,7 @@ private fun SlidingPillBar(
 
     // one "step" of bias between adjacent icons
     val step = if (count <= 1) 2f else 2f / (count - 1)
+
 
     Surface(
         shape = RoundedCornerShape(32.dp),

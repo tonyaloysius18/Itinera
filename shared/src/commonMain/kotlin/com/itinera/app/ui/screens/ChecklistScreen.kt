@@ -3,7 +3,6 @@ package com.itinera.app.ui.screens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckBox
@@ -13,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.itinera.app.i18n.LocalStrings
@@ -79,7 +77,8 @@ fun ChecklistScreen(
             contentAlignment = Alignment.Center
         ) {
             Button(
-                onClick = { showAddDialog = true },                  // ⬅ was TODO
+                onClick = { showAddDialog = true },
+                modifier = Modifier.padding(bottom = 10.dp),
                 shape = androidx.compose.foundation.shape.CircleShape,
                 contentPadding = PaddingValues(horizontal = 25.dp, vertical = 8.dp)
             ) {
@@ -130,7 +129,16 @@ private fun AddChecklistItemDialog(
 
     // auto-suggest a group from the text until the user picks one manually
     LaunchedEffect(text) {
-        if (!userPicked) group = suggestGroup(text, groupOptions)
+        if (!userPicked) group = suggestGroup(
+            text,
+            documents = s.documents,
+            bookings = s.bookings,
+            packing = s.packing,
+            transport = s.transport,
+            money = s.money,
+            gadget = s.gadget,
+            other = s.other,
+        )
     }
 
     AlertDialog(
@@ -181,39 +189,76 @@ private fun AddChecklistItemDialog(
 }
 
 // keyword auto-suggest → returns a group name that exists in options, else "Other"
-private fun suggestGroup(text: String, options: List<String>): String {
+// keyword auto-suggest → returns one of the provided localized labels, else the "other" label
+private fun suggestGroup(
+    text: String,
+    documents: String,
+    bookings: String,
+    packing: String,
+    transport: String,
+    money: String,
+    gadget: String,
+    other: String,
+): String {
     val t = text.lowercase()
     fun has(vararg w: String) = w.any { t.contains(it) }
-    val guess = when {
-        has("passport", "visa", "insurance", "document", "licence", "id") -> "Documents"
-        has("hotel", "hostel", "book", "reserve", "Airbnb", "flight", "ticket", "reservation") -> "Bookings"
-        has("pack", "clothes", "baby bag", "backpack", "sunscreen", "shoes", "suitcase", "handbag", "bag") -> "Packing"
-        has("bus", "train", "transfer", "taxi", "metro", "car", "taxi", "shuttle", "subway", "train") -> "Transport"
-        has("cash", "money", "card", "currency", "atm", "exchange", "credit card", "debit card", "credit") -> "Money"
-        has(
-            "drone",
-            "camera",
-            "hard disk",
-            "laptop",
-            "charger",
-            "trimmer",
-            "tripod",
-            "mobile",
-            "phone",
-            "tablet",
-            "computer",
-            "printer",
-            "scanner",
-            "projector",
-            "monitor",
-            "headphones",
-            "speaker",
-            "microphone",
-            "mouse",
-            "keyboard"
-        ) -> "Gadget"
-        else -> "Other"
+    return when {
+        // Documents — passport / visa / insurance / id / licence
+        has("passport", "visa", "insurance", "document", "licence", "license", "id",
+            "passeport", "assurance", "papiers", "pièce",                          // FR
+            "pasaporte", "seguro", "documento", "carnet",                          // ES
+            "reisepass", "ausweis", "versicherung", "dokument",                    // DE
+            "passaporto", "assicurazione", "documento", "patente",                 // IT
+            "passaporte", "seguro", "documento", "carteira"                        // PT
+        ) -> documents
+
+        // Bookings — hotel / flight / ticket / reservation
+        has("hotel", "hostel", "book", "reserve", "airbnb", "flight", "ticket", "reservation",
+            "hôtel", "vol", "billet", "réservation", "auberge",                    // FR
+            "vuelo", "billete", "reserva", "alojamiento",                          // ES
+            "flug", "ticket", "buchung", "unterkunft", "reservierung",             // DE
+            "volo", "biglietto", "prenotazione", "albergo",                        // IT
+            "voo", "bilhete", "reserva", "hospedagem"                              // PT
+        ) -> bookings
+
+        // Packing — clothes / bag / shoes / suitcase
+        has("pack", "clothes", "backpack", "sunscreen", "shoes", "suitcase", "handbag", "bag",
+            "valise", "vêtements", "chaussures", "sac", "bagage",                  // FR
+            "maleta", "ropa", "zapatos", "bolsa", "equipaje",                      // ES
+            "koffer", "kleidung", "schuhe", "tasche", "gepäck",                    // DE
+            "valigia", "vestiti", "scarpe", "borsa", "bagaglio",                   // IT
+            "mala", "roupas", "sapatos", "bolsa", "bagagem"                        // PT
+        ) -> packing
+
+        // Transport — bus / train / taxi / car
+        has("bus", "train", "transfer", "taxi", "metro", "car", "shuttle", "subway",
+            "voiture", "métro", "navette", "transfert",                            // FR
+            "tren", "coche", "autobús", "metro", "traslado",                       // ES
+            "zug", "auto", "u-bahn", "transfer",                                   // DE
+            "treno", "auto", "metropolitana", "navetta",                           // IT
+            "trem", "carro", "ônibus", "metrô", "transporte"                       // PT
+        ) -> transport
+
+        // Money — cash / card / currency / atm
+        has("cash", "money", "card", "currency", "atm", "exchange", "credit", "debit",
+            "argent", "carte", "monnaie", "espèces", "change",                     // FR
+            "dinero", "tarjeta", "efectivo", "cambio", "moneda",                   // ES
+            "geld", "karte", "bargeld", "währung", "wechsel",                      // DE
+            "soldi", "carta", "contanti", "valuta", "cambio",                      // IT
+            "dinheiro", "cartão", "moeda", "câmbio"                                // PT
+        ) -> money
+
+        // Gadget — electronics
+        has("drone", "camera", "hard disk", "laptop", "charger", "trimmer", "tripod",
+            "mobile", "phone", "tablet", "computer", "printer", "scanner", "projector",
+            "monitor", "headphones", "speaker", "microphone", "mouse", "keyboard",
+            "appareil", "caméra", "chargeur", "téléphone", "ordinateur", "casque", // FR
+            "cámara", "cargador", "teléfono", "ordenador", "auriculares",          // ES
+            "kamera", "ladegerät", "telefon", "computer", "kopfhörer",             // DE
+            "fotocamera", "caricabatterie", "telefono", "computer", "cuffie",      // IT
+            "câmera", "carregador", "telefone", "computador", "fones"              // PT
+        ) -> gadget
+
+        else -> other
     }
-    // only return the guess if that section is actually offered; else first option
-    return if (options.contains(guess)) guess else options.firstOrNull() ?: "Other"
 }

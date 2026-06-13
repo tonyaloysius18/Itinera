@@ -7,26 +7,23 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete                       // ⬅ ADD
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color                                  // ⬅ ADD
 import androidx.compose.ui.unit.dp
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.Leg
 import com.itinera.app.model.TransportType
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import androidx.compose.material3.rememberTimePickerState
 import dev.darkokoa.datetimewheelpicker.WheelTimePicker
 import dev.darkokoa.datetimewheelpicker.core.format.TimeFormat
 import dev.darkokoa.datetimewheelpicker.core.format.timeFormatter
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalTime
 import com.itinera.app.model.label
+import kotlin.time.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,8 +59,8 @@ fun AddLegScreen(
             Modifier.weight(1f).padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            OutlinedTextField(from, { from = it }, label = { Text(s.from) }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = textFieldShape)
-            OutlinedTextField(to, { to = it }, label = { Text(s.to) }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = textFieldShape)
+            OutlinedTextField(from, { from = it.replaceFirstChar{ if (it.isLowerCase()) it.uppercase() else it.toString() } }, label = { Text(s.from) }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = textFieldShape)
+            OutlinedTextField(to, { to = it.replaceFirstChar{ if (it.isLowerCase()) it.uppercase() else it.toString() } }, label = { Text(s.to) }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = textFieldShape)
 
             Text(s.transport, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -187,9 +184,10 @@ fun AddLegScreen(
                         )
                     )
                 },
+
                 enabled = from.isNotBlank() && to.isNotBlank() && date != null,
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 120.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 40.dp).padding(bottom = 16.dp),
             ) { Text(s.saveLeg) }
         }
     }
