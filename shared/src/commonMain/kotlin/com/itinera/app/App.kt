@@ -132,6 +132,10 @@ private fun AppContent(
         }
     }
 
+    LaunchedEffect(current) {
+        barScale = 1f
+    }
+
     if (current == Screen.Login) {
         LoginScreen(
             onAuthed = { navigator.resetTo(Screen.Home) },
