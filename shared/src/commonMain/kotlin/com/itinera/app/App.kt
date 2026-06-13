@@ -72,6 +72,7 @@ fun App() {
         stringsFor(if (language == Language.SYSTEM) systemLanguage() else language)   // ⬅ CHANGED
     }
 
+
     val darkTheme = when (themeMode) {
         ThemeMode.SYSTEM -> isSystemInDarkTheme()
         ThemeMode.LIGHT -> false
