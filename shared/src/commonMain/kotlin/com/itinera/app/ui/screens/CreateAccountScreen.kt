@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -52,14 +53,15 @@ fun CreateAccountScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp, vertical = 24.dp),
+            .padding(horizontal = 24.dp, vertical = 5.dp)
+            .padding(top = 24.dp),
     ) {
         Spacer(Modifier.statusBarsPadding())
         Text(
             s.createAccount,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Medium,
-            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+            modifier = Modifier.padding(bottom = 8.dp),
         )
 
 
@@ -68,28 +70,29 @@ fun CreateAccountScreen(
                 .weight(1f)
                 .verticalScroll(rememberScrollState()),
         ) {
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(5.dp))
             OutlinedTextField(
                 value = name, onValueChange = { name = it },
                 label = { Text(s.name) }, singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = textFieldShape,
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(9.dp))
             OutlinedTextField(
                 value = surname, onValueChange = { surname = it },
                 label = { Text(s.surname) }, singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = textFieldShape,
             )
-            Spacer(Modifier.height(12.dp))
-            OutlinedTextField(
-                value = email, onValueChange = { email = it },
-                label = { Text(s.email) }, singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
+            Spacer(Modifier.height(9.dp))
+            EmailFieldWithSuggestions(
+                email = email,
+                onEmailChange = { email = it },
+                label = s.email,
                 shape = textFieldShape,
+                modifier = Modifier.fillMaxWidth(),
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(9.dp))
             OutlinedTextField(
                 value = password, onValueChange = { password = it },
                 label = { Text(s.password) }, singleLine = true,
@@ -99,7 +102,7 @@ fun CreateAccountScreen(
             )
 
             // Date of birth — read-only field that opens the calendar on tap
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(9.dp))
             OutlinedTextField(
                 value = dob,
                 onValueChange = {},
@@ -122,21 +125,21 @@ fun CreateAccountScreen(
             // Address — three separate fields
             Spacer(Modifier.height(20.dp))
             Text(s.address, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Medium)
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(9.dp))
             OutlinedTextField(
                 value = street, onValueChange = { street = it },
                 label = { Text(s.street) }, singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = textFieldShape,
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(9.dp))
             OutlinedTextField(
                 value = city, onValueChange = { city = it },
                 label = { Text(s.city) }, singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = textFieldShape,
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(9.dp))
             OutlinedTextField(
                 value = postalCode, onValueChange = { postalCode = it },
                 label = { Text(s.postelCode) }, singleLine = true,
@@ -144,8 +147,8 @@ fun CreateAccountScreen(
                 shape = textFieldShape,
             )
 
-            Spacer(Modifier.height(24.dp))
-            Button(onClick = onCreate, modifier = Modifier.fillMaxWidth()) {
+            Spacer(Modifier.height(20.dp))
+            Button(onClick = onCreate, modifier = Modifier.fillMaxWidth().padding(horizontal = 45.dp)) {
                 Text(s.createAccount)
             }
             Spacer(Modifier.height(24.dp))
@@ -170,6 +173,63 @@ fun CreateAccountScreen(
             },
         ) {
             DatePicker(state = datePickerState)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EmailFieldWithSuggestions(
+    email: String,
+    onEmailChange: (String) -> Unit,
+    label: String,
+    shape: Shape,
+    modifier: Modifier = Modifier,
+) {
+    val domains = listOf("gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "icloud.com", "proton.me")
+
+    // local part = text before any "@"
+    val localPart = email.substringBefore("@")
+    val afterAt = if (email.contains("@")) email.substringAfter("@") else null
+
+    // build suggestions: only when there's a local part and the domain isn't already complete
+    val suggestions = if (email.contains("@") && localPart.isNotBlank()) {   // ⬅ require "@"
+        domains
+            .filter { it.startsWith(afterAt ?: "", ignoreCase = true) }
+            .map { "$localPart@$it" }
+            .filter { it != email }
+    } else emptyList()
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = suggestions.isNotEmpty(),
+        onExpandedChange = { },
+        modifier = modifier,
+    ) {
+        OutlinedTextField(
+            value = email,
+            onValueChange = { onEmailChange(it) },
+            label = { Text(label) },
+            singleLine = true,
+            shape = shape,
+            modifier = Modifier.menuAnchor().fillMaxWidth(),
+        )
+        MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp)))
+        {
+            ExposedDropdownMenu(
+                expanded = suggestions.isNotEmpty(),
+                onDismissRequest = { },
+            ) {
+                suggestions.forEach { suggestion ->
+                    DropdownMenuItem(
+                        text = { Text(suggestion) },
+                        onClick = {
+                            onEmailChange(suggestion)
+                            expanded = false
+                        },
+                    )
+                }
+            }
         }
     }
 }
