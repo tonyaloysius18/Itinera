@@ -18,6 +18,9 @@ class AuthService {
     val isSignedIn: Boolean
         get() = currentUser != null
 
+    val currentUid: String?
+        get() = Firebase.auth.currentUser?.uid
+
     /** Create a new account. Throws if the email is taken or the password is weak. */
     suspend fun signUp(email: String, password: String): FirebaseUser? {
         val result = Firebase.auth.createUserWithEmailAndPassword(email.trim(), password)

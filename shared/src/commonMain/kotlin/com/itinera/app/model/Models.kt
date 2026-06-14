@@ -2,6 +2,8 @@ package com.itinera.app.model
 
 import kotlinx.datetime.LocalDate
 import com.itinera.app.model.label
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 
 fun LocalDate.label(): String {
@@ -75,15 +77,17 @@ data class ChecklistItem(
     val done: Boolean = false,
 )
 
+
+@Serializable                                   // ⬅ ADD
 data class UserProfile(
-    val name: String,
-    val surname: String,
-    val email: String,        // fixed — not editable
-    val dob: String,          // fixed — not editable
-    val street: String,
-    val city: String,
-    val postalCode: String,
-    val photoBytes: ByteArray? = null,   // null = show initials; set when a photo is picked
+    val name: String = "",                      // ⬅ defaults added (Firestore needs them)
+    val surname: String = "",
+    val email: String = "",
+    val dob: String = "",
+    val street: String = "",
+    val city: String = "",
+    val postalCode: String = "",
+    @Transient val photoBytes: ByteArray? = null,   // ⬅ excluded from Firestore
 ) {
     val fullName: String get() = "$name $surname".trim()
     val initials: String get() =

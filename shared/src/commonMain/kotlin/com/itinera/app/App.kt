@@ -139,7 +139,20 @@ private fun AppContent(
     if (current == Screen.Login) {
         LoginScreen(
             authService = repository.authService,
-            onAuthed = { navigator.resetTo(Screen.Home) },
+            onAuthed = {
+                scope.launch {                                       // ⬅ ADD: load profile from Firestore
+                    val uid = repository.authService.currentUid
+                    if (uid != null) {
+                        try {
+                            val profile = repository.profileService.loadProfile(uid)
+                            if (profile != null) repository.updateProfile(profile)
+                        } catch (e: Exception) {
+                            // non-fatal: couldn't load profile
+                        }
+                    }
+                    navigator.resetTo(Screen.Home)
+                }
+            },
             onCreateAccount = { navigator.push(Screen.CreateAccount) },
         )
         return
@@ -182,11 +195,21 @@ private fun AppContent(
                 )
 
                 Screen.CreateAccount -> CreateAccountScreen(
-                    authService = repository.authService,           // ⬅ ADD
+                    authService = repository.authService,
                     onBack = { navigator.back() },
-                    onCreate = { profile ->                          // ⬅ CHANGED: receives UserProfile
-                        repository.updateProfile(profile)            // save name/email/etc. to profile
-                        navigator.resetTo(Screen.Login)              // back to Login to sign in
+                    onCreate = { profile ->
+                        repository.updateProfile(profile)                    // in-memory (immediate UI)
+                        scope.launch {                                       // ⬅ ADD: persist to Firestore
+                            val uid = repository.authService.currentUid
+                            if (uid != null) {
+                                try {
+                                    repository.profileService.saveProfile(uid, profile)
+                                } catch (e: Exception) {
+                                    // non-fatal: profile saved in memory, Firestore write failed
+                                }
+                            }
+                        }
+                        navigator.resetTo(Screen.Login)
                     },
                 )
 

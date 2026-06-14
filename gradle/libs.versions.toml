@@ -57,6 +57,8 @@ coil-network-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.re
 firebase-auth = { module = "dev.gitlive:firebase-auth", version.ref = "gitliveFirebase" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-auth-android = { module = "com.google.firebase:firebase-auth" }
+firebase-firestore = { module = "dev.gitlive:firebase-firestore", version.ref = "gitliveFirebase" }
+firebase-firestore-android = { module = "com.google.firebase:firebase-firestore" }
 
 
 [plugins]

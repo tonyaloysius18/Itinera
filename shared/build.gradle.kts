@@ -26,7 +26,7 @@ kotlin {
         minSdk = libs.versions.android.minSdk.get().toInt()
 
         compilerOptions {
-            jvmTarget = JvmTarget.JVM_11
+            jvmTarget = JvmTarget.JVM_17
         }
 
         androidResources {
@@ -46,6 +46,7 @@ kotlin {
             implementation(libs.ktor.client.okhttp)
             implementation(project.dependencies.platform(libs.firebase.bom))   // ⬅ ADD: BoM
             implementation(libs.firebase.auth.android)
+            implementation(libs.firebase.firestore.android)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -67,6 +68,7 @@ kotlin {
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor)
             implementation(libs.firebase.auth)
+            implementation(libs.firebase.firestore)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

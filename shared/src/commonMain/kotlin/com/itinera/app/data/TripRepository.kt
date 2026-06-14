@@ -32,6 +32,9 @@ class TripRepository {
 
     val authService = AuthService()
 
+    val profileService = ProfileService()     // ⬅ ADD
+
+
     fun addTrip(title: String): String {                                  // ⬅ no accent param
         val id = "trip_${kotlin.random.Random.nextLong()}"
         trips.add(

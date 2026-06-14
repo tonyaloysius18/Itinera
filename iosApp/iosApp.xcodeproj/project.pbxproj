@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		F51B27D92FDE7E7E00BD029C /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = F51B27D82FDE7E7E00BD029C /* FirebaseAuth */; };
 		F51B27DB2FDE7E7E00BD029C /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = F51B27DA2FDE7E7E00BD029C /* FirebaseCore */; };
+		F51B27DE2FDEF02B00BD029C /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = F51B27DD2FDEF02B00BD029C /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +49,7 @@
 			files = (
 				F51B27DB2FDE7E7E00BD029C /* FirebaseCore in Frameworks */,
 				F51B27D92FDE7E7E00BD029C /* FirebaseAuth in Frameworks */,
+				F51B27DE2FDEF02B00BD029C /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -67,8 +69,16 @@
 			children = (
 				15EEC974EC0510350F49A721 /* Configuration */,
 				FB5B4324C86A600EDF69BECB /* iosApp */,
+				F51B27DC2FDEF02B00BD029C /* Frameworks */,
 				050D516CB73550E5DD19C4E8 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		F51B27DC2FDEF02B00BD029C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -94,6 +104,7 @@
 			packageProductDependencies = (
 				F51B27D82FDE7E7E00BD029C /* FirebaseAuth */,
 				F51B27DA2FDE7E7E00BD029C /* FirebaseCore */,
+				F51B27DD2FDEF02B00BD029C /* FirebaseFirestore */,
 			);
 			productName = iosApp;
 			productReference = 3668C1612AA275C188E125B9 /* Itinera.app */;
@@ -408,6 +419,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = F51B27D72FDE7E7E00BD029C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseCore;
+		};
+		F51B27DD2FDEF02B00BD029C /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F51B27D72FDE7E7E00BD029C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
