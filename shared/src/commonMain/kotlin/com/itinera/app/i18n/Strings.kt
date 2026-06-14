@@ -103,7 +103,8 @@ data class Strings(
     val editProfile: String, val newPassword: String, val saveChanges: String, val systemDefault: String, val light: String,
     val dark: String, val matchYourPhone: String, val currency: String, val convert: String, 
     val bookings: String, val packing: String, val money: String, val gadget: String, val other: String, val needToAdd: String, val section: String,
-    val amount: String, val validAmount: String, val couldntFetch: String,
+    val amount: String, val validAmount: String, val couldntFetch: String, val fillAllFields: String, val loginFailed: String,
+    val passwordTooShort: String, val signupFailed: String,
 
 
     val add: String, val addToItinerary: String, val travel: String, val place: String,
@@ -130,6 +131,9 @@ private val EN = Strings(
     newPassword = "New password", saveChanges = "Save changes", systemDefault = "System default", light = "Light", dark = "Dark", matchYourPhone = "Match your phone", currency = "Currency",
     convert = "Convert", bookings = "Bookings", packing = "Packing", money = "Money", gadget = "Gadget", other = "Other", needToAdd = "What do you need to add?", section = "Section",
     amount = "Amount", validAmount = "Enter a valid amount", couldntFetch = "Couldn't fetch rate. Check your connection.",
+    fillAllFields = "Please fill in all fields", loginFailed = "Login failed. Check your email and password.",
+    passwordTooShort = "Password must be at least 6 characters", signupFailed = "Could not create account. The email may already be in use.",
+
 
 
     add = "Add", addToItinerary = "Add to itinerary", travel = "Travel", place = "Place",
@@ -157,6 +161,7 @@ private val FR = EN.copy(
     matchYourPhone = "Match votre téléphone", currency = "Devise", orDivider = "ou", convert = "Convertir", bookings = "Réservations", packing = "Emballage", money = "Argent",
     gadget = "Appareil", other = "Autre", needToAdd = "Que voulez-vous ajouter ?", section = "Section",
     amount = "Montant", validAmount = "Entrez un montant valide", couldntFetch = "Impossible de récupérer le taux. Vérifiez votre connexion.",
+    fillAllFields = "Veuillez remplir tous les champs", loginFailed = "Connexion échouée. Vérifiez votre adresse e-mail et mot de passe.",
     
     add = "Ajouter", addToItinerary = "Ajouter à l'itinéraire", travel = "Voyage", place = "Lieu", 
     newPlace = "Nouveau lieu", editPlace = "Modifier le lieu", landmark = "Point de repère (facultatif)", savePlace = "Enregistrer le lieu", searchTrips = "Rechercher des voyages", 
@@ -183,6 +188,8 @@ private val ES = EN.copy(
     transport = "Transporte", orDivider = "o", convert = "Convertir",
     bookings = "Reservas", packing = "Envase", money = "Dinero", gadget = "Dispositivo", other = "Otro", needToAdd = "¿Qué necesitas agregar?", section = "Sección",
     amount = "Monto", validAmount = "Ingrese un monto válido", couldntFetch = "No se pudo obtener la tasa. Verifique su conexión.",
+    fillAllFields = "Por favor complete todos los campos", loginFailed = "Inicio de sesión fallido. Verifique su dirección de correo electrónico y contraseña.",
+
 
     add = "Añadir", addToItinerary = "Añadir al itinerario", travel = "Viaje", place = "Lugar",
     newPlace = "Nuevo lugar", editPlace = "Editar lugar", landmark = "Punto de referencia (opcional)", savePlace = "Guardar lugar", searchTrips = "Buscar viajes",
@@ -209,6 +216,7 @@ private val DE = EN.copy(
     transport = "Verkehrsmittel", orDivider = "oder", convert = "Umwandeln", 
     bookings = "Reservierungen", packing = "Packung", money = "Geld", gadget = "Gerät", other = "Andere", needToAdd = "Was möchten Sie hinzufügen?", section = "Abschnitt",
     amount = "Betrag", validAmount = "Geben Sie eine gültige Menge ein", couldntFetch = "Konnte den Kurs nicht abrufen. Überprüfen Sie Ihre Verbindung.",
+    fillAllFields = "Bitte füllen Sie alle Felder aus", loginFailed = "Anmeldung fehlgeschlagen. Überprüfen Sie Ihre E-Mail-Adresse und Ihr Passwort.",
 
     add = "Hinzufügen", addToItinerary = "Zum Reiseplan hinzufügen", travel = "Reise", place = "Ort",
     newPlace = "Neuer Ort", editPlace = "Ort bearbeiten", landmark = "Wahrzeichen (optional)", savePlace = "Ort speichern", searchTrips = "Reisen suchen",
@@ -235,6 +243,8 @@ private val IT = EN.copy(
     transport = "Trasporto", orDivider = "o", convert = "Convertire",
     bookings = "Prenotazioni", packing = "Pacco", money = "Monero", gadget = "Gadget", other = "Altro", needToAdd = "Cosa vuoi aggiungere?", section = "Sezione",
     amount = "Importo", validAmount = "Inserisci un importo valido", couldntFetch = "Impossibile ottenere il tasso. Controllare la connessione.",
+    fillAllFields = "Per favore compila tutti i campi", loginFailed = "Login fallito. Controllare la tua email e password.",
+
 
 
     add = "Aggiungi", addToItinerary = "Aggiungi all'itinerario", travel = "Viaggio", place = "Luogo",
@@ -264,6 +274,8 @@ private val PT = EN.copy(
     matchYourPhone = "Coincidir com o seu telefone", currency = "Moeda", transport = "Transporte", orDivider = "ou", convert = "Converter",
     bookings = "Reservas", packing = "Embalagem", money = "Dinheiro", gadget = "Dispositivo", other = "Outro", needToAdd = "O que você precisa adicionar?", section = "Seção",
     amount = "Montante", validAmount = "Insira um montante válido", couldntFetch = "Não foi possível obter a taxa. Verifique a sua conexão.",
+    fillAllFields = "Por favor preencha todos os campos", loginFailed = "Login falhou. Verifique a sua email e senha.",
+
 
     add = "Adicionar", addToItinerary = "Adicionar ao itinerário", travel = "Viagem", place = "Lugar",
     newPlace = "Novo lugar", editPlace = "Editar lugar", landmark = "Ponto de referência (opcional)", savePlace = "Salvar lugar", searchTrips = "Pesquisar viagens",
@@ -290,6 +302,7 @@ private val NL = EN.copy(
     transport = "Vervoer", orDivider = "of", convert = "Convert", 
     bookings = "Reservaties", packing = "Pakken", money = "Geld", gadget = "Gadget", other = "Overige", needToAdd = "Wat wilt u toevoegen?", section = "Sectie",
     amount = "Bedrag", validAmount = "Geef een geldig bedrag", couldntFetch = "Kon de kurs niet ophalen. Controleer uw verbinding.",
+    fillAllFields = "Vul alle velden in", loginFailed = "Inloggen mislukt. Controleer uw e-mailadres en wachtwoord.",
 
     add = "Toevoegen", addToItinerary = "Toevoegen aan reisplan", travel = "Reis", place = "Plaats",
     newPlace = "Nieuwe plaats", editPlace = "Plaats bewerken", landmark = "Bezienswaardigheid (optioneel)", savePlace = "Plaats opslaan", searchTrips = "Reizen zoeken",
@@ -316,6 +329,8 @@ private val PL = EN.copy(
     transport = "Transport", orDivider = "lub", convert = "Przelicz",
     bookings = "Rezerwacje", packing = "Pakowanie", money = "Pieniądze", gadget = "Gadżet", other = "Inne", needToAdd = "Co chcesz dodać?", section = "Sekcja",
     amount = "Kwota", validAmount = "Wprowadź prawidłową kwotę", couldntFetch = "Nie udało się pobrać kursu. Sprawdź połączenie.",
+    fillAllFields = "Proszę uzupełnić wszystkie pola", loginFailed = "Logowanie nieudane. Sprawdź poprawność adresu e-mail i hasła.",
+
 
 
     add = "Dodaj", addToItinerary = "Dodaj do planu podróży", travel = "Podróż", place = "Miejsce",
@@ -339,6 +354,8 @@ private val ZH = EN.copy(
     light = "亮色", dark = "暗色", matchYourPhone = "匹配你的手机", currency = "货币",transport = "交通", orDivider = "或", convert = "转换",
     bookings = "预订", packing = "装箱", money = "钱", gadget = "设备", other = "其他", needToAdd = "你需要添加什么？", section = "章节",
     amount = "金额", validAmount = "请输入有效的金额", couldntFetch = "无法获取汇率。请检查您的连接。",
+    fillAllFields = "请填写所有字段", loginFailed = "登录失败。请检查您的电子邮件地址和密码。",
+
 
 
     add = "添加", addToItinerary = "添加到行程", travel = "旅行", place = "地点",
@@ -364,6 +381,7 @@ private val JP = EN.copy(
     systemDefault = "系统默认", light = "ライト", dark = "ダーク", matchYourPhone = "電話と一致", currency = "通貨", convert = "変換",
     bookings = "予約", packing = "パック", money = "お金", gadget = " gadget", other = "その他", needToAdd = "追加したいものがあれば？", section = "セクション",
     amount = "金額", validAmount = "正しい金額を入力してください", couldntFetch = "レートを取得できませんでした。接続を確認してください。",
+    fillAllFields = "すべての項目を入力してください", loginFailed = "ログインに失敗しました。メールアドレスとパスワードを確認してください。",
     
 
     add = "追加", addToItinerary = "旅程に追加", travel = "旅行", place = "場所",
@@ -390,6 +408,8 @@ private val KR = EN.copy(
     currency = "통화", convert = "변환", 
     bookings = "예약", packing = "포장", money = "돈", gadget = "기기", other = "기타", needToAdd = "추가할 것이 있나요?", section = "섹션",
     amount = "금액", validAmount = "유효한 금액을 입력하세요", couldntFetch = "환율을 가져올 수 없습니다. 연결을 확인하세요.",
+    fillAllFields = "모든 필드를 채워주세요", loginFailed = "로그인에 실패했습니다. 이메일과 비밀번호를 확인하세요.",
+
 
     add = "추가", addToItinerary = "일정에 추가", travel = "여행", place = "장소",
     newPlace = "새 장소", editPlace = "장소 편집", landmark = "랜드마크 (선택 사항)", savePlace = "장소 저장", searchTrips = "여행 검색",
@@ -418,6 +438,7 @@ private val RU = EN.copy(
     transport = "Транспорт", orDivider = "или", convert = "Перевести",
     bookings = "Бронирования", packing = "Упаковка", money = "Деньги", gadget = "Гаджет", other = "Другое", needToAdd = "Что нужно добавить?", section = "Секция",
     amount = "Сумма", validAmount = "Введите действительную сумму", couldntFetch = "Не удалось получить курс. Проверьте соединение.",
+    fillAllFields = "Заполните все поля", loginFailed = "Вход не удался. Проверьте адрес электронной почты и пароль.",
 
     add = "Добавить", addToItinerary = "Добавить в маршрут", travel = "Путешествие", place = "Место",
     newPlace = "Новое место", editPlace = "Редактировать место", landmark = "Достопримечательность (необязательно)", savePlace = "Сохранить место", searchTrips = "Поиск путешествий",
@@ -448,7 +469,7 @@ private val TAM = EN.copy(
     newPassword = "புதிய கடவுச்சொல்", saveChanges = "மாற்றங்களைச் சேமி", systemDefault = "கணினி இயல்புநிலை",
     light = "ஒளி", dark = "இருள்", matchYourPhone = "உங்கள் தொலைபேசியுடன் பொருந்தவும்", currency = "நாணயம்", convert = "மாற்று",
     bookings = "முன்பதிவுகள்", packing = "பேக்கிங்", money = "பணம்", gadget = "கேஜெட்", other = "மற்றவை", needToAdd = "நீங்கள் என்ன சேர்க்க வேண்டும்?", section = "பிரிவு",
-    amount = "தொகை", validAmount = "செல்லுபடியாகும் தொகையை உள்ளிடவும்", couldntFetch = "விகிதத்தைப் பெற முடியவில்லை. உங்கள் இணைப்பைச் சரிபார்க்கவும்.", 
+    amount = "தொகை", validAmount = "செல்லுபடியாகும் தொகையை உள்ளிடவும்", couldntFetch = "விகிதத்தைப் பெற முடியவில்லை. உங்கள் இணைப்பைச் சரிபார்க்கவும்.",
 
     add = "சேர்", addToItinerary = "பயணத்திட்டத்தில் சேர்", travel = "பயணம்", place = "இடம்",
     newPlace = "புதிய இடம்", editPlace = "இடத்தைத் திருத்து", landmark = "அடையாளம் (விருப்பத்திற்குரியது)", savePlace = "இடத்தைச் சேமி", searchTrips = "பயணங்களைத் தேடு",
@@ -480,7 +501,8 @@ private val HI = EN.copy(
     newPassword = "नया पासवर्ड", saveChanges = "परिवर्तन सहेजें", systemDefault = "सिस्टम डिफ़ॉल्ट",
     light = "लाइट", dark = "डार्क", matchYourPhone = "अपने फ़ोन से मिलान करें", currency = "मुप्रा", convert = "बदलें",
     bookings = "बुकिंग", packing = "पैकिंग", money = "मु", gadget = "गेट", other = "अन्य", needToAdd = "जान", section = "section",
-    amount = "राशि", validAmount = "एक वैध राशि दर्ज करें", couldntFetch = "दर प्राप्त नहीं हो सकी। अपना कनेक्शन जांचें।", 
+    amount = "राशि", validAmount = "एक वैध राशि दर्ज करें", couldntFetch = "दर प्राप्त नहीं हो सकी। अपना कनेक्शन जांचें।",
+
 
     add = "जोड़ें", addToItinerary = "यात्रा कार्यक्रम में जोड़ें", travel = "यात्रा", place = "स्थान",
     newPlace = "नया स्थान", editPlace = "स्थान संपादित करें", landmark = "लैंडमार्क (वैकल्पिक)", savePlace = "स्थान सहेजें", searchTrips = "यात्राएं खोजें",

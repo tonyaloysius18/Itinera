@@ -19,6 +19,9 @@ kotlinxSerializationJson = "1.7.3"
 ktorClientCore = "3.0.3"
 material3 = "1.11.0-alpha07"
 coil = "3.0.4"
+googleServices = "4.4.2"
+gitliveFirebase = "2.4.0"
+firebaseBom = "33.7.0"
 
 
 
@@ -51,6 +54,9 @@ ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "kto
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorClientCore" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
+firebase-auth = { module = "dev.gitlive:firebase-auth", version.ref = "gitliveFirebase" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-auth-android = { module = "com.google.firebase:firebase-auth" }
 
 
 [plugins]
@@ -60,3 +66,4 @@ composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMul
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }

@@ -30,6 +30,8 @@ class TripRepository {
 
     val unsplashApi = UnsplashApi()
 
+    val authService = AuthService()
+
     fun addTrip(title: String): String {                                  // ⬅ no accent param
         val id = "trip_${kotlin.random.Random.nextLong()}"
         trips.add(

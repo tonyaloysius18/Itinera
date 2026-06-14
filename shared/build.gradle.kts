@@ -44,6 +44,8 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.ktor.client.okhttp)
+            implementation(project.dependencies.platform(libs.firebase.bom))   // ⬅ ADD: BoM
+            implementation(libs.firebase.auth.android)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -64,6 +66,7 @@ kotlin {
             implementation(libs.datetime.wheel.picker)
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor)
+            implementation(libs.firebase.auth)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

@@ -17,21 +17,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.itinera.app.i18n.LocalStrings
+import com.itinera.app.model.UserProfile                       // ⬅ ADD
+import com.itinera.app.data.AuthService                        // ⬅ ADD
+import androidx.compose.runtime.rememberCoroutineScope         // ⬅ ADD
+import kotlinx.coroutines.launch                               // ⬅ ADD
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-//import kotlin.time.Instant
 
 /**
- * Collects the user's details to create an account. Mock for now — onCreate()
- * just proceeds. To make it real, call Firebase Auth createUserWithEmailAndPassword
- * here and save the name to the user profile.
+ * Collects the user's details and creates a REAL Firebase account via AuthService.
+ * Firebase stores only email + password; the rest of the details are handed up
+ * through onCreate(UserProfile) so App.kt can save them to the repository profile.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateAccountScreen(
+    authService: AuthService,                 // ⬅ ADD
     onBack: () -> Unit,
-    onCreate: () -> Unit,
+    onCreate: (UserProfile) -> Unit,          // ⬅ CHANGED: now carries the profile up
 ) {
     val s = LocalStrings.current
     val textFieldShape = RoundedCornerShape(12.dp)
@@ -49,6 +53,45 @@ fun CreateAccountScreen(
     var street by remember { mutableStateOf("") }
     var city by remember { mutableStateOf("") }
     var postalCode by remember { mutableStateOf("") }
+
+    var error by remember { mutableStateOf<String?>(null) }    // ⬅ ADD
+    var loading by remember { mutableStateOf(false) }          // ⬅ ADD
+    val scope = rememberCoroutineScope()                       // ⬅ ADD
+
+    // Validate, then create the Firebase account. Suspends, so runs in a coroutine.
+    fun attemptCreate() {                                       // ⬅ ADD
+        when {
+            name.isBlank() || email.isBlank() || password.isBlank() -> {
+                error = s.fillAllFields
+                return
+            }
+            password.length < 6 -> {
+                error = s.passwordTooShort
+                return
+            }
+        }
+        error = null
+        loading = true
+        scope.launch {
+            try {
+                authService.signUp(email, password)
+                val profile = UserProfile(
+                    name = name.trim(),
+                    surname = surname.trim(),
+                    email = email.trim(),
+                    dob = dob,
+                    street = street.trim(),
+                    city = city.trim(),
+                    postalCode = postalCode.trim(),
+                )
+                loading = false
+                onCreate(profile)                              // success → save profile + navigate
+            } catch (e: Exception) {
+                loading = false
+                error = s.signupFailed                         // email in use / weak pw / network
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -72,7 +115,7 @@ fun CreateAccountScreen(
         ) {
             Spacer(Modifier.height(5.dp))
             OutlinedTextField(
-                value = name, onValueChange = { name = it },
+                value = name, onValueChange = { name = it; error = null },
                 label = { Text(s.name) }, singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = textFieldShape,
@@ -87,14 +130,14 @@ fun CreateAccountScreen(
             Spacer(Modifier.height(9.dp))
             EmailFieldWithSuggestions(
                 email = email,
-                onEmailChange = { email = it },
+                onEmailChange = { email = it; error = null },
                 label = s.email,
                 shape = textFieldShape,
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(9.dp))
             OutlinedTextField(
-                value = password, onValueChange = { password = it },
+                value = password, onValueChange = { password = it; error = null },
                 label = { Text(s.password) }, singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
@@ -147,9 +190,32 @@ fun CreateAccountScreen(
                 shape = textFieldShape,
             )
 
+            // Inline error message
+            if (error != null) {                               // ⬅ ADD
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    error!!,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
             Spacer(Modifier.height(20.dp))
-            Button(onClick = onCreate, modifier = Modifier.fillMaxWidth().padding(horizontal = 45.dp)) {
-                Text(s.createAccount)
+            Button(
+                onClick = { attemptCreate() },                 // ⬅ CHANGED: real sign-up
+                enabled = !loading,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 45.dp),
+            ) {
+                if (loading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                    )
+                } else {
+                    Text(s.createAccount)
+                }
             }
             Spacer(Modifier.height(24.dp))
         }
@@ -192,8 +258,8 @@ private fun EmailFieldWithSuggestions(
     val localPart = email.substringBefore("@")
     val afterAt = if (email.contains("@")) email.substringAfter("@") else null
 
-    // build suggestions: only when there's a local part and the domain isn't already complete
-    val suggestions = if (email.contains("@") && localPart.isNotBlank()) {   // ⬅ require "@"
+    // build suggestions: only when there's a local part and "@" has been typed
+    val suggestions = if (email.contains("@") && localPart.isNotBlank()) {
         domains
             .filter { it.startsWith(afterAt ?: "", ignoreCase = true) }
             .map { "$localPart@$it" }

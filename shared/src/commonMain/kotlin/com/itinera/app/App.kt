@@ -138,6 +138,7 @@ private fun AppContent(
 
     if (current == Screen.Login) {
         LoginScreen(
+            authService = repository.authService,
             onAuthed = { navigator.resetTo(Screen.Home) },
             onCreateAccount = { navigator.push(Screen.CreateAccount) },
         )
@@ -175,13 +176,18 @@ private fun AppContent(
         ) {
             when (val screen = current) {
                 Screen.Login -> LoginScreen(
+                    authService = repository.authService,
                     onAuthed = { navigator.resetTo(Screen.Home) },
                     onCreateAccount = { navigator.push(Screen.CreateAccount) },
                 )
 
                 Screen.CreateAccount -> CreateAccountScreen(
+                    authService = repository.authService,           // ⬅ ADD
                     onBack = { navigator.back() },
-                    onCreate = { navigator.resetTo(Screen.Login) },
+                    onCreate = { profile ->                          // ⬅ CHANGED: receives UserProfile
+                        repository.updateProfile(profile)            // save name/email/etc. to profile
+                        navigator.resetTo(Screen.Login)              // back to Login to sign in
+                    },
                 )
 
                 is Screen.Home -> TripsHomeScreen(

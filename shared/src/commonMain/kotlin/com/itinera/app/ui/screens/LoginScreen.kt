@@ -6,8 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-//import androidx.compose.material.icons.Icons
-//import androidx.compose.material.icons.filled.Route
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,22 +32,22 @@ import com.itinera.app.resources.ic_apple
 import com.itinera.app.getPlatform
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.rememberCoroutineScope          // ⬅ ADD
+import kotlinx.coroutines.launch                                 // ⬅ ADD
+import com.itinera.app.data.AuthService                          // ⬅ ADD
 
 
 /**
- * Local mock login gate. "Log in" and the social buttons all just call onAuthed().
- * To make it real: replace onAuthed with a Firebase Auth call (GitLive SDK gives
- * email/password, Google and Apple sign-in from shared Kotlin).
- *
- * Background: put your image at
- *   composeApp/src/commonMain/composeResources/drawable/login_bg.jpg
- * then Gradle-sync so Res.drawable.login_bg is generated.
+ * Login gate. The email/password button now performs a REAL Firebase sign-in
+ * via AuthService. Google and Apple buttons remain mocks (they need separate
+ * OAuth / native flows) and still call onAuthed() for now.
  */
 
 val isIos = getPlatform().name.startsWith("iOS", ignoreCase = true)
 
 @Composable
 fun LoginScreen(
+    authService: AuthService,                 // ⬅ ADD: passed in from App.kt
     onAuthed: () -> Unit,
     onCreateAccount: () -> Unit,
 ) {
@@ -57,10 +55,12 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
+    var error by remember { mutableStateOf<String?>(null) }     // ⬅ ADD: inline error text
+    var loading by remember { mutableStateOf(false) }           // ⬅ ADD: disables button during call
+    val scope = rememberCoroutineScope()                        // ⬅ ADD
+
     val displayFont = FontFamily(Font(Res.font.arizonia_regular))
     val taglineFont = FontFamily(Font(Res.font.caudex_bold))
-
-
 
     // Light colors for text/fields so they read on a darkened photo.
     val onImage = Color.White
@@ -76,6 +76,25 @@ fun LoginScreen(
     )
     val textFieldShape = RoundedCornerShape(12.dp)
 
+    // Performs the real sign-in. Suspends, so it runs in a coroutine.
+    fun attemptLogin() {                                         // ⬅ ADD
+        if (email.isBlank() || password.isBlank()) {
+            error = s.fillAllFields
+            return
+        }
+        error = null
+        loading = true
+        scope.launch {
+            try {
+                authService.signIn(email, password)
+                loading = false
+                onAuthed()                                      // success → navigate in
+            } catch (e: Exception) {
+                loading = false
+                error = s.loginFailed                           // wrong credentials / network / etc.
+            }
+        }
+    }
 
     Box(Modifier.fillMaxSize()) {
         // Back layer: the background image, cropped to fill the screen.
@@ -94,7 +113,7 @@ fun LoginScreen(
             )
         )
 
-        // Top layer: the login content (unchanged structure, recolored for the photo).
+        // Top layer: the login content.
         Column(
             modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing).padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.Top,
@@ -106,27 +125,16 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.Start,
             ) {
-
-                // Removed an icon
-//                Surface(
-//                    modifier = Modifier.size(56.dp).clip(RoundedCornerShape(14.dp)),
-//                    color = Color.White.copy(alpha = 0.18f),
-//                ) {
-//                    Box(contentAlignment = Alignment.Center) {
-//                        Icon(Icons.Filled.Route, contentDescription = null, tint = onImage)
-//                    }
-//                }
-
                 Spacer(Modifier.height(14.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                Text(
-                    "Itinera",
-                    fontFamily = displayFont,
-                    style = MaterialTheme.typography.displayLargeEmphasized,
-                    color = onImage,
-                )
+                    Text(
+                        "Itinera",
+                        fontFamily = displayFont,
+                        style = MaterialTheme.typography.displayLargeEmphasized,
+                        color = onImage,
+                    )
                     Spacer(Modifier.width(12.dp))
                     Image(
                         painter = painterResource(Res.drawable.itinera_logo),
@@ -134,11 +142,9 @@ fun LoginScreen(
                         colorFilter = ColorFilter.tint(onImage),
                         modifier = Modifier.height(90.dp)
                             .padding(top = 2.dp, end = 2.dp)
-                            //.offset(y = (-4).dp, x= (-4).dp),
                     )
                 }
 
-                //Spacer(Modifier.height(1.dp).padding(end = 60.dp))
                 Text(
                     s.appTagline,
                     fontFamily = taglineFont,
@@ -151,7 +157,7 @@ fun LoginScreen(
 
             Spacer(Modifier.height(130.dp))
             OutlinedTextField(
-                value = email, onValueChange = { email = it },
+                value = email, onValueChange = { email = it; error = null },
                 label = { Text(s.email) }, singleLine = true,
                 colors = fieldColors,
                 modifier = Modifier.fillMaxWidth(),
@@ -159,13 +165,13 @@ fun LoginScreen(
             )
             Spacer(Modifier.height(12.dp))
             OutlinedTextField(
-                value = password, onValueChange = { password = it },
+                value = password, onValueChange = { password = it; error = null },
                 label = { Text(s.password) }, singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 colors = fieldColors,
                 modifier = Modifier.fillMaxWidth(),
                 shape = textFieldShape,
-                )
+            )
             Text(
                 s.forgotPassword,
                 style = MaterialTheme.typography.bodySmall,
@@ -174,8 +180,34 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
             )
 
+            // Inline error message (shown on failure)
+            if (error != null) {                                 // ⬅ ADD
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    error!!,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
             Spacer(Modifier.height(16.dp))
-            Button(onClick = onAuthed, modifier = Modifier.fillMaxWidth()) { Text(s.logIn) }
+            Button(
+                onClick = { attemptLogin() },                    // ⬅ CHANGED: real sign-in
+                enabled = !loading,                              // ⬅ disable while working
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                if (loading) {                                   // ⬅ spinner while working
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                    )
+                } else {
+                    Text(s.logIn)
+                }
+            }
 
             Spacer(Modifier.height(16.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -184,7 +216,7 @@ fun LoginScreen(
                 HorizontalDivider(Modifier.weight(1f), color = onImageMuted)
             }
             Spacer(Modifier.height(16.dp))
-            OutlinedButton(onClick = onAuthed, modifier = Modifier.fillMaxWidth()) {
+            OutlinedButton(onClick = onAuthed, modifier = Modifier.fillMaxWidth()) {   // still mock
                 Image(
                     painter = painterResource(Res.drawable.ic_google),
                     contentDescription = null,
@@ -196,11 +228,11 @@ fun LoginScreen(
 
             if (isIos) {
                 Spacer(Modifier.height(10.dp))
-                OutlinedButton(onClick = onAuthed, modifier = Modifier.fillMaxWidth()) {
+                OutlinedButton(onClick = onAuthed, modifier = Modifier.fillMaxWidth()) {  // still mock
                     Image(
                         painter = painterResource(Res.drawable.ic_apple),
                         contentDescription = null,
-                        colorFilter = ColorFilter.tint(onImage),   // tints it white to match the button text
+                        colorFilter = ColorFilter.tint(onImage),
                         modifier = Modifier.size(20.dp),
                     )
                     Spacer(Modifier.width(12.dp))
@@ -217,7 +249,6 @@ fun LoginScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onCreateAccount() },
-
             )
         }
     }
