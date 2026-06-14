@@ -21,6 +21,11 @@ class AuthService {
     val currentUid: String?
         get() = Firebase.auth.currentUser?.uid
 
+    suspend fun deleteAccount() {
+        Firebase.auth.currentUser?.delete()
+    }
+
+
     /** Create a new account. Throws if the email is taken or the password is weak. */
     suspend fun signUp(email: String, password: String): FirebaseUser? {
         val result = Firebase.auth.createUserWithEmailAndPassword(email.trim(), password)

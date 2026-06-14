@@ -329,6 +329,21 @@ private fun AppContent(
                     onOpenLanguage = { navigator.push(Screen.LanguagePicker) },
                     onArchivedTrips = { navigator.push(Screen.ArchivedTrips) },
                     onLogOut = { navigator.resetTo(Screen.Login) },
+                    onDeleteAccount = {                                          // ⬅ ADD
+                        scope.launch {
+                            val uid = repository.authService.currentUid
+                            try {
+                                if (uid != null) {
+                                    repository.profileService.deleteProfile(uid)   // Firestore FIRST (while authed)
+                                }
+                                repository.authService.deleteAccount()             // then Auth account
+                                navigator.resetTo(Screen.Login)                    // back to login
+                            } catch (e: Exception) {
+                                // likely "requires recent login" — handled below
+                                navigator.resetTo(Screen.Login)
+                            }
+                        }
+                    },
                 )
 
                 Screen.Appearance -> AppearanceScreen(

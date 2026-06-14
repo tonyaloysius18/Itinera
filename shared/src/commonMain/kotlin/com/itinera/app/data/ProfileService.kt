@@ -24,4 +24,8 @@ class ProfileService {
         val snapshot = db.collection("users").document(uid).get()
         return if (snapshot.exists) snapshot.data(UserProfile.serializer()) else null
     }
+
+    suspend fun deleteProfile(uid: String) {
+        db.collection("users").document(uid).delete()
+    }
 }

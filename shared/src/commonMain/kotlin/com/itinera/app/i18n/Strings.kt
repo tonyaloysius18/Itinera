@@ -104,7 +104,7 @@ data class Strings(
     val dark: String, val matchYourPhone: String, val currency: String, val convert: String, 
     val bookings: String, val packing: String, val money: String, val gadget: String, val other: String, val needToAdd: String, val section: String,
     val amount: String, val validAmount: String, val couldntFetch: String, val fillAllFields: String, val loginFailed: String,
-    val passwordTooShort: String, val signupFailed: String,
+    val passwordTooShort: String, val signupFailed: String, val deleteAccount: String, val deleteAccountConfirm: String, val deleteButton: String,
 
 
     val add: String, val addToItinerary: String, val travel: String, val place: String,
@@ -133,6 +133,7 @@ private val EN = Strings(
     amount = "Amount", validAmount = "Enter a valid amount", couldntFetch = "Couldn't fetch rate. Check your connection.",
     fillAllFields = "Please fill in all fields", loginFailed = "Login failed. Check your email and password.",
     passwordTooShort = "Password must be at least 6 characters", signupFailed = "Could not create account. The email may already be in use.",
+    deleteAccount = "Delete account", deleteAccountConfirm = "This permanently deletes your account and all your data. This cannot be undone.", deleteButton = "Delete",
 
 
 
