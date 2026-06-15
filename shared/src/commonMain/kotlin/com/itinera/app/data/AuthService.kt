@@ -21,6 +21,10 @@ class AuthService {
     val currentUid: String?
         get() = Firebase.auth.currentUser?.uid
 
+    suspend fun updatePassword(newPassword: String) {
+        Firebase.auth.currentUser?.updatePassword(newPassword)
+    }
+
     suspend fun deleteAccount() {
         Firebase.auth.currentUser?.delete()
     }

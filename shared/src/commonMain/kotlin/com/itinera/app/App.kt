@@ -1,5 +1,6 @@
 package com.itinera.app
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,6 +43,10 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.gestures.detectTapGestures
 import com.itinera.app.data.imageQueryForTrip
 import com.itinera.app.ui.theme.ThemeMode
@@ -51,13 +56,11 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import kotlinx.coroutines.launch
 import com.itinera.app.i18n.systemLanguage
-
+import kotlinx.coroutines.delay
 
 
 /**
- * App root. Owns the three pieces of global state — auth flag, chosen language,
- * and the repository — and routes the current screen. Changing the language swaps
- * the value provided to LocalStrings, which recomposes every screen instantly.
+ * App root. Owns the global state and routes the current screen.
  */
 @Composable
 fun App() {
@@ -65,13 +68,23 @@ fun App() {
     var language by remember { mutableStateOf(Language.ENGLISH) }
     var themeMode by remember { mutableStateOf(ThemeMode.SYSTEM) }
     val navigator = rememberNavigator(Screen.Login)
+    var authChecked by remember { mutableStateOf(false) }   // ⬅ ADD
 
-    // SYSTEM falls back to English here; in production resolve the device locale
-    // via an expect/actual platform call and map it to a Language.
-    val activeStrings = remember(language) {
-        stringsFor(if (language == Language.SYSTEM) systemLanguage() else language)   // ⬅ CHANGED
+    LaunchedEffect(Unit) {
+        val uid = repository.authService.currentUid
+        if (uid != null) {
+            try {
+                val profile = repository.profileService.loadProfile(uid)
+                if (profile != null) repository.updateProfile(profile)
+            } catch (e: Exception) { }
+            navigator.resetTo(Screen.Home)
+        }
+        authChecked = true
     }
 
+    val activeStrings = remember(language) {
+        stringsFor(if (language == Language.SYSTEM) systemLanguage() else language)
+    }
 
     val darkTheme = when (themeMode) {
         ThemeMode.SYSTEM -> isSystemInDarkTheme()
@@ -79,11 +92,22 @@ fun App() {
         ThemeMode.DARK -> true
     }
 
-    val scope = rememberCoroutineScope()
-
-    ItineraTheme(darkTheme = darkTheme) {
-        CompositionLocalProvider(LocalStrings provides activeStrings) {
-            AppContent(repository, navigator, language, themeMode, { language = it }, { themeMode = it })
+        ItineraTheme(darkTheme = darkTheme) {
+            CompositionLocalProvider(LocalStrings provides activeStrings) {
+                if (!authChecked) {
+                    Box(
+                        Modifier.fillMaxSize()
+                            .background(MaterialTheme.colorScheme.background),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                } else {
+                AppContent(
+                    repository, navigator, language, themeMode,
+                    { language = it }, { themeMode = it }
+                )
+            }
         }
     }
 }
@@ -121,7 +145,6 @@ private fun AppContent(
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                // When scrolling down (available.y < 0), shrink. When up, expand.
                 if (available.y < -5) {
                     barScale = 0.85f
                 } else if (available.y > 5) {
@@ -136,243 +159,249 @@ private fun AppContent(
         barScale = 1f
     }
 
-    if (current == Screen.Login) {
-        LoginScreen(
-            authService = repository.authService,
-            onAuthed = {
-                scope.launch {                                       // ⬅ ADD: load profile from Firestore
-                    val uid = repository.authService.currentUid
-                    if (uid != null) {
-                        try {
-                            val profile = repository.profileService.loadProfile(uid)
-                            if (profile != null) repository.updateProfile(profile)
-                        } catch (e: Exception) {
-                            // non-fatal: couldn't load profile
-                        }
-                    }
-                    navigator.resetTo(Screen.Home)
-                }
-            },
-            onCreateAccount = { navigator.push(Screen.CreateAccount) },
-        )
-        return
+    // ===== app-level message pill =====
+    var pillMessage by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(pillMessage) {
+        if (pillMessage != null) {
+            delay(2000)
+            pillMessage = null
+        }
     }
-    if (current == Screen.LanguagePicker) {
-        LanguageScreen(
-            selected = language,
-            onSelect = onLanguageChange,
-            onBack = { navigator.back() },
-        )
-        return
+
+    var pillMessageTop by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(pillMessageTop) {
+        if (pillMessageTop != null) { delay(2000); pillMessageTop = null }
     }
 
     val showBottomBar = current in topLevel
 
-    // ⬅ CHANGED: replaced Scaffold with a Box so content fills the whole screen
-    //    and the pill bar floats on top instead of reserving space below it.
+    // ===== ROOT BOX: everything overlays here, so the pill shows on every screen incl. Login =====
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .pointerInput(Unit) {                    // ⬅ ADD
+            .pointerInput(Unit) {
                 detectTapGestures(onTap = { focusManager.clearFocus() })
             }
             .background(MaterialTheme.colorScheme.background)
             .nestedScroll(nestedScrollConnection),
     ) {
-        // ⬅ CHANGED: content now fills the entire height (no Scaffold bottom padding,
-        //    no navigationBarsPadding here — the floating bar handles that itself).
-        Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding(),
-            color = MaterialTheme.colorScheme.background,
-        ) {
-            when (val screen = current) {
-                Screen.Login -> LoginScreen(
-                    authService = repository.authService,
-                    onAuthed = { navigator.resetTo(Screen.Home) },
-                    onCreateAccount = { navigator.push(Screen.CreateAccount) },
-                )
+        // Login and LanguagePicker render full-screen (no Surface padding, no nav bar).
+        when (current) {
+            Screen.Login -> LoginScreen(
+                authService = repository.authService,
+                onAuthed = {
+                    scope.launch {
+                        val uid = repository.authService.currentUid
+                        if (uid != null) {
+                            try {
+                                val profile = repository.profileService.loadProfile(uid)
+                                if (profile != null) repository.updateProfile(profile)
+                            } catch (e: Exception) { }
+                        }
+                        navigator.resetTo(Screen.Home)
+                    }
+                },
+                onCreateAccount = { navigator.push(Screen.CreateAccount) },
+                onMessage = { pillMessage = it },          // ⬅ ADD
+            )
 
-                Screen.CreateAccount -> CreateAccountScreen(
-                    authService = repository.authService,
-                    onBack = { navigator.back() },
-                    onCreate = { profile ->
-                        repository.updateProfile(profile)                    // in-memory (immediate UI)
-                        scope.launch {                                       // ⬅ ADD: persist to Firestore
-                            val uid = repository.authService.currentUid
-                            if (uid != null) {
-                                try {
-                                    repository.profileService.saveProfile(uid, profile)
-                                } catch (e: Exception) {
-                                    // non-fatal: profile saved in memory, Firestore write failed
+            Screen.LanguagePicker -> LanguageScreen(
+                selected = language,
+                onSelect = onLanguageChange,
+                onBack = { navigator.back() },
+            )
+
+            else -> {
+                // All other screens render inside the Surface (with status-bar padding).
+                Surface(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .statusBarsPadding(),
+                    color = MaterialTheme.colorScheme.background,
+                ) {
+                    when (val screen = current) {
+                        Screen.CreateAccount -> CreateAccountScreen(
+                            authService = repository.authService,
+                            onBack = { navigator.back() },
+                            onMessage = { pillMessage = it },
+                            onCreate = { profile ->
+                                repository.updateProfile(profile)            // in-memory (immediate UI)
+                                scope.launch {                               // persist to Firestore
+                                    val uid = repository.authService.currentUid
+                                    if (uid != null) {
+                                        try {
+                                            repository.profileService.saveProfile(uid, profile)
+                                        } catch (e: Exception) {
+                                            // non-fatal
+                                        }
+                                    }
                                 }
+                                navigator.resetTo(Screen.Login)
+                                pillMessage = s.accountCreated               // ⬅ show success pill
+                            },
+                        )
+
+                        is Screen.Home -> TripsHomeScreen(
+                            trips = repository.activeTrips(),
+                            onOpenTrip = { navigator.push(Screen.TripDetail(it)) },
+                            onCreateTrip = { name ->
+                                val id = repository.addTrip(name)
+                                scope.launch {
+                                    val trip = repository.tripById(id)
+                                    if (trip != null) {
+                                        val url = repository.unsplashApi.fetchImage(imageQueryForTrip(trip))
+                                        if (url != null) repository.updateTripImage(id, url)
+                                    }
+                                }
+                            },
+                            onRenameTrip = { id, name -> repository.updateTrip(id, name) },
+                            onPinTrip = { repository.togglePin(it) },
+                            onArchiveTrip = { repository.toggleArchive(it) },
+                            onDeleteTrip = { repository.deleteTrip(it) },
+                        )
+
+                        Screen.Currency -> CurrencyScreen(
+                            onMessage = { pillMessage = it },
+                        )
+
+                        is Screen.TripDetail -> {
+                            val trip = repository.tripById(screen.tripId)
+                            if (trip == null) navigator.back()
+                            else TripDetailScreen(
+                                trip = trip,
+                                activities = repository.activitiesForTrip(screen.tripId),
+                                onBack = { navigator.back() },
+                                onAddLeg = { navigator.push(Screen.AddLeg(screen.tripId)) },
+                                onAddPlace = { navigator.push(Screen.AddPlace(screen.tripId)) },
+                                onEditActivity = { actId -> navigator.push(Screen.EditPlace(screen.tripId, actId)) },
+                                onChecklist = { navigator.push(Screen.Checklist(screen.tripId)) },
+                                onToggleLeg = { repository.toggleLegCompleted(screen.tripId, it) },
+                                onEditLeg = { legId -> navigator.push(Screen.EditLeg(screen.tripId, legId)) },
+                                onDeleteLeg = { legId -> repository.deleteLeg(screen.tripId, legId) },
+                                onToggleActivity = { repository.toggleActivity(it) },
+                                onDeleteActivity = { repository.deleteActivity(it) },
+
+                            )
+                        }
+
+                        is Screen.AddPlace -> AddPlaceScreen(
+                            onClose = { navigator.back() },
+                            onSave = { date, title, time, location ->
+                                repository.addActivity(screen.tripId, date, title, time, location)
+                                navigator.back()
+                            },
+                        )
+
+                        is Screen.EditPlace -> {
+                            val act = repository.activitiesForTrip(screen.tripId).firstOrNull { it.id == screen.activityId }
+                            if (act == null) navigator.back()
+                            else AddPlaceScreen(
+                                existing = act,
+                                onClose = { navigator.back() },
+                                onSave = { date, title, time, location ->
+                                    repository.updateActivity(act.id, date, title, time, location)
+                                    navigator.back()
+                                },
+                            )
+                        }
+
+                        is Screen.AddLeg -> AddLegScreen(
+                            onClose = { navigator.back() },
+                            onSave = { leg -> repository.addLeg(screen.tripId, leg); navigator.back() },
+                        )
+
+                        is Screen.EditLeg -> {
+                            val trip = repository.tripById(screen.tripId)
+                            val leg = trip?.legs?.firstOrNull { it.id == screen.legId }
+                            if (leg == null) navigator.back()
+                            else AddLegScreen(
+                                existing = leg,
+                                onClose = { navigator.back() },
+                                onSave = { updated -> repository.updateLeg(screen.tripId, updated); navigator.back() },
+                                onDelete = { repository.deleteLeg(screen.tripId, screen.legId); navigator.back() },
+                            )
+                        }
+
+                        is Screen.ArchivedTrips -> ArchivedTripsScreen(
+                            trips = repository.archivedTrips(),
+                            onBack = { navigator.back() },
+                            onUnarchive = { repository.toggleArchive(it) },
+                            onDelete = { repository.deleteTrip(it) },
+                        )
+
+                        Screen.Documents -> DocumentsScreen(
+                            documents = repository.documents,
+                            onOpenDoc = { navigator.push(Screen.DocViewer(it)) },
+                        )
+
+                        is Screen.DocViewer -> {
+                            val doc = repository.documents.firstOrNull { it.id == screen.docId }
+                            if (doc == null) {
+                                navigator.back()
+                            } else {
+                                DocumentViewerScreen(doc = doc, onBack = { navigator.back() })
                             }
                         }
-                        navigator.resetTo(Screen.Login)
-                    },
-                )
 
-                is Screen.Home -> TripsHomeScreen(
-                    trips = repository.activeTrips(),
-                    onOpenTrip = { navigator.push(Screen.TripDetail(it)) },
-                    onCreateTrip = { name ->                                    // ⬅ create + fetch image
-                        val id = repository.addTrip(name)
-                        scope.launch {
-                            val trip = repository.tripById(id)
-                            if (trip != null) {
-                                val url = repository.unsplashApi.fetchImage(imageQueryForTrip(trip))
-                                if (url != null) repository.updateTripImage(id, url)
-                            }
-                        }
-                    },
-                    onRenameTrip = { id, name -> repository.updateTrip(id, name) },   // ⬅ rename
-                    onPinTrip = { repository.togglePin(it) },
-                    onArchiveTrip = { repository.toggleArchive(it) },
-                    onDeleteTrip = { repository.deleteTrip(it) },
-                )
+                        is Screen.Checklist -> ChecklistScreen(
+                            items = repository.checklistForTrip(screen.tripId),
+                            onBack = { navigator.back() },
+                            onToggle = { repository.toggleChecklistItem(it) },
+                            onAdd = { text, group -> repository.addChecklistItem(screen.tripId, text, group) },
+                        )
 
+                        Screen.Calendar -> CalendarScreen(trips = repository.trips)
 
-                Screen.Currency -> CurrencyScreen()
+                        Screen.Settings -> SettingsScreen(
+                            profile = repository.profile,
+                            onEditProfile = { navigator.push(Screen.EditProfile) },
+                            onAppearance = { navigator.push(Screen.Appearance) },
+                            onOpenLanguage = { navigator.push(Screen.LanguagePicker) },
+                            onArchivedTrips = { navigator.push(Screen.ArchivedTrips) },
+                            onLogOut = { navigator.resetTo(Screen.Login) },
+                            onDeleteAccount = {
+                                scope.launch {
+                                    val uid = repository.authService.currentUid
+                                    try {
+                                        if (uid != null) {
+                                            repository.profileService.deleteProfile(uid)   // Firestore FIRST (while authed)
+                                        }
+                                        repository.authService.deleteAccount()             // then Auth account
+                                        navigator.resetTo(Screen.Login)
+                                        pillMessage = s.accountDeleted                     // ⬅ show success pill
+                                    } catch (e: Exception) {
+                                        // likely "requires recent login" — no success pill
+                                        navigator.resetTo(Screen.Login)
+                                    }
+                                }
+                            },
+                        )
 
-                is Screen.TripDetail -> {
-                    val trip = repository.tripById(screen.tripId)
-                    if (trip == null) navigator.back()
-                    else TripDetailScreen(
-                        trip = trip,
-                        activities = repository.activitiesForTrip(screen.tripId),
-                        onBack = { navigator.back() },
-                        onAddLeg = { navigator.push(Screen.AddLeg(screen.tripId)) },
-                        onAddPlace = { navigator.push(Screen.AddPlace(screen.tripId)) },
-                        onEditActivity = { actId -> navigator.push(Screen.EditPlace(screen.tripId, actId)) },   // ⬅ ADD
-                        onChecklist = { navigator.push(Screen.Checklist(screen.tripId)) },
-                        onToggleLeg = { repository.toggleLegCompleted(screen.tripId, it) },
-                        onEditLeg = { legId -> navigator.push(Screen.EditLeg(screen.tripId, legId)) },
-                        onDeleteLeg = { legId -> repository.deleteLeg(screen.tripId, legId) },
-                        onToggleActivity = { repository.toggleActivity(it) },
-                        onDeleteActivity = { repository.deleteActivity(it) },
-                    )
-                }
+                        Screen.Appearance -> AppearanceScreen(
+                            selected = themeMode,
+                            onSelect = onThemeChange,
+                            onBack = { navigator.back() },
+                        )
 
-                is Screen.AddPlace -> AddPlaceScreen(
-                    onClose = { navigator.back() },
-                    onSave = { date, title, time, location ->                          // ⬅ date, not day
-                        repository.addActivity(screen.tripId, date, title, time, location)
-                        navigator.back()
-                    },
-                )
+                        Screen.EditProfile -> EditProfileScreen(
+                            profile = repository.profile,
+                            authService = repository.authService,
+                            profileService = repository.profileService,
+                            onBack = { navigator.back() },
+                            onSave = { updated ->
+                                repository.updateProfile(updated)
+                                navigator.back()
+                                pillMessageTop = s.changesSaved          // ⬅ ADD
+                            },
+                        )
 
-                is Screen.EditPlace -> {
-                    val act = repository.activitiesForTrip(screen.tripId).firstOrNull { it.id == screen.activityId }
-                    if (act == null) navigator.back()
-                    else AddPlaceScreen(
-                        existing = act,
-                        onClose = { navigator.back() },
-                        onSave = { date, title, time, location ->
-                            repository.updateActivity(act.id, date, title, time, location)
-                            navigator.back()
-                        },
-                    )
-                }
-
-                is Screen.AddLeg -> AddLegScreen(                          // adding — no existing, no onDelete
-                    onClose = { navigator.back() },
-                    onSave = { leg -> repository.addLeg(screen.tripId, leg); navigator.back() },
-                )
-
-                is Screen.EditLeg -> {                                     // editing — pass existing + onDelete
-                    val trip = repository.tripById(screen.tripId)
-                    val leg = trip?.legs?.firstOrNull { it.id == screen.legId }
-                    if (leg == null) navigator.back()
-                    else AddLegScreen(
-                        existing = leg,
-                        onClose = { navigator.back() },
-                        onSave = { updated -> repository.updateLeg(screen.tripId, updated); navigator.back() },
-                        onDelete = { repository.deleteLeg(screen.tripId, screen.legId); navigator.back() },
-                    )
-                }
-
-                is Screen.ArchivedTrips -> ArchivedTripsScreen(
-                    trips = repository.archivedTrips(),
-                    onBack = { navigator.back() },
-                    onUnarchive = { repository.toggleArchive(it) },   // toggling an archived trip un-archives it
-                    onDelete = { repository.deleteTrip(it) },
-                )
-
-                Screen.Documents -> DocumentsScreen(
-                    documents = repository.documents,
-                    onOpenDoc = { navigator.push(Screen.DocViewer(it)) },
-                )
-
-                is Screen.DocViewer -> {
-                    val doc = repository.documents.firstOrNull { it.id == screen.docId }
-                    if (doc == null) {
-                        navigator.back()
-                    } else {
-                        DocumentViewerScreen(doc = doc, onBack = { navigator.back() })
+                        else -> {}
                     }
                 }
-
-                is Screen.Checklist -> ChecklistScreen(
-                    items = repository.checklistForTrip(screen.tripId),
-                    onBack = { navigator.back() },
-                    onToggle = { repository.toggleChecklistItem(it) },
-                    onAdd = { text, group -> repository.addChecklistItem(screen.tripId, text, group) },
-                )
-
-                Screen.Calendar -> CalendarScreen(trips = repository.trips)
-
-                Screen.Settings -> SettingsScreen(
-                    profile = repository.profile,
-                    onEditProfile = { navigator.push(Screen.EditProfile) },
-                    onAppearance = { navigator.push(Screen.Appearance) },
-                    onOpenLanguage = { navigator.push(Screen.LanguagePicker) },
-                    onArchivedTrips = { navigator.push(Screen.ArchivedTrips) },
-                    onLogOut = { navigator.resetTo(Screen.Login) },
-                    onDeleteAccount = {                                          // ⬅ ADD
-                        scope.launch {
-                            val uid = repository.authService.currentUid
-                            try {
-                                if (uid != null) {
-                                    repository.profileService.deleteProfile(uid)   // Firestore FIRST (while authed)
-                                }
-                                repository.authService.deleteAccount()             // then Auth account
-                                navigator.resetTo(Screen.Login)                    // back to login
-                            } catch (e: Exception) {
-                                // likely "requires recent login" — handled below
-                                navigator.resetTo(Screen.Login)
-                            }
-                        }
-                    },
-                )
-
-                Screen.Appearance -> AppearanceScreen(
-                    selected = themeMode,
-                    onSelect = onThemeChange,
-                    onBack = { navigator.back() },
-                )
-
-                Screen.EditProfile -> EditProfileScreen(
-                    profile = repository.profile,
-                    onBack = { navigator.back() },
-                    onSave = { updated ->
-                        repository.updateProfile(updated)
-                        navigator.back()
-                    },
-                )
-
-                Screen.LanguagePicker -> LanguageScreen(
-                    selected = language,
-                    onSelect = onLanguageChange,
-                    onBack = { navigator.back() },
-                )
-                else -> {}
             }
         }
 
-        // ⬅ CHANGED: pill bar moved OUT of Scaffold.bottomBar and overlaid here.
-        //    .align(BottomCenter) floats it at the bottom; .navigationBarsPadding()
-        //    keeps it clear of the home indicator. Content scrolls underneath.
+        // Floating pill nav bar (only on top-level screens).
         if (showBottomBar) {
             val items = listOf(
                 NavItem(Icons.Filled.Flight, s.myTrips, Screen.Home),
@@ -400,6 +429,23 @@ private fun AppContent(
                 SlidingPillBar(current = current, items = items) { navigator.resetTo(it) }
             }
         }
+
+        // Message pill overlay — last child, so it floats above everything on every screen.
+        MessagePill(
+            message = pillMessage,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(bottom = 110.dp),
+        )
+
+        MessagePill(
+            message = pillMessageTop,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(bottom = 180.dp),   // ⬅ tweak this value to taste
+        )
     }
 }
 
@@ -453,9 +499,7 @@ private fun SlidingPillBar(
         label = "pillSlide",
     )
 
-    // one "step" of bias between adjacent icons
     val step = if (count <= 1) 2f else 2f / (count - 1)
-
 
     Surface(
         shape = RoundedCornerShape(32.dp),
@@ -465,7 +509,6 @@ private fun SlidingPillBar(
     ) {
         Box(Modifier.padding(8.dp)) {
 
-            // sliding highlight capsule
             Box(
                 modifier = Modifier
                     .fillMaxWidth(1f / count)
@@ -478,9 +521,7 @@ private fun SlidingPillBar(
 
             Row(Modifier.fillMaxWidth()) {
                 items.forEachIndexed { index, item ->
-                    // this icon's resting position on the bias scale
                     val itemBias = if (count <= 1) 0f else -1f + 2f * index / (count - 1)
-                    // 1f when the capsule is right here, 0f once it's a full step away
                     val selectedness = (1f - abs(bias - itemBias) / step).coerceIn(0f, 1f)
                     val tint = lerp(onSurface.copy(alpha = 0.55f), onSurface, selectedness)
 
@@ -490,7 +531,7 @@ private fun SlidingPillBar(
                             .height(48.dp)
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
-                                indication = null,                       // <- kills the ripple patch
+                                indication = null,
                             ) { onSelect(item.screen) },
                         contentAlignment = Alignment.Center,
                     ) {
@@ -503,6 +544,33 @@ private fun SlidingPillBar(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun MessagePill(message: String?, modifier: Modifier = Modifier) {
+    // Hold the last non-null text so it stays visible during the fade-out animation.
+    var lastMessage by remember { mutableStateOf("") }
+    if (message != null) lastMessage = message
+
+    AnimatedVisibility(
+        visible = message != null,
+        enter = fadeIn() + slideInVertically { it / 2 },
+        exit = fadeOut() + slideOutVertically { it / 2 },
+        modifier = modifier.offset(y = 95.dp),
+    ) {
+        Surface(
+            shape = RoundedCornerShape(24.dp),
+            color = Color.DarkGray.copy(alpha = 0.6f),
+            shadowElevation = 6.dp,
+        ) {
+            Text(
+                lastMessage,
+                color = Color.White,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+            )
         }
     }
 }

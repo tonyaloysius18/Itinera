@@ -8,6 +8,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +22,9 @@ import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.UserProfile                       // ⬅ ADD
 import com.itinera.app.data.AuthService                        // ⬅ ADD
 import androidx.compose.runtime.rememberCoroutineScope         // ⬅ ADD
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
 import kotlinx.coroutines.launch                               // ⬅ ADD
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
@@ -35,7 +40,8 @@ import kotlinx.datetime.toLocalDateTime
 fun CreateAccountScreen(
     authService: AuthService,                 // ⬅ ADD
     onBack: () -> Unit,
-    onCreate: (UserProfile) -> Unit,          // ⬅ CHANGED: now carries the profile up
+    onCreate: (UserProfile) -> Unit, // ⬅ CHANGED: now carries the profile up
+    onMessage: (String) -> Unit,
 ) {
     val s = LocalStrings.current
     val textFieldShape = RoundedCornerShape(12.dp)
@@ -44,6 +50,8 @@ fun CreateAccountScreen(
     var surname by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+
     // Date of birth
     var dob by remember { mutableStateOf("") }
     var showDatePicker by remember { mutableStateOf(false) }
@@ -56,19 +64,26 @@ fun CreateAccountScreen(
 
     var error by remember { mutableStateOf<String?>(null) }    // ⬅ ADD
     var loading by remember { mutableStateOf(false) }          // ⬅ ADD
-    val scope = rememberCoroutineScope()                       // ⬅ ADD
+    val scope = rememberCoroutineScope()
+
+    // ⬅ ADD
+
+
+    fun String.toTitleCase(): String =
+        split(" ").joinToString(" ") { word ->
+            word.replaceFirstChar { char ->
+                if (char.isLowerCase()) char.titlecase() else char.toString()
+            }
+        }
 
     // Validate, then create the Firebase account. Suspends, so runs in a coroutine.
-    fun attemptCreate() {                                       // ⬅ ADD
+    fun attemptCreate() {
         when {
-            name.isBlank() || email.isBlank() || password.isBlank() -> {
-                error = s.fillAllFields
+            listOf(name, surname, email, password, dob, street, city, postalCode).any { it.isBlank() } -> {
+                onMessage(s.fillAllFields)
                 return
             }
-            password.length < 6 -> {
-                error = s.passwordTooShort
-                return
-            }
+            password.length < 6 -> { onMessage(s.passwordTooShort); return }
         }
         error = null
         loading = true
@@ -88,7 +103,7 @@ fun CreateAccountScreen(
                 onCreate(profile)                              // success → save profile + navigate
             } catch (e: Exception) {
                 loading = false
-                error = s.signupFailed                         // email in use / weak pw / network
+                onMessage(s.signupFailed)                         // email in use / weak pw / network
             }
         }
     }
@@ -97,15 +112,27 @@ fun CreateAccountScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 24.dp, vertical = 5.dp)
-            .padding(top = 24.dp),
+            .padding(top = 8.dp),
     ) {
         Spacer(Modifier.statusBarsPadding())
-        Text(
-            s.createAccount,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.padding(bottom = 8.dp),
-        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(bottom = 16.dp).offset(x = (-12).dp)
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = s.back
+                )
+            }
+            Text(
+                s.createAccount,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Medium,
+            )
+        }
+
 
 
         Column(
@@ -115,15 +142,15 @@ fun CreateAccountScreen(
         ) {
             Spacer(Modifier.height(5.dp))
             OutlinedTextField(
-                value = name, onValueChange = { name = it; error = null },
-                label = { Text(s.name) }, singleLine = true,
+                value = name, onValueChange = { name = it.toTitleCase() ; error = null },
+                label = { RequiredLabel(s.name) }, singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = textFieldShape,
             )
             Spacer(Modifier.height(9.dp))
             OutlinedTextField(
-                value = surname, onValueChange = { surname = it },
-                label = { Text(s.surname) }, singleLine = true,
+                value = surname, onValueChange = { surname = it.toTitleCase() },
+                label = { RequiredLabel(s.surname) }, singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = textFieldShape,
             )
@@ -131,15 +158,26 @@ fun CreateAccountScreen(
             EmailFieldWithSuggestions(
                 email = email,
                 onEmailChange = { email = it; error = null },
-                label = s.email,
+                label = { RequiredLabel(s.email) },
                 shape = textFieldShape,
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(9.dp))
             OutlinedTextField(
                 value = password, onValueChange = { password = it; error = null },
-                label = { Text(s.password) }, singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
+                label = { RequiredLabel(s.password) }, singleLine = true,
+                visualTransformation = if (passwordVisible)               // ⬅ CHANGED
+                    VisualTransformation.None
+                else
+                    PasswordVisualTransformation(),
+                trailingIcon = {                                          // ⬅ ADD
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                            contentDescription = if (passwordVisible) s.hidePassword else s.showPassword,
+                        )
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 shape = textFieldShape,
             )
@@ -151,7 +189,7 @@ fun CreateAccountScreen(
                 onValueChange = {},
                 readOnly = true,
                 enabled = false,                       // so the whole field is tappable
-                label = { Text(s.dob) },
+                label = { RequiredLabel(s.dob) },
                 trailingIcon = { Icon(Icons.Filled.CalendarMonth, contentDescription = null) },
                 shape = textFieldShape,
                 modifier = Modifier
@@ -170,36 +208,36 @@ fun CreateAccountScreen(
             Text(s.address, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Medium)
             Spacer(Modifier.height(9.dp))
             OutlinedTextField(
-                value = street, onValueChange = { street = it },
-                label = { Text(s.street) }, singleLine = true,
+                value = street, onValueChange = { street = it.toTitleCase()},
+                label = { RequiredLabel(s.street) }, singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = textFieldShape,
             )
             Spacer(Modifier.height(9.dp))
             OutlinedTextField(
-                value = city, onValueChange = { city = it },
-                label = { Text(s.city) }, singleLine = true,
+                value = city, onValueChange = { city = it.toTitleCase() },
+                label = { RequiredLabel(s.city) }, singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = textFieldShape,
             )
             Spacer(Modifier.height(9.dp))
             OutlinedTextField(
                 value = postalCode, onValueChange = { postalCode = it },
-                label = { Text(s.postelCode) }, singleLine = true,
+                label = { RequiredLabel(s.postelCode) }, singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = textFieldShape,
             )
 
-            // Inline error message
-            if (error != null) {                               // ⬅ ADD
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    error!!,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
+//            // Inline error message
+//            if (error != null) {                               // ⬅ ADD
+//                Spacer(Modifier.height(12.dp))
+//                Text(
+//                    error!!,
+//                    style = MaterialTheme.typography.bodySmall,
+//                    color = MaterialTheme.colorScheme.error,
+//                    modifier = Modifier.fillMaxWidth(),
+//                )
+//            }
 
             Spacer(Modifier.height(20.dp))
             Button(
@@ -245,27 +283,45 @@ fun CreateAccountScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun EmailFieldWithSuggestions(
+fun EmailFieldWithSuggestions(
     email: String,
     onEmailChange: (String) -> Unit,
-    label: String,
+    label: @Composable () -> Unit,
     shape: Shape,
     modifier: Modifier = Modifier,
+    colors: TextFieldColors = OutlinedTextFieldDefaults.colors(),
 ) {
     val domains = listOf("gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "icloud.com", "proton.me")
 
-    // local part = text before any "@"
-    val localPart = email.substringBefore("@")
-    val afterAt = if (email.contains("@")) email.substringAfter("@") else null
+    var fieldValue by remember { mutableStateOf(TextFieldValue(email, TextRange(email.length))) }
+    var justSelected by remember { mutableStateOf(false) }  // ⬅ ADD
 
-    // build suggestions: only when there's a local part and "@" has been typed
-    val suggestions = if (email.contains("@") && localPart.isNotBlank()) {
+    LaunchedEffect(email) {
+        if (fieldValue.text != email) {
+            fieldValue = TextFieldValue(email, TextRange(email.length))
+        }
+    }
+
+    val localPart = fieldValue.text.substringBefore("@")
+    val afterAt = if (fieldValue.text.contains("@")) fieldValue.text.substringAfter("@") else null
+
+    // ⬅ Reset justSelected only when user fully backspaces to "@"
+    LaunchedEffect(afterAt) {
+        if (afterAt == null || afterAt.isEmpty()) justSelected = false
+    }
+
+    val suggestions = if (
+        !justSelected &&                         // ⬅ suppressed after a selection
+        fieldValue.text.contains("@") &&
+        localPart.isNotBlank() &&
+        afterAt != null &&
+        !afterAt.contains(".")
+    ) {
         domains
-            .filter { it.startsWith(afterAt ?: "", ignoreCase = true) }
+            .filter { it.startsWith(afterAt, ignoreCase = true) }
             .map { "$localPart@$it" }
-            .filter { it != email }
+            .filter { it != fieldValue.text }
     } else emptyList()
-    var expanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
         expanded = suggestions.isNotEmpty(),
@@ -273,29 +329,42 @@ private fun EmailFieldWithSuggestions(
         modifier = modifier,
     ) {
         OutlinedTextField(
-            value = email,
-            onValueChange = { onEmailChange(it) },
-            label = { Text(label) },
+            value = fieldValue,
+            onValueChange = {
+                fieldValue = it
+                onEmailChange(it.text)
+            },
+            label = label,
             singleLine = true,
             shape = shape,
             modifier = Modifier.menuAnchor().fillMaxWidth(),
+            colors = colors,
         )
-        MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp)))
-        {
+        MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))) {
             ExposedDropdownMenu(
                 expanded = suggestions.isNotEmpty(),
                 onDismissRequest = { },
+                modifier = Modifier.exposedDropdownSize()
             ) {
                 suggestions.forEach { suggestion ->
                     DropdownMenuItem(
-                        text = { Text(suggestion) },
+                        text = { Text("@${suggestion.substringAfter("@")}") },
                         onClick = {
+                            fieldValue = TextFieldValue(suggestion, TextRange(suggestion.length))
                             onEmailChange(suggestion)
-                            expanded = false
+                            justSelected = true   // ⬅ suppress dropdown until back at "@"
                         },
                     )
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun RequiredLabel(text: String) {
+    Row {
+        Text(text)
+        Text(" *", color = MaterialTheme.colorScheme.error)
     }
 }

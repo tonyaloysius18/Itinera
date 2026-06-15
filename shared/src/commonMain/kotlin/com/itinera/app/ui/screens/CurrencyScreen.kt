@@ -1,8 +1,11 @@
 package com.itinera.app.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -28,9 +31,10 @@ private val currencies = listOf(
     "INR", "CNY", "SEK", "NOK", "PLN", "CZK", "DKK",
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CurrencyScreen() {
+fun CurrencyScreen(
+    onMessage: (String) -> Unit,        // ⬅ ADD: requests an app-level pill
+) {
     val api = remember { CurrencyApi() }
     val scope = rememberCoroutineScope()
 
@@ -50,12 +54,11 @@ fun CurrencyScreen() {
 
     var rotated by remember { mutableStateOf(false) }
 
-    var toast by remember { mutableStateOf<String?>(null) }
-
-    LaunchedEffect(toast) {
-        if (toast != null) {
-            delay(2000)        // kotlinx.coroutines.delay
-            toast = null
+    var validPill by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(validPill) {
+        if (validPill != null) {
+            delay(2000)
+            validPill = null
         }
     }
 
@@ -67,7 +70,7 @@ fun CurrencyScreen() {
 
     fun convert() {
         val value = amount.toDoubleOrNull()
-        if (value == null) { toast = s.validAmount; return }
+        if (value == null) { validPill = s.validAmount; return }   // ⬅ CHANGED: was `toast = ...`
         loading = true; error = null; result = null
         scope.launch {
             try {
@@ -85,103 +88,138 @@ fun CurrencyScreen() {
 
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
-            // ...your existing TopBar, fields, Convert button, result...
-        }
-
-        androidx.compose.animation.AnimatedVisibility(
-            visible = toast != null,
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 160.dp), // Increased from 80.dp
-        ) {
-            Surface(
-                shape = RoundedCornerShape(24.dp),
-                color = Color.DarkGray.copy(alpha = 0.6f),
-            )
-            {
-                Text(
-                    toast ?: "",
-                    color = Color.White,
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
-                )
-            }
-        }
-    }
-
-    Column(Modifier.fillMaxSize()) {
-        TopBar(s.currency)
-        Column(Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+            TopBar(s.currency)
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp)
+            ) {
 
 //            Spacer(Modifier.height(5.dp))
 
-            OutlinedTextField(
-                value = amount,
-                onValueChange = { amount = it },
-                label = { Text(s.amount) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                shape = textFieldShape,
-
-                )
-
-
-            Spacer(Modifier.height(16.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                CurrencyDropdown(s.from, from, { from = it }, Modifier.weight(1f),shape = dropdownShape)
-                IconButton(onClick = {
-                    val t = from
-                    from = to
-                    to = t
-                    rotated = !rotated
-                }) {
-                    Icon(
-                        imageVector = Icons.Filled.SwapVert,
-                        contentDescription = "Swap",
-                        modifier = Modifier.rotate(rotation)
-                    )
-                }
-                CurrencyDropdown(s.to, to, { to = it }, Modifier.weight(1f), shape = dropdownShape)
-
-            }
-
-            Spacer(Modifier.height(20.dp))
-            Button(
-                onClick = { convert() },
-                enabled = !loading,
-                modifier = Modifier.fillMaxWidth().height(50.dp).padding(horizontal = 100.dp),
-            ) {
-                if (loading) {
-                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onPrimary)
-                } else {
-                    Text(s.convert)
-                }
-            }
-
-
-            Spacer(Modifier.height(24.dp))
-            when {
-                error != null -> Text(error!!, color = MaterialTheme.colorScheme.error)
-                result != null -> Surface(
+                OutlinedTextField(
+                    value = amount,
+                    onValueChange = { amount = it },
+                    label = { Text(s.amount) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.large,
-                    tonalElevation = 2.dp,
+                    shape = textFieldShape,
+
+                    )
+
+
+                Spacer(Modifier.height(16.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    CurrencyDropdown(
+                        s.from,
+                        from,
+                        { from = it },
+                        Modifier.weight(1f),
+                        shape = dropdownShape
+                    )
+                    IconButton(onClick = {
+                        val t = from
+                        from = to
+                        to = t
+                        rotated = !rotated
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.SwapVert,
+                            contentDescription = "Swap",
+                            modifier = Modifier.rotate(rotation)
+                        )
+                    }
+                    CurrencyDropdown(
+                        s.to,
+                        to,
+                        { to = it },
+                        Modifier.weight(1f),
+                        shape = dropdownShape
+                    )
+
+                }
+
+                Spacer(Modifier.height(20.dp))
+                Button(
+                    onClick = { convert() },
+                    enabled = !loading,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .padding(horizontal = 100.dp),
                 ) {
-                    Column(Modifier.padding(20.dp)) {
-                        Text("$amount $from =", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                        Spacer(Modifier.height(4.dp))
-                        Text(result!!, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
-                        rateInfo?.let {
-                            Spacer(Modifier.height(8.dp))
-                            Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                    if (loading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    } else {
+                        Text(s.convert)
+                    }
+                }
+
+
+                Spacer(Modifier.height(24.dp))
+                when {
+                    error != null -> Text(error!!, color = MaterialTheme.colorScheme.error)
+                    result != null -> Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.large,
+                        tonalElevation = 2.dp,
+                    ) {
+                        Column(Modifier.padding(20.dp)) {
+                            Text(
+                                "$amount $from =",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                result!!,
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            rateInfo?.let {
+                                Spacer(Modifier.height(8.dp))
+                                Text(
+                                    it,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                )
+                            }
                         }
                     }
                 }
             }
         }
+
+        AnimatedVisibility(
+            visible = validPill != null,
+            enter = fadeIn() + slideInVertically { -it },
+            exit = fadeOut() + slideOutVertically { -it },
+            modifier = Modifier
+                .align(Alignment.BottomCenter).padding(vertical = 150.dp)
+                .statusBarsPadding()
+                .padding(top = 16.dp),
+        ) {
+            Surface(
+                shape = RoundedCornerShape(24.dp),
+                color = Color.DarkGray.copy(alpha = 0.8f),
+                shadowElevation = 6.dp,
+            ) {
+                Text(
+                    validPill ?: "",
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+                )
+            }
+        }
     }
 }
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)

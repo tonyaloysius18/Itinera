@@ -46,6 +46,13 @@ fun AddLegScreen(
 
     val textFieldShape = RoundedCornerShape(12.dp)
 
+    fun String.toTitleCase(): String =
+        split(" ").joinToString(" ") { word ->
+            word.replaceFirstChar { c ->
+                if (c.isLowerCase()) c.titlecase() else c.toString()
+            }
+        }
+
     Column(Modifier.fillMaxSize()) {
         Row(
             Modifier.fillMaxWidth().padding(8.dp),
@@ -59,8 +66,8 @@ fun AddLegScreen(
             Modifier.weight(1f).padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            OutlinedTextField(from, { from = it.replaceFirstChar{ if (it.isLowerCase()) it.uppercase() else it.toString() } }, label = { Text(s.from) }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = textFieldShape)
-            OutlinedTextField(to, { to = it.replaceFirstChar{ if (it.isLowerCase()) it.uppercase() else it.toString() } }, label = { Text(s.to) }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = textFieldShape)
+            OutlinedTextField(from, { from = it.toTitleCase() }, label = { Text(s.from) }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = textFieldShape)
+            OutlinedTextField(to, { to = it.toTitleCase() }, label = { Text(s.to) }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = textFieldShape)
 
             Text(s.transport, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

@@ -123,9 +123,12 @@ private fun AddChecklistItemDialog(
 
     val textFieldShape = RoundedCornerShape(12.dp)
 
-
-
-
+    fun String.toTitleCase(): String =
+        split(" ").joinToString(" ") { word ->
+            word.replaceFirstChar { c ->
+                if (c.isLowerCase()) c.titlecase() else c.toString()
+            }
+        }
 
     // auto-suggest a group from the text until the user picks one manually
     LaunchedEffect(text) {
@@ -155,7 +158,7 @@ private fun AddChecklistItemDialog(
                 OutlinedTextField(
                     value = text,
                     onValueChange = { input ->
-                        text = input.replaceFirstChar { if (it.isLowerCase()) it.uppercase() else it.toString() }
+                        text = input.toTitleCase()
                     },
                     label = { Text(s.needToAdd) },
                     singleLine = true,

@@ -32,32 +32,37 @@ import com.itinera.app.resources.ic_apple
 import com.itinera.app.getPlatform
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
-import androidx.compose.runtime.rememberCoroutineScope          // ⬅ ADD
-import kotlinx.coroutines.launch                                 // ⬅ ADD
-import com.itinera.app.data.AuthService                          // ⬅ ADD
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.text.input.VisualTransformation
+import kotlinx.coroutines.launch
+import com.itinera.app.data.AuthService
 
 
 /**
- * Login gate. The email/password button now performs a REAL Firebase sign-in
- * via AuthService. Google and Apple buttons remain mocks (they need separate
- * OAuth / native flows) and still call onAuthed() for now.
+ * Login gate. The email/password button performs a real Firebase sign-in via
+ * AuthService. Validation and failure messages surface through the app-level
+ * pill via onMessage. Google and Apple buttons remain mocks for now.
  */
 
 val isIos = getPlatform().name.startsWith("iOS", ignoreCase = true)
 
 @Composable
 fun LoginScreen(
-    authService: AuthService,                 // ⬅ ADD: passed in from App.kt
+    authService: AuthService,
     onAuthed: () -> Unit,
     onCreateAccount: () -> Unit,
+    onMessage: (String) -> Unit,              // ⬅ ADD: triggers the app-level pill
 ) {
     val s = LocalStrings.current
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
 
-    var error by remember { mutableStateOf<String?>(null) }     // ⬅ ADD: inline error text
-    var loading by remember { mutableStateOf(false) }           // ⬅ ADD: disables button during call
-    val scope = rememberCoroutineScope()                        // ⬅ ADD
+    var loading by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     val displayFont = FontFamily(Font(Res.font.arizonia_regular))
     val taglineFont = FontFamily(Font(Res.font.caudex_bold))
@@ -76,22 +81,20 @@ fun LoginScreen(
     )
     val textFieldShape = RoundedCornerShape(12.dp)
 
-    // Performs the real sign-in. Suspends, so it runs in a coroutine.
-    fun attemptLogin() {                                         // ⬅ ADD
+    fun attemptLogin() {
         if (email.isBlank() || password.isBlank()) {
-            error = s.fillAllFields
+            onMessage(s.fillAllFields)            // ⬅ pill: empty fields
             return
         }
-        error = null
         loading = true
         scope.launch {
             try {
                 authService.signIn(email, password)
                 loading = false
-                onAuthed()                                      // success → navigate in
+                onAuthed()                        // success → navigate in
             } catch (e: Exception) {
                 loading = false
-                error = s.loginFailed                           // wrong credentials / network / etc.
+                onMessage(s.invalidCredentials)   // ⬅ pill: generic auth failure
             }
         }
     }
@@ -156,18 +159,46 @@ fun LoginScreen(
             }
 
             Spacer(Modifier.height(130.dp))
-            OutlinedTextField(
-                value = email, onValueChange = { email = it; error = null },
-                label = { Text(s.email) }, singleLine = true,
+            EmailFieldWithSuggestions(
+                email = email,
+                onEmailChange = { email = it },
+                label = { Text(s.email) },
+                //singleLine = true,
                 colors = fieldColors,
+                //colors = fieldColors,
                 modifier = Modifier.fillMaxWidth(),
                 shape = textFieldShape,
             )
+
+//            EmailFieldWithSuggestions(
+//                email = email,
+//                onEmailChange = { email = it; error = null },
+//                label = { RequiredLabel(s.email) },
+//                shape = textFieldShape,
+//                modifier = Modifier.fillMaxWidth(),
+//            )
+
+
+
+
+
             Spacer(Modifier.height(12.dp))
             OutlinedTextField(
-                value = password, onValueChange = { password = it; error = null },
+                value = password, onValueChange = { password = it },
                 label = { Text(s.password) }, singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
+                visualTransformation = if (passwordVisible)
+                    VisualTransformation.None
+                else
+                    PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                            contentDescription = if (passwordVisible) s.hidePassword else s.showPassword,
+                            tint = onImageMuted,
+                        )
+                    }
+                },
                 colors = fieldColors,
                 modifier = Modifier.fillMaxWidth(),
                 shape = textFieldShape,
@@ -180,25 +211,13 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
             )
 
-            // Inline error message (shown on failure)
-            if (error != null) {                                 // ⬅ ADD
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    error!!,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error,
-                    textAlign = TextAlign.Start,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
-
             Spacer(Modifier.height(16.dp))
             Button(
-                onClick = { attemptLogin() },                    // ⬅ CHANGED: real sign-in
-                enabled = !loading,                              // ⬅ disable while working
+                onClick = { attemptLogin() },
+                enabled = !loading,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                if (loading) {                                   // ⬅ spinner while working
+                if (loading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
                         strokeWidth = 2.dp,
@@ -253,3 +272,4 @@ fun LoginScreen(
         }
     }
 }
+

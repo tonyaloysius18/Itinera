@@ -104,7 +104,7 @@ fun TripsHomeScreen(
             if (searchActive) {
                 OutlinedTextField(
                     value = query,
-                    onValueChange = { query = it.replaceFirstChar{ if (it.isLowerCase()) it.uppercase() else it.toString() } },
+                    onValueChange = { query = it.toTitleCase() },
                     placeholder = { Text(s.searchTrips) },
                     singleLine = true,
                     leadingIcon = { Icon(Icons.Filled.Search, null) },

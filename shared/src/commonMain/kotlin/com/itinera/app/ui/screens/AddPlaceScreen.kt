@@ -39,8 +39,17 @@ fun AddPlaceScreen(
 
     var showDatePicker by remember { mutableStateOf(false) }       // ⬅ ADD
     var showTimePicker by remember { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState()                // ⬅ ADD
+    val datePickerState = rememberDatePickerState()
+    // ⬅ ADD
     val textFieldShape = RoundedCornerShape(12.dp)
+
+    fun String.toTitleCase(): String =
+        split(" ").joinToString(" ") { word ->
+            word.replaceFirstChar { c ->
+                if (c.isLowerCase()) c.titlecase() else c.toString()
+            }
+        }
+
 
     Column(Modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -52,14 +61,14 @@ fun AddPlaceScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             OutlinedTextField(
-                title, { title = it.replaceFirstChar{ if (it.isLowerCase()) it.uppercase() else it.toString() } },
+                title, { title = it.toTitleCase() },
                 label = { Text(s.place) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = textFieldShape,
             )
             OutlinedTextField(
-                location, { location = it.replaceFirstChar{ if (it.isLowerCase()) it.uppercase() else it.toString() } },
+                location, { location = it.toTitleCase() },
                 label = { Text(s.landmark) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
