@@ -110,7 +110,7 @@ data class Strings(
     val changesSaved: String, val invalidCredentials: String, val uppercase: String, val lowercase: String, val number: String, val specialCharacter: String, val minimumCharacters: String,
 
     val choosePhoto: String, val uploadFromGallery: String, val takePhoto: String, val removePhoto: String, val cropAndScale: String, val usePhoto: String,
-    val resetPasswordPrompt: String, val resetEmailSent: String, val resetEmailFailed: String,
+    val resetPasswordPrompt: String, val resetEmailSent: String, val resetEmailFailed: String, val mobile: String,
 
 
     val add: String, val addToItinerary: String, val travel: String, val place: String,
@@ -150,7 +150,7 @@ private val EN = Strings(
     pin = "Pin", unpin = "Unpin", edit = "Edit", archive = "Archive", unarchive = "Unarchive",
     delete = "Delete", deleteTripQ = "Delete Trip?", deletePlaceQ = "Delete Place?", deleteLegQ = "Delete Leg?",
     cantBeUndone = "This Cannot Be Undone.", archivedTrips = "Archived Trips", noArchivedTrips = "No Archived Trips",
-    noDatesYet = "No Dates Yet", tripName = "Trip Name", aLegBetween = "A Leg Between", somewhereToVisit = "Somewhere To Visit",
+    noDatesYet = "No Dates Yet", tripName = "Trip Name", aLegBetween = "A Leg Between", somewhereToVisit = "Somewhere To Visit", mobile = "Mobile",
 
     choosePhoto = "Choose Photo", uploadFromGallery = "Upload From Gallery", takePhoto = "Take Photo", removePhoto = "Remove Photo", cropAndScale = "Crop And Scale", usePhoto = "Use Photo",
     resetPasswordPrompt = "Enter your email to reset your password", resetEmailSent = "An email has been sent to reset your password", resetEmailFailed = "Failed to send email to reset password.",

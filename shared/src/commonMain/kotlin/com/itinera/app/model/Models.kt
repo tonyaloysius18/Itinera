@@ -83,6 +83,7 @@ data class UserProfile(
     val name: String = "",                      // ⬅ defaults added (Firestore needs them)
     val surname: String = "",
     val email: String = "",
+    val mobile: String = "",
     val dob: String = "",
     val street: String = "",
     val city: String = "",

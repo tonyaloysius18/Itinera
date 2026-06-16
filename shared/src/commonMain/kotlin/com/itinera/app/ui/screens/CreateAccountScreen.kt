@@ -37,6 +37,8 @@ import kotlinx.coroutines.launch                               // ⬅ ADD
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import com.itinera.app.ui.components.PhoneNumberField
+import com.itinera.app.ui.components.countries
 
 /**
  * Collects the user's details and creates a REAL Firebase account via AuthService.
@@ -59,6 +61,11 @@ fun CreateAccountScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+
+    var mobile by remember { mutableStateOf("") }
+    
+    // Default country (e.g., US)
+    var country by remember { mutableStateOf(countries.find { it.code == "US" } ?: countries.first()) }
 
     // Date of birth
     var dob by remember { mutableStateOf("") }
@@ -87,7 +94,7 @@ fun CreateAccountScreen(
     // Validate, then create the Firebase account. Suspends, so runs in a coroutine.
     fun attemptCreate() {
         when {
-            listOf(name, surname, email, password, dob, street, city, postalCode).any { it.isBlank() } -> {
+            listOf(name, surname, email, password, mobile, dob, street, city, postalCode).any { it.isBlank() } -> {
                 onMessage(s.fillAllFields); return
             }
             password.length < 6 -> {
@@ -115,6 +122,7 @@ fun CreateAccountScreen(
                     name = name.trim(),
                     surname = surname.trim(),
                     email = email.trim(),
+                    mobile = country.dialCode + mobile.trim(),
                     dob = dob,
                     street = street.trim(),
                     city = city.trim(),
@@ -204,6 +212,17 @@ fun CreateAccountScreen(
             )
 
             PasswordRequirementsDropdown(password = password)
+
+            Spacer(Modifier.height(9.dp))
+            PhoneNumberField(
+                value = mobile,
+                onValueChange = { mobile = it; error = null },
+                selectedCountry = country,
+                onCountrySelected = { country = it },
+                label = { RequiredLabel(s.mobile) },
+                shape = textFieldShape,
+            )
+
 
             // Date of birth — read-only field that opens the calendar on tap
             Spacer(Modifier.height(9.dp))
@@ -402,8 +421,10 @@ private fun PasswordRequirementsDropdown(password: String) {
         "Minimum 6 characters"          to (password.length >= 6),
     )
 
+    val allMet = requirements.all { it.second }
+
     AnimatedVisibility(
-        visible = password.isNotEmpty(),
+        visible = password.isNotEmpty() && !allMet,
         enter = fadeIn() + expandVertically(),
         exit = fadeOut() + shrinkVertically(),
     ) {

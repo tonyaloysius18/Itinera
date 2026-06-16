@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -33,6 +34,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -98,6 +100,7 @@ fun EditProfileScreen(
     var name       by remember { mutableStateOf(profile.name) }
     var surname    by remember { mutableStateOf(profile.surname) }
     var password   by remember { mutableStateOf("") }
+    var mobile by remember { mutableStateOf(profile.mobile) }
     var street     by remember { mutableStateOf(profile.street) }
     var city       by remember { mutableStateOf(profile.city) }
     var postalCode by remember { mutableStateOf(profile.postalCode) }
@@ -147,6 +150,7 @@ fun EditProfileScreen(
                 val updated = profile.copy(
                     name       = name.trim(),
                     surname    = surname.trim(),
+                    mobile     = mobile.trim(),
                     street     = street.trim(),
                     city       = city.trim(),
                     postalCode = postalCode.trim(),
@@ -233,6 +237,16 @@ fun EditProfileScreen(
                     value = profile.email, onValueChange = {}, enabled = false,
                     label = { Text(s.email) }, singleLine = true,
                     modifier = Modifier.fillMaxWidth(), shape = textFieldShape,
+                )
+
+                OutlinedTextField(
+                    value = mobile,
+                    onValueChange = { mobile = it },
+                    label = { Text(s.mobile) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = textFieldShape,
                 )
 
                 // Date of birth — fixed, disabled
