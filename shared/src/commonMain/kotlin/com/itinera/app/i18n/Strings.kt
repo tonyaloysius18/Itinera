@@ -77,6 +77,7 @@ enum class Language(val englishName: String, val nativeName: String) {
     HEBREW("Hebrew", "עברית"),
     BENGALI("Bengali", "বাংলা"),
     TAGALOG("Tagalog", "Tagalog"),
+    SINHALA("Sinhala", "සිංහල"),
 
 }
 
@@ -106,7 +107,7 @@ data class Strings(
     val amount: String, val validAmount: String, val couldntFetch: String, val fillAllFields: String, val loginFailed: String,
     val passwordTooShort: String, val signupFailed: String, val deleteAccount: String, val deleteAccountConfirm: String, val deleteButton: String,
     val showPassword: String, val hidePassword: String, val back: String, val recentLoginRequired: String, val accountCreated: String, val accountDeleted: String,
-    val changesSaved: String, val invalidCredentials: String,
+    val changesSaved: String, val invalidCredentials: String, val uppercase: String, val lowercase: String, val number: String, val specialCharacter: String, val minimumCharacters: String,
 
 
     val add: String, val addToItinerary: String, val travel: String, val place: String,
@@ -138,9 +139,8 @@ private val EN = Strings(
     deleteAccount = "Delete Account", deleteAccountConfirm = "This permanently deletes your account and all your data. This cannot be undone.", deleteButton = "Delete",
     showPassword = "Show Password", hidePassword = "Hide Password", back = "Back", recentLoginRequired = "Could not save. To change your password, log out and back in, then try again.",
     accountCreated = "Your Account Has Been Successfully Created", accountDeleted = "Your Account Has Been Successfully Deleted",
-    changesSaved = "Your Changes Have Been Saved", invalidCredentials = "Invalid Credentials",
-
-
+    changesSaved = "Your Changes Have Been Saved", invalidCredentials = "Invalid Credentials", 
+    uppercase = "At least one uppercase letter", lowercase = "At least one lowercase letter", number = "At least one number", specialCharacter = "At least one special character", minimumCharacters = "Minimum 6 characters",
     add = "Add", addToItinerary = "Add To Itinerary", travel = "Travel", place = "Place",
     newPlace = "New Place", editPlace = "Edit Place", landmark = "Landmark (Optional)", savePlace = "Save Place", searchTrips = "Search Trips",
     newTrip = "New trip", renameTrip = "Rename trip", create = "Create", save = "Save",
@@ -173,6 +173,7 @@ private val FR = EN.copy(
     recentLoginRequired = "Impossible d'enregistrer. Pour modifier votre mot de passe, déconnectez-vous et reconnectez-vous, puis réessayez.",
     accountCreated = "Votre compte a été créé avec succès", accountDeleted = "Votre compte a été supprimé avec succès",
     changesSaved = "Vos modifications ont été enregistrées", invalidCredentials = "Identifiants invalides",
+    uppercase = "Au moins une majuscule", lowercase = "Au moins une minuscule", number = "Au moins un chiffre", specialCharacter = "Au moins un caractère spécial", minimumCharacters = "Au moins 6 caractères",
     add = "Ajouter", addToItinerary = "Ajouter à l'itinéraire", travel = "Voyage", place = "Lieu", 
     newPlace = "Nouveau lieu", editPlace = "Modifier le lieu", landmark = "Point de repère (facultatif)", savePlace = "Enregistrer le lieu", searchTrips = "Rechercher des voyages", 
     newTrip = "Nouveau voyage", renameTrip = "Renommer le voyage", create = "Créer", save = "Enregistrer", 
@@ -205,6 +206,7 @@ private val ES = EN.copy(
     recentLoginRequired = "No se pudo guardar. Para cambiar su contraseña, cierre sesión y vuelva a entrar, luego inténtelo de nuevo.",
     accountCreated = "Tu cuenta ha sido creada con éxito", accountDeleted = "Tu cuenta ha sido eliminada con éxito",
     changesSaved = "Tus cambios han sido guardados", invalidCredentials = "Credenciales inválidas",
+    uppercase = "Al menos una mayúscula", lowercase = "Al menos una minúscula", number = "Al menos un número", specialCharacter = "Al menos un carácter especial", minimumCharacters = "Mínimo 6 caracteres",
 
 
     add = "Añadir", addToItinerary = "Añadir al itinerario", travel = "Viaje", place = "Lugar",
@@ -239,6 +241,7 @@ private val DE = EN.copy(
     recentLoginRequired = "Konnte nicht gespeichert werden. Um Ihr Passwort zu ändern, melden Sie sich ab und wieder an und versuchen Sie es dann erneut.",
     accountCreated = "Ihr Konto wurde erfolgreich erstellt", accountDeleted = "Ihr Konto wurde erfolgreich gelöscht",
     changesSaved = "Ihre Änderungen wurden gespeichert", invalidCredentials = "Ungültige Anmeldedaten",
+    uppercase = "Mindestens ein Großbuchstabe", lowercase = "Mindestens ein Kleinbuchstabe", number = "Mindestens eine Zahl", specialCharacter = "Mindestens ein Sonderzeichen", minimumCharacters = "Mindestens 6 Zeichen",
 
     add = "Hinzufügen", addToItinerary = "Zum Reiseplan hinzufügen", travel = "Reise", place = "Ort",
     newPlace = "Neuer Ort", editPlace = "Ort bearbeiten", landmark = "Wahrzeichen (optional)", savePlace = "Ort speichern", searchTrips = "Reisen suchen",
@@ -272,6 +275,7 @@ private val IT = EN.copy(
     recentLoginRequired = "Impossibile salvare. Per cambiare la password, esci e rientra, quindi riprova.",
     accountCreated = "Il tuo account è stato creato con successo", accountDeleted = "Il tuo account è stato eliminato con successo",
     changesSaved = "Le tue modifiche sono state salvate", invalidCredentials = "Credenziali non valide",
+    uppercase = "Almeno una lettera maiuscola", lowercase = "Almeno una lettera minuscola", number = "Almeno un numero", specialCharacter = "Almeno un carattere speciale", minimumCharacters = "Minimo 6 caratteri",
 
 
 
@@ -309,6 +313,7 @@ private val PT = EN.copy(
     recentLoginRequired = "Não foi possível salvar. Para alterar sua senha, saia e entre novamente e tente de novo.",
     accountCreated = "Sua conta foi criada com sucesso", accountDeleted = "Sua conta foi excluída com sucesso",
     changesSaved = "Suas alterações foram salvas", invalidCredentials = "Credenciais inválidas",
+    uppercase = "Pelo menos uma letra maiúscula", lowercase = "Pelo menos uma letra minúscula", number = "Pelo menos um número", specialCharacter = "Pelo menos um caractere especial", minimumCharacters = "Mínimo de 6 caracteres",
 
 
     add = "Adicionar", addToItinerary = "Adicionar ao itinerário", travel = "Viagem", place = "Lugar",
@@ -343,6 +348,7 @@ private val NL = EN.copy(
     recentLoginRequired = "Kon niet opslaan. Om uw wachtwoord te wijzigen, logt u uit en weer in, en probeert u het opnieuw.",
     accountCreated = "Uw account is succesvol aangemaakt", accountDeleted = "Uw account is succesvol verwijderd",
     changesSaved = "Uw wijzigingen zijn opgeslagen", invalidCredentials = "Ongeldige inloggegevens",
+    uppercase = "Ten minste één hoofdletter", lowercase = "Ten minste één kleine letter", number = "Ten minste één cijfer", specialCharacter = "Ten minste één speciaal teken", minimumCharacters = "Minimaal 6 tekens",
 
     add = "Toevoegen", addToItinerary = "Toevoegen aan reisplan", travel = "Reis", place = "Plaats",
     newPlace = "Nieuwe plaats", editPlace = "Plaats bewerken", landmark = "Bezienswaardigheid (optioneel)", savePlace = "Plaats opslaan", searchTrips = "Reizen zoeken",
@@ -376,6 +382,7 @@ private val PL = EN.copy(
     recentLoginRequired = "Nie udało się zapisać. Aby zmienić hasło, wyloguj się i zaloguj ponownie, a następnie spróbuj ponownie.",
     accountCreated = "Twoje konto zostało pomyślnie utworzone", accountDeleted = "Twoje konto zostało pomyślnie usunięte",
     changesSaved = "Twoje zmiany zostały zapisane", invalidCredentials = "Nieprawidłowe dane logowania Polish",
+    uppercase = "Co najmniej jedna wielka litera", lowercase = "Co najmniej jedna mała litera", number = "Co najmniej jedna cyfra", specialCharacter = "Co najmniej jeden znak specjalny", minimumCharacters = "Minimum 6 znaków",
 
 
 
@@ -407,6 +414,7 @@ private val ZH = EN.copy(
     recentLoginRequired = "无法保存。要更改密码，请先退出并重新登录，然后重试。",
     accountCreated = "您的账号已成功创建", accountDeleted = "您的账号已成功删除",
     changesSaved = "您的修改已保存", invalidCredentials = "凭据无效",
+    uppercase = "至少一个大写字母", lowercase = "至少一个小写字母", number = "至少一个数字", specialCharacter = "至少一个特殊字符", minimumCharacters = "最少 6 个字符",
 
 
 
@@ -440,6 +448,7 @@ private val JP = EN.copy(
     recentLoginRequired = "保存できませんでした。パスワードを変更するには、一度ログアウトしてから再度ログインし、もう一度お試しください。",
     accountCreated = "アカウントが正常に作成されました", accountDeleted = "アカウントが正常に削除されました",
     changesSaved = "変更が保存されました", invalidCredentials = "資格情報が無効です",
+    uppercase = "大文字を1文字以上", lowercase = "小文字を1文字以上", number = "数字を1文字以上", specialCharacter = "記号を1文字以上", minimumCharacters = "6文字以上",
     
 
     add = "追加", addToItinerary = "旅程に追加", travel = "旅行", place = "場所",
@@ -473,6 +482,7 @@ private val KR = EN.copy(
     recentLoginRequired = "저장할 수 없습니다. 비밀번호를 변경하려면 로그아웃 후 다시 로그인한 다음 다시 시도하십시오.",
     accountCreated = "계정이 성공적으로 생성되었습니다", accountDeleted = "계정이 성공적으로 삭제되었습니다",
     changesSaved = "변경 사항이 저장되었습니다", invalidCredentials = "유효하지 않은 자격 증명",
+    uppercase = "대문자 최소 1자", lowercase = "소문자 최소 1자", number = "숫자 최소 1자", specialCharacter = "특수 문자 최소 1자", minimumCharacters = "최소 6자",
 
 
     add = "추가", addToItinerary = "일정에 추가", travel = "여행", place = "장소",
@@ -509,6 +519,7 @@ private val RU = EN.copy(
     recentLoginRequired = "Не удалось сохранить. Чтобы изменить пароль, выйдите из системы и войдите снова, а затем повторите попытку.",
     accountCreated = "Ваш аккаунт был успешно создан", accountDeleted = "Ваш аккаунт был успешно удален",
     changesSaved = "Ваши изменения сохранены", invalidCredentials = "Неверные учетные данные",
+    uppercase = "Хотя бы одна заглавная буква", lowercase = "Хотя бы одна строчная буква", number = "Хотя бы одна цифра", specialCharacter = "Хотя бы один спецсимвол", minimumCharacters = "Минимум 6 символов",
 
     add = "Добавить", addToItinerary = "Добавить в маршрут", travel = "Путешествие", place = "Место",
     newPlace = "Новое место", editPlace = "Редактировать место", landmark = "Достопримечательность (необязательно)", savePlace = "Сохранить место", searchTrips = "Поиск путешествий",
@@ -546,6 +557,7 @@ private val TAM = EN.copy(
     recentLoginRequired = "சேமிக்க முடியவில்லை. உங்கள் கடவுச்சொல்லை மாற்ற, வெளியேறி மீண்டும் உள்நுழைந்து, மீண்டும் முயற்சிக்கவும்.",
     accountCreated = "உங்கள் கணக்கு வெற்றிகரமாக உருவாக்கப்பட்டது", accountDeleted = "உங்கள் கணக்கு வெற்றிகரமாக நீக்கப்பட்டது",
     changesSaved = "உங்கள் மாற்றங்கள் சேமிக்கப்பட்டன", invalidCredentials = "தவறான சான்றுகள்",
+    uppercase = "குறைந்தது ஒரு பெரிய எழுத்து", lowercase = "குறைந்தது ஒரு சிறிய எழுத்து", number = "குறைந்தது ஒரு எண்", specialCharacter = "குறைந்தது ஒரு சிறப்பு எழுத்து", minimumCharacters = "குறைந்தது 6 எழுத்துகள்",
 
     add = "சேர்", addToItinerary = "பயணத்திட்டத்தில் சேர்", travel = "பயணம்", place = "இடம்",
     newPlace = "புதிய இடம்", editPlace = "இடத்தைத் திருத்து", landmark = "அடையாளம் (விருப்பத்திற்குரியது)", savePlace = "இடத்தைச் சேமி", searchTrips = "பயணங்களைத் தேடு",
@@ -584,6 +596,7 @@ private val HI = EN.copy(
     recentLoginRequired = "सहेजा नहीं जा सका। अपना पासवर्ड बदलने के लिए, लॉग आउट करें और फिर से लॉग इन करें, फिर से प्रयास करें।",
     accountCreated = "आपका खाता सफलतापूर्वक बना लिया गया है", accountDeleted = "आपका खाता सफलतापूर्वक हटा दिया गया है",
     changesSaved = "आपके परिवर्तन सहेजे गए हैं", invalidCredentials = "अमान्य क्रेडेंशियल",
+    uppercase = "कम से कम एक बड़ा अक्षर", lowercase = "कम से कम एक छोटा अक्षर", number = "कम से कम एक संख्या", specialCharacter = "कम से कम एक विशेष वर्ण", minimumCharacters = "न्यूनतम 6 अक्षर",
 
 
     add = "जोड़ें", addToItinerary = "यात्रा कार्यक्रम में जोड़ें", travel = "यात्रा", place = "स्थान",
@@ -617,6 +630,7 @@ private val UKR = EN.copy(
     recentLoginRequired = "Не вдалося зберегти. Щоб змінити пароль, вийдіть із системи та увійдіть знову, а потім повторіть спробу.",
     accountCreated = "Ваш акаунт успішно створено", accountDeleted = "Ваш акаунт успішно видалено",
     changesSaved = "Ваші зміни збережено", invalidCredentials = "Невірні облікові дані",
+    uppercase = "Принаймні одна велика літера", lowercase = "Принаймні одна мала літера", number = "Принаймні одна цифра", specialCharacter = "Принаймні один спецсимвол", minimumCharacters = "Мінімум 6 символів",
 
     add = "Додати", addToItinerary = "Додати до маршруту", travel = "Подорож", place = "Місце",
     newPlace = "Нове місце", editPlace = "Редагувати місце", landmark = "Орієнтир (необов'язково)", savePlace = "Зберегти місце", searchTrips = "Пошук подорожей",
@@ -649,6 +663,7 @@ private val HUN = EN.copy(
     recentLoginRequired = "Nem sikerült menteni. A jelszó megváltoztatásához jelentkezzen ki, majd jelentkezzen be újra, és próbálja meg újra.",
     accountCreated = "Fiókja sikeresen létrejött", accountDeleted = "Fiókja sikeresen törölve lett",
     changesSaved = "A változtatásokat elmentettük", invalidCredentials = "Érvénytelen adatok",
+    uppercase = "Legalább egy nagybetű", lowercase = "Legalább egy kisbetű", number = "Legalább egy szám", specialCharacter = "Legalább egy speciális karakter", minimumCharacters = "Legalább 6 karakter",
 
     add = "Hozzáadás", addToItinerary = "Hozzáadás az útitervhez", travel = "Utazás", place = "Hely",
     newPlace = "Új hely", editPlace = "Hely szerkesztése", landmark = "Nevezetesség (opcionális)", savePlace = "Hely mentése", searchTrips = "Utazások keresése",
@@ -681,6 +696,7 @@ private val RO = EN.copy(
     recentLoginRequired = "Nu s-a putut salva. Pentru a vă schimba parola, deconectați-vă și reconectați-vă, apoi încercați din nou.",
     accountCreated = "Contul dvs. a fost creat cu succes", accountDeleted = "Contul dvs. a fost șters cu succes",
     changesSaved = "Modificările dvs. au fost salvate", invalidCredentials = "Date de conectare nevalide",
+    uppercase = "Cel puțin o majusculă", lowercase = "Cel puțin o minusculă", number = "Cel puțin o cifră", specialCharacter = "Cel puțin un caracter special", minimumCharacters = "Minimum 6 caractere",
 
     add = "Adaugă", addToItinerary = "Adaugă la itinerar", travel = "Călătorie", place = "Loc",
     newPlace = "Loc nou", editPlace = "Editează locul", landmark = "Punct de reper (opțional)", savePlace = "Salvează locul", searchTrips = "Caută călătorii",
@@ -713,6 +729,7 @@ private val GR = EN.copy(
     recentLoginRequired = "Δεν ήταν δυνατή η αποθήκευση. Για να αλλάξετε τον κωδικό πρόσβασής σας, αποσυνδεθείτε και συνδεθείτε ξανά και μετά δοκιμάστε ξανά.",
     accountCreated = "Ο λογαριασμός σας δημιουργήθηκε με επιτυχία", accountDeleted = "Ο λογαριασμός σας διαγράφηκε με επιτυχία",
     changesSaved = "Οι αλλαγές σας αποθηκεύτηκαν", invalidCredentials = "Μη έγκυρα διαπιστευτήρια",
+    uppercase = "Τουλάχιστον ένα κεφαλαίο γράμμα", lowercase = "Τουλάχιστον ένα πεζό γράμμα", number = "Τουλάχιστον ένας αριθμός", specialCharacter = "Τουλάχιστον ένας ειδικός χαρακτήρας", minimumCharacters = "Ελάχιστο 6 χαρακτήρες",
 
     add = "Προσθήκη", addToItinerary = "Προσθήκη στο δρομολόγιο", travel = "Ταξίδι", place = "Τοποθεσία",
     newPlace = "Νέα τοποθεσία", editPlace = "Επεξεργασία τοποθεσίας", landmark = "Ορόσημο (προαιρετικό)", savePlace = "Αποθήκευση τοποθεσίας", searchTrips = "Αναζήτηση ταξιδιών",
@@ -745,6 +762,7 @@ private val KA = EN.copy(
     recentLoginRequired = "შენახვა ვერ მოხერხდა. პაროლის შესაცვლელად გადით სისტემიდან და თავიდან შედით, შემდეგ კი სცადეთ კვლავ.",
     accountCreated = "თქვენი ანგარიში წარმატებით შეიქმნა", accountDeleted = "თქვენი ანგარიში წარმატებით წაიშალა",
     changesSaved = "თქვენი ცვლილებები შენახულია", invalidCredentials = "არასწორი მონაცემები",
+    uppercase = "მინიმუმ ერთი დიდი ასო", lowercase = "მინიმუმ ერთი პატარა ასო", number = "მინიმუმ ერთი ციფრი", specialCharacter = "მინიმუმ ერთი სპეციალური სიმბოლო", minimumCharacters = "მინიმუმ 6 სიმბოლო",
 
     add = "დამატება", addToItinerary = "მარშრუტში დამატება", travel = "მგზავრობა", place = "ადგილი",
     newPlace = "ახალი ადგილი", editPlace = "ადგილის რედაქტირება", landmark = "ღირსშესანიშნაობა (არასავალდებულო)", savePlace = "ადგილის შენახვა", searchTrips = "მოგზაურობის ძებნა",
@@ -777,6 +795,7 @@ private val BG = EN.copy(
     recentLoginRequired = "Не може да се запише. За да промените паролата си, излезте и влезте отново, след което опитайте отново.",
     accountCreated = "Вашият акаунт беше успешно създаден", accountDeleted = "Вашият акаунт беше успешно изтрит",
     changesSaved = "Вашите промени бяха запазени", invalidCredentials = "Невалидни идентификационни данни",
+    uppercase = "Поне една главна буква", lowercase = "Поне една малка буква", number = "Поне една цифра", specialCharacter = "Поне един специален знак", minimumCharacters = "Минимум 6 знака",
 
     add = "Добави", addToItinerary = "Добави към маршрута", travel = "Пътуване", place = "Място",
     newPlace = "Ново място", editPlace = "Редактирай мястото", landmark = "Забележителност (по избор)", savePlace = "Запази мястото", searchTrips = "Търсене на пътувания",
@@ -809,6 +828,7 @@ private val CZ = EN.copy(
     recentLoginRequired = "Nepodařilo se uložit. Chcete-li změnit heslo, odhlaste se a znovu přihlaste a zkuste to znovu.",
     accountCreated = "Váš účet byl úspěšně vytvořen", accountDeleted = "Váš účet byl úspěšně smazán",
     changesSaved = "Vaše změny byly uloženy", invalidCredentials = "Neplatné přihlašovací údaje",
+    uppercase = "Alespoň jedno velké písmeno", lowercase = "Alespoň jedno malé písmeno", number = "Alespoň jedna číslice", specialCharacter = "Alespoň jeden speciální znak", minimumCharacters = "Minimálně 6 znaků",
 
     add = "Přidat", addToItinerary = "Přidat do itineráře", travel = "Cesta", place = "Místo",
     newPlace = "Nové místo", editPlace = "Upravit místo", landmark = "Záchytný bod (volitelné)", savePlace = "Uložit místo", searchTrips = "Hledat cesty",
@@ -841,6 +861,7 @@ private val LV = EN.copy(
     recentLoginRequired = "Neizdevās saglabāt. Lai mainītu paroli, izrakstieties un pierakstieties vēlreiz, pēc tam mēģiniet vēlreiz.",
     accountCreated = "Jūsu konts ir veiksmīgi izveidots", accountDeleted = "Jūsu konts ir veiksmīgi dzēsts",
     changesSaved = "Jūsu izmaiņas ir saglabātas", invalidCredentials = "Nederīgi akreditācijas dati",
+    uppercase = "Vismaz viens lielais burts", lowercase = "Vismaz viens mazais burts", number = "Vismaz viens cipars", specialCharacter = "Vismaz viens speciālais simbols", minimumCharacters = "Vismaz 6 rakstzīmes",
 
     add = "Pievienot", addToItinerary = "Pievienot maršrutam", travel = "Ceļojums", place = "Vieta",
     newPlace = "Jauna vieta", editPlace = "Rediģēt vietu", landmark = "Ievērojama vieta (neobligāti)", savePlace = "Saglabāt vietu", searchTrips = "Meklēt ceļojumus",
@@ -873,6 +894,7 @@ private val LT = EN.copy(
     recentLoginRequired = "Išsaugoti nepavyko. Norėdami pakeisti slaptažodį, atsijunkite ir vėl prisijunkite, tada bandykite dar kartą.",
     accountCreated = "Jūsų paskyra sėkmingai sukurta", accountDeleted = "Jūsų paskyra sėkmingai ištrinta",
     changesSaved = "Pakeitimai išsaugoti", invalidCredentials = "Neteisingi prisijungimo duomenys",
+    uppercase = "Bent viena didžioji raidė", lowercase = "Bent viena mažoji raidė", number = "Bent vienas skaičius", specialCharacter = "Bent vienas specialusis simbolis", minimumCharacters = "Mažiausiai 6 simboliai",
 
     add = "Pridėti", addToItinerary = "Pridėti į maršrutą", travel = "Kelionė", place = "Vieta",
     newPlace = "Nauja vieta", editPlace = "Redaguoti vietą", landmark = "Lankytina vieta (nebūtina)", savePlace = "Išsaugoti vietą", searchTrips = "Ieškoti kelionių",
@@ -905,6 +927,7 @@ private val SK = EN.copy(
     recentLoginRequired = "Nepodarilo sa uložiť. Ak chcete zmeniť heslo, odhláste sa a znova prihláste a skúste to znova.",
     accountCreated = "Váš účet bol úspešne vytvorený", accountDeleted = "Váš účet bol úspešne zmazaný",
     changesSaved = "Vaše zmeny boli uložené", invalidCredentials = "Neplatné prihlasovacie údaje",
+    uppercase = "Aspoň jedno veľké písmeno", lowercase = "Aspoň jedno malé písmeno", number = "Aspoň jedna číslica", specialCharacter = "Aspoň jeden špeciálny znak", minimumCharacters = "Minimálne 6 znakov",
 
     add = "Pridať", addToItinerary = "Pridať do itinerára", travel = "Cesta", place = "Miesto",
     newPlace = "Nové miesto", editPlace = "Upraviť miesto", landmark = "Záchytný bod (voliteľné)", savePlace = "Uložiť miesto", searchTrips = "Hľadať cesty",
@@ -937,6 +960,7 @@ private val SL = EN.copy(
     recentLoginRequired = "Ni bilo mogoče shraniti. Če želite spremeniti geslo, se odjavite in znova prijavite, nato poskusite znova.",
     accountCreated = "Vaš račun je bil uspešno ustvarjen", accountDeleted = "Vaš račun je bil uspešno izbrisan",
     changesSaved = "Vaše spremembe so bile shranjene", invalidCredentials = "Neveljavni podatki za prijavo",
+    uppercase = "Vsaj ena velika črka", lowercase = "Vsaj ena mala črka", number = "Vsaj ena številka", specialCharacter = "Vsaj en poseben znak", minimumCharacters = "Najmanj 6 znakov",
 
     add = "Dodaj", addToItinerary = "Dodaj v načrt poti", travel = "Potovanje", place = "Kraj",
     newPlace = "Nov kraj", editPlace = "Uredi kraj", landmark = "Znamenitost (neobvezno)", savePlace = "Shrani kraj", searchTrips = "Išči potovanja",
@@ -969,6 +993,7 @@ private val SR = EN.copy(
     recentLoginRequired = "Nije moguće sačuvati. Da biste promenili lozinku, odjavite se i ponovo prijavite, pa pokušajte ponovo.",
     accountCreated = "Vaš nalog je uspešno kreiran", accountDeleted = "Vaš nalog je uspešno obrisan",
     changesSaved = "Vaše izmene su sačuvane", invalidCredentials = "Neispravni kredencijali",
+    uppercase = "Barem jedno veliko slovo", lowercase = "Barem jedno malo slovo", number = "Barem jedan broj", specialCharacter = "Barem jedan specijalan karakter", minimumCharacters = "Najmanje 6 karaktera",
 
     add = "Dodaj", addToItinerary = "Dodaj u plan puta", travel = "Putovanje", place = "Mesto",
     newPlace = "Novo mesto", editPlace = "Izmeni mesto", landmark = "Obeležje (opciono)", savePlace = "Sačuvaj mesto", searchTrips = "Pretraži putovanja",
@@ -1001,6 +1026,7 @@ private val SQ = EN.copy(
     recentLoginRequired = "Nuk u ruajt dot. Për të ndryshuar fjalëkalimin, dilni dhe hyni përsëri, pastaj provoni përsëri.",
     accountCreated = "Llogaria juaj u krijua me sukses", accountDeleted = "Llogaria juaj u fshi me sukses",
     changesSaved = "Ndryshimet tuaja u ruajtën", invalidCredentials = "Kredenciale të pavlefshme",
+    uppercase = "Të paktën një shkronjë e madhe", lowercase = "Të paktën një shkronjë e vogël", number = "Të paktën një numër", specialCharacter = "Të paktën një karakter special", minimumCharacters = "Minimumi 6 karaktere",
 
     add = "Shto", addToItinerary = "Shto në itinerar", travel = "Udhëtim", place = "Vendi",
     newPlace = "Vend i ri", editPlace = "Edito vendin", landmark = "Pikë referimi (opsionale)", savePlace = "Ruaj vendin", searchTrips = "Kërko udhëtime",
@@ -1033,6 +1059,7 @@ private val MK = EN.copy(
     recentLoginRequired = "Не може да се зачува. За да ја промените лозинката, одјавете се и повторно најавете се, па обидете се повторно.",
     accountCreated = "Вашата сметка е успешно креирана", accountDeleted = "Вашата сметка е успешно избришана",
     changesSaved = "Вашите промени се зачувани", invalidCredentials = "Невалидни акредитиви",
+    uppercase = "Најмалку една голема буква", lowercase = "Најмалку една мала буква", number = "Најмалку еден број", specialCharacter = "Најмалку еден специјален карактер", minimumCharacters = "Минимум 6 карактери",
 
     add = "Додај", addToItinerary = "Додај во итинерарот", travel = "Патување", place = "Место",
     newPlace = "Ново место", editPlace = "Уреди место", landmark = "Знаменитост (опционално)", savePlace = "Зачувај место", searchTrips = "Пребарај патувања",
@@ -1065,6 +1092,7 @@ private val MO = EN.copy(
     recentLoginRequired = "Nu s-a putut salva. Pentru a vă schimba parola, deconectați-vă și reconectați-vă, apoi încercați din nou.",
     accountCreated = "Contul dvs. a fost creat cu succes", accountDeleted = "Contul dvs. a fost șters cu succes",
     changesSaved = "Modificările dvs. au fost salvate", invalidCredentials = "Date de conectare nevalide",
+    uppercase = "Cel puțin o majusculă", lowercase = "Cel puțin o minusculă", number = "Cel puțin o cifră", specialCharacter = "Cel puțin un caracter special", minimumCharacters = "Minimum 6 caractere",
 
     add = "Adaugă", addToItinerary = "Adaugă la itinerar", travel = "Călătorie", place = "Loc",
     newPlace = "Loc nou", editPlace = "Editează locul", landmark = "Punct de reper (opțional)", savePlace = "Salvează locul", searchTrips = "Caută călătorii",
@@ -1097,6 +1125,7 @@ private val NO = EN.copy(
     recentLoginRequired = "Kunne ikke lagre. For å endre passord, logg ut og inn igjen, og prøv deretter på nytt.",
     accountCreated = "Kontoen din er opprettet", accountDeleted = "Kontoen din er slettet",
     changesSaved = "Endringene dine er lagret", invalidCredentials = "Ugyldig påloggingsinformasjon",
+    uppercase = "Minst én stor bokstav", lowercase = "Minst én liten bokstav", number = "Minst ett tall", specialCharacter = "Minst ett spesialtegn", minimumCharacters = "Minst 6 tegn",
 
     add = "Legg til", addToItinerary = "Legg til i reiseplan", travel = "Reise", place = "Sted",
     newPlace = "Nytt sted", editPlace = "Rediger sted", landmark = "Landemerke (valgfritt)", savePlace = "Lagre sted", searchTrips = "Søk i reiser",
@@ -1129,6 +1158,7 @@ private val FI = EN.copy(
     recentLoginRequired = "Tallennus epäonnistui. Jos haluat vaihtaa salasanasi, kirjaudu ulos ja takaisin sisään ja yritä sitten uudelleen.",
     accountCreated = "Tilisi on luotu onnistuneesti", accountDeleted = "Tilisi on poistettu onnistuneesti",
     changesSaved = "Muutokset on tallennettu", invalidCredentials = "Virheelliset kirjautumistiedot",
+    uppercase = "Vähintään yksi ison kirjain", lowercase = "Vähintään yksi pienen kirjain", number = "Vähintään yksi numero", specialCharacter = "Vähintään yksi erikoismerkki", minimumCharacters = "Vähintään 6 merkkiä",
 
     add = "Lisää", addToItinerary = "Lisää matkaohjelmaan", travel = "Matka", place = "Paikka",
     newPlace = "Uusi paikka", editPlace = "Muokkaa paikkaa", landmark = "Maamerkki (valinnainen)", savePlace = "Tallenna paikka", searchTrips = "Hae matkoja",
@@ -1161,6 +1191,7 @@ private val SV = EN.copy(
     recentLoginRequired = "Det gick inte att spara. För att ändra ditt lösenord, logga ut och logga in igen och försök sedan igen.",
     accountCreated = "Ditt konto har skapats framgångsrikt", accountDeleted = "Ditt konto har raderats framgångsrikt",
     changesSaved = "Dina ändringar har sparats", invalidCredentials = "Ogiltiga uppgifter",
+    uppercase = "Minst en stor bokstav", lowercase = "Minst en liten bokstav", number = "Minst en siffra", specialCharacter = "Minst ett specialtecken", minimumCharacters = "Minst 6 tecken",
 
     add = "Lägg till", addToItinerary = "Lägg till i resplan", travel = "Resa", place = "Plats",
     newPlace = "Ny plats", editPlace = "Redigera plats", landmark = "Landmärke (valfritt)", savePlace = "Spara plats", searchTrips = "Sök resor",
@@ -1193,6 +1224,7 @@ private val DA = EN.copy(
     recentLoginRequired = "Kunne ikke gemme. For at ændre din adgangskode skal du logge ud og ind igen og derefter prøve igen.",
     accountCreated = "Din konto er blevet oprettet", accountDeleted = "Din konto er blevet slettet",
     changesSaved = "Dine ændringer er blevet gemt", invalidCredentials = "Ugyldige legitimationsoplysninger",
+    uppercase = "Mindst ét stort bogstav", lowercase = "Mindst ét lille bogstav", number = "Mindst ét tal", specialCharacter = "Mindst ét specialtegn", minimumCharacters = "Mindst 6 tegn",
 
     add = "Tilføj", addToItinerary = "Tilføj til rejseplan", travel = "Rejse", place = "Sted",
     newPlace = "Nyt sted", editPlace = "Rediger sted", landmark = "Landemærke (valgfritt)", savePlace = "Gem sted", searchTrips = "Søg rejser",
@@ -1225,6 +1257,7 @@ private val ET = EN.copy(
     recentLoginRequired = "Ei õnnestunud salvestada. Parooli muutmiseks logige välja ja uuesti sisse ning proovige siis uuesti.",
     accountCreated = "Teie konto on edukalt loodud", accountDeleted = "Teie konto on edukalt kustutatud",
     changesSaved = "Teie muudatused on salvestatud", invalidCredentials = "Vigased andmed",
+    uppercase = "Vähemalt üks suurtäht", lowercase = "Vähemalt üks väiketäht", number = "Vähemalt üks number", specialCharacter = "Vähemalt üks erimärk", minimumCharacters = "Vähemalt 6 tähemärki",
 
     add = "Lisa", addToItinerary = "Lisa teekonnale", travel = "Reis", place = "Koht",
     newPlace = "Uus koht", editPlace = "Muuda kohta", landmark = "Maamärk (valikuline)", savePlace = "Salvesta koht", searchTrips = "Otsi reise",
@@ -1257,6 +1290,7 @@ private val AR = EN.copy(
     recentLoginRequired = "تعذر الحفظ. لتغيير كلمة المرور، يرجى تسجيل الخروج ثم الدخول مرة أخرى والمحاولة مجدداً.",
     accountCreated = "تم إنشاء حسابك بنجاح", accountDeleted = "تم حذف حسابك بنجاح",
     changesSaved = "تم حفظ التغييرات", invalidCredentials = "بيانات الاعتماد غير صالحة",
+    uppercase = "حرف كبير واحد على الأقل", lowercase = "حرف صغير واحد على الأقل", number = "رقم واحد على الأقل", specialCharacter = "رمز خاص واحد على الأقل", minimumCharacters = "6 أحرف على الأقل",
 
     add = "إضافة", addToItinerary = "إضافة إلى المسار", travel = "سفر", place = "مكان",
     newPlace = "مكان جديد", editPlace = "تعديل المكان", landmark = "معلم (اختياري)", savePlace = "حفظ المكان", searchTrips = "بحث عن رحلات",
@@ -1289,6 +1323,7 @@ private val TR = EN.copy(
     recentLoginRequired = "Kaydedilemedi. Şifrenizi değiştirmek için çıkış yapıp tekrar girin, ardından tekrar deneyin.",
     accountCreated = "Hesabınız başarıyla oluşturuldu", accountDeleted = "Hesabınız başarıyla silindi",
     changesSaved = "Değişiklikleriniz kaydedildi", invalidCredentials = "Geçersiz kimlik bilgileri",
+    uppercase = "En az bir büyük harf", lowercase = "En az bir küçük harf", number = "En az bir rakam", specialCharacter = "En az bir özel karakter", minimumCharacters = "En az 6 karakter",
 
     add = "Ekle", addToItinerary = "Seyahat planına ekle", travel = "Seyahat", place = "Yer",
     newPlace = "Yeni yer", editPlace = "Yeri düzenle", landmark = "Önemli yer (isteğe bağlı)", savePlace = "Yeri kaydet", searchTrips = "Gezilerde ara",
@@ -1321,6 +1356,7 @@ private val VI = EN.copy(
     recentLoginRequired = "Không thể lưu. Để thay đổi mật khẩu, vui lòng đăng xuất và đăng nhập lại, sau đó thử lại.",
     accountCreated = "Tài khoản của bạn đã được tạo thành công", accountDeleted = "Tài khoản của bạn đã được xóa thành công",
     changesSaved = "Thay đổi của bạn đã được lưu", invalidCredentials = "Thông tin đăng nhập không hợp lệ",
+    uppercase = "Ít nhất một chữ hoa", lowercase = "Ít nhất một chữ thường", number = "Ít nhất một chữ số", specialCharacter = "Ít nhất một ký tự đặc biệt", minimumCharacters = "Tối thiểu 6 ký tự",
 
     add = "Thêm", addToItinerary = "Thêm vào hành trình", travel = "Du lịch", place = "Địa điểm",
     newPlace = "Địa điểm mới", editPlace = "Chỉnh sửa địa điểm", landmark = "Địa danh (tùy chọn)", savePlace = "Lưu địa điểm", searchTrips = "Tìm kiếm chuyến đi",
@@ -1353,6 +1389,7 @@ private val ID = EN.copy(
     recentLoginRequired = "Tidak dapat menyimpan. Untuk mengubah kata sandi, silakan keluar dan masuk kembali, lalu coba lagi.",
     accountCreated = "Akun Anda telah berhasil dibuat", accountDeleted = "Akun Anda telah berhasil dihapus",
     changesSaved = "Perubahan Anda telah disimpan", invalidCredentials = "Kredensial tidak valid",
+    uppercase = "Setidaknya satu huruf besar", lowercase = "Setidaknya satu huruf kecil", number = "Setidaknya satu angka", specialCharacter = "Setidaknya satu karakter khusus", minimumCharacters = "Minimal 6 karakter",
 
     add = "Tambah", addToItinerary = "Tambah ke rencana perjalanan", travel = "Perjalanan", place = "Tempat",
     newPlace = "Tempat baru", editPlace = "Edit tempat", landmark = "Landmark (opsional)", savePlace = "Simpan tempat", searchTrips = "Cari perjalanan",
@@ -1385,6 +1422,7 @@ private val TH = EN.copy(
     recentLoginRequired = "ไม่สามารถบันทึกได้ หากต้องการเปลี่ยนรหัสผ่าน โปรดออกจากระบบและเข้าสู่ระบบใหม่อีกครั้ง แล้วลองอีกครั้ง",
     accountCreated = "สร้างบัญชีของคุณสำเร็จแล้ว", accountDeleted = "ลบบัญชีของคุณสำเร็จแล้ว",
     changesSaved = "บันทึกการเปลี่ยนแปลงของคุณแล้ว", invalidCredentials = "ข้อมูลประจำตัวไม่ถูกต้อง",
+    uppercase = "ตัวอักษรพิมพ์ใหญ่อย่างน้อย 1 ตัว", lowercase = "ตัวอักษรพิมพ์เล็กอย่างน้อย 1 ตัว", number = "ตัวเลขอย่างน้อย 1 ตัว", specialCharacter = "ตัวอักษรพิเศษอย่างน้อย 1 ตัว", minimumCharacters = "อย่างน้อย 6 ตัวอักษร",
 
     add = "เพิ่ม", addToItinerary = "เพิ่มในแผนการเดินทาง", travel = "การเดินทาง", place = "สถานที่",
     newPlace = "สถานที่ใหม่", editPlace = "แก้ไขสถานที่", landmark = "สถานที่สำคัญ (เลือกได้)", savePlace = "บันทึกสถานที่", searchTrips = "ค้นหาการเดินทาง",
@@ -1417,6 +1455,7 @@ private val HE = EN.copy(
     recentLoginRequired = "לא ניתן היה לשמור. כדי לשנות את הסיסמה, אנא התנתק והתחבר שוב, ואז נסה שוב.",
     accountCreated = "החשבון שלך נוצר בהצלחה", accountDeleted = "החשבון שלך נמחק בהצלחה",
     changesSaved = "השינויים שלך נשמרו", invalidCredentials = "אישורים לא תקפים",
+    uppercase = "לפחות אות גדולה אחת", lowercase = "לפחות אות קטנה אחת", number = "לפחות ספרה אחת", specialCharacter = "לפחות תו מיוחד אחד", minimumCharacters = "לפחות 6 תווים",
 
     add = "הוספה", addToItinerary = "הוספה למסלול", travel = "נסיעה", place = "מקום",
     newPlace = "מקום חדש", editPlace = "עריכת מקום", landmark = "נקודת ציון (אופציונלי)", savePlace = "שמירת מקום", searchTrips = "חיפוש טיולים",
@@ -1449,6 +1488,7 @@ private val BN = EN.copy(
     recentLoginRequired = "সংরক্ষণ করা যায়নি। আপনার পাসওয়ার্ড পরিবর্তন করতে, অনুগ্রহ করে লগ আউট করে আবার লগ ইন করুন এবং তারপরে আবার চেষ্টা করুন।",
     accountCreated = "আপনার অ্যাকাউন্ট সফলভাবে তৈরি করা হয়েছে", accountDeleted = "আপনার অ্যাকাউন্ট সফলভাবে মুছে ফেলা হয়েছে",
     changesSaved = "আপনার পরিবর্তনগুলি সংরক্ষিত হয়েছে", invalidCredentials = "অকার্যকর শংসাপত্র",
+    uppercase = "অন্তত একটি বড় হাতের অক্ষর", lowercase = "অন্তত একটি ছোট হাতের অক্ষর", number = "অন্তত একটি সংখ্যা", specialCharacter = "অন্তত একটি বিশেষ চিহ্ন", minimumCharacters = "ন্যূনতম ৬টি অক্ষর",
 
     add = "যোগ করুন", addToItinerary = "ভ্রমণসূচীতে যোগ করুন", travel = "ভ্রমণ", place = "স্থান",
     newPlace = "নতুন স্থান", editPlace = "স্থান সম্পাদনা করুন", landmark = "ল্যান্ডমার্ক (ঐচ্ছিক)", savePlace = "স্থান সংরক্ষণ করুন", searchTrips = "ভ্রমণ খুঁজুন",
@@ -1486,6 +1526,7 @@ private val TG = EN.copy(
     recentLoginRequired = "Hindi ma-save. Para mapalitan ang iyong password, mangyaring mag-log out at mag-log in muli, pagkatapos ay subukang muli.",
     accountCreated = "Matagumpay na nalikha ang iyong account", accountDeleted = "Matagumpay na na-delete ang iyong account",
     changesSaved = "Nailigtas na ang iyong mga pagbabago", invalidCredentials = "Maling mga kredensyal",
+    uppercase = "Dapat mayroong kahit isang malaking titik", lowercase = "Dapat mayroong kahit isang maliit na titik", number = "Dapat mayroong kahit isang numero", specialCharacter = "Dapat mayroong kahit isang espesyal na character", minimumCharacters = "Minimum na 6 na character",
 
     add = "Idagdag", addToItinerary = "Idagdag sa itinerary", travel = "Paglalakbay", place = "Lugar",
     newPlace = "Bagong lugar", editPlace = "I-edit ang lugar", landmark = "Landmark (opsyonal)", savePlace = "I-save ang lugar", searchTrips = "Maghanap ng mga biyahe",
@@ -1494,6 +1535,39 @@ private val TG = EN.copy(
     delete = "I-delete", deleteTripQ = "I-delete ang biyahe?", deletePlaceQ = "I-delete ang lugar?", deleteLegQ = "I-delete ang yugto?",
     cantBeUndone = "Hindi na ito mababawi.", archivedTrips = "Mga naka-archive na biyahe", noArchivedTrips = "Walang mga naka-archive na biyahe",
     noDatesYet = "Wala pang mga petsa", tripName = "Pangalan ng biyahe", aLegBetween = "Isang yugto sa pagitan ng", somewhereToVisit = "Isang lugar na mapupuntahan",
+)
+
+private val SI = EN.copy(
+    name = "නම", surname = "වාසගම", dob = "උපන් දිනය", street = "වීදිය", city = "නගරය", postelCode = "තැපැල් කේතය",
+    appTagline = "සෑම ගමනක්ම ආරම්භ වන තැන!", myTrips = "මගේ ගමන්", countries = "රටවල්", legs = "ගමන් වාර", done = "අවසන්",
+    addLeg = "ගමන් වාරයක් එක් කරන්න", newLeg = "නව ගමන් වාරය", from = "සිට", to = "දක්වා", transport = "ප්‍රවාහනය", date = "දිනය", time = "වේලාව",
+    bookingRef = "වෙන්කිරීමේ අංකය", optional = "විකල්ප", saveLeg = "ගමන් වාරය සුරකින්න", tickets = "ටිකට්පත්", event = "උත්සවය", beforeYouGo = "පිටත්වීමට පෙර",
+    addItem = "අයිතමයක් එක් කරන්න", settings = "සැකසුම්", backupSync = "උපස්ථ සහ සමමුහුර්තකරණය", appearance = "පෙනුම",
+    language = "භාෂාව", currencyUnits = "මුදල් සහ ඒකක", exportTrips = "ගමන් අපනයනය කරන්න", about = "පිළිබඳව", logOut = "ඉවත් වන්න",
+    welcomeBack = "නැවත සාදරයෙන් පිළිගනිමු", logInToTrips = "ඔබගේ ගමන් වෙත පිවිසෙන්න", email = "විද්‍යුත් තැපෑල", password = "මුරපදය",
+    forgotPassword = "මුරපදය අමතකද?", logIn = "ඇතුළු වන්න", orDivider = "හෝ", continueGoogle = "Google සමඟ ඉදිරියට යන්න",
+    continueApple = "Apple සමඟ ඉදිරියට යන්න", newHere = "අලුත් කෙනෙක්ද?", createAccount = "ගිණුමක් සාදන්න", calendar = "දින දර්ශනය",
+    documents = "ලේඛන", nextUp = "ඊළඟට", legsTravelled = "ගමන් කළ වාර ගණන", syncWholeTrip = "මුළු ගමනම දින දර්ශනයට සමමුහුර්ත කරන්න",
+    addToPhoneCalendar = "දුරකථන දින දර්ශනයට එක් කරන්න", remindMe = "මට මතක් කරන්න", chooseLanguage = "භාෂාවක් තෝරන්න",
+    followPhone = "දුරකථන භාෂාව අනුගමනය කරන්න", ok = "හරි", cancel = "අවලංගු කරන්න", address = "ලිපිනය",
+    editProfile = "පැතිකඩ සංස්කරණය කරන්න", newPassword = "නව මුරපදය", saveChanges = "වෙනස්කම් සුරකින්න",
+    systemDefault = "පද්ධති පෙරනිමිය", light = "ආලෝකය", dark = "අඳුරු", matchYourPhone = "ඔබගේ දුරකථනයට ගැලපෙන්න", currency = "මුදල්", convert = "පරිවර්තනය කරන්න", bookings = "වෙන්කිරීම්", packing = "ඇසුරුම් කිරීම", money = "මුදල්", gadget = "ගැජට්", other = "වෙනත්", needToAdd = "ඔබට එක් කිරීමට අවශ්‍ය කුමක්ද?", section = "අංශය",
+    amount = "මුදල", validAmount = "වලංගු මුදලක් ඇතුළත් කරන්න", couldntFetch = "අනුපාතය ලබා ගත නොහැකි විය. ඔබගේ සම්බන්ධතාවය පරීක්ෂා කරන්න.",
+    passwordTooShort = "මුරපදය අවම වශයෙන් අක්ෂර 6 ක් විය යුතුය", signupFailed = "ගිණුම සෑදීම අසාර්ථක විය, විද්‍යුත් තැපෑල දැනටමත් භාවිතයේ තිබිය හැක.",
+    deleteAccount = "ගිණුම මකන්න", deleteAccountConfirm = "මෙය ඔබගේ ගිණුම සහ ඔබගේ සියලු දත්ත ස්ථිරවම මකා දමයි. මෙය ආපසු හැරවිය නොහැක.", deleteButton = "මකන්න",
+    showPassword = "මුරපදය පෙන්වන්න", hidePassword = "මුරපදය සඟවන්න", back = "ආපසු",
+    recentLoginRequired = "සුරැකීමට නොහැකි විය. ඔබගේ මුරපදය වෙනස් කිරීමට, ඉවත් වී නැවත ඇතුළු වන්න, ඉන්පසු නැවත උත්සාහ කරන්න.",
+    accountCreated = "ඔබගේ ගිණුම සාර්ථකව සාදන ලදී", accountDeleted = "ඔබගේ ගිණුම සාර්ථකව මකා දමන ලදී",
+    changesSaved = "ඔබගේ වෙනස්කම් සුරකින ලදී", invalidCredentials = "අවලංගු අක්තපත්‍ර",
+    uppercase = "අවම වශයෙන් එක ලොකු අකුරක්", lowercase = "අවම වශයෙන් එක කුඩා අකුරක්", number = "අවම වශයෙන් එක ඉලක්කමක්", specialCharacter = "අවම වශයෙන් එක විශේෂ අක්ෂරයක්", minimumCharacters = "අවම වශයෙන් අක්ෂර 6 ක්",
+
+    add = "එක් කරන්න", addToItinerary = "ගමන් විස්තරයට එක් කරන්න", travel = "සංචාරය", place = "ස්ථානය",
+    newPlace = "නව ස්ථානය", editPlace = "ස්ථානය සංස්කරණය කරන්න", landmark = "සන්ධිස්ථානය (විකල්ප)", savePlace = "ස්ථානය සුරකින්න", searchTrips = "ගමන් සොයන්න",
+    newTrip = "නව ගමන", renameTrip = "ගමන නැවත නම් කරන්න", create = "සාදන්න", save = "සුරකින්න",
+    pin = "පින් කරන්න", unpin = "පින් ඉවත් කරන්න", edit = "සංස්කරණය කරන්න", archive = "සංරක්ෂිත කරන්න", unarchive = "සංරක්ෂිතයෙන් ඉවත් කරන්න",
+    delete = "මකන්න", deleteTripQ = "ගමන මකා දමන්නද?", deletePlaceQ = "ස්ථානය මකා දමන්නද?", deleteLegQ = "ගමන් වාරය මකා දමන්නද?",
+    cantBeUndone = "මෙය ආපසු හැරවිය නොහැක.", archivedTrips = "සංරක්ෂිත ගමන්", noArchivedTrips = "සංරක්ෂිත ගමන් නැත",
+    noDatesYet = "තවමත් දින නැත", tripName = "ගමනේ නම", aLegBetween = "අතර ගමන් වාරයක්", somewhereToVisit = "නැරඹීමට ස්ථානයක්",
 )
 
 /**
@@ -1542,6 +1616,7 @@ fun systemLanguage(): Language = when (deviceLanguageCode().lowercase()) {
     "he", "iw" -> Language.HEBREW
     "bn" -> Language.BENGALI
     "tl", "fil" -> Language.TAGALOG
+    "si" -> Language.SINHALA
     else -> Language.ENGLISH
 }
 
@@ -1592,4 +1667,5 @@ fun stringsFor(language: Language): Strings = when (language) {
     Language.HEBREW -> HE
     Language.BENGALI -> BN
     Language.TAGALOG -> TG
+    Language.SINHALA -> SI
 }

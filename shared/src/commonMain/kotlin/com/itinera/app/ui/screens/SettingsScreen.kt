@@ -127,7 +127,7 @@ fun SettingsScreen(
             ) {
                 Text(
                     s.deleteAccount,
-                    fontWeight = FontWeight.Medium,
+                    fontWeight = FontWeight.SemiBold,
                     fontSize = 14.sp,
                 )
             }

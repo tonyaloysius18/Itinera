@@ -1,5 +1,10 @@
 package com.itinera.app.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -8,6 +13,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -22,6 +29,7 @@ import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.UserProfile                       // ⬅ ADD
 import com.itinera.app.data.AuthService                        // ⬅ ADD
 import androidx.compose.runtime.rememberCoroutineScope         // ⬅ ADD
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
@@ -80,10 +88,23 @@ fun CreateAccountScreen(
     fun attemptCreate() {
         when {
             listOf(name, surname, email, password, dob, street, city, postalCode).any { it.isBlank() } -> {
-                onMessage(s.fillAllFields)
-                return
+                onMessage(s.fillAllFields); return
             }
-            password.length < 6 -> { onMessage(s.passwordTooShort); return }
+            password.length < 6 -> {
+                onMessage(s.passwordTooShort); return
+            }
+            !password.any { it.isUpperCase() } -> {
+                onMessage("Password needs an uppercase letter"); return
+            }
+            !password.any { it.isLowerCase() } -> {
+                onMessage("Password needs a lowercase letter"); return
+            }
+            !password.any { it.isDigit() } -> {
+                onMessage("Password needs a number"); return
+            }
+            !password.any { !it.isLetterOrDigit() } -> {
+                onMessage("Password needs a special character"); return
+            }
         }
         error = null
         loading = true
@@ -181,6 +202,8 @@ fun CreateAccountScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = textFieldShape,
             )
+
+            PasswordRequirementsDropdown(password = password)
 
             // Date of birth — read-only field that opens the calendar on tap
             Spacer(Modifier.height(9.dp))
@@ -366,5 +389,57 @@ private fun RequiredLabel(text: String) {
     Row {
         Text(text)
         Text(" *", color = MaterialTheme.colorScheme.error)
+    }
+}
+
+@Composable
+private fun PasswordRequirementsDropdown(password: String) {
+    val requirements = listOf(
+        "At least one uppercase letter" to password.any { it.isUpperCase() },
+        "At least one lowercase letter" to password.any { it.isLowerCase() },
+        "At least one number"           to password.any { it.isDigit() },
+        "At least one special character" to password.any { !it.isLetterOrDigit() },
+        "Minimum 6 characters"          to (password.length >= 6),
+    )
+
+    AnimatedVisibility(
+        visible = password.isNotEmpty(),
+        enter = fadeIn() + expandVertically(),
+        exit = fadeOut() + shrinkVertically(),
+    ) {
+        Card(
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 6.dp),
+        ) {
+            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
+                requirements.forEach { (label, met) ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(vertical = 4.dp),
+                    ) {
+                        Icon(
+                            imageVector = if (met) Icons.Filled.CheckCircle
+                            else Icons.Filled.RadioButtonUnchecked,
+                            contentDescription = null,
+                            tint = if (met) Color(0xFF4CAF50)
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
+                            modifier = Modifier.size(16.dp),
+                        )
+                        Spacer(Modifier.width(10.dp))
+                        Text(
+                            label,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (met) Color(0xFF4CAF50)
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        )
+                    }
+                }
+            }
+        }
     }
 }
