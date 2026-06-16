@@ -384,14 +384,19 @@ private fun AppContent(
                         )
 
                         Screen.EditProfile -> EditProfileScreen(
-                            profile = repository.profile,
-                            authService = repository.authService,
+                            profile        = repository.profile,
+                            authService    = repository.authService,
                             profileService = repository.profileService,
-                            onBack = { navigator.back() },
+                            onBack         = { navigator.back() },
+                            onUploadPhoto  = { bytes ->                          // ⬅ ADD
+                                val uid = repository.authService.currentUid
+                                    ?: return@EditProfileScreen ""
+                                repository.uploadProfilePhoto(uid, bytes)
+                            },
                             onSave = { updated ->
                                 repository.updateProfile(updated)
                                 navigator.back()
-                                pillMessageTop = s.changesSaved          // ⬅ ADD
+                                pillMessageTop = s.changesSaved
                             },
                         )
 

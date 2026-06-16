@@ -39,14 +39,22 @@ kotlin {
 
     sourceSets {
         commonMain {
-            kotlin.srcDir(layout.buildDirectory.dir("generated/secrets/kotlin"))   // ⬅ ADD: generated Secrets.kt
+            kotlin.srcDir(layout.buildDirectory.dir("generated/secrets/kotlin"))   // generated Secrets.kt
         }
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.ktor.client.okhttp)
-            implementation(project.dependencies.platform(libs.firebase.bom))   // ⬅ ADD: BoM
+            implementation(project.dependencies.platform(libs.firebase.bom))   // BoM
             implementation(libs.firebase.auth.android)
             implementation(libs.firebase.firestore.android)
+            implementation(libs.kotlinx.coroutines.play.services)
+
+            // 16 KB-aligned native libs (override peekaboo's older CameraX + graphics)
+            implementation("androidx.camera:camera-core:1.4.1")
+            implementation("androidx.camera:camera-camera2:1.4.1")
+            implementation("androidx.camera:camera-lifecycle:1.4.1")
+            implementation("androidx.camera:camera-view:1.4.1")
+            implementation("androidx.graphics:graphics-path:1.0.1")
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -65,10 +73,18 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.datetime.wheel.picker)
+
+            // Image loading (Coil 3) — single source of truth
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor)
+
+            // Firebase (GitLive KMP SDK)
             implementation(libs.firebase.auth)
             implementation(libs.firebase.firestore)
+
+            // Image picking (KMP — Android + iOS)
+            implementation(libs.peekaboo.ui)
+            implementation(libs.peekaboo.image.picker)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -88,7 +104,7 @@ dependencies {
     androidRuntimeClasspath(libs.compose.uiTooling)
 }
 
-// ⬅ reads unsplashAccessKey from local.properties and generates a Kotlin constant
+// reads unsplashAccessKey from local.properties and generates a Kotlin constant
 val generateSecrets by tasks.registering {
     val propsFile = rootProject.file("local.properties")
     val outputDir = layout.buildDirectory.dir("generated/secrets/kotlin")
@@ -113,7 +129,7 @@ val generateSecrets by tasks.registering {
     }
 }
 
-// ⬅ make every Kotlin compilation run the generator first
+// make every Kotlin compilation run the generator first
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
     dependsOn(generateSecrets)
 }

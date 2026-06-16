@@ -11,6 +11,7 @@ import com.itinera.app.model.Trip
 import com.itinera.app.model.UserProfile
 import com.itinera.app.model.Activity
 import com.itinera.app.model.TripAccent
+import io.ktor.client.HttpClient
 import kotlinx.datetime.LocalDate
 
 
@@ -33,6 +34,8 @@ class TripRepository {
     val authService = AuthService()
 
     val profileService = ProfileService()     // ⬅ ADD
+
+    private val uploadClient = HttpClient()
 
 
     fun addTrip(title: String): String {                                  // ⬅ no accent param
@@ -201,4 +204,11 @@ class TripRepository {
         private set
 
     fun updateProfile(updated: UserProfile) { profile = updated }
+
+    suspend fun uploadProfilePhoto(uid: String, bytes: ByteArray): String {
+        return uploadBytesToStorage(uploadClient, bytes)   // ⬅ uploadClient, not httpClient
+    }
+
 }
+
+

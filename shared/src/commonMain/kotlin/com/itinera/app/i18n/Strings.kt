@@ -109,6 +109,8 @@ data class Strings(
     val showPassword: String, val hidePassword: String, val back: String, val recentLoginRequired: String, val accountCreated: String, val accountDeleted: String,
     val changesSaved: String, val invalidCredentials: String, val uppercase: String, val lowercase: String, val number: String, val specialCharacter: String, val minimumCharacters: String,
 
+    val choosePhoto: String, val uploadFromGallery: String, val takePhoto: String, val removePhoto: String, val cropAndScale: String, val usePhoto: String,
+
 
     val add: String, val addToItinerary: String, val travel: String, val place: String,
     val newPlace: String, val editPlace: String, val landmark: String, val savePlace: String, val searchTrips: String,
@@ -148,6 +150,8 @@ private val EN = Strings(
     delete = "Delete", deleteTripQ = "Delete Trip?", deletePlaceQ = "Delete Place?", deleteLegQ = "Delete Leg?",
     cantBeUndone = "This Cannot Be Undone.", archivedTrips = "Archived Trips", noArchivedTrips = "No Archived Trips",
     noDatesYet = "No Dates Yet", tripName = "Trip Name", aLegBetween = "A Leg Between", somewhereToVisit = "Somewhere To Visit",
+
+    choosePhoto = "Choose Photo", uploadFromGallery = "Upload From Gallery", takePhoto = "Take Photo", removePhoto = "Remove Photo", cropAndScale = "Crop And Scale", usePhoto = "Use Photo",
 )
 
 private val FR = EN.copy(
@@ -180,7 +184,8 @@ private val FR = EN.copy(
     pin = "Épingler", unpin = "Désépingler", edit = "Modifier", archive = "Archiver", unarchive = "Déarchiver", 
     delete = "Supprimer", deleteTripQ = "Supprimer le voyage?", deletePlaceQ = "Supprimer le lieu?", deleteLegQ = "Supprimer le trajet?", 
     cantBeUndone = "Cela ne peut pas être annulé.", archivedTrips = "Voyages archivés", noArchivedTrips = "Aucun voyage archivé", 
-    noDatesYet = "Aucune date trouvée", tripName = "Nom du voyage", aLegBetween = "Un trajet entre", somewhereToVisit = "Où visiter", 
+    noDatesYet = "Aucune date trouvée", tripName = "Nom du voyage", aLegBetween = "Un trajet entre", somewhereToVisit = "Où visiter",
+    choosePhoto = "Choisir une photo", uploadFromGallery = "Télécharger depuis la galerie", takePhoto = "Prendre une photo", removePhoto = "Supprimer la photo", cropAndScale = "Couper et agrandir", usePhoto = "Utiliser la photo",
 )
 
 private val ES = EN.copy(
@@ -207,6 +212,7 @@ private val ES = EN.copy(
     accountCreated = "Tu cuenta ha sido creada con éxito", accountDeleted = "Tu cuenta ha sido eliminada con éxito",
     changesSaved = "Tus cambios han sido guardados", invalidCredentials = "Credenciales inválidas",
     uppercase = "Al menos una mayúscula", lowercase = "Al menos una minúscula", number = "Al menos un número", specialCharacter = "Al menos un carácter especial", minimumCharacters = "Mínimo 6 caracteres",
+    choosePhoto = "Elegir foto", uploadFromGallery = "Subir desde galería", takePhoto = "Tomar foto", removePhoto = "Eliminar foto", cropAndScale = "Cortar y escalar", usePhoto = "Usar foto",
 
 
     add = "Añadir", addToItinerary = "Añadir al itinerario", travel = "Viaje", place = "Lugar",
@@ -241,7 +247,7 @@ private val DE = EN.copy(
     recentLoginRequired = "Konnte nicht gespeichert werden. Um Ihr Passwort zu ändern, melden Sie sich ab und wieder an und versuchen Sie es dann erneut.",
     accountCreated = "Ihr Konto wurde erfolgreich erstellt", accountDeleted = "Ihr Konto wurde erfolgreich gelöscht",
     changesSaved = "Ihre Änderungen wurden gespeichert", invalidCredentials = "Ungültige Anmeldedaten",
-    uppercase = "Mindestens ein Großbuchstabe", lowercase = "Mindestens ein Kleinbuchstabe", number = "Mindestens eine Zahl", specialCharacter = "Mindestens ein Sonderzeichen", minimumCharacters = "Mindestens 6 Zeichen",
+    uppercase = "Mindestens ein Großbuchstabe", lowercase = "Mindestens ein Kleinbuchstabe", number = "Mindestens eine Zahl", specialCharacter = "Mindestens ein Sonderzeichen", minimumCharacters = "Mindestens 6 Zeichen", 
 
     add = "Hinzufügen", addToItinerary = "Zum Reiseplan hinzufügen", travel = "Reise", place = "Ort",
     newPlace = "Neuer Ort", editPlace = "Ort bearbeiten", landmark = "Wahrzeichen (optional)", savePlace = "Ort speichern", searchTrips = "Reisen suchen",
@@ -249,7 +255,7 @@ private val DE = EN.copy(
     pin = "Anheften", unpin = "Lösen", edit = "Bearbeiten", archive = "Archivieren", unarchive = "Dearchivieren",
     delete = "Löschen", deleteTripQ = "Reise löschen?", deletePlaceQ = "Ort löschen?", deleteLegQ = "Etappe löschen?",
     cantBeUndone = "Dies kann nicht rückgängig gemacht werden.", archivedTrips = "Archivierte Reisen", noArchivedTrips = "Keine archivierten Reisen",
-    noDatesYet = "Noch keine Termine", tripName = "Name der Reise", aLegBetween = "Eine Etappe zwischen", somewhereToVisit = "Irgendwo zu besuchen",
+    choosePhoto = "Foto auswählen", uploadFromGallery = "Aus Galerie hochladen", takePhoto = "Foto aufnehmen", removePhoto = "Foto entfernen", cropAndScale = "Zuschneiden und skalieren", usePhoto = "Foto verwenden",
 )
 
 private val IT = EN.copy(
@@ -285,7 +291,7 @@ private val IT = EN.copy(
     pin = "Fissa", unpin = "Rimuovi fissa", edit = "Modifica", archive = "Archivia", unarchive = "Ripristina", 
     delete = "Elimina", deleteTripQ = "Elimina viaggio?", deletePlaceQ = "Elimina luogo?", deleteLegQ = "Elimina tratta?", 
     cantBeUndone = "Questa azione non può essere annullata.", archivedTrips = "Viaggi archiviati", noArchivedTrips = "Nessun viaggio archiviato", 
-    noDatesYet = "Ancora nessuna data", tripName = "Nome del viaggio", aLegBetween = "Una tratta tra", somewhereToVisit = "Qualche posto da visitare", 
+    choosePhoto = "Scegli foto", uploadFromGallery = "Carica dalla galleria", takePhoto = "Scatta foto", removePhoto = "Rimuovi foto", cropAndScale = "Ritaglia e scala", usePhoto = "Usa foto",
 )
 
 private val PT = EN.copy(
@@ -322,7 +328,7 @@ private val PT = EN.copy(
     pin = "Fixar", unpin = "Desafixar", edit = "Editar", archive = "Arquivar", unarchive = "Desarquivar",
     delete = "Excluir", deleteTripQ = "Excluir viagem?", deletePlaceQ = "Excluir lugar?", deleteLegQ = "Excluir leg?",
     cantBeUndone = "Isso não pode ser desfeito.", archivedTrips = "Viagens arquivadas", noArchivedTrips = "Nenhuma viagem arquivada",
-    noDatesYet = "Sem datas ainda", tripName = "Nome da viagem", aLegBetween = "Uma leg entre", somewhereToVisit = "Algum lugar para visitar",
+    choosePhoto = "Escolher foto", uploadFromGallery = "Carregar da galeria", takePhoto = "Tirar foto", removePhoto = "Remover foto", cropAndScale = "Recortar e dimensionar", usePhoto = "Usar foto",
 )
 private val NL = EN.copy(
     name = "Naam", surname = "Achternaam", dob = "Geboortedatum", street = "Straat", city = "Stad", postelCode = "Postcode",
@@ -356,7 +362,7 @@ private val NL = EN.copy(
     pin = "Vastzetten", unpin = "Losmaken", edit = "Bewerken", archive = "Archiveren", unarchive = "Dearchiveren",
     delete = "Verwijderen", deleteTripQ = "Reis verwijderen?", deletePlaceQ = "Plaats verwijderen?", deleteLegQ = "Leg verwijderen?",
     cantBeUndone = "Dit kan niet ongedaan worden gemaakt.", archivedTrips = "Gearchiveerde reizen", noArchivedTrips = "Geen gearchiveerde reizen",
-    noDatesYet = "Nog geen data", tripName = "Naam van de reis", aLegBetween = "Een leg tussen", somewhereToVisit = "Iets om te bezoeken",
+    choosePhoto = "Foto kiezen", uploadFromGallery = "Uploaden uit galerij", takePhoto = "Foto maken", removePhoto = "Foto verwijderen", cropAndScale = "Bijsnijden en schalen", usePhoto = "Foto gebruiken",
 )
 
 private val PL = EN.copy(
@@ -392,7 +398,7 @@ private val PL = EN.copy(
     pin = "Przypnij", unpin = "Odepnij", edit = "Edytuj", archive = "Archiwizuj", unarchive = "Przywróć z archiwum", 
     delete = "Usuń", deleteTripQ = "Usunąć podróż?", deletePlaceQ = "Usunąć miejsce?", deleteLegQ = "Usunąć odcinek?", 
     cantBeUndone = "Tego nie można cofnąć.", archivedTrips = "Zarchiwizowane podróże", noArchivedTrips = "Brak zarchiwizowanych podróży", 
-    noDatesYet = "Brak dat", tripName = "Nazwa podróży", aLegBetween = "Odcinek między", somewhereToVisit = "Miejsce do odwiedzenia", 
+    choosePhoto = "Wybierz zdjęcie", uploadFromGallery = "Prześlij z galerii", takePhoto = "Zrób zdjęcie", removePhoto = "Usuń zdjęcie", cropAndScale = "Kadruj i skaluj", usePhoto = "Użyj zdjęcia",
 )
 
 private val ZH = EN.copy(
@@ -424,7 +430,7 @@ private val ZH = EN.copy(
     pin = "固定", unpin = "取消固定", edit = "编辑", archive = "归档", unarchive = "取消归档", 
     delete = "删除", deleteTripQ = "删除行程？", deletePlaceQ = "删除地点？", deleteLegQ = "删除行程段？", 
     cantBeUndone = "此操作无法撤销。", archivedTrips = "已归档行程", noArchivedTrips = "没有已归档行程", 
-    noDatesYet = "尚无日期", tripName = "行程名称", aLegBetween = "之间的行程", somewhereToVisit = "值得一游的地方", 
+    choosePhoto = "选择照片", uploadFromGallery = "从相册上传", takePhoto = "拍照", removePhoto = "移除照片", cropAndScale = "裁剪和缩放", usePhoto = "使用照片",
 )
 
 private val JP = EN.copy(
@@ -491,7 +497,7 @@ private val KR = EN.copy(
     pin = "고정", unpin = "고정 해제", edit = "편집", archive = "보관", unarchive = "보관 취소", 
     delete = "삭제", deleteTripQ = "여행을 삭제할까요?", deletePlaceQ = "장소를 삭제할까요?", deleteLegQ = "경로를 삭제할까요?", 
     cantBeUndone = "이 작업은 되돌릴 수 없습니다.", archivedTrips = "보관된 여행", noArchivedTrips = "보관된 여행이 없습니다", 
-    noDatesYet = "날짜 없음", tripName = "여행 이름", aLegBetween = "사이의 경로", somewhereToVisit = "방문할 곳", 
+    choosePhoto = "사진 선택", uploadFromGallery = "갤러리에서 업로드", takePhoto = "사진 촬영", removePhoto = "사진 삭제", cropAndScale = "자르기 및 크기 조정", usePhoto = "사진 사용",
 )
 
 private val RU = EN.copy(
@@ -527,7 +533,7 @@ private val RU = EN.copy(
     pin = "Закрепить", unpin = "Открепить", edit = "Редактировать", archive = "Архивировать", unarchive = "Разархивировать", 
     delete = "Удалить", deleteTripQ = "Удалить путешествие?", deletePlaceQ = "Удалить место?", deleteLegQ = "Удалить путь?", 
     cantBeUndone = "Это действие нельзя отменить.", archivedTrips = "Архивные путешествия", noArchivedTrips = "Нет архивных путешествий", 
-    noDatesYet = "Нет дат", tripName = "Название путешествия", aLegBetween = "Путь между", somewhereToVisit = "Место для посещения",
+    choosePhoto = "Выбрать фото", uploadFromGallery = "Загрузить из галереи", takePhoto = "Сделать фото", removePhoto = "Удалить фото", cropAndScale = "Обрезать и масштабировать", usePhoto = "Использовать фото",
 )
 
 private val TAM = EN.copy(
@@ -638,7 +644,7 @@ private val UKR = EN.copy(
     pin = "Закріпити", unpin = "Відкріпити", edit = "Редагувати", archive = "Архівувати", unarchive = "Розархівувати",
     delete = "Видалити", deleteTripQ = "Видалити подорож?", deletePlaceQ = "Видалити місце?", deleteLegQ = "Видалити лінію?",
     cantBeUndone = "Цю дію неможливо скасувати.", archivedTrips = "Архівні подорожі", noArchivedTrips = "Немає архівних подорожей",
-    noDatesYet = "Немає дат", tripName = "Назва подорожі", aLegBetween = "Лінія між", somewhereToVisit = "Місце для відвідування",
+    choosePhoto = "Вибрати фото", uploadFromGallery = "Завантажити з галереї", takePhoto = "Зробити фото", removePhoto = "Видалити фото", cropAndScale = "Обрізати та масштабувати", usePhoto = "Використати фото",
 )
 
 private val HUN = EN.copy(
@@ -704,7 +710,7 @@ private val RO = EN.copy(
     pin = "Fixează", unpin = "Anulează fixarea", edit = "Editează", archive = "Arhivează", unarchive = "Dezarhivează",
     delete = "Șterge", deleteTripQ = "Ștergi călătoria?", deletePlaceQ = "Ștergi locul?", deleteLegQ = "Ștergi etapa?",
     cantBeUndone = "Această acțiune nu poate fi anulată.", archivedTrips = "Călătorii arhivate", noArchivedTrips = "Nicio călătorie arhivată",
-    noDatesYet = "Nicio dată încă", tripName = "Numele călătoriei", aLegBetween = "O etapă între", somewhereToVisit = "Undeva de vizitat",
+    choosePhoto = "Alegeți fotografia", uploadFromGallery = "Încărcați din galerie", takePhoto = "Faceți o fotografie", removePhoto = "Eliminați fotografia", cropAndScale = "Decupați și scalați", usePhoto = "Utilizați fotografia",
 )
 
 private val GR = EN.copy(
@@ -737,7 +743,7 @@ private val GR = EN.copy(
     pin = "Καρφίτσωμα", unpin = "Ξεκαρφίτσωμα", edit = "Επεξεργασία", archive = "Αρχειοθέτηση", unarchive = "Αποαρχειοθέτηση",
     delete = "Διαγραφή", deleteTripQ = "Διαγραφή ταξιδιού;", deletePlaceQ = "Διαγραφή τοποθεσίας;", deleteLegQ = "Διαγραφή σκέλους;",
     cantBeUndone = "Αυτή η ενέργεια δεν αναιρείται.", archivedTrips = "Αρχειοθετημένα ταξίδια", noArchivedTrips = "Δεν υπάρχουν αρχειοθετημένα ταξίδια",
-    noDatesYet = "Δεν υπάρχουν ημερομηνίες", tripName = "Όνομα ταξιδιού", aLegBetween = "Ένα σκέλος μεταξύ", somewhereToVisit = "Κάπου για επίσκεψη",
+    choosePhoto = "Επιλογή φωτογραφίας", uploadFromGallery = "Μεταφόρτωση από τη συλλογή", takePhoto = "Λήψη φωτογραφίας", removePhoto = "Αφαίρεση φωτογραφίας", cropAndScale = "Περικοπή και κλιμάκωση", usePhoto = "Χρήση φωτογραφίας",
 )
 
 private val KA = EN.copy(
@@ -770,7 +776,7 @@ private val KA = EN.copy(
     pin = "ჩამაგრება", unpin = "მოხსნა", edit = "რედაქტირება", archive = "არქივირება", unarchive = "ამოარქივება",
     delete = "წაშლა", deleteTripQ = "წაიშალოს მოგზაურობა?", deletePlaceQ = "წაიშალოს ადგილი?", deleteLegQ = "წაიშალოს ეტაპი?",
     cantBeUndone = "ეს ქმედება შეუქცევადია.", archivedTrips = "დაარქივებული მოგზაურობები", noArchivedTrips = "დაარქივებული მოგზაურობები არ არის",
-    noDatesYet = "თარიღები ჯერ არ არის", tripName = "მოგზაურობის სახელი", aLegBetween = "ეტაპი შორის", somewhereToVisit = "ადგილი მოსანახულებლად",
+    choosePhoto = "ფოტოს არჩევა", uploadFromGallery = "გალერეიდან ატვირთვა", takePhoto = "ფოტოს გადაღება", removePhoto = "ფოტოს წაშლა", cropAndScale = "მოჭრა და მასშტაბირება", usePhoto = "ფოტოს გამოყენება",
 )
 
 private val BG = EN.copy(
@@ -803,7 +809,7 @@ private val BG = EN.copy(
     pin = "Закачи", unpin = "Откачи", edit = "Редактирай", archive = "Архивирай", unarchive = "Разархивирай",
     delete = "Изтрий", deleteTripQ = "Изтриване на пътуването?", deletePlaceQ = "Изтриване на мястото?", deleteLegQ = "Изтриване на етапа?",
     cantBeUndone = "Това не може да бъде отменено.", archivedTrips = "Архивирани пътувания", noArchivedTrips = "Няма архивирани пътувания",
-    noDatesYet = "Все още няма дати", tripName = "Име на пътуването", aLegBetween = "Етап между", somewhereToVisit = "Място за посещение",
+    choosePhoto = "Избор на снимка", uploadFromGallery = "Качване от галерията", takePhoto = "Снимане", removePhoto = "Премахване на снимка", cropAndScale = "Изрязване и мащабиране", usePhoto = "Използване на снимка",
 )
 
 private val CZ = EN.copy(
@@ -836,7 +842,7 @@ private val CZ = EN.copy(
     pin = "Připnout", unpin = "Odepnout", edit = "Upravit", archive = "Archivovat", unarchive = "Obnovit z archivu",
     delete = "Smazat", deleteTripQ = "Smazat cestu?", deletePlaceQ = "Smazat místo?", deleteLegQ = "Smazat etapu?",
     cantBeUndone = "Tuto akci nelze vzít zpět.", archivedTrips = "Archivované cesty", noArchivedTrips = "Žádné archivované cesty",
-    noDatesYet = "Zatím žádná data", tripName = "Název cesty", aLegBetween = "Etapa mezi", somewhereToVisit = "Místo k návštěvě",
+    choosePhoto = "Vybrat fotku", uploadFromGallery = "Nahrát z galerie", takePhoto = "Pořídit fotku", removePhoto = "Odstranit fotku", cropAndScale = "Oříznout a změnit měřítko", usePhoto = "Použít fotku",
 )
 
 private val LV = EN.copy(
@@ -869,7 +875,7 @@ private val LV = EN.copy(
     pin = "Piespraust", unpin = "Atspraust", edit = "Rediģēt", archive = "Arhivēt", unarchive = "Atarhivēt",
     delete = "Dzēst", deleteTripQ = "Dzēst ceļojumu?", deletePlaceQ = "Dzēst vietu?", deleteLegQ = "Dzēst posmu?",
     cantBeUndone = "Šo darbību nevar atsaukt.", archivedTrips = "Arhivētie ceļojumi", noArchivedTrips = "Nav arhivētu ceļojumu",
-    noDatesYet = "Vēl nav datumu", tripName = "Ceļojuma nosaukums", aLegBetween = "Posms starp", somewhereToVisit = "Vieta, ko apmeklēt",
+    choosePhoto = "Izvēlēties fotoattēlu", uploadFromGallery = "Augšupielādēt no galerijas", takePhoto = "Uzņemt fotoattēlu", removePhoto = "Noņemt fotoattēlu", cropAndScale = "Apgriezt un mērogot", usePhoto = "Izmantot fotoattēlu",
 )
 
 private val LT = EN.copy(
@@ -902,7 +908,7 @@ private val LT = EN.copy(
     pin = "Prisegti", unpin = "Atsegti", edit = "Redaguoti", archive = "Archyvuoti", unarchive = "Išarchyvuoti",
     delete = "Ištrinti", deleteTripQ = "Ištrinti kelionę?", deletePlaceQ = "Ištrinti vietą?", deleteLegQ = "Ištrinti etapą?",
     cantBeUndone = "Šio veiksmo negalima atšaukti.", archivedTrips = "Archyvuotos kelionės", noArchivedTrips = "Nėra archyvuotų kelionių",
-    noDatesYet = "Dar nėra datų", tripName = "Kelionės pavadinimas", aLegBetween = "Etapas tarp", somewhereToVisit = "Vieta apsilankymui",
+    choosePhoto = "Pasirinkti nuotrauką", uploadFromGallery = "Įkelti iš galerijos", takePhoto = "Nufotografuoti", removePhoto = "Pašalinti nuotrauką", cropAndScale = "Apkarpyti ir keisti mastelį", usePhoto = "Naudoti nuotrauką",
 )
 
 private val SK = EN.copy(
@@ -935,7 +941,7 @@ private val SK = EN.copy(
     pin = "Pripnúť", unpin = "Odpnúť", edit = "Upraviť", archive = "Archivovať", unarchive = "Obnoviť z archívu",
     delete = "Zmazať", deleteTripQ = "Zmazať cestu?", deletePlaceQ = "Zmazať miesto?", deleteLegQ = "Zmazať etapu?",
     cantBeUndone = "Túto akciu nie je možné vrátiť späť.", archivedTrips = "Archivované cesty", noArchivedTrips = "Žiadne archivované cesty",
-    noDatesYet = "Zatiaľ žiadne dáta", tripName = "Názov cesty", aLegBetween = "Etapa medzi", somewhereToVisit = "Miesto na návštevu",
+    choosePhoto = "Vybrať fotku", uploadFromGallery = "Nahrať z galérie", takePhoto = "Odfotografovať", removePhoto = "Odstrániť fotku", cropAndScale = "Orezať a zmeniť mierku", usePhoto = "Použiť fotku",
 )
 
 private val SL = EN.copy(
@@ -968,7 +974,7 @@ private val SL = EN.copy(
     pin = "Pripni", unpin = "Odpni", edit = "Uredi", archive = "Arhiviraj", unarchive = "Obnovi",
     delete = "Izbriši", deleteTripQ = "Izbrišem potovanje?", deletePlaceQ = "Izbrišem kraj?", deleteLegQ = "Izbrišem etapo?",
     cantBeUndone = "Tega ni mogoče preklicati.", archivedTrips = "Arhivirana potovanja", noArchivedTrips = "Ni arhiviranih potovanj",
-    noDatesYet = "Ni še datumov", tripName = "Ime potovanja", aLegBetween = "Etapa med", somewhereToVisit = "Kraj za obisk",
+    choosePhoto = "Izberi fotografijo", uploadFromGallery = "Naloži iz galerije", takePhoto = "Posnemi fotografijo", removePhoto = "Odstrani fotografijo", cropAndScale = "Obreži in spremeni velikost", usePhoto = "Uporabi fotografijo",
 )
 
 private val SR = EN.copy(
@@ -1001,7 +1007,7 @@ private val SR = EN.copy(
     pin = "Zakači", unpin = "Otkači", edit = "Izmeni", archive = "Arhiviraj", unarchive = "Povrati",
     delete = "Obriši", deleteTripQ = "Obrisati putovanje?", deletePlaceQ = "Obrisati mesto?", deleteLegQ = "Obrisati etapu?",
     cantBeUndone = "Ovo se ne može poništiti.", archivedTrips = "Arhivirana putovanja", noArchivedTrips = "Nema arhiviranih putovanja",
-    noDatesYet = "Još nema datuma", tripName = "Naziv putovanja", aLegBetween = "Etapa između", somewhereToVisit = "Mesto za posetu",
+    choosePhoto = "Izaberi fotografiju", uploadFromGallery = "Otpremi iz galerije", takePhoto = "Snimi fotografiju", removePhoto = "Ukloni fotografiju", cropAndScale = "Opseci i skaliraj", usePhoto = "Koristi fotografiju",
 )
 
 private val SQ = EN.copy(
@@ -1034,7 +1040,7 @@ private val SQ = EN.copy(
     pin = "Fikso", unpin = "Hiq fiksimin", edit = "Edito", archive = "Arkivo", unarchive = "Hiq nga arkiva",
     delete = "Fshij", deleteTripQ = "Fshij udhëtimin?", deletePlaceQ = "Fshij vendin?", deleteLegQ = "Fshij etapën?",
     cantBeUndone = "Kjo nuk mund të kthehet mbrapsht.", archivedTrips = "Udhëtime të arkivuara", noArchivedTrips = "Nuk ka udhëtime të arkivuara",
-    noDatesYet = "Nuk ka data ende", tripName = "Emri i udhëtimit", aLegBetween = "Një etapë mes", somewhereToVisit = "Diku për të vizituar",
+    choosePhoto = "Zgjidh foton", uploadFromGallery = "Ngarko nga galeria", takePhoto = "Bëj foto", removePhoto = "Hiq foton", cropAndScale = "Prit dhe shkallëzo", usePhoto = "Përdor foton",
 )
 
 private val MK = EN.copy(
@@ -1067,7 +1073,7 @@ private val MK = EN.copy(
     pin = "Закачи", unpin = "Откачи", edit = "Уреди", archive = "Архивирај", unarchive = "Врати од архива",
     delete = "Избриши", deleteTripQ = "Избриши патување?", deletePlaceQ = "Избриши место?", deleteLegQ = "Избриши етапа?",
     cantBeUndone = "Ова не може да се врати.", archivedTrips = "Архивирани патувања", noArchivedTrips = "Нема архивирани патувања",
-    noDatesYet = "Сè уште нема датуми", tripName = "Име на патувањето", aLegBetween = "Етапа помеѓу", somewhereToVisit = "Место за посета",
+    choosePhoto = "Избери фотографија", uploadFromGallery = "Постави од галерија", takePhoto = "Сними фотографија", removePhoto = "Отстрани фотографија", cropAndScale = "Исечи и скалирај", usePhoto = "Користи фотографија",
 )
 
 private val MO = EN.copy(
@@ -1100,7 +1106,7 @@ private val MO = EN.copy(
     pin = "Fixează", unpin = "Anulează fixarea", edit = "Editează", archive = "Arhivează", unarchive = "Dezarhivează",
     delete = "Șterge", deleteTripQ = "Ștergi călătoria?", deletePlaceQ = "Ștergi locul?", deleteLegQ = "Ștergi etapa?",
     cantBeUndone = "Această acțiune nu poate fi anulată.", archivedTrips = "Călătorii arhivate", noArchivedTrips = "Nicio călătorie arhivată",
-    noDatesYet = "Nicio dată încă", tripName = "Numele călătoriei", aLegBetween = "O etapă între", somewhereToVisit = "Undeva de vizitat",
+    choosePhoto = "Alegeți fotografia", uploadFromGallery = "Încărcați din galerie", takePhoto = "Faceți o fotografie", removePhoto = "Eliminați fotografia", cropAndScale = "Decupați și scalați", usePhoto = "Utilizați fotografia",
 )
 
 private val NO = EN.copy(
@@ -1133,7 +1139,7 @@ private val NO = EN.copy(
     pin = "Fest", unpin = "Løsne", edit = "Rediger", archive = "Arkiver", unarchive = "Gjenopprett",
     delete = "Slett", deleteTripQ = "Slett reisen?", deletePlaceQ = "Slett stedet?", deleteLegQ = "Slett etappen?",
     cantBeUndone = "Dette kan ikke angres.", archivedTrips = "Arkiverte reiser", noArchivedTrips = "Ingen arkiverte reiser",
-    noDatesYet = "Ingen datoer ennå", tripName = "Navn på reisen", aLegBetween = "En etappe mellom", somewhereToVisit = "Et sted å besøke",
+    choosePhoto = "Velg bilde", uploadFromGallery = "Last opp fra galleri", takePhoto = "Ta bilde", removePhoto = "Fjern bilde", cropAndScale = "Beskjær og skaler", usePhoto = "Bruk bilde",
 )
 
 private val FI = EN.copy(
@@ -1166,7 +1172,7 @@ private val FI = EN.copy(
     pin = "Kiinnitä", unpin = "Irrota", edit = "Muokkaa", archive = "Arkistoi", unarchive = "Palauta arkistosta",
     delete = "Poista", deleteTripQ = "Poista matka?", deletePlaceQ = "Poista paikka?", deleteLegQ = "Poista osuus?",
     cantBeUndone = "Tätä ei voi kumota.", archivedTrips = "Arkistoidut matkat", noArchivedTrips = "Ei arkistoituja matkoja",
-    noDatesYet = "Ei vielä päivämääriä", tripName = "Matkan nimi", aLegBetween = "Osuus välillä", somewhereToVisit = "Jokin paikka vierailla",
+    choosePhoto = "Valitse kuva", uploadFromGallery = "Lataa galleriasta", takePhoto = "Ota kuva", removePhoto = "Poista kuva", cropAndScale = "Rajaa ja skaalaa", usePhoto = "Käytä kuvaa",
 )
 
 private val SV = EN.copy(
@@ -1199,7 +1205,7 @@ private val SV = EN.copy(
     pin = "Fäst", unpin = "Lossa", edit = "Redigera", archive = "Arkivera", unarchive = "Återställ",
     delete = "Ta bort", deleteTripQ = "Ta bort resa?", deletePlaceQ = "Ta bort plats?", deleteLegQ = "Ta bort etapp?",
     cantBeUndone = "Detta kan inte ångras.", archivedTrips = "Arkiverade resor", noArchivedTrips = "Inga arkiverade resor",
-    noDatesYet = "Inga datum än", tripName = "Resans namn", aLegBetween = "En etapp mellan", somewhereToVisit = "Någonstans att besöka", 
+    choosePhoto = "Välj foto", uploadFromGallery = "Ladda upp från galleri", takePhoto = "Ta foto", removePhoto = "Ta bort foto", cropAndScale = "Beskär och skala", usePhoto = "Använd foto",
 )
 
 private val DA = EN.copy(
@@ -1232,7 +1238,7 @@ private val DA = EN.copy(
     pin = "Fastgør", unpin = "Frigør", edit = "Rediger", archive = "Arkiver", unarchive = "Gendan",
     delete = "Slet", deleteTripQ = "Slet rejse?", deletePlaceQ = "Slet sted?", deleteLegQ = "Slet etape?",
     cantBeUndone = "Dette kan ikke fortrydes.", archivedTrips = "Arkiverede rejser", noArchivedTrips = "Ingen arkiverede rejser",
-    noDatesYet = "Ingen datoer endnu", tripName = "Navn på rejse", aLegBetween = "En etape mellem", somewhereToVisit = "Et sted at besøge",
+    choosePhoto = "Vælg foto", uploadFromGallery = "Upload fra galleri", takePhoto = "Tag foto", removePhoto = "Fjern foto", cropAndScale = "Beskær og skaler", usePhoto = "Brug foto",
 )
 
 private val ET = EN.copy(
@@ -1265,7 +1271,7 @@ private val ET = EN.copy(
     pin = "Kinnita", unpin = "Eemalda kinnitus", edit = "Muuda", archive = "Arhiveeri", unarchive = "Taasta arhiivist",
     delete = "Kustuta", deleteTripQ = "Kustuta reis?", deletePlaceQ = "Kustuta koht?", deleteLegQ = "Kustuta etapp?",
     cantBeUndone = "Seda ei saa tagasi võtta.", archivedTrips = "Arhiveeritud reisid", noArchivedTrips = "Arhiveeritud reise pole",
-    noDatesYet = "Kuupäevi pole veel", tripName = "Reisi nimi", aLegBetween = "Etapp vahel", somewhereToVisit = "Koht, mida külastada",
+    choosePhoto = "Vali foto", uploadFromGallery = "Laadi galeriist üles", takePhoto = "Tee foto", removePhoto = "Eemalda foto", cropAndScale = "Kärbi ja skaleeri", usePhoto = "Kasuta fotot",
 )
 
 private val AR = EN.copy(
@@ -1298,7 +1304,7 @@ private val AR = EN.copy(
     pin = "تثبيت", unpin = "إلغاء التثبيت", edit = "تعديل", archive = "أرشفة", unarchive = "إلغاء الأرشفة",
     delete = "حذف", deleteTripQ = "حذف الرحلة؟", deletePlaceQ = "حذف المكان؟", deleteLegQ = "حذف المرحلة؟",
     cantBeUndone = "لا يمكن التراجع عن هذا الإجراء.", archivedTrips = "الرحلات المؤرشفة", noArchivedTrips = "لا توجد رحلات مؤرشفة",
-    noDatesYet = "لا توجد تواريخ بعد", tripName = "اسم الرحلة", aLegBetween = "مرحلة بين", somewhereToVisit = "مكان للزيارة",
+    choosePhoto = "اختر صورة", uploadFromGallery = "تحميل من المعرض", takePhoto = "التقاط صورة", removePhoto = "إزالة الصورة", cropAndScale = "قص وتغيير الحجم", usePhoto = "استخدام الصورة",
 )
 
 private val TR = EN.copy(
@@ -1331,7 +1337,7 @@ private val TR = EN.copy(
     pin = "Sabitle", unpin = "Sabitlemeyi kaldır", edit = "Düzenle", archive = "Arşivle", unarchive = "Arşivden çıkar",
     delete = "Sil", deleteTripQ = "Geziyi sil?", deletePlaceQ = "Yeri sil?", deleteLegQ = "Etabı sil?",
     cantBeUndone = "Bu işlem geri alınamaz.", archivedTrips = "Arşivlenen geziler", noArchivedTrips = "Arşivlenen gezi yok",
-    noDatesYet = "Henüz tarih yok", tripName = "Gezi adı", aLegBetween = "Arasındaki etap", somewhereToVisit = "Ziyaret edilecek bir yer",
+    choosePhoto = "Fotoğraf Seç", uploadFromGallery = "Galeriden Yükle", takePhoto = "Fotoğraf Çek", removePhoto = "Fotoğrafı Kaldır", cropAndScale = "Kırp ve Ölçeklendir", usePhoto = "Fotoğrafı Kullan",
 )
 
 private val VI = EN.copy(
@@ -1364,7 +1370,7 @@ private val VI = EN.copy(
     pin = "Ghim", unpin = "Bỏ ghim", edit = "Chỉnh sửa", archive = "Lưu trữ", unarchive = "Bỏ lưu trữ",
     delete = "Xóa", deleteTripQ = "Xóa chuyến đi?", deletePlaceQ = "Xóa địa điểm?", deleteLegQ = "Xóa chặng?",
     cantBeUndone = "Hành động này không thể hoàn tác.", archivedTrips = "Chuyến đi đã lưu trữ", noArchivedTrips = "Không có chuyến đi lưu trữ",
-    noDatesYet = "Chưa có ngày", tripName = "Tên chuyến đi", aLegBetween = "Một chặng giữa", somewhereToVisit = "Nơi nào đó để tham quan",
+    choosePhoto = "Chọn ảnh", uploadFromGallery = "Tải lên từ thư viện", takePhoto = "Chụp ảnh", removePhoto = "Xóa ảnh", cropAndScale = "Cắt và thu phóng", usePhoto = "Sử dụng ảnh",
 )
 
 private val ID = EN.copy(
@@ -1397,7 +1403,7 @@ private val ID = EN.copy(
     pin = "Sematkan", unpin = "Lepas sematan", edit = "Edit", archive = "Arsip", unarchive = "Buka arsip",
     delete = "Hapus", deleteTripQ = "Hapus perjalanan?", deletePlaceQ = "Hapus tempat?", deleteLegQ = "Hapus tahap?",
     cantBeUndone = "Tindakan ini tidak dapat dibatalkan.", archivedTrips = "Perjalanan diarsipkan", noArchivedTrips = "Tidak ada perjalanan diarsipkan",
-    noDatesYet = "Belum ada tanggal", tripName = "Nama perjalanan", aLegBetween = "Tahap antara", somewhereToVisit = "Suatu tempat untuk dikunjungi",
+    choosePhoto = "Pilih Foto", uploadFromGallery = "Unggah Dari Galeri", takePhoto = "Ambil Foto", removePhoto = "Hapus Foto", cropAndScale = "Potong dan Skala", usePhoto = "Gunakan Foto",
 )
 
 private val TH = EN.copy(
@@ -1430,7 +1436,7 @@ private val TH = EN.copy(
     pin = "ปักหมุด", unpin = "ถอนหมุด", edit = "แก้ไข", archive = "เก็บถาวร", unarchive = "ยกเลิกการเก็บถาวร",
     delete = "ลบ", deleteTripQ = "ลบการเดินทาง?", deletePlaceQ = "ลบสถานที่?", deleteLegQ = "ลบช่วง?",
     cantBeUndone = "ไม่สามารถย้อนกลับการดำเนินการนี้ได้", archivedTrips = "การเดินทางที่เก็บถาวร", noArchivedTrips = "ไม่มีการเดินทางที่เก็บถาวร",
-    noDatesYet = "ยังไม่มีวันที่", tripName = "ชื่อการเดินทาง", aLegBetween = "ช่วงระหว่าง", somewhereToVisit = "สถานที่ที่น่าไปเยือน",
+    choosePhoto = "เลือกรูปภาพ", uploadFromGallery = "อัปโหลดจากแกลเลอรี", takePhoto = "ถ่ายภาพ", removePhoto = "ลบรูปภาพ", cropAndScale = "ครอบตัดและปรับขนาด", usePhoto = "ใช้รูปภาพ",
 )
 
 private val HE = EN.copy(
@@ -1463,7 +1469,7 @@ private val HE = EN.copy(
     pin = "נעיצה", unpin = "ביטול נעיצה", edit = "עריכה", archive = "ארכוב", unarchive = "ביטול ארכוב",
     delete = "מחיקה", deleteTripQ = "למחוק את הטיול?", deletePlaceQ = "למחוק את המקום?", deleteLegQ = "למחוק את המקטע?",
     cantBeUndone = "לא ניתן לבטל פעולה זו.", archivedTrips = "טיולים בארכיון", noArchivedTrips = "אין טיולים בארכיון",
-    noDatesYet = "עדיין אין תאריכים", tripName = "שם הטיול", aLegBetween = "מקטע בין", somewhereToVisit = "מקום לבקר בו",
+    choosePhoto = "בחר תמונה", uploadFromGallery = "העלה מהגלריה", takePhoto = "צלם תמונה", removePhoto = "הסר תמונה", cropAndScale = "חתוך ושנה קנה מידה", usePhoto = "השתמש בתמונה",
 )
 
 private val BN = EN.copy(
@@ -1496,7 +1502,7 @@ private val BN = EN.copy(
     pin = "পিন করুন", unpin = "আনপিন করুন", edit = "সম্পাদনা করুন", archive = "আর্কাইভ করুন", unarchive = "আর্কাইভ থেকে সরান",
     delete = "মুছে ফেলুন", deleteTripQ = "ভ্রমণটি কি মুছে ফেলবেন?", deletePlaceQ = "স্থানটি কি মুছে ফেলবেন?", deleteLegQ = "পর্যায়টি কি মুছে ফেলবেন?",
     cantBeUndone = "এই কাজটি ফিরিয়ে নেওয়া যাবে না।", archivedTrips = "আর্কাইভ করা ভ্রমণ", noArchivedTrips = "কোন আর্কাইভ করা ভ্রমণ নেই",
-    noDatesYet = "এখনও কোন তারিখ নেই", tripName = "ভ্রমণের নাম", aLegBetween = "এর মধ্যে একটি পর্যায়", somewhereToVisit = "ভ্রমণের জন্য কোনো জায়গা",
+    choosePhoto = "ছবি নির্বাচন করুন", uploadFromGallery = "গ্যালারি থেকে আপলোড করুন", takePhoto = "ছবি তুলুন", removePhoto = "ছবি সরান", cropAndScale = "ক্রপ এবং স্কেল করুন", usePhoto = "ছবি ব্যবহার করুন",
 )
 
 private val TG = EN.copy(
@@ -1534,7 +1540,7 @@ private val TG = EN.copy(
     pin = "I-pin", unpin = "I-unpin", edit = "I-edit", archive = "I-archive", unarchive = "I-unarchive",
     delete = "I-delete", deleteTripQ = "I-delete ang biyahe?", deletePlaceQ = "I-delete ang lugar?", deleteLegQ = "I-delete ang yugto?",
     cantBeUndone = "Hindi na ito mababawi.", archivedTrips = "Mga naka-archive na biyahe", noArchivedTrips = "Walang mga naka-archive na biyahe",
-    noDatesYet = "Wala pang mga petsa", tripName = "Pangalan ng biyahe", aLegBetween = "Isang yugto sa pagitan ng", somewhereToVisit = "Isang lugar na mapupuntahan",
+    choosePhoto = "Pumili ng Larawan", uploadFromGallery = "Mag-upload Mula sa Gallery", takePhoto = "Kumuha ng Larawan", removePhoto = "Alisin ang Larawan", cropAndScale = "I-crop at I-scale", usePhoto = "Gamitin ang Larawan",
 )
 
 private val SI = EN.copy(
@@ -1567,7 +1573,7 @@ private val SI = EN.copy(
     pin = "පින් කරන්න", unpin = "පින් ඉවත් කරන්න", edit = "සංස්කරණය කරන්න", archive = "සංරක්ෂිත කරන්න", unarchive = "සංරක්ෂිතයෙන් ඉවත් කරන්න",
     delete = "මකන්න", deleteTripQ = "ගමන මකා දමන්නද?", deletePlaceQ = "ස්ථානය මකා දමන්නද?", deleteLegQ = "ගමන් වාරය මකා දමන්නද?",
     cantBeUndone = "මෙය ආපසු හැරවිය නොහැක.", archivedTrips = "සංරක්ෂිත ගමන්", noArchivedTrips = "සංරක්ෂිත ගමන් නැත",
-    noDatesYet = "තවමත් දින නැත", tripName = "ගමනේ නම", aLegBetween = "අතර ගමන් වාරයක්", somewhereToVisit = "නැරඹීමට ස්ථානයක්",
+    choosePhoto = "ඡායාරූපයක් තෝරන්න", uploadFromGallery = "ගැලරියෙන් උඩුගත කරන්න", takePhoto = "ඡායාරූපයක් ගන්න", removePhoto = "ඡායාරූපය ඉවත් කරන්න", cropAndScale = "කැපීම සහ පරිමාණය කරන්න", usePhoto = "ඡායාරූපය භාවිතා කරන්න",
 )
 
 /**

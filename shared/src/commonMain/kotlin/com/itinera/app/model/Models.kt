@@ -87,6 +87,7 @@ data class UserProfile(
     val street: String = "",
     val city: String = "",
     val postalCode: String = "",
+    val photoUrl: String = "",
     @Transient val photoBytes: ByteArray? = null,   // ⬅ excluded from Firestore
 ) {
     val fullName: String get() = "$name $surname".trim()

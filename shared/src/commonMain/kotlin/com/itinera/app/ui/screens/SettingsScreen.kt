@@ -16,11 +16,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.UserProfile
 import com.itinera.app.ui.components.TopBar
@@ -181,9 +184,22 @@ private fun ThinDivider() {
 @Composable
 fun ProfileAvatar(profile: UserProfile, size: androidx.compose.ui.unit.Dp) {
     val primary = MaterialTheme.colorScheme.primary
+
+    // Show photo if we have one (bytes take priority over URL for instant preview)
+    val imageModel = profile.photoBytes ?: profile.photoUrl.takeIf { it.isNotBlank() }
+
     Surface(modifier = Modifier.size(size), shape = CircleShape, color = primary.copy(alpha = 0.15f)) {
-        Box(contentAlignment = Alignment.Center) {
-            Text(profile.initials, color = primary, fontWeight = FontWeight.SemiBold)
+        if (imageModel != null) {
+            AsyncImage(
+                model = imageModel,
+                contentDescription = "Profile photo",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.size(size).clip(CircleShape),
+            )
+        } else {
+            Box(contentAlignment = Alignment.Center) {
+                Text(profile.initials, color = primary, fontWeight = FontWeight.SemiBold)
+            }
         }
     }
 }
