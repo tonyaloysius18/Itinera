@@ -54,12 +54,15 @@ fun LoginScreen(
     authService: AuthService,
     onAuthed: () -> Unit,
     onCreateAccount: () -> Unit,
-    onMessage: (String) -> Unit,              // ⬅ ADD: triggers the app-level pill
+    onMessage: (String) -> Unit,
 ) {
     val s = LocalStrings.current
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+
+    var showResetDialog by remember { mutableStateOf(false) }
+    var resetEmail by remember { mutableStateOf("") }
 
     var loading by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
@@ -208,7 +211,13 @@ fun LoginScreen(
                 style = MaterialTheme.typography.bodySmall,
                 color = onImage,
                 textAlign = TextAlign.End,
-                modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 6.dp)
+                    .clickable {
+                        resetEmail = email          // prefill with whatever they typed
+                        showResetDialog = true
+                    },
             )
 
             Spacer(Modifier.height(16.dp))
@@ -270,6 +279,46 @@ fun LoginScreen(
                     .clickable { onCreateAccount() },
             )
         }
+    }
+    if (showResetDialog) {
+        AlertDialog(
+            onDismissRequest = { showResetDialog = false },
+            title = { Text(s.forgotPassword) },
+            text = {
+                Column {
+                    Text(s.resetPasswordPrompt)   // "Enter your email and we'll send a reset link."
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = resetEmail,
+                        onValueChange = { resetEmail = it },
+                        label = { Text(s.email) },
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    if (resetEmail.isBlank()) {
+                        onMessage(s.fillAllFields)
+                        return@TextButton
+                    }
+                    showResetDialog = false
+                    scope.launch {
+                        try {
+                            authService.sendPasswordReset(resetEmail.trim())
+                            onMessage(s.resetEmailSent)   // "Password reset email sent"
+                        } catch (e: Exception) {
+                            onMessage(s.resetEmailFailed) // "Couldn't send reset email"
+                        }
+                    }
+                }) { Text(s.ok) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showResetDialog = false }) { Text(s.cancel) }
+            },
+        )
     }
 }
 

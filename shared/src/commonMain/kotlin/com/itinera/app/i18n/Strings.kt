@@ -110,6 +110,7 @@ data class Strings(
     val changesSaved: String, val invalidCredentials: String, val uppercase: String, val lowercase: String, val number: String, val specialCharacter: String, val minimumCharacters: String,
 
     val choosePhoto: String, val uploadFromGallery: String, val takePhoto: String, val removePhoto: String, val cropAndScale: String, val usePhoto: String,
+    val resetPasswordPrompt: String, val resetEmailSent: String, val resetEmailFailed: String,
 
 
     val add: String, val addToItinerary: String, val travel: String, val place: String,
@@ -152,6 +153,7 @@ private val EN = Strings(
     noDatesYet = "No Dates Yet", tripName = "Trip Name", aLegBetween = "A Leg Between", somewhereToVisit = "Somewhere To Visit",
 
     choosePhoto = "Choose Photo", uploadFromGallery = "Upload From Gallery", takePhoto = "Take Photo", removePhoto = "Remove Photo", cropAndScale = "Crop And Scale", usePhoto = "Use Photo",
+    resetPasswordPrompt = "Enter your email to reset your password", resetEmailSent = "An email has been sent to reset your password", resetEmailFailed = "Failed to send email to reset password.",
 )
 
 private val FR = EN.copy(
@@ -186,6 +188,7 @@ private val FR = EN.copy(
     cantBeUndone = "Cela ne peut pas être annulé.", archivedTrips = "Voyages archivés", noArchivedTrips = "Aucun voyage archivé",
     noDatesYet = "Aucune date trouvée", tripName = "Nom du voyage", aLegBetween = "Un trajet entre", somewhereToVisit = "Où visiter",
     choosePhoto = "Choisir une photo", uploadFromGallery = "Télécharger depuis la galerie", takePhoto = "Prendre une photo", removePhoto = "Supprimer la photo", cropAndScale = "Couper et agrandir", usePhoto = "Utiliser la photo",
+    resetPasswordPrompt = "Entrez votre adresse e-mail pour réinitialiser votre mot de passe", resetEmailSent = "Un email a été envoyé pour réinitialiser votre mot de passe", resetEmailFailed = "Échec de l'envoi d'email pour réinitialiser le mot de passe.",
 )
 
 private val ES = EN.copy(
@@ -213,6 +216,8 @@ private val ES = EN.copy(
     changesSaved = "Tus cambios han sido guardados", invalidCredentials = "Credenciales inválidas",
     uppercase = "Al menos una mayúscula", lowercase = "Al menos una minúscula", number = "Al menos un número", specialCharacter = "Al menos un carácter especial", minimumCharacters = "Mínimo 6 caracteres",
     choosePhoto = "Elegir foto", uploadFromGallery = "Subir desde galería", takePhoto = "Tomar foto", removePhoto = "Eliminar foto", cropAndScale = "Cortar y escalar", usePhoto = "Usar foto",
+    resetPasswordPrompt = "Ingrese su correo electrónico para restablecer su contraseña", resetEmailSent = "Se ha enviado un correo electrónico para restablecer su contraseña", resetEmailFailed = "Error al enviar el correo electrónico para restablecer la contraseña.",
+
 
 
     add = "Añadir", addToItinerary = "Añadir al itinerario", travel = "Viaje", place = "Lugar",
@@ -249,6 +254,7 @@ private val DE = EN.copy(
     changesSaved = "Ihre Änderungen wurden gespeichert", invalidCredentials = "Ungültige Anmeldedaten",
     uppercase = "Mindestens ein Großbuchstabe", lowercase = "Mindestens ein Kleinbuchstabe", number = "Mindestens eine Zahl", specialCharacter = "Mindestens ein Sonderzeichen", minimumCharacters = "Mindestens 6 Zeichen",
 
+
     add = "Hinzufügen", addToItinerary = "Zum Reiseplan hinzufügen", travel = "Reise", place = "Ort",
     newPlace = "Neuer Ort", editPlace = "Ort bearbeiten", landmark = "Wahrzeichen (optional)", savePlace = "Ort speichern", searchTrips = "Reisen suchen",
     newTrip = "Neue Reise", renameTrip = "Reise umbenennen", create = "Erstellen", save = "Speichern",
@@ -257,6 +263,7 @@ private val DE = EN.copy(
     cantBeUndone = "Dies kann nicht rückgängig gemacht werden.", archivedTrips = "Archivierte Reisen", noArchivedTrips = "Keine archivierten Reisen",
     noDatesYet = "Noch keine Daten", tripName = "Reisename", aLegBetween = "Eine Etappe zwischen", somewhereToVisit = "Ein Ort zum Besuchen",
     choosePhoto = "Foto auswählen", uploadFromGallery = "Aus Galerie hochladen", takePhoto = "Foto aufnehmen", removePhoto = "Foto entfernen", cropAndScale = "Zuschneiden und skalieren", usePhoto = "Foto verwenden",
+    resetPasswordPrompt = "Geben Sie Ihre E-Mail ein, um Ihr Passwort zurückzusetzen", resetEmailSent = "Eine E-Mail zum Zurücksetzen Ihres Passworts wurde gesendet", resetEmailFailed = "E-Mail zum Zurücksetzen des Passworts konnte nicht gesendet werden.",
 )
 
 private val IT = EN.copy(
@@ -294,6 +301,7 @@ private val IT = EN.copy(
     cantBeUndone = "Questa azione non può essere annullata.", archivedTrips = "Viaggi archiviati", noArchivedTrips = "Nessun viaggio archiviato",
     noDatesYet = "Nessuna data ancora", tripName = "Nome del viaggio", aLegBetween = "Una tratta tra", somewhereToVisit = "Un luogo da visitare",
     choosePhoto = "Scegli foto", uploadFromGallery = "Carica dalla galleria", takePhoto = "Scatta foto", removePhoto = "Rimuovi foto", cropAndScale = "Ritaglia e scala", usePhoto = "Usa foto",
+    resetPasswordPrompt = "Inserisci la tua email per reimpostare la password", resetEmailSent = "È stata inviata un'email per reimpostare la password", resetEmailFailed = "Impossibile inviare l'email per reimpostare la password.",
 )
 
 private val PT = EN.copy(
@@ -332,6 +340,7 @@ private val PT = EN.copy(
     cantBeUndone = "Isso não pode ser desfeito.", archivedTrips = "Viagens arquivadas", noArchivedTrips = "Nenhuma viagem arquivada",
     noDatesYet = "Sem datas ainda", tripName = "Nome da viagem", aLegBetween = "Um trecho entre", somewhereToVisit = "Algum lugar para visitar",
     choosePhoto = "Escolher foto", uploadFromGallery = "Carregar da galeria", takePhoto = "Tirar foto", removePhoto = "Remover foto", cropAndScale = "Recortar e dimensionar", usePhoto = "Usar foto",
+    resetPasswordPrompt = "Insira seu e-mail para redefinir sua senha", resetEmailSent = "Um e-mail foi enviado para redefinir sua senha", resetEmailFailed = "Falha ao enviar e-mail para redefinir a senha.",
 )
 private val NL = EN.copy(
     name = "Naam", surname = "Achternaam", dob = "Geboortedatum", street = "Straat", city = "Stad", postelCode = "Postcode",
@@ -367,6 +376,7 @@ private val NL = EN.copy(
     cantBeUndone = "Dit kan niet ongedaan worden gemaakt.", archivedTrips = "Gearchiveerde reizen", noArchivedTrips = "Geen gearchiveerde reizen",
     noDatesYet = "Nog geen data", tripName = "Reisnaam", aLegBetween = "Een traject tussen", somewhereToVisit = "Ergens om te bezoeken",
     choosePhoto = "Foto kiezen", uploadFromGallery = "Uploaden uit galerij", takePhoto = "Foto maken", removePhoto = "Foto verwijderen", cropAndScale = "Bijsnijden en schalen", usePhoto = "Foto gebruiken",
+    resetPasswordPrompt = "Voer je e-mailadres in om je wachtwoord te resetten", resetEmailSent = "Er is een e-mail verzonden om je wachtwoord te resetten", resetEmailFailed = "E-mail voor het resetten van wachtwoord verzenden mislukt.",
 )
 
 private val PL = EN.copy(
@@ -404,6 +414,7 @@ private val PL = EN.copy(
     cantBeUndone = "Tego nie można cofnąć.", archivedTrips = "Zarchiwizowane podróże", noArchivedTrips = "Brak zarchiwizowanych podróży",
     noDatesYet = "Brak dat", tripName = "Nazwa podróży", aLegBetween = "Odcinek między", somewhereToVisit = "Miejsce do odwiedzenia",
     choosePhoto = "Wybierz zdjęcie", uploadFromGallery = "Prześlij z galerii", takePhoto = "Zrób zdjęcie", removePhoto = "Usuń zdjęcie", cropAndScale = "Kadruj i skaluj", usePhoto = "Użyj zdjęcia",
+    resetPasswordPrompt = "Wprowadź swój e-mail, aby zresetować hasło", resetEmailSent = "E-mail z instrukcją resetowania hasła został wysłany", resetEmailFailed = "Nie udało się wysłać e-maila do resetowania hasła.",
 )
 
 private val ZH = EN.copy(
@@ -437,6 +448,7 @@ private val ZH = EN.copy(
     cantBeUndone = "此操作无法撤销。", archivedTrips = "已归档行程", noArchivedTrips = "没有已归档行程",
     noDatesYet = "暂无日期", tripName = "行程名称", aLegBetween = "之间的行程", somewhereToVisit = "想去的地方",
     choosePhoto = "选择照片", uploadFromGallery = "从相册上传", takePhoto = "拍照", removePhoto = "移除照片", cropAndScale = "裁剪和缩放", usePhoto = "使用照片",
+    resetPasswordPrompt = "输入您的电子邮件以重置密码", resetEmailSent = "重置密码的电子邮件已发送", resetEmailFailed = "发送重置密码电子邮件失败。",
 )
 
 private val JP = EN.copy(
@@ -505,6 +517,7 @@ private val KR = EN.copy(
     cantBeUndone = "이 작업은 되돌릴 수 없습니다.", archivedTrips = "보관된 여행", noArchivedTrips = "보관된 여행이 없습니다",
     noDatesYet = "아직 날짜 없음", tripName = "여행 이름", aLegBetween = "사이의 경로", somewhereToVisit = "방문할 장소",
     choosePhoto = "사진 선택", uploadFromGallery = "갤러리에서 업로드", takePhoto = "사진 촬영", removePhoto = "사진 삭제", cropAndScale = "자르기 및 크기 조정", usePhoto = "사진 사용",
+    resetPasswordPrompt = "비밀번호를 재설정하려면 이메일을 입력하세요", resetEmailSent = "비밀번호 재설정을 위한 이메일이 전송되었습니다", resetEmailFailed = "비밀번호 재설정 이메일 전송에 실패했습니다.",
 )
 
 private val RU = EN.copy(
@@ -542,6 +555,7 @@ private val RU = EN.copy(
     cantBeUndone = "Это действие нельзя отменить.", archivedTrips = "Архивные путешествия", noArchivedTrips = "Нет архивных путешествий",
     noDatesYet = "Дат пока нет", tripName = "Название путешествия", aLegBetween = "Путь между", somewhereToVisit = "Место для посещения",
     choosePhoto = "Выбрать фото", uploadFromGallery = "Загрузить из галереи", takePhoto = "Сделать фото", removePhoto = "Удалить фото", cropAndScale = "Обрезать и масштабировать", usePhoto = "Использовать фото",
+    resetPasswordPrompt = "Введите свой e-mail, чтобы сбросить пароль", resetEmailSent = "Письмо для сброса пароля было отправлено", resetEmailFailed = "Не удалось отправить письмо для сброса пароля.",
 )
 
 private val TAM = EN.copy(
@@ -655,6 +669,7 @@ private val UKR = EN.copy(
     cantBeUndone = "Цю дію неможливо скасувати.", archivedTrips = "Архівні подорожі", noArchivedTrips = "Немає архівних подорожей",
     noDatesYet = "Ще немає дат", tripName = "Назва подорожі", aLegBetween = "Етап між", somewhereToVisit = "Місце для відвідування",
     choosePhoto = "Вибрати фото", uploadFromGallery = "Завантажити з галереї", takePhoto = "Зробити фото", removePhoto = "Видалити фото", cropAndScale = "Обрізати та масштабувати", usePhoto = "Використати фото",
+    resetPasswordPrompt = "Введіть свою пошту, щоб скинути пароль", resetEmailSent = "Надіслано електронний лист для скидання пароля", resetEmailFailed = "Не вдалося надіслати лист для скидання пароля.",
 )
 
 private val HUN = EN.copy(
@@ -722,6 +737,7 @@ private val RO = EN.copy(
     cantBeUndone = "Această acțiune nu poate fi anulată.", archivedTrips = "Călătorii arhivate", noArchivedTrips = "Nicio călătorie arhivată",
     noDatesYet = "Încă nicio dată", tripName = "Numele călătoriei", aLegBetween = "O etapă între", somewhereToVisit = "Un loc de vizitat",
     choosePhoto = "Alegeți fotografia", uploadFromGallery = "Încărcați din galerie", takePhoto = "Faceți o fotografie", removePhoto = "Eliminați fotografia", cropAndScale = "Decupați și scalați", usePhoto = "Utilizați fotografia",
+    resetPasswordPrompt = "Introduceți e-mailul pentru a reseta parola", resetEmailSent = "A fost trimis un e-mail pentru resetarea parolei", resetEmailFailed = "Trimiterea e-mailului pentru resetarea parolei a eșuat.",
 )
 
 private val GR = EN.copy(
@@ -756,6 +772,7 @@ private val GR = EN.copy(
     cantBeUndone = "Αυτή η ενέργεια δεν αναιρείται.", archivedTrips = "Αρχειοθετημένα ταξίδια", noArchivedTrips = "Δεν υπάρχουν αρχειοθετημένα ταξίδια",
     noDatesYet = "Δεν υπάρχουν ημερομηνίες ακόμη", tripName = "Όνομα ταξιδιού", aLegBetween = "Ένα σκέλος μεταξύ", somewhereToVisit = "Κάπου να επισκεφθείτε",
     choosePhoto = "Επιλογή φωτογραφίας", uploadFromGallery = "Μεταφόρτωση από τη συλλογή", takePhoto = "Λήψη φωτογραφίας", removePhoto = "Αφαίρεση φωτογραφίας", cropAndScale = "Περικοπή και κλιμάκωση", usePhoto = "Χρήση φωτογραφίας",
+    resetPasswordPrompt = "Εισαγάγετε το email σας για επαναφορά κωδικού", resetEmailSent = "Στάλθηκε email για την επαναφορά του κωδικού σας", resetEmailFailed = "Αποτυχία αποστολής email επαναφοράς κωδικού.",
 )
 
 private val KA = EN.copy(
@@ -790,6 +807,7 @@ private val KA = EN.copy(
     cantBeUndone = "ეს ქმედება შეუქცევადია.", archivedTrips = "დაარქივებული მოგზაურობები", noArchivedTrips = "დაარქივებული მოგზაურობები არ არის",
     noDatesYet = "თარიღები ჯერ არ არის", tripName = "მოგზაურობის სახელი", aLegBetween = "ეტაპი შორის", somewhereToVisit = "ადგილი მოსანახულებლად",
     choosePhoto = "ფოტოს არჩევა", uploadFromGallery = "გალერეიდან ატვირთვა", takePhoto = "ფოტოს გადაღება", removePhoto = "ფოტოს წაშლა", cropAndScale = "მოჭრა და მასშტაბირება", usePhoto = "ფოტოს გამოყენება",
+    resetPasswordPrompt = "პაროლის აღსადგენად შეიყვანეთ ელფოსტა", resetEmailSent = "პაროლის აღსადგენად ელფოსტა გაიგზავნა", resetEmailFailed = "ელფოსტის გაგზავნა ვერ მოხერხდა.",
 )
 
 private val BG = EN.copy(
@@ -824,6 +842,7 @@ private val BG = EN.copy(
     cantBeUndone = "Това не може да бъде отменено.", archivedTrips = "Архивирани пътувания", noArchivedTrips = "Няма архивирани пътувания",
     noDatesYet = "Все още няма дати", tripName = "Име на пътуването", aLegBetween = "Етап между", somewhereToVisit = "Място за посещение",
     choosePhoto = "Избор на снимка", uploadFromGallery = "Качване от галерията", takePhoto = "Снимане", removePhoto = "Премахване на снимка", cropAndScale = "Изрязване и мащабиране", usePhoto = "Използване на снимка",
+    resetPasswordPrompt = "Въведете имейл за нулиране на паролата", resetEmailSent = "Изпратен е имейл за нулиране на паролата ви", resetEmailFailed = "Неуспешно изпращане на имейл за нулиране.",
 )
 
 private val CZ = EN.copy(
@@ -858,6 +877,7 @@ private val CZ = EN.copy(
     cantBeUndone = "Tuto akci nelze vzít zpět.", archivedTrips = "Archivované cesty", noArchivedTrips = "Žádné archivované cesty",
     noDatesYet = "Zatím žádná data", tripName = "Název cesty", aLegBetween = "Etapa mezi", somewhereToVisit = "Místo k návštěvě",
     choosePhoto = "Vybrat fotku", uploadFromGallery = "Nahrát z galerie", takePhoto = "Pořídit fotku", removePhoto = "Odstranit fotku", cropAndScale = "Oříznout a změnit měřítko", usePhoto = "Použít fotku",
+    resetPasswordPrompt = "Zadejte svůj e-mail pro resetování hesla", resetEmailSent = "E-mail k resetování hesla byl odeslán", resetEmailFailed = "Nepodařilo se odeslat e-mail k resetování hesla.",
 )
 
 private val LV = EN.copy(
@@ -1130,6 +1150,7 @@ private val MO = EN.copy(
     cantBeUndone = "Această acțiune nu poate fi anulată.", archivedTrips = "Călătorii arhivate", noArchivedTrips = "Nicio călătorie arhivată",
     noDatesYet = "Încă nicio dată", tripName = "Numele călătoriei", aLegBetween = "O etapă între", somewhereToVisit = "Un loc de vizitat",
     choosePhoto = "Alegeți fotografia", uploadFromGallery = "Încărcați din galerie", takePhoto = "Faceți o fotografie", removePhoto = "Eliminați fotografia", cropAndScale = "Decupați și scalați", usePhoto = "Utilizați fotografia",
+    resetPasswordPrompt = "Introduceți e-mailul pentru a reseta parola", resetEmailSent = "A fost trimis un e-mail pentru resetarea parolei", resetEmailFailed = "Trimiterea e-mailului pentru resetarea parolei a eșuat.",
 )
 
 private val NO = EN.copy(

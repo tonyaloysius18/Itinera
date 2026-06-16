@@ -46,4 +46,8 @@ class AuthService {
     suspend fun signOut() {
         Firebase.auth.signOut()
     }
+
+    suspend fun sendPasswordReset(email: String) {
+        Firebase.auth.sendPasswordResetEmail(email)
+    }
 }
