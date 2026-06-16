@@ -173,18 +173,6 @@ fun LoginScreen(
                 shape = textFieldShape,
             )
 
-//            EmailFieldWithSuggestions(
-//                email = email,
-//                onEmailChange = { email = it; error = null },
-//                label = { RequiredLabel(s.email) },
-//                shape = textFieldShape,
-//                modifier = Modifier.fillMaxWidth(),
-//            )
-
-
-
-
-
             Spacer(Modifier.height(12.dp))
             OutlinedTextField(
                 value = password, onValueChange = { password = it },
