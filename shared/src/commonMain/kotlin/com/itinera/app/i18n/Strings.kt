@@ -16,17 +16,17 @@ enum class Language(val englishName: String, val nativeName: String) {
     PORTUGUESE("Portuguese", "Português"),
     DUTCH("Dutch", "Nederlands"),
     POLISH("Polish", "Polski"),
-    
+
     CHINESE("Chinese", "中文"),
-    
+
     JAPANESE("Japanese", "日本語"),
-    
+
     KOREAN("Korean", "한국어"),
-    
+
     RUSSIAN("Russian", "Русский"),
-    
+
     TAMIL("Tamil", "தமிழ்"),
-    
+
     HINDI("Hindi", "हिंदी"),
 
     UKRAINIAN("Ukrainian", "Українська"),
@@ -34,41 +34,41 @@ enum class Language(val englishName: String, val nativeName: String) {
     HUNGARIAN("Hungarian", "Magyar"),
 
     ROMANIAN("Romanian", "Română"),
-    
+
     GREEK("Greek", "Ελληνικά"),
-    
+
     GEORGIAN("Georgian", "ქართული"),
-    
+
     BULGARIAN("Bulgarian", "български"),
-    
+
     CZECH("Czech", "Čeština"),
-    
+
     LATVIAN("Latvian", "Latviešu"),
-    
+
     LITHUANIAN("Lithuanian", "Lietuvių"),
-    
+
     SLOVAK("Slovak", "Slovenčina"),
-    
+
     SLOVENIAN("Slovenian", "Slovenščina"),
-    
+
     SERBIAN("Serbian", "Српски"),
-    
+
     ALBANIAN("Albanian", "Shqip"),
-    
+
     MACEDONIAN("Macedonian", "Македонски"),
-    
+
     MOLDAVIAN("Moldovan", "Молдавски"),
-    
+
     NORWEGIAN("Norwegian", "Norsk"),
-    
+
     FINNISH("Finnish", "Suomi"),
-    
+
     SWEDISH("Swedish", "Svenska"),
-    
+
     DANISH("Danish", "Dansk"),
-    
+
     ESTONIAN("Estonian", "Eesti"),
-    
+
     ARABIC("Arabic", "العربية"),
     TURKISH("Turkish", "Türkçe"),
     VIETNAMESE("Vietnamese", "Tiếng Việt"),
@@ -102,7 +102,7 @@ data class Strings(
     val documents: String, val nextUp: String, val legsTravelled: String, val syncWholeTrip: String, val addToPhoneCalendar: String,
     val remindMe: String, val chooseLanguage: String, val followPhone: String, val ok: String, val cancel: String, val address: String,
     val editProfile: String, val newPassword: String, val saveChanges: String, val systemDefault: String, val light: String,
-    val dark: String, val matchYourPhone: String, val currency: String, val convert: String, 
+    val dark: String, val matchYourPhone: String, val currency: String, val convert: String,
     val bookings: String, val packing: String, val money: String, val gadget: String, val other: String, val needToAdd: String, val section: String,
     val amount: String, val validAmount: String, val couldntFetch: String, val fillAllFields: String, val loginFailed: String,
     val passwordTooShort: String, val signupFailed: String, val deleteAccount: String, val deleteAccountConfirm: String, val deleteButton: String,
@@ -141,7 +141,7 @@ private val EN = Strings(
     deleteAccount = "Delete Account", deleteAccountConfirm = "This permanently deletes your account and all your data. This cannot be undone.", deleteButton = "Delete",
     showPassword = "Show Password", hidePassword = "Hide Password", back = "Back", recentLoginRequired = "Could not save. To change your password, log out and back in, then try again.",
     accountCreated = "Your Account Has Been Successfully Created", accountDeleted = "Your Account Has Been Successfully Deleted",
-    changesSaved = "Your Changes Have Been Saved", invalidCredentials = "Invalid Credentials", 
+    changesSaved = "Your Changes Have Been Saved", invalidCredentials = "Invalid Credentials",
     uppercase = "At least one uppercase letter", lowercase = "At least one lowercase letter", number = "At least one number", specialCharacter = "At least one special character", minimumCharacters = "Minimum 6 characters",
     add = "Add", addToItinerary = "Add To Itinerary", travel = "Travel", place = "Place",
     newPlace = "New Place", editPlace = "Edit Place", landmark = "Landmark (Optional)", savePlace = "Save Place", searchTrips = "Search Trips",
@@ -167,7 +167,7 @@ private val FR = EN.copy(
     nextUp = "à venir", legsTravelled = "trajets effectués", syncWholeTrip = "Synchroniser tout le voyage", addToPhoneCalendar = "Ajouter au calendrier", remindMe = "Me rappeler",
     chooseLanguage = "Choisir une langue", followPhone = "Suivre la langue du téléphone", ok = "OK", cancel = "Annuler", address = "Adresse", editProfile = "Modifier le profil",
     newPassword = "Nouveau mot de passe", saveChanges = "Enregistrer les modifications", systemDefault = "Par défaut du système", light = "Clair", dark = "Sombre",
-    matchYourPhone = "Match votre téléphone", currency = "Devise", orDivider = "ou", convert = "Convertir", bookings = "Réservations", packing = "Emballage", money = "Argent",
+    matchYourPhone = "Suivre votre téléphone", currency = "Devise", orDivider = "ou", convert = "Convertir", bookings = "Réservations", packing = "Emballage", money = "Argent",
     gadget = "Appareil", other = "Autre", needToAdd = "Que voulez-vous ajouter ?", section = "Section",
     amount = "Montant", validAmount = "Entrez un montant valide", couldntFetch = "Impossible de récupérer le taux. Vérifiez votre connexion.",
     fillAllFields = "Veuillez remplir tous les champs", loginFailed = "Connexion échouée. Vérifiez votre adresse e-mail et mot de passe.",
@@ -178,12 +178,12 @@ private val FR = EN.copy(
     accountCreated = "Votre compte a été créé avec succès", accountDeleted = "Votre compte a été supprimé avec succès",
     changesSaved = "Vos modifications ont été enregistrées", invalidCredentials = "Identifiants invalides",
     uppercase = "Au moins une majuscule", lowercase = "Au moins une minuscule", number = "Au moins un chiffre", specialCharacter = "Au moins un caractère spécial", minimumCharacters = "Au moins 6 caractères",
-    add = "Ajouter", addToItinerary = "Ajouter à l'itinéraire", travel = "Voyage", place = "Lieu", 
-    newPlace = "Nouveau lieu", editPlace = "Modifier le lieu", landmark = "Point de repère (facultatif)", savePlace = "Enregistrer le lieu", searchTrips = "Rechercher des voyages", 
-    newTrip = "Nouveau voyage", renameTrip = "Renommer le voyage", create = "Créer", save = "Enregistrer", 
-    pin = "Épingler", unpin = "Désépingler", edit = "Modifier", archive = "Archiver", unarchive = "Déarchiver", 
-    delete = "Supprimer", deleteTripQ = "Supprimer le voyage?", deletePlaceQ = "Supprimer le lieu?", deleteLegQ = "Supprimer le trajet?", 
-    cantBeUndone = "Cela ne peut pas être annulé.", archivedTrips = "Voyages archivés", noArchivedTrips = "Aucun voyage archivé", 
+    add = "Ajouter", addToItinerary = "Ajouter à l'itinéraire", travel = "Voyage", place = "Lieu",
+    newPlace = "Nouveau lieu", editPlace = "Modifier le lieu", landmark = "Point de repère (facultatif)", savePlace = "Enregistrer le lieu", searchTrips = "Rechercher des voyages",
+    newTrip = "Nouveau voyage", renameTrip = "Renommer le voyage", create = "Créer", save = "Enregistrer",
+    pin = "Épingler", unpin = "Désépingler", edit = "Modifier", archive = "Archiver", unarchive = "Déarchiver",
+    delete = "Supprimer", deleteTripQ = "Supprimer le voyage?", deletePlaceQ = "Supprimer le lieu?", deleteLegQ = "Supprimer le trajet?",
+    cantBeUndone = "Cela ne peut pas être annulé.", archivedTrips = "Voyages archivés", noArchivedTrips = "Aucun voyage archivé",
     noDatesYet = "Aucune date trouvée", tripName = "Nom du voyage", aLegBetween = "Un trajet entre", somewhereToVisit = "Où visiter",
     choosePhoto = "Choisir une photo", uploadFromGallery = "Télécharger depuis la galerie", takePhoto = "Prendre une photo", removePhoto = "Supprimer la photo", cropAndScale = "Couper et agrandir", usePhoto = "Utiliser la photo",
 )
@@ -218,10 +218,10 @@ private val ES = EN.copy(
     add = "Añadir", addToItinerary = "Añadir al itinerario", travel = "Viaje", place = "Lugar",
     newPlace = "Nuevo lugar", editPlace = "Editar lugar", landmark = "Punto de referencia (opcional)", savePlace = "Guardar lugar", searchTrips = "Buscar viajes",
     newTrip = "Nuevo viaje", renameTrip = "Renombrar viaje", create = "Crear", save = "Guardar",
-    pin = "Fijar", unpin = "Desfijar", edit = "Editar", archive = "Archivar", unarchive = "Desarchivar", 
-    delete = "Eliminar", deleteTripQ = "¿Eliminar viaje?", deletePlaceQ = "¿Eliminar lugar?", deleteLegQ = "¿Eliminar tramo?", 
-    cantBeUndone = "Esto no se puede deshacer.", archivedTrips = "Viajes archivados", noArchivedTrips = "Sin viajes archivados", 
-    noDatesYet = "Sin fechas aún", tripName = "Nombre del viaje", aLegBetween = "Un tramo entre", somewhereToVisit = "Algún lugar para visitar", 
+    pin = "Fijar", unpin = "Desfijar", edit = "Editar", archive = "Archivar", unarchive = "Desarchivar",
+    delete = "Eliminar", deleteTripQ = "¿Eliminar viaje?", deletePlaceQ = "¿Eliminar lugar?", deleteLegQ = "¿Eliminar tramo?",
+    cantBeUndone = "Esto no se puede deshacer.", archivedTrips = "Viajes archivados", noArchivedTrips = "Sin viajes archivados",
+    noDatesYet = "Sin fechas aún", tripName = "Nombre del viaje", aLegBetween = "Un tramo entre", somewhereToVisit = "Algún lugar para visitar",
 )
 
 private val DE = EN.copy(
@@ -237,7 +237,7 @@ private val DE = EN.copy(
     legsTravelled = "Etappen gereist", syncWholeTrip = "Ganze Reise synchronisieren", addToPhoneCalendar = "Zum Kalender hinzufügen", remindMe = "Erinnern", chooseLanguage = "Sprache wählen",
     followPhone = "Telefonsprache folgen", ok = "OK", cancel = "Abbrechen", address = "Adresse", editProfile = "Profil bearbeiten", newPassword = "Neues Passwort",
     saveChanges = "Änderungen speichern", systemDefault = "System-Standard", light = "Hell", dark = "Dunkel", matchYourPhone = "Mit Ihrem Telefon", currency = "Währung",
-    transport = "Verkehrsmittel", orDivider = "oder", convert = "Umwandeln", 
+    transport = "Verkehrsmittel", orDivider = "oder", convert = "Umwandeln",
     bookings = "Reservierungen", packing = "Packung", money = "Geld", gadget = "Gerät", other = "Andere", needToAdd = "Was möchten Sie hinzufügen?", section = "Abschnitt",
     amount = "Betrag", validAmount = "Geben Sie eine gültige Menge ein", couldntFetch = "Konnte den Kurs nicht abrufen. Überprüfen Sie Ihre Verbindung.",
     fillAllFields = "Bitte füllen Sie alle Felder aus", loginFailed = "Anmeldung fehlgeschlagen. Überprüfen Sie Ihre E-Mail-Adresse und Ihr Passwort.",
@@ -247,7 +247,7 @@ private val DE = EN.copy(
     recentLoginRequired = "Konnte nicht gespeichert werden. Um Ihr Passwort zu ändern, melden Sie sich ab und wieder an und versuchen Sie es dann erneut.",
     accountCreated = "Ihr Konto wurde erfolgreich erstellt", accountDeleted = "Ihr Konto wurde erfolgreich gelöscht",
     changesSaved = "Ihre Änderungen wurden gespeichert", invalidCredentials = "Ungültige Anmeldedaten",
-    uppercase = "Mindestens ein Großbuchstabe", lowercase = "Mindestens ein Kleinbuchstabe", number = "Mindestens eine Zahl", specialCharacter = "Mindestens ein Sonderzeichen", minimumCharacters = "Mindestens 6 Zeichen", 
+    uppercase = "Mindestens ein Großbuchstabe", lowercase = "Mindestens ein Kleinbuchstabe", number = "Mindestens eine Zahl", specialCharacter = "Mindestens ein Sonderzeichen", minimumCharacters = "Mindestens 6 Zeichen",
 
     add = "Hinzufügen", addToItinerary = "Zum Reiseplan hinzufügen", travel = "Reise", place = "Ort",
     newPlace = "Neuer Ort", editPlace = "Ort bearbeiten", landmark = "Wahrzeichen (optional)", savePlace = "Ort speichern", searchTrips = "Reisen suchen",
@@ -255,6 +255,7 @@ private val DE = EN.copy(
     pin = "Anheften", unpin = "Lösen", edit = "Bearbeiten", archive = "Archivieren", unarchive = "Dearchivieren",
     delete = "Löschen", deleteTripQ = "Reise löschen?", deletePlaceQ = "Ort löschen?", deleteLegQ = "Etappe löschen?",
     cantBeUndone = "Dies kann nicht rückgängig gemacht werden.", archivedTrips = "Archivierte Reisen", noArchivedTrips = "Keine archivierten Reisen",
+    noDatesYet = "Noch keine Daten", tripName = "Reisename", aLegBetween = "Eine Etappe zwischen", somewhereToVisit = "Ein Ort zum Besuchen",
     choosePhoto = "Foto auswählen", uploadFromGallery = "Aus Galerie hochladen", takePhoto = "Foto aufnehmen", removePhoto = "Foto entfernen", cropAndScale = "Zuschneiden und skalieren", usePhoto = "Foto verwenden",
 )
 
@@ -267,12 +268,12 @@ private val IT = EN.copy(
     backupSync = "Backup e sincronizzazione", appearance = "Aspetto", language = "Lingua", currencyUnits = "Valuta e unità", exportTrips = "Esporta viaggi",
     about = "Informazioni", logOut = "Esci", welcomeBack = "Bentornato", logInToTrips = "Accedi ai tuoi viaggi", email = "E-mail",
     password = "Password", forgotPassword = "Password dimenticata?", logIn = "Accedi", continueGoogle = "Continua con Google", continueApple = "Continua con Apple",
-    newHere = "Nuovo qui?", createAccount = "Crea account", calendar = "Calendario", documents = "Documentos", nextUp = "prossimo",
+    newHere = "Nuovo qui?", createAccount = "Crea account", calendar = "Calendario", documents = "Documenti", nextUp = "prossimo",
     legsTravelled = "tratte percorse", syncWholeTrip = "Sincronizza tutto il viaggio", addToPhoneCalendar = "Aggiungi al calendario", remindMe = "Ricordami", chooseLanguage = "Scegli una lingua",
     followPhone = "Segui lingua del telefono", ok = "OK", cancel = "Annulla", address = "Indirizzo", editProfile = "Modifica profilo", newPassword = "Nuova password",
     saveChanges = "Salva modifiche", systemDefault = "Predefinito del sistema", light = "Chiaro", dark = "Scuro", matchYourPhone = "Coincide con il tuo telefono", currency = "Valuta",
     transport = "Trasporto", orDivider = "o", convert = "Convertire",
-    bookings = "Prenotazioni", packing = "Pacco", money = "Monero", gadget = "Gadget", other = "Altro", needToAdd = "Cosa vuoi aggiungere?", section = "Sezione",
+    bookings = "Prenotazioni", packing = "Pacco", money = "Denaro", gadget = "Gadget", other = "Altro", needToAdd = "Cosa vuoi aggiungere?", section = "Sezione",
     amount = "Importo", validAmount = "Inserisci un importo valido", couldntFetch = "Impossibile ottenere il tasso. Controllare la connessione.",
     fillAllFields = "Per favore compila tutti i campi", loginFailed = "Login fallito. Controllare la tua email e password.",
     passwordTooShort = "La password deve contenere almeno 6 caratteri", signupFailed = "Creazione account fallita. L'email potrebbe essere già in uso.",
@@ -288,16 +289,17 @@ private val IT = EN.copy(
     add = "Aggiungi", addToItinerary = "Aggiungi all'itinerario", travel = "Viaggio", place = "Luogo",
     newPlace = "Nuovo luogo", editPlace = "Modifica luogo", landmark = "Punto di riferimento (opzionale)", savePlace = "Salva luogo", searchTrips = "Cerca viaggi",
     newTrip = "Nuovo viaggio", renameTrip = "Rinomina viaggio", create = "Crea", save = "Salva",
-    pin = "Fissa", unpin = "Rimuovi fissa", edit = "Modifica", archive = "Archivia", unarchive = "Ripristina", 
-    delete = "Elimina", deleteTripQ = "Elimina viaggio?", deletePlaceQ = "Elimina luogo?", deleteLegQ = "Elimina tratta?", 
-    cantBeUndone = "Questa azione non può essere annullata.", archivedTrips = "Viaggi archiviati", noArchivedTrips = "Nessun viaggio archiviato", 
+    pin = "Fissa", unpin = "Rimuovi fissa", edit = "Modifica", archive = "Archivia", unarchive = "Ripristina",
+    delete = "Elimina", deleteTripQ = "Elimina viaggio?", deletePlaceQ = "Elimina luogo?", deleteLegQ = "Elimina tratta?",
+    cantBeUndone = "Questa azione non può essere annullata.", archivedTrips = "Viaggi archiviati", noArchivedTrips = "Nessun viaggio archiviato",
+    noDatesYet = "Nessuna data ancora", tripName = "Nome del viaggio", aLegBetween = "Una tratta tra", somewhereToVisit = "Un luogo da visitare",
     choosePhoto = "Scegli foto", uploadFromGallery = "Carica dalla galleria", takePhoto = "Scatta foto", removePhoto = "Rimuovi foto", cropAndScale = "Ritaglia e scala", usePhoto = "Usa foto",
 )
 
 private val PT = EN.copy(
     name = "Nome", surname = "Sobrenome", dob = "Data de nascimento", street = "Rua", city = "Cidade",
     postelCode = "Código postal", appTagline = "Onde começa cada viagem!", myTrips = "Minhas viagens",
-    countries = "países", legs = "legs", done = "feito", addLeg = "Adicionar leg", newLeg = "Nova leg", from = "De",
+    countries = "países", legs = "trechos", done = "feito", addLeg = "Adicionar trecho", newLeg = "Novo trecho", from = "De",
     to = "Para", date = "Data", time = "Hora", bookingRef = "Reserva", optional = "opcional", saveLeg = "Salvar",
     tickets = "Bilhetes", event = "Evento", beforeYouGo = "Antes de sair", addItem = "Adicionar", settings = "Configurações",
     backupSync = "Backup & sincronização", appearance = "Aparência", language = "Idioma", currencyUnits = "Moeda e unidades",
@@ -305,7 +307,7 @@ private val PT = EN.copy(
     logInToTrips = "Entrar em suas viagens", email = "E-mail", password = "Senha", forgotPassword = "Esqueceu a senha?",
     logIn = "Entrar", continueGoogle = "Continuar com Google", continueApple = "Continuar com Apple",
     newHere = "Novo aqui?", createAccount = "Criar conta", calendar = "Calendário", documents = "Documentos", nextUp = "próximo",
-    legsTravelled = "legs percorridos", syncWholeTrip = "Sincronizar toda a viagem", addToPhoneCalendar = "Adicionar ao calendário",
+    legsTravelled = "trechos percorridos", syncWholeTrip = "Sincronizar toda a viagem", addToPhoneCalendar = "Adicionar ao calendário",
     remindMe = "Lembrar", chooseLanguage = "Escolher idioma", followPhone = "Seguir idioma do telefone",
     ok = "OK", cancel = "Cancelar", address = "Endereço", editProfile = "Editar perfil", newPassword = "Nova senha",
     saveChanges = "Salvar alterações", systemDefault = "Padrão do sistema", light = "Claro", dark = "Escuro",
@@ -326,25 +328,26 @@ private val PT = EN.copy(
     newPlace = "Novo lugar", editPlace = "Editar lugar", landmark = "Ponto de referência (opcional)", savePlace = "Salvar lugar", searchTrips = "Pesquisar viagens",
     newTrip = "Nova viagem", renameTrip = "Renomear viagem", create = "Criar", save = "Salvar",
     pin = "Fixar", unpin = "Desafixar", edit = "Editar", archive = "Arquivar", unarchive = "Desarquivar",
-    delete = "Excluir", deleteTripQ = "Excluir viagem?", deletePlaceQ = "Excluir lugar?", deleteLegQ = "Excluir leg?",
+    delete = "Excluir", deleteTripQ = "Excluir viagem?", deletePlaceQ = "Excluir lugar?", deleteLegQ = "Excluir trecho?",
     cantBeUndone = "Isso não pode ser desfeito.", archivedTrips = "Viagens arquivadas", noArchivedTrips = "Nenhuma viagem arquivada",
+    noDatesYet = "Sem datas ainda", tripName = "Nome da viagem", aLegBetween = "Um trecho entre", somewhereToVisit = "Algum lugar para visitar",
     choosePhoto = "Escolher foto", uploadFromGallery = "Carregar da galeria", takePhoto = "Tirar foto", removePhoto = "Remover foto", cropAndScale = "Recortar e dimensionar", usePhoto = "Usar foto",
 )
 private val NL = EN.copy(
     name = "Naam", surname = "Achternaam", dob = "Geboortedatum", street = "Straat", city = "Stad", postelCode = "Postcode",
-    appTagline = "Waar elke reis begint!", myTrips = "Mijn reizen", countries = "countries", legs = "legs",
+    appTagline = "Waar elke reis begint!", myTrips = "Mijn reizen", countries = "landen", legs = "trajecten",
     done = "afgerond", addLeg = "Leg toevoegen", newLeg = "Nieuwe leg", from = "Van", to = "Naar",
     date = "Datum", time = "Tijd", bookingRef = "Reserveringsnummer", optional = "optioneel", saveLeg = "Opslaan",
-    tickets = "Billets", event = "Event", beforeYouGo = "Voordat je gaat", addItem = "Item toevoegen", settings = "Instellingen",
-    backupSync = "Backup & synchronisatie", appearance = "Apparaat", language = "Taal", currencyUnits = "Woonheid",
+    tickets = "Tickets", event = "Evenement", beforeYouGo = "Voordat je gaat", addItem = "Item toevoegen", settings = "Instellingen",
+    backupSync = "Backup & synchronisatie", appearance = "Apparaat", language = "Taal", currencyUnits = "Valuta & eenheden",
     exportTrips = "Reizen exporteren", about = "Over", logOut = "Uitloggen", welcomeBack = "Welkom terug",
     logInToTrips = "Inloggen naar je reizen", email = "E-mail", password = "Wachtwoord", forgotPassword = "Wachtwoord vergeten?",
     logIn = "Inloggen", continueGoogle = "Doorgaan met Google", continueApple = "Doorgaan met Apple",
-    newHere = "Nieuw hier?", createAccount = "Account creëren", calendar = "Kalender", documents = "Documents", nextUp = "naast",
-    legsTravelled = "legs doorlopen", syncWholeTrip = "Alle rit synchroniseren", addToPhoneCalendar = "Toevoegen aan agenda", remindMe = "Opgelet",
+    newHere = "Nieuw hier?", createAccount = "Account creëren", calendar = "Kalender", documents = "Documenten", nextUp = "volgende",
+    legsTravelled = "trajecten afgelegd", syncWholeTrip = "Hele reis synchroniseren", addToPhoneCalendar = "Toevoegen aan agenda", remindMe = "Herinner mij",
     chooseLanguage = "Taal kiezen", followPhone = "Volg telefoontaal", ok = "OK", cancel = "Annuleer", address = "Adres", editProfile = "Profiel wijzigen", newPassword = "Nieuw wachtwoord",
-    saveChanges = "Opslaan wijzigingen", systemDefault = "Systeemstandaard", light = "Licht", dark = "Donker", matchYourPhone = "Match je telefoon", currency = "Woonheid",
-    transport = "Vervoer", orDivider = "of", convert = "Convert", 
+    saveChanges = "Wijzigingen opslaan", systemDefault = "Systeemstandaard", light = "Licht", dark = "Donker", matchYourPhone = "Volg je telefoon", currency = "Valuta",
+    transport = "Vervoer", orDivider = "of", convert = "Converteren",
     bookings = "Reservaties", packing = "Pakken", money = "Geld", gadget = "Gadget", other = "Overige", needToAdd = "Wat wilt u toevoegen?", section = "Sectie",
     amount = "Bedrag", validAmount = "Geef een geldig bedrag", couldntFetch = "Kon de kurs niet ophalen. Controleer uw verbinding.",
     fillAllFields = "Vul alle velden in", loginFailed = "Inloggen mislukt. Controleer uw e-mailadres en wachtwoord.",
@@ -362,6 +365,7 @@ private val NL = EN.copy(
     pin = "Vastzetten", unpin = "Losmaken", edit = "Bewerken", archive = "Archiveren", unarchive = "Dearchiveren",
     delete = "Verwijderen", deleteTripQ = "Reis verwijderen?", deletePlaceQ = "Plaats verwijderen?", deleteLegQ = "Leg verwijderen?",
     cantBeUndone = "Dit kan niet ongedaan worden gemaakt.", archivedTrips = "Gearchiveerde reizen", noArchivedTrips = "Geen gearchiveerde reizen",
+    noDatesYet = "Nog geen data", tripName = "Reisnaam", aLegBetween = "Een traject tussen", somewhereToVisit = "Ergens om te bezoeken",
     choosePhoto = "Foto kiezen", uploadFromGallery = "Uploaden uit galerij", takePhoto = "Foto maken", removePhoto = "Foto verwijderen", cropAndScale = "Bijsnijden en schalen", usePhoto = "Foto gebruiken",
 )
 
@@ -377,7 +381,7 @@ private val PL = EN.copy(
     newHere = "Nowy tutaj?", createAccount = "Utworz konto", calendar = "Kalendarz", documents = "Dokumenty", nextUp = "następne",
     legsTravelled = "przebyte odcinki", syncWholeTrip = "Synchronizuj całą podróż", addToPhoneCalendar = "Dodaj do kalendarza", remindMe = "Przypomnij mi", chooseLanguage = "Wybierz język",
     followPhone = "Użyj języka telefonu", ok = "OK", cancel = "Anuluj", address = "Adres", editProfile = "Edytuj profil",
-    newPassword = "Nowe hasło", saveChanges = "Zapisz zmiany", systemDefault = "Domyślny system", light = "Jasny", dark = "Ciemny", matchYourPhone = "Zgadnij telefon", currency = "Waluta",
+    newPassword = "Nowe hasło", saveChanges = "Zapisz zmiany", systemDefault = "Domyślny system", light = "Jasny", dark = "Ciemny", matchYourPhone = "Dopasuj do telefonu", currency = "Waluta",
     transport = "Transport", orDivider = "lub", convert = "Przelicz",
     bookings = "Rezerwacje", packing = "Pakowanie", money = "Pieniądze", gadget = "Gadżet", other = "Inne", needToAdd = "Co chcesz dodać?", section = "Sekcja",
     amount = "Kwota", validAmount = "Wprowadź prawidłową kwotę", couldntFetch = "Nie udało się pobrać kursu. Sprawdź połączenie.",
@@ -387,7 +391,7 @@ private val PL = EN.copy(
     showPassword = "Pokaż hasło", hidePassword = "Ukryj hasło", back = "Wróć",
     recentLoginRequired = "Nie udało się zapisać. Aby zmienić hasło, wyloguj się i zaloguj ponownie, a następnie spróbuj ponownie.",
     accountCreated = "Twoje konto zostało pomyślnie utworzone", accountDeleted = "Twoje konto zostało pomyślnie usunięte",
-    changesSaved = "Twoje zmiany zostały zapisane", invalidCredentials = "Nieprawidłowe dane logowania Polish",
+    changesSaved = "Twoje zmiany zostały zapisane", invalidCredentials = "Nieprawidłowe dane logowania",
     uppercase = "Co najmniej jedna wielka litera", lowercase = "Co najmniej jedna mała litera", number = "Co najmniej jedna cyfra", specialCharacter = "Co najmniej jeden znak specjalny", minimumCharacters = "Minimum 6 znaków",
 
 
@@ -395,9 +399,10 @@ private val PL = EN.copy(
     add = "Dodaj", addToItinerary = "Dodaj do planu podróży", travel = "Podróż", place = "Miejsce",
     newPlace = "Nowe miejsce", editPlace = "Edytuj miejsce", landmark = "Punkt orientacyjny (opcjonalnie)", savePlace = "Zapisz miejsce", searchTrips = "Szukaj podróży",
     newTrip = "Nowa podróż", renameTrip = "Zmień nazwę podróży", create = "Utwórz", save = "Zapisz",
-    pin = "Przypnij", unpin = "Odepnij", edit = "Edytuj", archive = "Archiwizuj", unarchive = "Przywróć z archiwum", 
-    delete = "Usuń", deleteTripQ = "Usunąć podróż?", deletePlaceQ = "Usunąć miejsce?", deleteLegQ = "Usunąć odcinek?", 
-    cantBeUndone = "Tego nie można cofnąć.", archivedTrips = "Zarchiwizowane podróże", noArchivedTrips = "Brak zarchiwizowanych podróży", 
+    pin = "Przypnij", unpin = "Odepnij", edit = "Edytuj", archive = "Archiwizuj", unarchive = "Przywróć z archiwum",
+    delete = "Usuń", deleteTripQ = "Usunąć podróż?", deletePlaceQ = "Usunąć miejsce?", deleteLegQ = "Usunąć odcinek?",
+    cantBeUndone = "Tego nie można cofnąć.", archivedTrips = "Zarchiwizowane podróże", noArchivedTrips = "Brak zarchiwizowanych podróży",
+    noDatesYet = "Brak dat", tripName = "Nazwa podróży", aLegBetween = "Odcinek między", somewhereToVisit = "Miejsce do odwiedzenia",
     choosePhoto = "Wybierz zdjęcie", uploadFromGallery = "Prześlij z galerii", takePhoto = "Zrób zdjęcie", removePhoto = "Usuń zdjęcie", cropAndScale = "Kadruj i skaluj", usePhoto = "Użyj zdjęcia",
 )
 
@@ -427,9 +432,10 @@ private val ZH = EN.copy(
     add = "添加", addToItinerary = "添加到行程", travel = "旅行", place = "地点",
     newPlace = "新地点", editPlace = "编辑地点", landmark = "地标（可选）", savePlace = "保存地点", searchTrips = "搜索行程",
     newTrip = "新行程", renameTrip = "重命名行程", create = "创建", save = "保存",
-    pin = "固定", unpin = "取消固定", edit = "编辑", archive = "归档", unarchive = "取消归档", 
-    delete = "删除", deleteTripQ = "删除行程？", deletePlaceQ = "删除地点？", deleteLegQ = "删除行程段？", 
-    cantBeUndone = "此操作无法撤销。", archivedTrips = "已归档行程", noArchivedTrips = "没有已归档行程", 
+    pin = "固定", unpin = "取消固定", edit = "编辑", archive = "归档", unarchive = "取消归档",
+    delete = "删除", deleteTripQ = "删除行程？", deletePlaceQ = "删除地点？", deleteLegQ = "删除行程段？",
+    cantBeUndone = "此操作无法撤销。", archivedTrips = "已归档行程", noArchivedTrips = "没有已归档行程",
+    noDatesYet = "暂无日期", tripName = "行程名称", aLegBetween = "之间的行程", somewhereToVisit = "想去的地方",
     choosePhoto = "选择照片", uploadFromGallery = "从相册上传", takePhoto = "拍照", removePhoto = "移除照片", cropAndScale = "裁剪和缩放", usePhoto = "使用照片",
 )
 
@@ -444,8 +450,8 @@ private val JP = EN.copy(
     calendar = "カレンダー", documents = "文書", nextUp = "次の予定", legsTravelled = "完了した経路", syncWholeTrip = "旅行全体を同期",
     addToPhoneCalendar = "カレンダーに追加", remindMe = "リマインド", chooseLanguage = "言語を選択", followPhone = "システム設定に従う", ok = "OK",
     cancel = "キャンセル", address = "住所", editProfile = "プロフィール編集", newPassword = "新しいパスワード", saveChanges = "変更を保存",
-    systemDefault = "系统默认", light = "ライト", dark = "ダーク", matchYourPhone = "電話と一致", currency = "通貨", convert = "変換",
-    bookings = "予約", packing = "パック", money = "お金", gadget = " gadget", other = "その他", needToAdd = "追加したいものがあれば？", section = "セクション",
+    systemDefault = "システムのデフォルト", light = "ライト", dark = "ダーク", matchYourPhone = "電話と一致", currency = "通貨", convert = "変換",
+    bookings = "予約", packing = "パック", money = "お金", gadget = "ガジェット", other = "その他", needToAdd = "追加したいものがあれば？", section = "セクション",
     amount = "金額", validAmount = "正しい金額を入力してください", couldntFetch = "レートを取得できませんでした。接続を確認してください。",
     fillAllFields = "すべての項目を入力してください", loginFailed = "ログインに失敗しました。メールアドレスとパスワードを確認してください。",
     passwordTooShort = "パスワードは6文字以上である必要があります", signupFailed = "アカウントの作成に失敗しました。メールアドレスが既に使用されている可能性があります。",
@@ -455,15 +461,15 @@ private val JP = EN.copy(
     accountCreated = "アカウントが正常に作成されました", accountDeleted = "アカウントが正常に削除されました",
     changesSaved = "変更が保存されました", invalidCredentials = "資格情報が無効です",
     uppercase = "大文字を1文字以上", lowercase = "小文字を1文字以上", number = "数字を1文字以上", specialCharacter = "記号を1文字以上", minimumCharacters = "6文字以上",
-    
+
 
     add = "追加", addToItinerary = "旅程に追加", travel = "旅行", place = "場所",
     newPlace = "新しい場所", editPlace = "場所を編集", landmark = "目印（オプション）", savePlace = "場所を保存", searchTrips = "旅を検索",
     newTrip = "新しい旅", renameTrip = "旅の名前を変更", create = "作成", save = "保存",
-    pin = "ピン留め", unpin = "ピン留めを解除", edit = "編集", archive = "アーカイブ", unarchive = "アーカイブを解除", 
-    delete = "削除", deleteTripQ = "旅を削除しますか？", deletePlaceQ = "場所を削除しますか？", deleteLegQ = "経路を削除しますか？", 
-    cantBeUndone = "この操作は取り消せません。", archivedTrips = "アーカイブ済みの旅", noArchivedTrips = "アーカイブ済みの旅はありません", 
-    noDatesYet = "日付が未設定です", tripName = "旅の名前", aLegBetween = "の間の経路", somewhereToVisit = "訪れる場所", 
+    pin = "ピン留め", unpin = "ピン留めを解除", edit = "編集", archive = "アーカイブ", unarchive = "アーカイブを解除",
+    delete = "削除", deleteTripQ = "旅を削除しますか？", deletePlaceQ = "場所を削除しますか？", deleteLegQ = "経路を削除しますか？",
+    cantBeUndone = "この操作は取り消せません。", archivedTrips = "アーカイブ済みの旅", noArchivedTrips = "アーカイブ済みの旅はありません",
+    noDatesYet = "日付が未設定です", tripName = "旅の名前", aLegBetween = "の間の経路", somewhereToVisit = "訪れる場所",
 )
 
 private val KR = EN.copy(
@@ -478,7 +484,7 @@ private val KR = EN.copy(
     documents = "문서", nextUp = "다음 일정", legsTravelled = "여행한 경로", syncWholeTrip = "전체 여행 일정 동기화", addToPhoneCalendar = "휴대폰 캘린더에 추가",
     remindMe = "미리 알림", chooseLanguage = "언어 선택", followPhone = "시스템 설정 언어 사용", ok = "확인", cancel = "취소", address = "주소",
     editProfile = "프로필 수정", newPassword = "새 비밀번호", saveChanges = "변경사항 저장", systemDefault = "시스템 기본값", light = "밝은", dark = "어두운", matchYourPhone = "전화와 일치",
-    currency = "통화", convert = "변환", 
+    currency = "통화", convert = "변환",
     bookings = "예약", packing = "포장", money = "돈", gadget = "기기", other = "기타", needToAdd = "추가할 것이 있나요?", section = "섹션",
     amount = "금액", validAmount = "유효한 금액을 입력하세요", couldntFetch = "환율을 가져올 수 없습니다. 연결을 확인하세요.",
     fillAllFields = "모든 필드를 채워주세요", loginFailed = "로그인에 실패했습니다. 이메일과 비밀번호를 확인하세요.",
@@ -494,25 +500,26 @@ private val KR = EN.copy(
     add = "추가", addToItinerary = "일정에 추가", travel = "여행", place = "장소",
     newPlace = "새 장소", editPlace = "장소 편집", landmark = "랜드마크 (선택 사항)", savePlace = "장소 저장", searchTrips = "여행 검색",
     newTrip = "새 여행", renameTrip = "여행 이름 바꾸기", create = "만들기", save = "저장",
-    pin = "고정", unpin = "고정 해제", edit = "편집", archive = "보관", unarchive = "보관 취소", 
-    delete = "삭제", deleteTripQ = "여행을 삭제할까요?", deletePlaceQ = "장소를 삭제할까요?", deleteLegQ = "경로를 삭제할까요?", 
-    cantBeUndone = "이 작업은 되돌릴 수 없습니다.", archivedTrips = "보관된 여행", noArchivedTrips = "보관된 여행이 없습니다", 
+    pin = "고정", unpin = "고정 해제", edit = "편집", archive = "보관", unarchive = "보관 취소",
+    delete = "삭제", deleteTripQ = "여행을 삭제할까요?", deletePlaceQ = "장소를 삭제할까요?", deleteLegQ = "경로를 삭제할까요?",
+    cantBeUndone = "이 작업은 되돌릴 수 없습니다.", archivedTrips = "보관된 여행", noArchivedTrips = "보관된 여행이 없습니다",
+    noDatesYet = "아직 날짜 없음", tripName = "여행 이름", aLegBetween = "사이의 경로", somewhereToVisit = "방문할 장소",
     choosePhoto = "사진 선택", uploadFromGallery = "갤러리에서 업로드", takePhoto = "사진 촬영", removePhoto = "사진 삭제", cropAndScale = "자르기 및 크기 조정", usePhoto = "사진 사용",
 )
 
 private val RU = EN.copy(
-    name = "Имя", surname = "Фамилия", dob = "Дата рождения", street = "Улица", city = "Город", 
-    postelCode = "Почтовый индекс", appTagline = "Начало каждого путешествия!", 
+    name = "Имя", surname = "Фамилия", dob = "Дата рождения", street = "Улица", city = "Город",
+    postelCode = "Почтовый индекс", appTagline = "Начало каждого путешествия!",
     myTrips = "Мои путешествия", countries = "страны", legs = "пути", done = "выполнено",
-    addLeg = "Добавить путь", newLeg = "Новый путь", from = "От", to = "До", date = "Дата", time = "Время", 
-    bookingRef = "Бронирование", optional = "необязательный", saveLeg = "Сохранить", tickets = "Билеты", event = "Событие", 
-    beforeYouGo = "До вылета", addItem = "Добавить элемент", settings = "Настройки", backupSync = "Backup & Sync", 
+    addLeg = "Добавить путь", newLeg = "Новый путь", from = "От", to = "До", date = "Дата", time = "Время",
+    bookingRef = "Бронирование", optional = "необязательный", saveLeg = "Сохранить", tickets = "Билеты", event = "Событие",
+    beforeYouGo = "До вылета", addItem = "Добавить элемент", settings = "Настройки", backupSync = "Резервная копия и синхронизация",
     appearance = "Внешний вид", language = "Язык", currencyUnits = "Валюта и единицы", exportTrips = "Экспорт путешествий", about = "О приложении",
-    logOut = "Выйти", welcomeBack = "Добро пожаловать", logInToTrips = "Войдите в ваши путешествия", email = "E-mail", password = "Пароль", 
-    forgotPassword = "Забыли пароль?", logIn = "Войти", continueGoogle = "Продолжить с Google", continueApple = "Продолжить с Apple", 
-    newHere = "Новый?", createAccount = "Создать аккаунт", calendar = "Календарь", documents = "Документы", nextUp = "Следующий", 
-    legsTravelled = "пути пройдено", syncWholeTrip = "Синхронизировать всю поездку", addToPhoneCalendar = "Добавить в календарь", 
-    remindMe = "Напомнить", chooseLanguage = "Выбрать язык", followPhone = "Следовать языку телефона", ok = "OK", cancel = "Отмена", 
+    logOut = "Выйти", welcomeBack = "Добро пожаловать", logInToTrips = "Войдите в ваши путешествия", email = "E-mail", password = "Пароль",
+    forgotPassword = "Забыли пароль?", logIn = "Войти", continueGoogle = "Продолжить с Google", continueApple = "Продолжить с Apple",
+    newHere = "Новый?", createAccount = "Создать аккаунт", calendar = "Календарь", documents = "Документы", nextUp = "Следующий",
+    legsTravelled = "пути пройдено", syncWholeTrip = "Синхронизировать всю поездку", addToPhoneCalendar = "Добавить в календарь",
+    remindMe = "Напомнить", chooseLanguage = "Выбрать язык", followPhone = "Следовать языку телефона", ok = "OK", cancel = "Отмена",
     address = "Адрес", editProfile = "Редактировать профиль", newPassword = "Новый пароль", saveChanges = "Сохранить изменения",
     systemDefault = "Системный по умолчанию", light = "Светлый", dark = "Тёмный", matchYourPhone = "Совместить с телефоном", currency = "Валюта",
     transport = "Транспорт", orDivider = "или", convert = "Перевести",
@@ -530,9 +537,10 @@ private val RU = EN.copy(
     add = "Добавить", addToItinerary = "Добавить в маршрут", travel = "Путешествие", place = "Место",
     newPlace = "Новое место", editPlace = "Редактировать место", landmark = "Достопримечательность (необязательно)", savePlace = "Сохранить место", searchTrips = "Поиск путешествий",
     newTrip = "Новое путешествие", renameTrip = "Переименовать путешествие", create = "Создать", save = "Сохранить",
-    pin = "Закрепить", unpin = "Открепить", edit = "Редактировать", archive = "Архивировать", unarchive = "Разархивировать", 
-    delete = "Удалить", deleteTripQ = "Удалить путешествие?", deletePlaceQ = "Удалить место?", deleteLegQ = "Удалить путь?", 
-    cantBeUndone = "Это действие нельзя отменить.", archivedTrips = "Архивные путешествия", noArchivedTrips = "Нет архивных путешествий", 
+    pin = "Закрепить", unpin = "Открепить", edit = "Редактировать", archive = "Архивировать", unarchive = "Разархивировать",
+    delete = "Удалить", deleteTripQ = "Удалить путешествие?", deletePlaceQ = "Удалить место?", deleteLegQ = "Удалить путь?",
+    cantBeUndone = "Это действие нельзя отменить.", archivedTrips = "Архивные путешествия", noArchivedTrips = "Нет архивных путешествий",
+    noDatesYet = "Дат пока нет", tripName = "Название путешествия", aLegBetween = "Путь между", somewhereToVisit = "Место для посещения",
     choosePhoto = "Выбрать фото", uploadFromGallery = "Загрузить из галереи", takePhoto = "Сделать фото", removePhoto = "Удалить фото", cropAndScale = "Обрезать и масштабировать", usePhoto = "Использовать фото",
 )
 
@@ -593,8 +601,8 @@ private val HI = EN.copy(
     remindMe = "मुझे याद दिलाएं", chooseLanguage = "भाषा चुनें", followPhone = "फोन की भाषा का पालन करें",
     ok = "ठीक है", cancel = "रद्द करें", address = "पता", editProfile = "प्रोफ़ाइल संपादित करें",
     newPassword = "नया पासवर्ड", saveChanges = "परिवर्तन सहेजें", systemDefault = "सिस्टम डिफ़ॉल्ट",
-    light = "लाइट", dark = "डार्क", matchYourPhone = "अपने फ़ोन से मिलान करें", currency = "मुप्रा", convert = "बदलें",
-    bookings = "बुकिंग", packing = "पैकिंग", money = "मु", gadget = "गेट", other = "अन्य", needToAdd = "जान", section = "section",
+    light = "लाइट", dark = "डार्क", matchYourPhone = "अपने फ़ोन से मिलान करें", currency = "मुद्रा", convert = "बदलें",
+    bookings = "बुकिंग", packing = "पैकिंग", money = "पैसा", gadget = "गैजेट", other = "अन्य", needToAdd = "आपको क्या जोड़ना है?", section = "अनुभाग",
     amount = "राशि", validAmount = "एक वैध राशि दर्ज करें", couldntFetch = "दर प्राप्त नहीं हो सकी। अपना कनेक्शन जांचें।",
     passwordTooShort = "पासवर्ड कम से कम 6 अक्षरों का होना चाहिए", signupFailed = "खाता बनाना विफल रहा, ईमेल पहले से ही उपयोग में हो सकता है।",
     deleteAccount = "खाता मिटाएं", deleteAccountConfirm = "यह आपके खाते और आपके सभी डेटा को स्थायी रूप से हटा देता है। इसे वापस नहीं लिया जा सकता।", deleteButton = "मिटाएं",
@@ -616,20 +624,21 @@ private val HI = EN.copy(
 
 private val UKR = EN.copy(
     name = "Ім'я", surname = "Прізвище", dob = "Дата народження", street = "Вулиця", city = "Місто",
-    postelCode = "Поштовий індекс", appTagline = "Початок кожного відпочинку!", myTrips = "Мої відпочинки",
-    countries = "країни", legs = "лінії", done = "виконано", addLeg = "Додати лінію", newLeg = "Нова лінія", from = "Від",
+    postelCode = "Поштовий індекс", appTagline = "Початок кожної подорожі!", myTrips = "Мої подорожі",
+    countries = "країни", legs = "етапи", done = "виконано", addLeg = "Додати етап", newLeg = "Новий етап", from = "Від",
     to = "До", transport = "Транспорт", date = "Дата", time = "Час", bookingRef = "Резерваційний номер",
-    optional = "необов'язковий", saveLeg = "Зберегти лінію", tickets = "Билеты", event = "Подія", beforeYouGo = "До відправлення",
-    addItem = "Додати елемент", settings = "Налаштування", backupSync = "Backup & Sync", appearance = "Внешний вид",
-    language = "Мова", currencyUnits = "Валюта та одиниці", exportTrips = "Експорт відпочинок", about = "Про додаток", logOut = "Вихід",
-    welcomeBack = "Ласкаво просимо", logInToTrips = "Увійти у ваші відпочинки", email = "Електронна пошта", password = "Пароль",
+    optional = "необов'язковий", saveLeg = "Зберегти етап", tickets = "Квитки", event = "Подія", beforeYouGo = "До відправлення",
+    addItem = "Додати елемент", settings = "Налаштування", backupSync = "Резервна копія та синхронізація", appearance = "Зовнішній вигляд",
+    language = "Мова", currencyUnits = "Валюта та одиниці", exportTrips = "Експорт подорожей", about = "Про додаток", logOut = "Вихід",
+    welcomeBack = "Ласкаво просимо", logInToTrips = "Увійти у ваші подорожі", email = "Електронна пошта", password = "Пароль",
     forgotPassword = "Забули пароль?", logIn = "Увійти", orDivider = "або", continueGoogle = "Продовжити з Google",
     continueApple = "Продовжити з Apple", newHere = "Новий?", createAccount = "Створити акаунт", calendar = "Календар", documents = "Документи",
-    nextUp = "наступний", legsTravelled = "лінії відправлено", syncWholeTrip = "Синхронізувати весь відпочинок", addToPhoneCalendar = "Додати до календаря телефону",
+    nextUp = "наступний", legsTravelled = "пройдені етапи", syncWholeTrip = "Синхронізувати всю подорож", addToPhoneCalendar = "Додати до календаря телефону",
     remindMe = "Нагадати", chooseLanguage = "Вибрати мову", followPhone = "Підтримувати мову телефону", ok = "OK", cancel = "Відміна", address = "Адреса", editProfile = "Редагувати профіль",
-    newPassword = "Новий пароль", saveChanges = "Зберегти зміни", systemDefault = "Системний замовчування",    light = "Світловий", dark = "Темний", matchYourPhone = "Збігається з телефоном",
-    currency = "Валюта", convert = "Конвертувати", bookings = "Бронювання", packing = "Упаковка", money = "Гроші", gadget = "Гаджет", other = "Інше", needToAdd = "Що вам потрібно додати?", section = "Розділ", 
-    amount = "Сума", validAmount = "Введіть коректну суму", couldntFetch = "Не вдалося отримати курс. Перевірте з'єднання.", 
+    newPassword = "Новий пароль", saveChanges = "Зберегти зміни", systemDefault = "Системні за замовчуванням", light = "Світла", dark = "Темна", matchYourPhone = "Збігається з телефоном",
+    currency = "Валюта", convert = "Конвертувати", bookings = "Бронювання", packing = "Упаковка", money = "Гроші", gadget = "Гаджет", other = "Інше", needToAdd = "Що вам потрібно додати?", section = "Розділ",
+    amount = "Сума", validAmount = "Введіть коректну суму", couldntFetch = "Не вдалося отримати курс. Перевірте з'єднання.",
+    fillAllFields = "Будь ласка, заповніть усі поля", loginFailed = "Помилка входу. Перевірте електронну пошту та пароль.",
     passwordTooShort = "Пароль має бути не менше 6 символів", signupFailed = "Не вдалося створити акаунт. Електронна пошта вже може бути у використанні.",
     deleteAccount = "Видалити акаунт", deleteAccountConfirm = "Це назавжди видалить ваш акаунт і всі ваші дані. Цю дію неможливо скасувати.", deleteButton = "Видалити",
     showPassword = "Показати пароль", hidePassword = "Приховати пароль", back = "Назад",
@@ -642,27 +651,28 @@ private val UKR = EN.copy(
     newPlace = "Нове місце", editPlace = "Редагувати місце", landmark = "Орієнтир (необов'язково)", savePlace = "Зберегти місце", searchTrips = "Пошук подорожей",
     newTrip = "Нова подорож", renameTrip = "Перейменувати подорож", create = "Створити", save = "Зберегти",
     pin = "Закріпити", unpin = "Відкріпити", edit = "Редагувати", archive = "Архівувати", unarchive = "Розархівувати",
-    delete = "Видалити", deleteTripQ = "Видалити подорож?", deletePlaceQ = "Видалити місце?", deleteLegQ = "Видалити лінію?",
+    delete = "Видалити", deleteTripQ = "Видалити подорож?", deletePlaceQ = "Видалити місце?", deleteLegQ = "Видалити етап?",
     cantBeUndone = "Цю дію неможливо скасувати.", archivedTrips = "Архівні подорожі", noArchivedTrips = "Немає архівних подорожей",
+    noDatesYet = "Ще немає дат", tripName = "Назва подорожі", aLegBetween = "Етап між", somewhereToVisit = "Місце для відвідування",
     choosePhoto = "Вибрати фото", uploadFromGallery = "Завантажити з галереї", takePhoto = "Зробити фото", removePhoto = "Видалити фото", cropAndScale = "Обрізати та масштабувати", usePhoto = "Використати фото",
 )
 
 private val HUN = EN.copy(
     name = "Név", surname = "Vezetéknév", dob = "Születési dátum", street = "Utca", city = "Város", postelCode = "Irányítószám",
-    appTagline = "Minden utazási kezdése!", myTrips = "Saját utazások", countries = "ország", legs = "utazások", done = "kész",
+    appTagline = "Ahol minden utazás kezdődik!", myTrips = "Saját utazások", countries = "ország", legs = "szakaszok", done = "kész",
     addLeg = "Útvonal hozzáadása", newLeg = "Új útvonal", from = "Kezdőpont", to = "Célpont", transport = "Transport", date = "Dátum", time = "Idő",
-    bookingRef = "Foglalási azonosító", optional = "opcionális", saveLeg = "Útvonal mentése", tickets = "Tiketek", event = "Esemény", beforeYouGo = "Először az útmutató",
-    addItem = "Elem hozzáadása", settings = "Beállítások", backupSync = "Backup & Sync", appearance = "Kiíró",
-    language = "Nyelv", currencyUnits = "Valuta és mértékegység", exportTrips = "Utázek exportálása", about = "Rólunk", logOut = "Kijelentkezés",
+    bookingRef = "Foglalási azonosító", optional = "opcionális", saveLeg = "Útvonal mentése", tickets = "Jegyek", event = "Esemény", beforeYouGo = "Indulás előtt",
+    addItem = "Elem hozzáadása", settings = "Beállítások", backupSync = "Biztonsági mentés és szinkronizálás", appearance = "Megjelenés",
+    language = "Nyelv", currencyUnits = "Valuta és mértékegység", exportTrips = "Utazások exportálása", about = "Rólunk", logOut = "Kijelentkezés",
     welcomeBack = "Üdvözlünk újra", logInToTrips = "Bejelentkezés az utazásokhoz", email = "E-mail", password = "Jelszó",
     forgotPassword = "Elfelejtettem a jelszavam?", logIn = "Bejelentkezés", orDivider = "vagy", continueGoogle = "Google-lel folytatás",
-    continueApple = "Apple-lel folytatás", newHere = "Új?", createAccount = "Új fiók létrehozása", calendar = "Kalendar",
-    documents = "Dokumentumok", nextUp = "következő", legsTravelled = "utazások hossza", syncWholeTrip = "Teljes utazási synchronizáció",
-    addToPhoneCalendar = "Családi dátumhozzáadás", remindMe = "Rengeteg értesítés", chooseLanguage = "Nyelv választása",
-    followPhone = "Teljesítjük a telefon nyelvét", ok = "OK", cancel = "Mégsem", address = "Cím",
+    continueApple = "Apple-lel folytatás", newHere = "Új?", createAccount = "Új fiók létrehozása", calendar = "Naptár",
+    documents = "Dokumentumok", nextUp = "következő", legsTravelled = "megtett szakaszok", syncWholeTrip = "Teljes utazás szinkronizálása",
+    addToPhoneCalendar = "Hozzáadás a naptárhoz", remindMe = "Emlékeztess", chooseLanguage = "Nyelv választása",
+    followPhone = "Telefon nyelvének követése", ok = "OK", cancel = "Mégsem", address = "Cím",
     editProfile = "Profil szerkesztése", newPassword = "Új jelszó", saveChanges = "Mentés", systemDefault = "Rendszeri alapértelmezés",
-    light = "Sötét", dark = "Sötét", matchYourPhone = "Teljesítjük a telefonunkat", currency = "Valuta", convert = "Konvertálás", bookings = "Foglalások", packing = "Csomagolás", money = "Pénz", gadget = "Kütyü", other = "Egyéb", needToAdd = "Mit kell hozzáadnia?", section = "Szakasz",
-    amount = "Összeg", validAmount = "Adjon meg egy érvényes összeget", couldntFetch = "Nem sikerült lekérni az árfolyamot. Ellenőrizze a kapcsolatot.", 
+    light = "Világos", dark = "Sötét", matchYourPhone = "Igazodás a telefonhoz", currency = "Valuta", convert = "Konvertálás", bookings = "Foglalások", packing = "Csomagolás", money = "Pénz", gadget = "Kütyü", other = "Egyéb", needToAdd = "Mit kell hozzáadnia?", section = "Szakasz",
+    amount = "Összeg", validAmount = "Adjon meg egy érvényes összeget", couldntFetch = "Nem sikerült lekérni az árfolyamot. Ellenőrizze a kapcsolatot.",
     passwordTooShort = "A jelszónak legalább 6 karakterből kell állnia", signupFailed = "Nem sikerült létrehozni a fiókot. Lehet, hogy az e-mail cím már használatban van.",
     deleteAccount = "Fiók törlése", deleteAccountConfirm = "Ez véglegesen törli fiókját és összes adatát. Ez a művelet nem vonható vissza.", deleteButton = "Törlés",
     showPassword = "Jelszó megjelenítése", hidePassword = "Jelszó elrejtése", back = "Vissza",
@@ -677,7 +687,7 @@ private val HUN = EN.copy(
     pin = "Rögzítés", unpin = "Rögzítés feloldása", edit = "Szerkesztés", archive = "Archiválás", unarchive = "Visszaállítás",
     delete = "Törlés", deleteTripQ = "Törli az utazást?", deletePlaceQ = "Törli a helyet?", deleteLegQ = "Törli az utat?",
     cantBeUndone = "Ez a művelet nem vonható vissza.", archivedTrips = "Archivált utazások", noArchivedTrips = "Nincsenek archivált utazások",
-    noDatesYet = "Nincsenek dátumok", tripName = "Utazás neve", aLegBetween = "Egy út a következők között:", somewhereToVisit = "Valahol, amit érdemies meglátogatni",
+    noDatesYet = "Nincsenek dátumok", tripName = "Utazás neve", aLegBetween = "Egy út a következők között:", somewhereToVisit = "Egy hely, amit érdemes meglátogatni",
 )
 
 private val RO = EN.copy(
@@ -693,8 +703,8 @@ private val RO = EN.copy(
     documents = "Documente", nextUp = "următoarea", legsTravelled = "etape parcurse", syncWholeTrip = "Sincronizează călătoria",
     addToPhoneCalendar = "Adaugă în calendar", remindMe = "Amintește-mi", chooseLanguage = "Alege o limbă",
     followPhone = "Urmează limba telefonului", ok = "OK", cancel = "Anulează", address = "Adresă",
-    editProfile = "Editează profilul", newPassword = "Parolă nouă", saveChanges = "Salvează modificările", systemDefault = "Sistem default",
-    light = "Luz", dark = "Umid", matchYourPhone = "Matchează cu telefonul", currency = "Monedă", convert = "Convertiți", bookings = "Rezervări", packing = "Ambalare", money = "Bani", gadget = "Gadget", other = "Altele", needToAdd = "Ce trebuie să adăugați?", section = "Secțiune",
+    editProfile = "Editează profilul", newPassword = "Parolă nouă", saveChanges = "Salvează modificările", systemDefault = "Implicit de sistem",
+    light = "Luminos", dark = "Întunecat", matchYourPhone = "Potrivește cu telefonul", currency = "Monedă", convert = "Convertiți", bookings = "Rezervări", packing = "Ambalare", money = "Bani", gadget = "Gadget", other = "Altele", needToAdd = "Ce trebuie să adăugați?", section = "Secțiune",
     amount = "Sumă", validAmount = "Introduceți o sumă validă", couldntFetch = "Nu s-a putut obține cursul. Verificați conexiunea.",
     passwordTooShort = "Parola trebuie să aibă cel puțin 6 caractere", signupFailed = "Crearea contului a eșuat. Adresa de e-mail ar putea fi deja utilizată.",
     deleteAccount = "Șterge contul", deleteAccountConfirm = "Acest lucru va șterge definitiv contul și toate datele dvs. Această acțiune nu poate fi anulată.", deleteButton = "Șterge",
@@ -710,6 +720,7 @@ private val RO = EN.copy(
     pin = "Fixează", unpin = "Anulează fixarea", edit = "Editează", archive = "Arhivează", unarchive = "Dezarhivează",
     delete = "Șterge", deleteTripQ = "Ștergi călătoria?", deletePlaceQ = "Ștergi locul?", deleteLegQ = "Ștergi etapa?",
     cantBeUndone = "Această acțiune nu poate fi anulată.", archivedTrips = "Călătorii arhivate", noArchivedTrips = "Nicio călătorie arhivată",
+    noDatesYet = "Încă nicio dată", tripName = "Numele călătoriei", aLegBetween = "O etapă între", somewhereToVisit = "Un loc de vizitat",
     choosePhoto = "Alegeți fotografia", uploadFromGallery = "Încărcați din galerie", takePhoto = "Faceți o fotografie", removePhoto = "Eliminați fotografia", cropAndScale = "Decupați și scalați", usePhoto = "Utilizați fotografia",
 )
 
@@ -743,6 +754,7 @@ private val GR = EN.copy(
     pin = "Καρφίτσωμα", unpin = "Ξεκαρφίτσωμα", edit = "Επεξεργασία", archive = "Αρχειοθέτηση", unarchive = "Αποαρχειοθέτηση",
     delete = "Διαγραφή", deleteTripQ = "Διαγραφή ταξιδιού;", deletePlaceQ = "Διαγραφή τοποθεσίας;", deleteLegQ = "Διαγραφή σκέλους;",
     cantBeUndone = "Αυτή η ενέργεια δεν αναιρείται.", archivedTrips = "Αρχειοθετημένα ταξίδια", noArchivedTrips = "Δεν υπάρχουν αρχειοθετημένα ταξίδια",
+    noDatesYet = "Δεν υπάρχουν ημερομηνίες ακόμη", tripName = "Όνομα ταξιδιού", aLegBetween = "Ένα σκέλος μεταξύ", somewhereToVisit = "Κάπου να επισκεφθείτε",
     choosePhoto = "Επιλογή φωτογραφίας", uploadFromGallery = "Μεταφόρτωση από τη συλλογή", takePhoto = "Λήψη φωτογραφίας", removePhoto = "Αφαίρεση φωτογραφίας", cropAndScale = "Περικοπή και κλιμάκωση", usePhoto = "Χρήση φωτογραφίας",
 )
 
@@ -776,6 +788,7 @@ private val KA = EN.copy(
     pin = "ჩამაგრება", unpin = "მოხსნა", edit = "რედაქტირება", archive = "არქივირება", unarchive = "ამოარქივება",
     delete = "წაშლა", deleteTripQ = "წაიშალოს მოგზაურობა?", deletePlaceQ = "წაიშალოს ადგილი?", deleteLegQ = "წაიშალოს ეტაპი?",
     cantBeUndone = "ეს ქმედება შეუქცევადია.", archivedTrips = "დაარქივებული მოგზაურობები", noArchivedTrips = "დაარქივებული მოგზაურობები არ არის",
+    noDatesYet = "თარიღები ჯერ არ არის", tripName = "მოგზაურობის სახელი", aLegBetween = "ეტაპი შორის", somewhereToVisit = "ადგილი მოსანახულებლად",
     choosePhoto = "ფოტოს არჩევა", uploadFromGallery = "გალერეიდან ატვირთვა", takePhoto = "ფოტოს გადაღება", removePhoto = "ფოტოს წაშლა", cropAndScale = "მოჭრა და მასშტაბირება", usePhoto = "ფოტოს გამოყენება",
 )
 
@@ -793,7 +806,7 @@ private val BG = EN.copy(
     addToPhoneCalendar = "Добави в календара", remindMe = "Напомни ми", chooseLanguage = "Избери език",
     followPhone = "Език на телефона", ok = "OK", cancel = "Отказ", address = "Адрес",
     editProfile = "Редактирай профила", newPassword = "Нова парола", saveChanges = "Запази промените",
-    systemDefault = "Системен по подразбиране", light = "Свет", dark = "Нощ", matchYourPhone = "Съвместите с телефоном", currency = "Валута", convert = "Конвертиране", bookings = "Резервации", packing = "Опаковане", money = "Пари", gadget = "Гаджет", other = "Друго", needToAdd = "Какво трябва да добавите?", section = "Раздел",
+    systemDefault = "Системен по подразбиране", light = "Светла", dark = "Тъмна", matchYourPhone = "Съгласувай с телефона", currency = "Валута", convert = "Конвертиране", bookings = "Резервации", packing = "Опаковане", money = "Пари", gadget = "Гаджет", other = "Друго", needToAdd = "Какво трябва да добавите?", section = "Раздел",
     amount = "Сума", validAmount = "Въведеτε валидна сума", couldntFetch = "Неуспешно извличане на курса. Проверете връзката си.",
     passwordTooShort = "Паролата трябва да бъде поне 6 знака", signupFailed = "Създаването на акаунт не бе успешно. Имейлът може вече да е зает.",
     deleteAccount = "Изтриване на акаунт", deleteAccountConfirm = "Това окончателно изтрива вашия акаунт и всички ваши данни. Това не може да бъде отменено.", deleteButton = "Изтрий",
@@ -809,6 +822,7 @@ private val BG = EN.copy(
     pin = "Закачи", unpin = "Откачи", edit = "Редактирай", archive = "Архивирай", unarchive = "Разархивирай",
     delete = "Изтрий", deleteTripQ = "Изтриване на пътуването?", deletePlaceQ = "Изтриване на мястото?", deleteLegQ = "Изтриване на етапа?",
     cantBeUndone = "Това не може да бъде отменено.", archivedTrips = "Архивирани пътувания", noArchivedTrips = "Няма архивирани пътувания",
+    noDatesYet = "Все още няма дати", tripName = "Име на пътуването", aLegBetween = "Етап между", somewhereToVisit = "Място за посещение",
     choosePhoto = "Избор на снимка", uploadFromGallery = "Качване от галерията", takePhoto = "Снимане", removePhoto = "Премахване на снимка", cropAndScale = "Изрязване и мащабиране", usePhoto = "Използване на снимка",
 )
 
@@ -842,6 +856,7 @@ private val CZ = EN.copy(
     pin = "Připnout", unpin = "Odepnout", edit = "Upravit", archive = "Archivovat", unarchive = "Obnovit z archivu",
     delete = "Smazat", deleteTripQ = "Smazat cestu?", deletePlaceQ = "Smazat místo?", deleteLegQ = "Smazat etapu?",
     cantBeUndone = "Tuto akci nelze vzít zpět.", archivedTrips = "Archivované cesty", noArchivedTrips = "Žádné archivované cesty",
+    noDatesYet = "Zatím žádná data", tripName = "Název cesty", aLegBetween = "Etapa mezi", somewhereToVisit = "Místo k návštěvě",
     choosePhoto = "Vybrat fotku", uploadFromGallery = "Nahrát z galerie", takePhoto = "Pořídit fotku", removePhoto = "Odstranit fotku", cropAndScale = "Oříznout a změnit měřítko", usePhoto = "Použít fotku",
 )
 
@@ -875,6 +890,7 @@ private val LV = EN.copy(
     pin = "Piespraust", unpin = "Atspraust", edit = "Rediģēt", archive = "Arhivēt", unarchive = "Atarhivēt",
     delete = "Dzēst", deleteTripQ = "Dzēst ceļojumu?", deletePlaceQ = "Dzēst vietu?", deleteLegQ = "Dzēst posmu?",
     cantBeUndone = "Šo darbību nevar atsaukt.", archivedTrips = "Arhivētie ceļojumi", noArchivedTrips = "Nav arhivētu ceļojumu",
+    noDatesYet = "Vēl nav datumu", tripName = "Ceļojuma nosaukums", aLegBetween = "Posms starp", somewhereToVisit = "Vieta, ko apmeklēt",
     choosePhoto = "Izvēlēties fotoattēlu", uploadFromGallery = "Augšupielādēt no galerijas", takePhoto = "Uzņemt fotoattēlu", removePhoto = "Noņemt fotoattēlu", cropAndScale = "Apgriezt un mērogot", usePhoto = "Izmantot fotoattēlu",
 )
 
@@ -891,8 +907,8 @@ private val LT = EN.copy(
     documents = "Dokumentai", nextUp = "kitas", legsTravelled = "nukeliauti etapai", syncWholeTrip = "Sinchronizuoti visą kelionę",
     addToPhoneCalendar = "Pridėti į kalendorių", remindMe = "Priminti man", chooseLanguage = "Pasirinkite kalbą",
     followPhone = "Naudoti telefono kalbą", ok = "Gerai", cancel = "Atšaukti", address = "Adresas",
-    editProfile = "Redaguoti profilį", newPassword = "Naujas slaptažodis", saveChanges = "Išsaugoti pakeitimus", systemDefault = "Sistėmos nustatymai",
-    light = "Šviesi", dark = "Tamsi", matchYourPhone = "Pagal telefoną", currency = "Valiuta", convert = "Konvertuoti", bookings = "Rezervacijos", packing = "Pakavimas", money = "Pinigai", gadget = "Programėlė", other = "Kita", needToAdd = "Ką jums reikia pridėti?", section = "Skyrius",
+    editProfile = "Redaguoti profilį", newPassword = "Naujas slaptažodis", saveChanges = "Išsaugoti pakeitimus", systemDefault = "Sistemos numatytasis",
+    light = "Šviesi", dark = "Tamsi", matchYourPhone = "Pagal telefoną", currency = "Valiuta", convert = "Konvertuoti", bookings = "Rezervacijos", packing = "Pakavimas", money = "Pinigai", gadget = "Įtaisas", other = "Kita", needToAdd = "Ką jums reikia pridėti?", section = "Skyrius",
     amount = "Suma", validAmount = "Įveskite galiojančią sumą", couldntFetch = "Nepavyko gauti kurso. Patikrinkite ryšį.",
     passwordTooShort = "Slaptažodis turi būti bent 6 simbolių ilgio", signupFailed = "Paskyros sukurti nepavyko. El. paštas jau gali būti naudojamas.",
     deleteAccount = "Ištrinti paskyrą", deleteAccountConfirm = "Tai visam laikui ištrins jūsų paskyrą ir visus jūsų duomenis. Šio veiksmo negalima atšaukti.", deleteButton = "Ištrinti",
@@ -908,6 +924,7 @@ private val LT = EN.copy(
     pin = "Prisegti", unpin = "Atsegti", edit = "Redaguoti", archive = "Archyvuoti", unarchive = "Išarchyvuoti",
     delete = "Ištrinti", deleteTripQ = "Ištrinti kelionę?", deletePlaceQ = "Ištrinti vietą?", deleteLegQ = "Ištrinti etapą?",
     cantBeUndone = "Šio veiksmo negalima atšaukti.", archivedTrips = "Archyvuotos kelionės", noArchivedTrips = "Nėra archyvuotų kelionių",
+    noDatesYet = "Kol kas nėra datų", tripName = "Kelionės pavadinimas", aLegBetween = "Etapas tarp", somewhereToVisit = "Vieta aplankyti",
     choosePhoto = "Pasirinkti nuotrauką", uploadFromGallery = "Įkelti iš galerijos", takePhoto = "Nufotografuoti", removePhoto = "Pašalinti nuotrauką", cropAndScale = "Apkarpyti ir keisti mastelį", usePhoto = "Naudoti nuotrauką",
 )
 
@@ -941,6 +958,7 @@ private val SK = EN.copy(
     pin = "Pripnúť", unpin = "Odpnúť", edit = "Upraviť", archive = "Archivovať", unarchive = "Obnoviť z archívu",
     delete = "Zmazať", deleteTripQ = "Zmazať cestu?", deletePlaceQ = "Zmazať miesto?", deleteLegQ = "Zmazať etapu?",
     cantBeUndone = "Túto akciu nie je možné vrátiť späť.", archivedTrips = "Archivované cesty", noArchivedTrips = "Žiadne archivované cesty",
+    noDatesYet = "Zatiaľ žiadne dátumy", tripName = "Názov cesty", aLegBetween = "Etapa medzi", somewhereToVisit = "Miesto na návštevu",
     choosePhoto = "Vybrať fotku", uploadFromGallery = "Nahrať z galérie", takePhoto = "Odfotografovať", removePhoto = "Odstrániť fotku", cropAndScale = "Orezať a zmeniť mierku", usePhoto = "Použiť fotku",
 )
 
@@ -974,6 +992,7 @@ private val SL = EN.copy(
     pin = "Pripni", unpin = "Odpni", edit = "Uredi", archive = "Arhiviraj", unarchive = "Obnovi",
     delete = "Izbriši", deleteTripQ = "Izbrišem potovanje?", deletePlaceQ = "Izbrišem kraj?", deleteLegQ = "Izbrišem etapo?",
     cantBeUndone = "Tega ni mogoče preklicati.", archivedTrips = "Arhivirana potovanja", noArchivedTrips = "Ni arhiviranih potovanj",
+    noDatesYet = "Še ni datumov", tripName = "Ime potovanja", aLegBetween = "Etapa med", somewhereToVisit = "Kraj za obisk",
     choosePhoto = "Izberi fotografijo", uploadFromGallery = "Naloži iz galerije", takePhoto = "Posnemi fotografijo", removePhoto = "Odstrani fotografijo", cropAndScale = "Obreži in spremeni velikost", usePhoto = "Uporabi fotografijo",
 )
 
@@ -1007,6 +1026,7 @@ private val SR = EN.copy(
     pin = "Zakači", unpin = "Otkači", edit = "Izmeni", archive = "Arhiviraj", unarchive = "Povrati",
     delete = "Obriši", deleteTripQ = "Obrisati putovanje?", deletePlaceQ = "Obrisati mesto?", deleteLegQ = "Obrisati etapu?",
     cantBeUndone = "Ovo se ne može poništiti.", archivedTrips = "Arhivirana putovanja", noArchivedTrips = "Nema arhiviranih putovanja",
+    noDatesYet = "Još nema datuma", tripName = "Naziv putovanja", aLegBetween = "Etapa između", somewhereToVisit = "Mesto za posetu",
     choosePhoto = "Izaberi fotografiju", uploadFromGallery = "Otpremi iz galerije", takePhoto = "Snimi fotografiju", removePhoto = "Ukloni fotografiju", cropAndScale = "Opseci i skaliraj", usePhoto = "Koristi fotografiju",
 )
 
@@ -1040,6 +1060,7 @@ private val SQ = EN.copy(
     pin = "Fikso", unpin = "Hiq fiksimin", edit = "Edito", archive = "Arkivo", unarchive = "Hiq nga arkiva",
     delete = "Fshij", deleteTripQ = "Fshij udhëtimin?", deletePlaceQ = "Fshij vendin?", deleteLegQ = "Fshij etapën?",
     cantBeUndone = "Kjo nuk mund të kthehet mbrapsht.", archivedTrips = "Udhëtime të arkivuara", noArchivedTrips = "Nuk ka udhëtime të arkivuara",
+    noDatesYet = "Ende pa data", tripName = "Emri i udhëtimit", aLegBetween = "Një etapë mes", somewhereToVisit = "Një vend për të vizituar",
     choosePhoto = "Zgjidh foton", uploadFromGallery = "Ngarko nga galeria", takePhoto = "Bëj foto", removePhoto = "Hiq foton", cropAndScale = "Prit dhe shkallëzo", usePhoto = "Përdor foton",
 )
 
@@ -1047,7 +1068,7 @@ private val MK = EN.copy(
     name = "Име", surname = "Презиме", dob = "Датум на раѓање", street = "Улица", city = "Град", postelCode = "Поштенски код",
     appTagline = "Каде што започнува секое патување!", myTrips = "Мои патувања", countries = "земји", legs = "етапи", done = "завршено",
     addLeg = "Додај етапа", newLeg = "Нова етапа", from = "Од", to = "До", transport = "Транспорт", date = "Датум", time = "Време",
-    bookingRef = "Код за резервација", optional = "опционално", saveLeg = "Зачувај етапа", tickets = "Билети", event = "Настан", beforeYouGo = "Пред да тръгнете",
+    bookingRef = "Код за резервација", optional = "опционално", saveLeg = "Зачувај етапа", tickets = "Билети", event = "Настан", beforeYouGo = "Пред да тргнете",
     addItem = "Додај ставка", settings = "Поставки", backupSync = "Резервна копија & синхронизација", appearance = "Изглед",
     language = "Јазик", currencyUnits = "Валута и единици", exportTrips = "Експортирај патувања", about = "За апликацијата", logOut = "Одјава",
     welcomeBack = "Добредојдовте назад", logInToTrips = "Најавете се во вашите патувања", email = "E-mail", password = "Лозинка",
@@ -1073,6 +1094,7 @@ private val MK = EN.copy(
     pin = "Закачи", unpin = "Откачи", edit = "Уреди", archive = "Архивирај", unarchive = "Врати од архива",
     delete = "Избриши", deleteTripQ = "Избриши патување?", deletePlaceQ = "Избриши место?", deleteLegQ = "Избриши етапа?",
     cantBeUndone = "Ова не може да се врати.", archivedTrips = "Архивирани патувања", noArchivedTrips = "Нема архивирани патувања",
+    noDatesYet = "Сè уште нема датуми", tripName = "Име на патувањето", aLegBetween = "Етапа помеѓу", somewhereToVisit = "Место за посета",
     choosePhoto = "Избери фотографија", uploadFromGallery = "Постави од галерија", takePhoto = "Сними фотографија", removePhoto = "Отстрани фотографија", cropAndScale = "Исечи и скалирај", usePhoto = "Користи фотографија",
 )
 
@@ -1106,6 +1128,7 @@ private val MO = EN.copy(
     pin = "Fixează", unpin = "Anulează fixarea", edit = "Editează", archive = "Arhivează", unarchive = "Dezarhivează",
     delete = "Șterge", deleteTripQ = "Ștergi călătoria?", deletePlaceQ = "Ștergi locul?", deleteLegQ = "Ștergi etapa?",
     cantBeUndone = "Această acțiune nu poate fi anulată.", archivedTrips = "Călătorii arhivate", noArchivedTrips = "Nicio călătorie arhivată",
+    noDatesYet = "Încă nicio dată", tripName = "Numele călătoriei", aLegBetween = "O etapă între", somewhereToVisit = "Un loc de vizitat",
     choosePhoto = "Alegeți fotografia", uploadFromGallery = "Încărcați din galerie", takePhoto = "Faceți o fotografie", removePhoto = "Eliminați fotografia", cropAndScale = "Decupați și scalați", usePhoto = "Utilizați fotografia",
 )
 
@@ -1125,7 +1148,7 @@ private val NO = EN.copy(
     editProfile = "Rediger profil", newPassword = "Nytt passord", saveChanges = "Lagre endringer",
     systemDefault = "Systemstandard", light = "Lys", dark = "Mørk", matchYourPhone = "Følg telefonen", currency = "Valuta", convert = "Konverter", bookings = "Bestillinger", packing = "Pakking", money = "Penger", gadget = "Gadget", other = "Annet", needToAdd = "Hva trenger du å legge til?", section = "Seksjon",
     amount = "Beløp", validAmount = "Skriv inn et gyldig beløp", couldntFetch = "Kunne ikke hente kurs. Sjekk tilkoblingen.",
-    passwordTooShort = "Passordet må være minst 6 tegn", signupFailed = "Kontoerstellung mislyktes. E-posten kan allerede være i bruk.",
+    passwordTooShort = "Passordet må være minst 6 tegn", signupFailed = "Kontoopprettelse mislyktes. E-posten kan allerede være i bruk.",
     deleteAccount = "Slett konto", deleteAccountConfirm = "Dette sletter kontoen din og alle dataene dine permanent. Dette kan ikke angres.", deleteButton = "Slett",
     showPassword = "Vis passord", hidePassword = "Skjul passord", back = "Tilbake",
     recentLoginRequired = "Kunne ikke lagre. For å endre passord, logg ut og inn igjen, og prøv deretter på nytt.",
@@ -1139,6 +1162,7 @@ private val NO = EN.copy(
     pin = "Fest", unpin = "Løsne", edit = "Rediger", archive = "Arkiver", unarchive = "Gjenopprett",
     delete = "Slett", deleteTripQ = "Slett reisen?", deletePlaceQ = "Slett stedet?", deleteLegQ = "Slett etappen?",
     cantBeUndone = "Dette kan ikke angres.", archivedTrips = "Arkiverte reiser", noArchivedTrips = "Ingen arkiverte reiser",
+    noDatesYet = "Ingen datoer ennå", tripName = "Reisenavn", aLegBetween = "En etappe mellom", somewhereToVisit = "Et sted å besøke",
     choosePhoto = "Velg bilde", uploadFromGallery = "Last opp fra galleri", takePhoto = "Ta bilde", removePhoto = "Fjern bilde", cropAndScale = "Beskjær og skaler", usePhoto = "Bruk bilde",
 )
 
@@ -1172,6 +1196,7 @@ private val FI = EN.copy(
     pin = "Kiinnitä", unpin = "Irrota", edit = "Muokkaa", archive = "Arkistoi", unarchive = "Palauta arkistosta",
     delete = "Poista", deleteTripQ = "Poista matka?", deletePlaceQ = "Poista paikka?", deleteLegQ = "Poista osuus?",
     cantBeUndone = "Tätä ei voi kumota.", archivedTrips = "Arkistoidut matkat", noArchivedTrips = "Ei arkistoituja matkoja",
+    noDatesYet = "Ei vielä päivämääriä", tripName = "Matkan nimi", aLegBetween = "Osuus välillä", somewhereToVisit = "Paikka vierailtavaksi",
     choosePhoto = "Valitse kuva", uploadFromGallery = "Lataa galleriasta", takePhoto = "Ota kuva", removePhoto = "Poista kuva", cropAndScale = "Rajaa ja skaalaa", usePhoto = "Käytä kuvaa",
 )
 
@@ -1205,6 +1230,7 @@ private val SV = EN.copy(
     pin = "Fäst", unpin = "Lossa", edit = "Redigera", archive = "Arkivera", unarchive = "Återställ",
     delete = "Ta bort", deleteTripQ = "Ta bort resa?", deletePlaceQ = "Ta bort plats?", deleteLegQ = "Ta bort etapp?",
     cantBeUndone = "Detta kan inte ångras.", archivedTrips = "Arkiverade resor", noArchivedTrips = "Inga arkiverade resor",
+    noDatesYet = "Inga datum ännu", tripName = "Resans namn", aLegBetween = "En etapp mellan", somewhereToVisit = "En plats att besöka",
     choosePhoto = "Välj foto", uploadFromGallery = "Ladda upp från galleri", takePhoto = "Ta foto", removePhoto = "Ta bort foto", cropAndScale = "Beskär och skala", usePhoto = "Använd foto",
 )
 
@@ -1238,6 +1264,7 @@ private val DA = EN.copy(
     pin = "Fastgør", unpin = "Frigør", edit = "Rediger", archive = "Arkiver", unarchive = "Gendan",
     delete = "Slet", deleteTripQ = "Slet rejse?", deletePlaceQ = "Slet sted?", deleteLegQ = "Slet etape?",
     cantBeUndone = "Dette kan ikke fortrydes.", archivedTrips = "Arkiverede rejser", noArchivedTrips = "Ingen arkiverede rejser",
+    noDatesYet = "Ingen datoer endnu", tripName = "Rejsenavn", aLegBetween = "En etape mellem", somewhereToVisit = "Et sted at besøge",
     choosePhoto = "Vælg foto", uploadFromGallery = "Upload fra galleri", takePhoto = "Tag foto", removePhoto = "Fjern foto", cropAndScale = "Beskær og skaler", usePhoto = "Brug foto",
 )
 
@@ -1271,6 +1298,7 @@ private val ET = EN.copy(
     pin = "Kinnita", unpin = "Eemalda kinnitus", edit = "Muuda", archive = "Arhiveeri", unarchive = "Taasta arhiivist",
     delete = "Kustuta", deleteTripQ = "Kustuta reis?", deletePlaceQ = "Kustuta koht?", deleteLegQ = "Kustuta etapp?",
     cantBeUndone = "Seda ei saa tagasi võtta.", archivedTrips = "Arhiveeritud reisid", noArchivedTrips = "Arhiveeritud reise pole",
+    noDatesYet = "Kuupäevi veel pole", tripName = "Reisi nimi", aLegBetween = "Etapp vahel", somewhereToVisit = "Koht külastamiseks",
     choosePhoto = "Vali foto", uploadFromGallery = "Laadi galeriist üles", takePhoto = "Tee foto", removePhoto = "Eemalda foto", cropAndScale = "Kärbi ja skaleeri", usePhoto = "Kasuta fotot",
 )
 
@@ -1304,6 +1332,7 @@ private val AR = EN.copy(
     pin = "تثبيت", unpin = "إلغاء التثبيت", edit = "تعديل", archive = "أرشفة", unarchive = "إلغاء الأرشفة",
     delete = "حذف", deleteTripQ = "حذف الرحلة؟", deletePlaceQ = "حذف المكان؟", deleteLegQ = "حذف المرحلة؟",
     cantBeUndone = "لا يمكن التراجع عن هذا الإجراء.", archivedTrips = "الرحلات المؤرشفة", noArchivedTrips = "لا توجد رحلات مؤرشفة",
+    noDatesYet = "لا توجد تواريخ بعد", tripName = "اسم الرحلة", aLegBetween = "مرحلة بين", somewhereToVisit = "مكان للزيارة",
     choosePhoto = "اختر صورة", uploadFromGallery = "تحميل من المعرض", takePhoto = "التقاط صورة", removePhoto = "إزالة الصورة", cropAndScale = "قص وتغيير الحجم", usePhoto = "استخدام الصورة",
 )
 
@@ -1337,6 +1366,7 @@ private val TR = EN.copy(
     pin = "Sabitle", unpin = "Sabitlemeyi kaldır", edit = "Düzenle", archive = "Arşivle", unarchive = "Arşivden çıkar",
     delete = "Sil", deleteTripQ = "Geziyi sil?", deletePlaceQ = "Yeri sil?", deleteLegQ = "Etabı sil?",
     cantBeUndone = "Bu işlem geri alınamaz.", archivedTrips = "Arşivlenen geziler", noArchivedTrips = "Arşivlenen gezi yok",
+    noDatesYet = "Henüz tarih yok", tripName = "Gezi adı", aLegBetween = "Arasında bir etap", somewhereToVisit = "Ziyaret edilecek bir yer",
     choosePhoto = "Fotoğraf Seç", uploadFromGallery = "Galeriden Yükle", takePhoto = "Fotoğraf Çek", removePhoto = "Fotoğrafı Kaldır", cropAndScale = "Kırp ve Ölçeklendir", usePhoto = "Fotoğrafı Kullan",
 )
 
@@ -1370,6 +1400,7 @@ private val VI = EN.copy(
     pin = "Ghim", unpin = "Bỏ ghim", edit = "Chỉnh sửa", archive = "Lưu trữ", unarchive = "Bỏ lưu trữ",
     delete = "Xóa", deleteTripQ = "Xóa chuyến đi?", deletePlaceQ = "Xóa địa điểm?", deleteLegQ = "Xóa chặng?",
     cantBeUndone = "Hành động này không thể hoàn tác.", archivedTrips = "Chuyến đi đã lưu trữ", noArchivedTrips = "Không có chuyến đi lưu trữ",
+    noDatesYet = "Chưa có ngày", tripName = "Tên chuyến đi", aLegBetween = "Một chặng giữa", somewhereToVisit = "Nơi nào đó để ghé thăm",
     choosePhoto = "Chọn ảnh", uploadFromGallery = "Tải lên từ thư viện", takePhoto = "Chụp ảnh", removePhoto = "Xóa ảnh", cropAndScale = "Cắt và thu phóng", usePhoto = "Sử dụng ảnh",
 )
 
@@ -1382,7 +1413,7 @@ private val ID = EN.copy(
     language = "Bahasa", currencyUnits = "Mata uang & unit", exportTrips = "Ekspor perjalanan", about = "Tentang", logOut = "Keluar",
     welcomeBack = "Selamat datang kembali", logInToTrips = "Masuk ke perjalananmu", email = "Email", password = "Kata sandi",
     forgotPassword = "Lupa kata sandi?", logIn = "Masuk", orDivider = "atau", continueGoogle = "Lanjutkan dengan Google",
-    continueApple = "Lanjutkan with Apple", newHere = "Baru di sini?", createAccount = "Buat akun", calendar = "Kalender",
+    continueApple = "Lanjutkan dengan Apple", newHere = "Baru di sini?", createAccount = "Buat akun", calendar = "Kalender",
     documents = "Dokumen", nextUp = "selanjutnya", legsTravelled = "tahap dilalui", syncWholeTrip = "Sinkronkan seluruh perjalanan",
     addToPhoneCalendar = "Tambah ke kalender ponsel", remindMe = "Ingatkan saya", chooseLanguage = "Pilih bahasa",
     followPhone = "Ikuti bahasa ponsel", ok = "OK", cancel = "Batal", address = "Alamat",
@@ -1403,6 +1434,7 @@ private val ID = EN.copy(
     pin = "Sematkan", unpin = "Lepas sematan", edit = "Edit", archive = "Arsip", unarchive = "Buka arsip",
     delete = "Hapus", deleteTripQ = "Hapus perjalanan?", deletePlaceQ = "Hapus tempat?", deleteLegQ = "Hapus tahap?",
     cantBeUndone = "Tindakan ini tidak dapat dibatalkan.", archivedTrips = "Perjalanan diarsipkan", noArchivedTrips = "Tidak ada perjalanan diarsipkan",
+    noDatesYet = "Belum ada tanggal", tripName = "Nama perjalanan", aLegBetween = "Tahap antara", somewhereToVisit = "Tempat untuk dikunjungi",
     choosePhoto = "Pilih Foto", uploadFromGallery = "Unggah Dari Galeri", takePhoto = "Ambil Foto", removePhoto = "Hapus Foto", cropAndScale = "Potong dan Skala", usePhoto = "Gunakan Foto",
 )
 
@@ -1436,6 +1468,7 @@ private val TH = EN.copy(
     pin = "ปักหมุด", unpin = "ถอนหมุด", edit = "แก้ไข", archive = "เก็บถาวร", unarchive = "ยกเลิกการเก็บถาวร",
     delete = "ลบ", deleteTripQ = "ลบการเดินทาง?", deletePlaceQ = "ลบสถานที่?", deleteLegQ = "ลบช่วง?",
     cantBeUndone = "ไม่สามารถย้อนกลับการดำเนินการนี้ได้", archivedTrips = "การเดินทางที่เก็บถาวร", noArchivedTrips = "ไม่มีการเดินทางที่เก็บถาวร",
+    noDatesYet = "ยังไม่มีวันที่", tripName = "ชื่อการเดินทาง", aLegBetween = "ช่วงระหว่าง", somewhereToVisit = "สถานที่ที่จะไปเยือน",
     choosePhoto = "เลือกรูปภาพ", uploadFromGallery = "อัปโหลดจากแกลเลอรี", takePhoto = "ถ่ายภาพ", removePhoto = "ลบรูปภาพ", cropAndScale = "ครอบตัดและปรับขนาด", usePhoto = "ใช้รูปภาพ",
 )
 
@@ -1469,6 +1502,7 @@ private val HE = EN.copy(
     pin = "נעיצה", unpin = "ביטול נעיצה", edit = "עריכה", archive = "ארכוב", unarchive = "ביטול ארכוב",
     delete = "מחיקה", deleteTripQ = "למחוק את הטיול?", deletePlaceQ = "למחוק את המקום?", deleteLegQ = "למחוק את המקטע?",
     cantBeUndone = "לא ניתן לבטל פעולה זו.", archivedTrips = "טיולים בארכיון", noArchivedTrips = "אין טיולים בארכיון",
+    noDatesYet = "עדיין אין תאריכים", tripName = "שם הטיול", aLegBetween = "מקטע בין", somewhereToVisit = "מקום לבקר בו",
     choosePhoto = "בחר תמונה", uploadFromGallery = "העלה מהגלריה", takePhoto = "צלם תמונה", removePhoto = "הסר תמונה", cropAndScale = "חתוך ושנה קנה מידה", usePhoto = "השתמש בתמונה",
 )
 
@@ -1502,6 +1536,7 @@ private val BN = EN.copy(
     pin = "পিন করুন", unpin = "আনপিন করুন", edit = "সম্পাদনা করুন", archive = "আর্কাইভ করুন", unarchive = "আর্কাইভ থেকে সরান",
     delete = "মুছে ফেলুন", deleteTripQ = "ভ্রমণটি কি মুছে ফেলবেন?", deletePlaceQ = "স্থানটি কি মুছে ফেলবেন?", deleteLegQ = "পর্যায়টি কি মুছে ফেলবেন?",
     cantBeUndone = "এই কাজটি ফিরিয়ে নেওয়া যাবে না।", archivedTrips = "আর্কাইভ করা ভ্রমণ", noArchivedTrips = "কোন আর্কাইভ করা ভ্রমণ নেই",
+    noDatesYet = "এখনও কোন তারিখ নেই", tripName = "ভ্রমণের নাম", aLegBetween = "এর মধ্যে একটি পর্যায়", somewhereToVisit = "ঘুরে দেখার জায়গা",
     choosePhoto = "ছবি নির্বাচন করুন", uploadFromGallery = "গ্যালারি থেকে আপলোড করুন", takePhoto = "ছবি তুলুন", removePhoto = "ছবি সরান", cropAndScale = "ক্রপ এবং স্কেল করুন", usePhoto = "ছবি ব্যবহার করুন",
 )
 
@@ -1540,6 +1575,7 @@ private val TG = EN.copy(
     pin = "I-pin", unpin = "I-unpin", edit = "I-edit", archive = "I-archive", unarchive = "I-unarchive",
     delete = "I-delete", deleteTripQ = "I-delete ang biyahe?", deletePlaceQ = "I-delete ang lugar?", deleteLegQ = "I-delete ang yugto?",
     cantBeUndone = "Hindi na ito mababawi.", archivedTrips = "Mga naka-archive na biyahe", noArchivedTrips = "Walang mga naka-archive na biyahe",
+    noDatesYet = "Wala pang mga petsa", tripName = "Pangalan ng biyahe", aLegBetween = "Isang yugto sa pagitan", somewhereToVisit = "Isang lugar na bibisitahin",
     choosePhoto = "Pumili ng Larawan", uploadFromGallery = "Mag-upload Mula sa Gallery", takePhoto = "Kumuha ng Larawan", removePhoto = "Alisin ang Larawan", cropAndScale = "I-crop at I-scale", usePhoto = "Gamitin ang Larawan",
 )
 
@@ -1573,6 +1609,7 @@ private val SI = EN.copy(
     pin = "පින් කරන්න", unpin = "පින් ඉවත් කරන්න", edit = "සංස්කරණය කරන්න", archive = "සංරක්ෂිත කරන්න", unarchive = "සංරක්ෂිතයෙන් ඉවත් කරන්න",
     delete = "මකන්න", deleteTripQ = "ගමන මකා දමන්නද?", deletePlaceQ = "ස්ථානය මකා දමන්නද?", deleteLegQ = "ගමන් වාරය මකා දමන්නද?",
     cantBeUndone = "මෙය ආපසු හැරවිය නොහැක.", archivedTrips = "සංරක්ෂිත ගමන්", noArchivedTrips = "සංරක්ෂිත ගමන් නැත",
+    noDatesYet = "තවම දිනයන් නැත", tripName = "ගමනේ නම", aLegBetween = "අතර ගමන් වාරයක්", somewhereToVisit = "යා යුතු ස්ථානයක්",
     choosePhoto = "ඡායාරූපයක් තෝරන්න", uploadFromGallery = "ගැලරියෙන් උඩුගත කරන්න", takePhoto = "ඡායාරූපයක් ගන්න", removePhoto = "ඡායාරූපය ඉවත් කරන්න", cropAndScale = "කැපීම සහ පරිමාණය කරන්න", usePhoto = "ඡායාරූපය භාවිතා කරන්න",
 )
 
