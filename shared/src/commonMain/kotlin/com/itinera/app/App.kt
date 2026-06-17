@@ -92,17 +92,17 @@ fun App() {
         ThemeMode.DARK -> true
     }
 
-        ItineraTheme(darkTheme = darkTheme) {
-            CompositionLocalProvider(LocalStrings provides activeStrings) {
-                if (!authChecked) {
-                    Box(
-                        Modifier.fillMaxSize()
-                            .background(MaterialTheme.colorScheme.background),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                } else {
+    ItineraTheme(darkTheme = darkTheme) {
+        CompositionLocalProvider(LocalStrings provides activeStrings) {
+            if (!authChecked) {
+                Box(
+                    Modifier.fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else {
                 AppContent(
                     repository, navigator, language, themeMode,
                     { language = it }, { themeMode = it }
@@ -290,7 +290,7 @@ private fun AppContent(
                                 onToggleActivity = { repository.toggleActivity(it) },
                                 onDeleteActivity = { repository.deleteActivity(it) },
 
-                            )
+                                )
                         }
 
                         is Screen.AddPlace -> AddPlaceScreen(
