@@ -1,7 +1,9 @@
 package com.itinera.app.data
 
+import com.itinera.app.model.UserProfile
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.FirebaseUser
+import dev.gitlive.firebase.auth.GoogleAuthProvider
 import dev.gitlive.firebase.auth.auth
 
 /**
@@ -50,4 +52,21 @@ class AuthService {
     suspend fun sendPasswordReset(email: String) {
         Firebase.auth.sendPasswordResetEmail(email)
     }
+
+    suspend fun signInWithGoogle(idToken: String, accessToken: String) {
+        val credential = GoogleAuthProvider.credential(idToken, accessToken)
+        Firebase.auth.signInWithCredential(credential)
+    }
+    fun currentUserProfile(): UserProfile? {
+        val user = Firebase.auth.currentUser ?: return null
+        val fullName = user.displayName ?: ""
+        val parts = fullName.split(" ")
+        return UserProfile(
+            name = parts.firstOrNull() ?: "",
+            surname = parts.drop(1).joinToString(" "),
+            email = user.email ?: "",
+            photoUrl = user.photoURL ?: "",          // ⬅ Google profile photo
+        )
+    }
+
 }

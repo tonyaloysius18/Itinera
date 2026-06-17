@@ -194,8 +194,17 @@ private fun AppContent(
                         val uid = repository.authService.currentUid
                         if (uid != null) {
                             try {
-                                val profile = repository.profileService.loadProfile(uid)
-                                if (profile != null) repository.updateProfile(profile)
+                                val existing = repository.profileService.loadProfile(uid)
+                                if (existing != null) {
+                                    repository.updateProfile(existing)          // returning user
+                                } else {
+                                    // new Google user → build profile from Google account
+                                    val googleProfile = repository.authService.currentUserProfile()
+                                    if (googleProfile != null) {
+                                        repository.updateProfile(googleProfile)
+                                        repository.profileService.saveProfile(uid, googleProfile)  // persist it
+                                    }
+                                }
                             } catch (e: Exception) { }
                         }
                         navigator.resetTo(Screen.Home)

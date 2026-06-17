@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.input.VisualTransformation
 import kotlinx.coroutines.launch
 import com.itinera.app.data.AuthService
+import com.itinera.app.data.rememberGoogleSignInHelper
 
 
 /**
@@ -67,6 +68,9 @@ fun LoginScreen(
     var loading by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
+    val googleHelper = rememberGoogleSignInHelper()
+
+
     val displayFont = FontFamily(Font(Res.font.arizonia_regular))
     val taglineFont = FontFamily(Font(Res.font.caudex_bold))
 
@@ -83,6 +87,7 @@ fun LoginScreen(
         cursorColor = onImage,
     )
     val textFieldShape = RoundedCornerShape(12.dp)
+
 
     fun attemptLogin() {
         if (email.isBlank() || password.isBlank()) {
@@ -232,7 +237,22 @@ fun LoginScreen(
                 HorizontalDivider(Modifier.weight(1f), color = onImageMuted)
             }
             Spacer(Modifier.height(16.dp))
-            OutlinedButton(onClick = onAuthed, modifier = Modifier.fillMaxWidth()) {   // still mock
+            OutlinedButton(
+                onClick = {
+                    scope.launch {
+                        val tokens = googleHelper.signIn()
+                        if (tokens != null) {
+                            try {
+                                authService.signInWithGoogle(tokens.idToken, tokens.accessToken)
+                                onAuthed()
+                            } catch (e: Exception) {
+                                onMessage("Google failed: ${e.message}")
+                            }
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+            )  {   // still mock
                 Image(
                     painter = painterResource(Res.drawable.ic_google),
                     contentDescription = null,

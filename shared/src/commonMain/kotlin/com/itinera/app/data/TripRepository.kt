@@ -190,17 +190,7 @@ class TripRepository {
         activities.removeAll { it.id == id }
     }
 
-    var profile by mutableStateOf(
-        UserProfile(
-            name = "Tony",
-            surname = "Aloysius",
-            email = "tony.aloysius@gmail.com",
-            dob = "01/01/1990",
-            street = "",
-            city = "",
-            postalCode = "",
-        )
-    )
+    var profile by mutableStateOf(UserProfile())   // ⬅ empty, no placeholder
         private set
 
     fun updateProfile(updated: UserProfile) { profile = updated }
