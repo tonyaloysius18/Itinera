@@ -432,11 +432,10 @@ private fun AppContent(
                     .graphicsLayer {
                         scaleX = animatedScale
                         scaleY = animatedScale
-                        alpha = androidx.compose.ui.graphics.lerp(
-                            start = Color.White.copy(alpha = 0.6f),
-                            stop = Color.White,
-                            fraction = (animatedScale - 0.85f) / 0.15f
-                        ).alpha
+                        // scale from the bottom-center so it shrinks "into" the bottom, no floating gap
+                        transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 1f)
+                        // keep it fully opaque — no translucency that reveals the shadow/background
+                        alpha = 1f
                     },
                 contentAlignment = Alignment.Center,
             ) {
@@ -519,7 +518,7 @@ private fun SlidingPillBar(
         shape = RoundedCornerShape(32.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
         tonalElevation = 6.dp,
-        shadowElevation = 8.dp,
+        shadowElevation = 2.dp,
     ) {
         Box(Modifier.padding(8.dp)) {
 
