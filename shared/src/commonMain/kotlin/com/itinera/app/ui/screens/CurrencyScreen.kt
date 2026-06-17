@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -37,35 +38,76 @@ import com.itinera.app.ui.components.TopBar
 import kotlinx.coroutines.delay
 import kotlin.math.pow
 import kotlin.math.round
+import androidx.compose.animation.core.Animatable
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
+import kotlinx.coroutines.launch
 
 private val currencies = listOf(
-    "EUR", "USD", "GBP", "JPY", "CHF", "CAD", "AUD",
-    "INR", "CNY", "SEK", "NOK", "PLN", "CZK", "DKK",
-    "RUB", "BRL", "ZAR", "MXN", "MYR", "SGD", "THB",
-    "HKD", "IDR", "PHP", "NZD", "TRY", "AED", "SAR",
-    "KWD", "QAR", "OMR", "BHD", "JOD", "IQD", "EGP", "ILS",
+    // World majors
+    "EUR", "USD", "GBP", "JPY", "CHF", "CAD", "AUD", "CNY", "NZD",
+    // Europe (non-euro)
+    "SEK", "NOK", "DKK", "PLN", "CZK", "HUF",
+    // Asia
+    "INR", "SGD", "HKD", "KRW", "IDR", "PHP", "THB", "MYR", "VND", "TWD",
+    // Middle East / Gulf
+    "AED", "SAR", "QAR", "KWD", "BHD", "OMR", "ILS", "TRY",
+    // Africa
+    "ZAR", "EGP", "NGN", "KES", "MAD",
+    // South America
+    "BRL", "ARS", "CLP", "COP", "MXN",
 )
 
 private val currencyFlags = mapOf(
-    "EUR" to "\uD83C\uDDEA\uD83C\uDDFA", "USD" to "\uD83C\uDDFA\uD83C\uDDF8",
-    "GBP" to "\uD83C\uDDEC\uD83C\uDDE7", "JPY" to "\uD83C\uDDEF\uD83C\uDDF5",
-    "CHF" to "\uD83C\uDDE8\uD83C\uDDED", "CAD" to "\uD83C\uDDE8\uD83C\uDDE6",
-    "AUD" to "\uD83C\uDDE6\uD83C\uDDFA", "INR" to "\uD83C\uDDEE\uD83C\uDDF3",
-    "CNY" to "\uD83C\uDDE8\uD83C\uDDF3", "SEK" to "\uD83C\uDDF8\uD83C\uDDEA",
-    "NOK" to "\uD83C\uDDF3\uD83C\uDDF4", "PLN" to "\uD83C\uDDF5\uD83C\uDDF1",
-    "CZK" to "\uD83C\uDDE8\uD83C\uDDFF", "DKK" to "\uD83C\uDDE9\uD83C\uDDF0",
-    "RUB" to "\uD83C\uDDF7\uD83C\uDDFA", "BRL" to "\uD83C\uDDE7\uD83C\uDDF7",
-    "ZAR" to "\uD83C\uDDF3\uD83C\uDDFA", "MXN" to "\uD83C\uDDFD\uD83C\uDDEA",
-    "MYR" to "\uD83C\uDDE6\uD83C\uDDF7", "SGD" to "\uD83C\uDDE7\uD83C\uDDF8",
-    "THB" to "\uD83C\uDDE9\uD83C\uDDE1", "HKD" to "\uD83C\uDDE8\uD83C\uDDF0",
-    "IDR" to "\uD83C\uDDE9\uD83C\uDDE6", "PHP" to "\uD83C\uDDF9\uD83C\uDDED",
-    "NZD" to "\uD83C\uDDF9\uD83C\uDDFF", "TRY" to "\uD83C\uDDF9\uD83C\uDDF7",
-    "AED" to "\uD83C\uDDE6\uD83C\uDDED", "SAR" to "\uD83C\uDDE6\uD83C\uDDFA",
-    "KWD" to "\uD83C\uDDE6\uD83C\uDDFF", "QAR" to "\uD83C\uDDE6\uD83C\uDDF9",
-    "OMR" to "\uD83C\uDDE6\uD83C\uDDFA", "BHD" to "\uD83C\uDDE6\uD83C\uDDFC",
-    "JOD" to "\uD83C\uDDE6\uD83C\uDDF4", "IQD" to "\uD83C\uDDE8\uD83C\uDDF3",
-    "EGP" to "\uD83C\uDDEA\uD83C\uDDF0", "ILS" to "\uD83C\uDDE9\uD83C\uDDE8",
-    
+    // World majors
+    "EUR" to "\uD83C\uDDEA\uD83C\uDDFA",  // 🇪🇺 Eurozone
+    "USD" to "\uD83C\uDDFA\uD83C\uDDF8",  // 🇺🇸 United States
+    "GBP" to "\uD83C\uDDEC\uD83C\uDDE7",  // 🇬🇧 United Kingdom
+    "JPY" to "\uD83C\uDDEF\uD83C\uDDF5",  // 🇯🇵 Japan
+    "CHF" to "\uD83C\uDDE8\uD83C\uDDED",  // 🇨🇭 Switzerland
+    "CAD" to "\uD83C\uDDE8\uD83C\uDDE6",  // 🇨🇦 Canada
+    "AUD" to "\uD83C\uDDE6\uD83C\uDDFA",  // 🇦🇺 Australia
+    "CNY" to "\uD83C\uDDE8\uD83C\uDDF3",  // 🇨🇳 China
+    "NZD" to "\uD83C\uDDF3\uD83C\uDDFF",  // 🇳🇿 New Zealand
+    // Europe (non-euro)
+    "SEK" to "\uD83C\uDDF8\uD83C\uDDEA",  // 🇸🇪 Sweden
+    "NOK" to "\uD83C\uDDF3\uD83C\uDDF4",  // 🇳🇴 Norway
+    "DKK" to "\uD83C\uDDE9\uD83C\uDDF0",  // 🇩🇰 Denmark
+    "PLN" to "\uD83C\uDDF5\uD83C\uDDF1",  // 🇵🇱 Poland
+    "CZK" to "\uD83C\uDDE8\uD83C\uDDFF",  // 🇨🇿 Czechia
+    "HUF" to "\uD83C\uDDED\uD83C\uDDFA",  // 🇭🇺 Hungary
+    // Asia
+    "INR" to "\uD83C\uDDEE\uD83C\uDDF3",  // 🇮🇳 India
+    "SGD" to "\uD83C\uDDF8\uD83C\uDDEC",  // 🇸🇬 Singapore
+    "HKD" to "\uD83C\uDDED\uD83C\uDDF0",  // 🇭🇰 Hong Kong
+    "KRW" to "\uD83C\uDDF0\uD83C\uDDF7",  // 🇰🇷 South Korea
+    "IDR" to "\uD83C\uDDEE\uD83C\uDDE9",  // 🇮🇩 Indonesia
+    "PHP" to "\uD83C\uDDF5\uD83C\uDDED",  // 🇵🇭 Philippines
+    "THB" to "\uD83C\uDDF9\uD83C\uDDED",  // 🇹🇭 Thailand
+    "MYR" to "\uD83C\uDDF2\uD83C\uDDFE",  // 🇲🇾 Malaysia
+    "VND" to "\uD83C\uDDFB\uD83C\uDDF3",  // 🇻🇳 Vietnam
+    "TWD" to "\uD83C\uDDF9\uD83C\uDDFC",  // 🇹🇼 Taiwan
+    // Middle East / Gulf
+    "AED" to "\uD83C\uDDE6\uD83C\uDDEA",  // 🇦🇪 UAE
+    "SAR" to "\uD83C\uDDF8\uD83C\uDDE6",  // 🇸🇦 Saudi Arabia
+    "QAR" to "\uD83C\uDDF6\uD83C\uDDE6",  // 🇶🇦 Qatar
+    "KWD" to "\uD83C\uDDF0\uD83C\uDDFC",  // 🇰🇼 Kuwait
+    "BHD" to "\uD83C\uDDE7\uD83C\uDDED",  // 🇧🇭 Bahrain
+    "OMR" to "\uD83C\uDDF4\uD83C\uDDF2",  // 🇴🇲 Oman
+    "ILS" to "\uD83C\uDDEE\uD83C\uDDF1",  // 🇮🇱 Israel
+    "TRY" to "\uD83C\uDDF9\uD83C\uDDF7",  // 🇹🇷 Turkey
+    // Africa
+    "ZAR" to "\uD83C\uDDFF\uD83C\uDDE6",  // 🇿🇦 South Africa
+    "EGP" to "\uD83C\uDDEA\uD83C\uDDEC",  // 🇪🇬 Egypt
+    "NGN" to "\uD83C\uDDF3\uD83C\uDDEC",  // 🇳🇬 Nigeria
+    "KES" to "\uD83C\uDDF0\uD83C\uDDEA",  // 🇰🇪 Kenya
+    "MAD" to "\uD83C\uDDF2\uD83C\uDDE6",  // 🇲🇦 Morocco
+    // South America
+    "BRL" to "\uD83C\uDDE7\uD83C\uDDF7",  // 🇧🇷 Brazil
+    "ARS" to "\uD83C\uDDE6\uD83C\uDDF7",  // 🇦🇷 Argentina
+    "CLP" to "\uD83C\uDDE8\uD83C\uDDF1",  // 🇨🇱 Chile
+    "COP" to "\uD83C\uDDE8\uD83C\uDDF4",  // 🇨🇴 Colombia
+    "MXN" to "\uD83C\uDDF2\uD83C\uDDFD",  // 🇲🇽 Mexico
 )
 
 private fun flagFor(code: String) = currencyFlags[code] ?: "\uD83C\uDFF3\uFE0F"
@@ -95,16 +137,30 @@ fun CurrencyScreen(
 
     var rotated by remember { mutableStateOf(false) }
 
+    val density = LocalDensity.current
+    val slidePx = with(density) { 82.dp.toPx() }    // approx card height + gap
+    var swapTrigger by remember { mutableStateOf(0) }
+    val topSlide = remember { Animatable(0f) }
+    val bottomSlide = remember { Animatable(0f) }
+
+    LaunchedEffect(swapTrigger) {
+        if (swapTrigger == 0) return@LaunchedEffect
+        topSlide.snapTo(slidePx)
+        bottomSlide.snapTo(-slidePx)
+        launch { topSlide.animateTo(0f, tween(400)) }
+        bottomSlide.animateTo(0f, tween(400))
+    }
+
     // Vertical swap animation: each card moves ~82dp (height 72 + spacer 10)
-    val cardOffset = 82.dp
-    val fromOffset by animateDpAsState(
-        targetValue = if (rotated) cardOffset else 0.dp,
-        animationSpec = tween(400)
-    )
-    val toOffset by animateDpAsState(
-        targetValue = if (rotated) -cardOffset else 0.dp,
-        animationSpec = tween(400)
-    )
+//    val cardOffset = 82.dp
+//    val fromOffset by animateDpAsState(
+//        targetValue = if (rotated) cardOffset else 0.dp,
+//        animationSpec = tween(400)
+//    )
+//    val toOffset by animateDpAsState(
+//        targetValue = if (rotated) -cardOffset else 0.dp,
+//        animationSpec = tween(400)
+//    )
 
     // Target values for heights: initially 72, then shrinks to 64 or enlarges to 84
     val fromHeight by animateDpAsState(
@@ -120,6 +176,12 @@ fun CurrencyScreen(
             "from" -> 84.dp
             else -> 72.dp
         }
+    )
+
+    val iconRotation by animateFloatAsState(
+        targetValue = if (rotated) 180f else 0f,
+        animationSpec = tween(400),          // matches the card slide
+        label = "swapIconRotation"
     )
 
     // ===== Live conversion: typing in FROM updates TO =====
@@ -189,7 +251,7 @@ fun CurrencyScreen(
                         currencyOptions = currencies,
                         onCurrencySelected = { from = it },
                         modifier = Modifier
-                            .offset(y = fromOffset)
+                            .offset { IntOffset(0, topSlide.value.toInt()) }   // ⬅ slide
                             .height(fromHeight),
                         isEnlarged = editing == "to" // from enlarges if to is being edited
                     )
@@ -205,7 +267,7 @@ fun CurrencyScreen(
                         currencyOptions = currencies,
                         onCurrencySelected = { to = it },
                         modifier = Modifier
-                            .offset(y = toOffset)
+                            .offset { IntOffset(0, bottomSlide.value.toInt()) } // ⬅ slide
                             .height(toHeight),
                         isEnlarged = editing == "from" // to enlarges if from is being edited
                     )
@@ -224,12 +286,19 @@ fun CurrencyScreen(
                         val tc = from; from = to; to = tc
                         val ta = fromAmount; fromAmount = toAmount; toAmount = ta
                         rotated = !rotated
+                        editing = when (editing) {
+                            "from" -> "to"
+                            "to" -> "from"
+                            else -> null
+                        }
+                        swapTrigger++              // ⬅ play the slide
                     }) {
                         Icon(
                             Icons.Filled.SwapVert,
                             contentDescription = "Swap",
                             tint = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.rotate(if (rotated) 180f else 0f),
+                            modifier = Modifier.rotate(iconRotation),
+
                         )
                     }
                 }
