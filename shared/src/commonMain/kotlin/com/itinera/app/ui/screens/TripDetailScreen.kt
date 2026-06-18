@@ -129,8 +129,9 @@ fun TripDetailScreen(
                                 }
                                 Spacer(Modifier.width(12.dp))
                                 Column {
+                                    val operatorSuffix = if (leg.operator.isNotBlank()) " (${leg.operator})" else ""
                                     Text(
-                                        "${leg.fromCity} → ${leg.toCity}",
+                                        "${leg.fromCity} → ${leg.toCity}$operatorSuffix",
                                         style = MaterialTheme.typography.bodyLarge,
                                         fontWeight = if (isNext) FontWeight.Medium else FontWeight.Normal,
                                         textDecoration = if (leg.completed) TextDecoration.LineThrough else null,

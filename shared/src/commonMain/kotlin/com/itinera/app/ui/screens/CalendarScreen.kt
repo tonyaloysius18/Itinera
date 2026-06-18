@@ -1,5 +1,6 @@
 package com.itinera.app.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -10,10 +11,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.itinera.app.data.rememberCalendarHelper
+import com.itinera.app.data.toCalendarEvent
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.Trip
 import com.itinera.app.model.label
 import com.itinera.app.ui.components.CardShape
+import com.itinera.app.ui.components.EmptyState
 import com.itinera.app.ui.components.TopBar
 
 /**
@@ -23,10 +27,23 @@ import com.itinera.app.ui.components.TopBar
  * Android Intent / iOS EventKit) in production.
  */
 @Composable
-fun CalendarScreen(trips: List<Trip>) {
+fun CalendarScreen(
+    trips: List<Trip>,
+    onMarkAdded: (tripId: String, legId: String) -> Unit,   // ⬅ ADD
+) {
     val s = LocalStrings.current
+    val calendar = rememberCalendarHelper()
+
     Column(Modifier.fillMaxSize()) {
         TopBar(s.calendar)
+            if (trips.none { it.legs.isNotEmpty() }) {
+                EmptyState(
+                    icon = Icons.Filled.CalendarMonth,
+                    title = s.noResults,
+                    subtitle = s.noResultsSubtitle,
+                    modifier = Modifier.weight(1f),
+                )
+            } else {
         Column(Modifier.weight(1f).padding(horizontal = 16.dp)) {
             trips.forEach { trip ->
                 Text(
@@ -53,11 +70,27 @@ fun CalendarScreen(trips: List<Trip>) {
                                 )
                             }
                             Spacer(Modifier.weight(1f))
-                            Icon(Icons.Filled.CalendarMonth, contentDescription = s.addToPhoneCalendar, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                            Icon(
+                                Icons.Filled.CalendarMonth,
+                                contentDescription = s.addToPhoneCalendar,
+                                tint = if (leg.addedToCalendar)
+                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)   // dimmed = already added (a hint)
+                                else
+                                    MaterialTheme.colorScheme.primary,                       // bright = not yet added
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .clickable {                                             // always re-tappable
+                                        calendar.addEvent(leg.toCalendarEvent())
+                                        onMarkAdded(trip.id, leg.id)
+                                    },
+                                )
+                            }
                         }
                     }
+
                 }
             }
         }
     }
 }
+

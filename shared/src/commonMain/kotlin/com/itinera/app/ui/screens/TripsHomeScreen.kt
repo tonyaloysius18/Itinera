@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Luggage                   // ⬅ ADD (empty-state icon)
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Search
@@ -48,7 +49,9 @@ import coil3.compose.AsyncImage
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.Trip
 import com.itinera.app.model.TripAccent
+import com.itinera.app.model.label
 import com.itinera.app.ui.components.CardShape
+import com.itinera.app.ui.components.EmptyState                          // ⬅ ADD
 import com.itinera.app.ui.components.TopBar
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -113,27 +116,44 @@ fun TripsHomeScreen(
                 )
             }
             Spacer(Modifier.height(12.dp))
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(bottom = 96.dp),        // ⬅ so last card isn't hidden behind the FAB
-            ) {
-                items(visibleTrips, key = { it.id }) { trip ->
-                    SwipeableTripCard(
-                        trip = trip,
-                        countriesWord = s.countries,
-                        legsWord = s.legs,
-                        doneWord = s.done,
-                        isOpen = openCardId == trip.id,
-                        onOpenChange = { open -> openCardId = if (open) trip.id else null },
-                        onClick = { onOpenTrip(trip.id) },
-                        modifier = Modifier.animateItem(),
-                        onPin = { onPinTrip(trip.id); openCardId = null },
-                        onEdit = { editingTrip = trip; openCardId = null },
-                        onArchive = { onArchiveTrip(trip.id); openCardId = null },
-                        onDelete = { pendingDeleteId = trip.id; openCardId = null },
-                    )
+
+            when {
+                // No trips at all → friendly empty state
+                trips.isEmpty() -> EmptyState(
+                    icon = Icons.Filled.Luggage,
+                    title = s.noTripsYet,
+                    subtitle = s.noTripsSubtitle,
+                    modifier = Modifier.weight(1f),
+                )
+                // Trips exist but the search matched none
+                visibleTrips.isEmpty() -> EmptyState(
+                    icon = Icons.Filled.Search,
+                    title = s.noResults,
+                    subtitle = s.noResultsSubtitle,
+                    modifier = Modifier.weight(1f),
+                )
+                else -> LazyColumn(
+                    state = listState,
+                    modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(bottom = 96.dp),        // ⬅ so last card isn't hidden behind the FAB
+                ) {
+                    items(visibleTrips, key = { it.id }) { trip ->
+                        SwipeableTripCard(
+                            trip = trip,
+                            countriesWord = s.countries,
+                            legsWord = s.legs,
+                            doneWord = s.done,
+                            isOpen = openCardId == trip.id,
+                            onOpenChange = { open -> openCardId = if (open) trip.id else null },
+                            onClick = { onOpenTrip(trip.id) },
+                            modifier = Modifier.animateItem(),
+                            onPin = { onPinTrip(trip.id); openCardId = null },
+                            onEdit = { editingTrip = trip; openCardId = null },
+                            onArchive = { onArchiveTrip(trip.id); openCardId = null },
+                            onDelete = { pendingDeleteId = trip.id; openCardId = null },
+                        )
+                    }
                 }
             }
         }
@@ -263,11 +283,18 @@ private fun SwipeableTripCard(
                     )
                 },
         ) {
-            TripCardContent(trip, countriesWord, legsWord, doneWord, s.noDatesYet, onClick = {
+            TripCardContent(
+                trip = trip,
+                countriesWord = countriesWord,
+                legsWord = legsWord,
+                legWordSingular = s.leg,
+                doneWord = doneWord,
+                noDatesWord = s.noDatesYet, onClick = {
                 if (offsetX.value != 0f) {
                     scope.launch { offsetX.animateTo(0f, tween(250)); onOpenChange(false) }
                 } else onClick()
-            })
+            }
+            )
         }
     }
 }
@@ -283,7 +310,7 @@ private fun ActionButton(
 
 
 
-) {
+    ) {
     Column(
         modifier
             .fillMaxHeight()
@@ -324,11 +351,15 @@ fun TripCardContent(
     countriesWord: String,
     legsWord: String,
     doneWord: String,
+    legWordSingular: String,
     noDatesWord: String, // Add this
     onClick: () -> Unit,
 ) {
     val accent = accentColor(trip.accent)
     val doneCount = trip.legs.count { it.completed }
+
+    val s = LocalStrings.current
+
     Surface(
         modifier = Modifier.fillMaxWidth().clip(CardShape).clickable(onClick = onClick),
         shape = CardShape,
@@ -371,8 +402,19 @@ fun TripCardContent(
                 Text(trip.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
                 Spacer(Modifier.height(3.dp))
                 val sub = buildString {
-                    val rangeShown = trip.dateRange.ifBlank { noDatesWord }
-                    append("$rangeShown · ${trip.legs.size} $legsWord")
+                    val rangeShown = if (trip.legs.isEmpty()) {
+                        noDatesWord
+                    } else {
+                        val dates = trip.legs.map { it.date }.sorted()
+                        val first = dates.first()
+                        val last = dates.last()
+                        if (first == last) first.label() else "${first.label()} – ${last.label()}"
+                    }
+
+                    val legCount = trip.legs.size
+                    val legWord = if (legCount == 1) legWordSingular else legsWord
+
+                    append("$rangeShown · ${trip.legs.size} $legWord")
                     if (doneCount > 0) append(" · $doneCount $doneWord")
                 }
                 Text(sub, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))

@@ -12,79 +12,122 @@ import com.itinera.app.model.UserProfile
 import com.itinera.app.model.Activity
 import com.itinera.app.model.TripAccent
 import io.ktor.client.HttpClient
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 
 
 /**
- * In-memory repository holding all app data as observable Compose state.
+ * Repository holding app data as observable Compose state.
  *
- * This is the single seam to replace when you add persistence/sync:
- *  - For local persistence, back these lists with SQLDelight or Room (KMP).
- *  - For cloud sync, mirror writes to Firestore behind the same function names.
- * The UI never talks to storage directly, so swapping this out touches no screens.
+ * Trips now persist to Firestore (via TripService): every trip mutation mirrors a
+ * write to the cloud, and loadTrips() pulls the user's data on login. Documents,
+ * checklist, and activities remain in-memory for now (next persistence increment).
  */
 class TripRepository {
 
-    val trips = mutableStateListOf<Trip>().apply { addAll(SampleData.trips) }
+    val trips = mutableStateListOf<Trip>()
     val documents = mutableStateListOf<DocItem>().apply { addAll(SampleData.documents) }
-    val checklist = mutableStateListOf<ChecklistItem>().apply { addAll(SampleData.checklist) }
+    val checklist = mutableStateListOf<ChecklistItem>()
 
     val unsplashApi = UnsplashApi()
-
     val authService = AuthService()
-
-    val profileService = ProfileService()     // ⬅ ADD
+    val profileService = ProfileService()
+    val tripService = TripService()                                    // ⬅ ADD
 
     private val uploadClient = HttpClient()
 
+    // Background scope for fire-and-forget cloud writes (mutations stay synchronous for the UI).
+    private val ioScope = CoroutineScope(Dispatchers.Default + SupervisorJob())   // ⬅ ADD
 
-    fun addTrip(title: String): String {                                  // ⬅ no accent param
+    // ===== cloud helpers =====
+    private fun persist(trip: Trip) {
+        val uid = authService.currentUid ?: run { println("ITINERA: PERSIST skipped — no uid"); return }
+        ioScope.launch {
+            try {
+                tripService.saveTrip(uid, trip)
+                println("ITINERA: PERSIST ok — ${trip.title}")
+            } catch (e: Exception) {
+                println("ITINERA: PERSIST FAILED — ${e.message}")
+            }
+        }
+    }
+
+    private fun removeRemote(tripId: String) {                         // ⬅ ADD
+        val uid = authService.currentUid ?: return
+        ioScope.launch { runCatching { tripService.deleteTrip(uid, tripId) } }
+    }
+
+    /** Replace the in-memory trips with the user's cloud data. Call on login. */
+    suspend fun loadTrips(uid: String) {
+        try {
+            val remote = tripService.loadTrips(uid)
+            println("ITINERA: LOAD ok — ${remote.size} trips")
+            trips.clear()
+            trips.addAll(remote)
+        } catch (e: Exception) {
+            println("ITINERA: LOAD FAILED — ${e.message}")
+        }
+    }
+
+    fun addTrip(title: String): String {
         val id = "trip_${kotlin.random.Random.nextLong()}"
-        trips.add(
-            Trip(
-                id = id,
-                title = title.trim(),
-                countriesCount = 0,
-                dateRange = "",
-                accent = TripAccent.values().random(),                     // ⬅ random accent
-                legs = emptyList(),
-            )
+        val trip = Trip(
+            id = id,
+            title = title.trim(),
+            countriesCount = 0,
+            dateRange = "",
+            accent = TripAccent.values().random(),
+            legs = emptyList(),
         )
+        trips.add(trip)
+        persist(trip)                                                  // ⬅ ADD
         return id
     }
 
     fun updateTripImage(id: String, url: String) {
         val i = trips.indexOfFirst { it.id == id }
-        if (i >= 0) trips[i] = trips[i].copy(imageUrl = url)
+        if (i >= 0) {
+            trips[i] = trips[i].copy(imageUrl = url)
+            persist(trips[i])                                          // ⬅ ADD
+        }
     }
 
-    fun updateTrip(id: String, title: String) {                           // ⬅ no accent param
+    fun updateTrip(id: String, title: String) {
         val i = trips.indexOfFirst { it.id == id }
-        if (i >= 0) trips[i] = trips[i].copy(title = title.trim())         // ⬅ keeps existing accent
+        if (i >= 0) {
+            trips[i] = trips[i].copy(title = title.trim())
+            persist(trips[i])                                          // ⬅ ADD
+        }
     }
 
     fun deleteTrip(id: String) {
         trips.removeAll { it.id == id }
+        removeRemote(id)                                               // ⬅ ADD
     }
 
     fun togglePin(id: String) {
         val i = trips.indexOfFirst { it.id == id }
-        if (i >= 0) trips[i] = trips[i].copy(pinned = !trips[i].pinned)
+        if (i >= 0) {
+            trips[i] = trips[i].copy(pinned = !trips[i].pinned)
+            persist(trips[i])                                          // ⬅ ADD
+        }
     }
 
     fun toggleArchive(id: String) {
         val i = trips.indexOfFirst { it.id == id }
-        if (i >= 0) trips[i] = trips[i].copy(archived = !trips[i].archived)
+        if (i >= 0) {
+            trips[i] = trips[i].copy(archived = !trips[i].archived)
+            persist(trips[i])                                          // ⬅ ADD
+        }
     }
 
-    // trips for the main list: not archived, pinned ones first
     fun activeTrips(): List<Trip> =
-        trips.filter { !it.archived }
-            .sortedByDescending { it.pinned }   // pinned = true sorts first; stable otherwise
+        trips.filter { !it.archived }.sortedByDescending { it.pinned }
 
-    // trips for the archived screen
-    fun archivedTrips(): List<Trip> =
-        trips.filter { it.archived }
+    fun archivedTrips(): List<Trip> = trips.filter { it.archived }
 
     fun tripById(id: String): Trip? = trips.firstOrNull { it.id == id }
 
@@ -102,6 +145,7 @@ class TripRepository {
             if (it.id == legId) it.copy(completed = !it.completed) else it
         }
         trips[tripIndex] = trip.copy(legs = newLegs)
+        persist(trips[tripIndex])                                      // ⬅ ADD
     }
 
     fun toggleChecklistItem(itemId: String) {
@@ -122,12 +166,12 @@ class TripRepository {
         )
     }
 
-
-    fun addLeg(tripId: String, leg: com.itinera.app.model.Leg) {
+    fun addLeg(tripId: String, leg: Leg) {
         val index = trips.indexOfFirst { it.id == tripId }
         if (index < 0) return
         val trip = trips[index]
         trips[index] = trip.copy(legs = trip.legs + leg)
+        persist(trips[index])                                          // ⬅ ADD
     }
 
     fun updateLeg(tripId: String, leg: Leg) {
@@ -135,6 +179,7 @@ class TripRepository {
         if (index < 0) return
         val trip = trips[index]
         trips[index] = trip.copy(legs = trip.legs.map { if (it.id == leg.id) leg else it })
+        persist(trips[index])                                          // ⬅ ADD
     }
 
     fun deleteLeg(tripId: String, legId: String) {
@@ -142,10 +187,22 @@ class TripRepository {
         if (index < 0) return
         val trip = trips[index]
         trips[index] = trip.copy(legs = trip.legs.filterNot { it.id == legId })
+        persist(trips[index])                                          // ⬅ ADD
     }
 
-    val activities = mutableStateListOf<Activity>().apply { addAll(SampleData.activities) }
+    fun markLegAddedToCalendar(tripId: String, legId: String) {        // ⬅ FIXED (was calling missing updateTripLegs)
+        val index = trips.indexOfFirst { it.id == tripId }
+        if (index < 0) return
+        val trip = trips[index]
+        val newLegs = trip.legs.map {
+            if (it.id == legId) it.copy(addedToCalendar = true) else it
+        }
+        trips[index] = trip.copy(legs = newLegs)
+        persist(trips[index])                                          // ⬅ ADD
+    }
 
+    // ===== activities (still in-memory) =====
+    val activities = mutableStateListOf<Activity>()
     fun activitiesForTrip(tripId: String): List<Activity> =
         activities.filter { it.tripId == tripId }
 
@@ -175,7 +232,6 @@ class TripRepository {
         return (legDates + actDates).distinct().sorted()
     }
 
-    /** Day number (1-based) for a date within a trip; earliest distinct date = Day 1. */
     fun dayNumberFor(tripId: String, date: LocalDate): Int {
         val rank = tripDates(tripId).indexOf(date)
         return if (rank >= 0) rank + 1 else 1
@@ -190,15 +246,21 @@ class TripRepository {
         activities.removeAll { it.id == id }
     }
 
-    var profile by mutableStateOf(UserProfile())   // ⬅ empty, no placeholder
+    // ===== profile =====
+    var profile by mutableStateOf(UserProfile())
         private set
 
     fun updateProfile(updated: UserProfile) { profile = updated }
 
     suspend fun uploadProfilePhoto(uid: String, bytes: ByteArray): String {
-        return uploadBytesToStorage(uploadClient, bytes)   // ⬅ uploadClient, not httpClient
+        return uploadBytesToStorage(uploadClient, bytes)
     }
 
+    fun clearLocal() {
+        trips.clear()
+        documents.clear()
+        checklist.clear()
+        activities.clear()
+        profile = UserProfile()
+    }
 }
-
-

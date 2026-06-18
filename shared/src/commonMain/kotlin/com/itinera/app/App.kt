@@ -77,6 +77,7 @@ fun App() {
                 val profile = repository.profileService.loadProfile(uid)
                 if (profile != null) repository.updateProfile(profile)
             } catch (e: Exception) { }
+            repository.loadTrips(uid)
             navigator.resetTo(Screen.Home)
         }
         authChecked = true
@@ -206,6 +207,7 @@ private fun AppContent(
                                     }
                                 }
                             } catch (e: Exception) { }
+                            repository.loadTrips(uid)
                         }
                         navigator.resetTo(Screen.Home)
                     }
@@ -359,7 +361,10 @@ private fun AppContent(
                             onAdd = { text, group -> repository.addChecklistItem(screen.tripId, text, group) },
                         )
 
-                        Screen.Calendar -> CalendarScreen(trips = repository.trips)
+                        Screen.Calendar -> CalendarScreen(
+                            trips = repository.trips,
+                            onMarkAdded = { tripId, legId -> repository.markLegAddedToCalendar(tripId, legId) },
+                        )
 
                         Screen.Settings -> SettingsScreen(
                             profile = repository.profile,
@@ -367,7 +372,9 @@ private fun AppContent(
                             onAppearance = { navigator.push(Screen.Appearance) },
                             onOpenLanguage = { navigator.push(Screen.LanguagePicker) },
                             onArchivedTrips = { navigator.push(Screen.ArchivedTrips) },
-                            onLogOut = { navigator.resetTo(Screen.Login) },
+                            onLogOut = {
+                                repository.clearLocal()
+                                navigator.resetTo(Screen.Login) },
                             onDeleteAccount = {
                                 scope.launch {
                                     val uid = repository.authService.currentUid

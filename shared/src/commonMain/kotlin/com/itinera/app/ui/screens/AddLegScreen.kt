@@ -37,14 +37,26 @@ fun AddLegScreen(
     var from by remember { mutableStateOf(existing?.fromCity ?: "") }
     var to by remember { mutableStateOf(existing?.toCity ?: "") }
     var date by remember { mutableStateOf(existing?.date) }
-    var time by remember { mutableStateOf(existing?.timeLabel ?: "") }
+    var startTime by remember { mutableStateOf(existing?.timeLabel ?: "") }
+    var endTime by remember { mutableStateOf(existing?.endTimeLabel ?: "") }       // ⬅ ADD
+    var operator by remember { mutableStateOf(existing?.operator ?: "") }          // ⬅ ADD
     var transport by remember { mutableStateOf(existing?.transport ?: TransportType.TRAIN) }
 
     var showDatePicker by remember { mutableStateOf(false) }
-    var showTimePicker by remember { mutableStateOf(false) }
+    var showStartTimePicker by remember { mutableStateOf(false) }
+    var showEndTimePicker by remember { mutableStateOf(false) }                    // ⬅ ADD
     val datePickerState = rememberDatePickerState()
 
     val textFieldShape = RoundedCornerShape(12.dp)
+
+    // Operator field label changes with the selected transport.
+    val operatorLabel = when (transport) {                                        // ⬅ ADD
+        TransportType.FLIGHT -> s.flightOperator
+        TransportType.TRAIN -> s.trainOperator
+        TransportType.BUS -> s.busOperator
+        TransportType.FERRY -> s.ferryOperator
+        TransportType.CAR -> s.operatorGeneric
+    }
 
     fun String.toTitleCase(): String =
         split(" ").joinToString(" ") { word ->
@@ -59,7 +71,7 @@ fun AddLegScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onClose) { Icon(Icons.Filled.Close, contentDescription = "Close") }
-            Text(if (existing == null) s.newLeg else "Edit leg", style = MaterialTheme.typography.titleLarge)   // ⬅ title switches
+            Text(if (existing == null) s.newLeg else "Edit leg", style = MaterialTheme.typography.titleLarge)
         }
 
         Column(
@@ -91,18 +103,35 @@ fun AddLegScreen(
                 }
             }
 
-            // ⬅ Day dropdown
+            // Date (full width)
+            OutlinedTextField(
+                value = date?.label() ?: "",
+                onValueChange = {},
+                readOnly = true,
+                enabled = false,
+                label = { Text(s.date) },
+                trailingIcon = { Icon(Icons.Filled.CalendarMonth, contentDescription = null) },
+                shape = textFieldShape,
+                modifier = Modifier.fillMaxWidth().clickable { showDatePicker = true },
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                ),
+            )
 
+            // Start time | End time
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
-                    value = date?.label() ?: "",
+                    value = startTime,
                     onValueChange = {},
                     readOnly = true,
                     enabled = false,
-                    label = { Text(s.date) },
-                    trailingIcon = { Icon(Icons.Filled.CalendarMonth, contentDescription = null) },
+                    label = { Text(s.startTime) },
+                    trailingIcon = { Icon(Icons.Filled.Schedule, contentDescription = null) },
                     shape = textFieldShape,
-                    modifier = Modifier.weight(1f).clickable { showDatePicker = true },
+                    modifier = Modifier.weight(1f).clickable { showStartTimePicker = true },
                     colors = OutlinedTextFieldDefaults.colors(
                         disabledTextColor = MaterialTheme.colorScheme.onSurface,
                         disabledBorderColor = MaterialTheme.colorScheme.outline,
@@ -112,14 +141,14 @@ fun AddLegScreen(
                 )
 
                 OutlinedTextField(
-                    value = time,
+                    value = endTime,
                     onValueChange = {},
                     readOnly = true,
                     enabled = false,
-                    label = { Text(s.time) },
+                    label = { Text(s.endTime) },
                     trailingIcon = { Icon(Icons.Filled.Schedule, contentDescription = null) },
                     shape = textFieldShape,
-                    modifier = Modifier.weight(1f).clickable { showTimePicker = true },
+                    modifier = Modifier.weight(1f).clickable { showEndTimePicker = true },
                     colors = OutlinedTextFieldDefaults.colors(
                         disabledTextColor = MaterialTheme.colorScheme.onSurface,
                         disabledBorderColor = MaterialTheme.colorScheme.outline,
@@ -128,6 +157,16 @@ fun AddLegScreen(
                     ),
                 )
             }
+
+            // Operator (full width, label changes with transport)
+            OutlinedTextField(
+                value = operator,
+                onValueChange = { operator = it },
+                label = { Text(operatorLabel) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                shape = textFieldShape,
+            )
         }
 
         // Calendar dialog
@@ -138,7 +177,7 @@ fun AddLegScreen(
                     TextButton(onClick = {
                         datePickerState.selectedDateMillis?.let { millis ->
                             date = Instant.fromEpochMilliseconds(millis)
-                                .toLocalDateTime(TimeZone.UTC).date      // ⬅ store the LocalDate itself
+                                .toLocalDateTime(TimeZone.UTC).date
                         }
                         showDatePicker = false
                     }) { Text(s.ok) }
@@ -149,20 +188,20 @@ fun AddLegScreen(
             }
         }
 
-        // Time picker dialog
-        if (showTimePicker) {
+        // Start time picker
+        if (showStartTimePicker) {
             var picked by remember { mutableStateOf(LocalTime(12, 0)) }
             AlertDialog(
-                onDismissRequest = { showTimePicker = false },
+                onDismissRequest = { showStartTimePicker = false },
                 confirmButton = {
                     TextButton(onClick = {
                         val h = picked.hour.toString().padStart(2, '0')
                         val m = picked.minute.toString().padStart(2, '0')
-                        time = "$h:$m"
-                        showTimePicker = false
+                        startTime = "$h:$m"
+                        showStartTimePicker = false
                     }) { Text(s.ok) }
                 },
-                dismissButton = { TextButton(onClick = { showTimePicker = false }) { Text(s.cancel) } },
+                dismissButton = { TextButton(onClick = { showStartTimePicker = false }) { Text(s.cancel) } },
                 text = {
                     WheelTimePicker(timeFormatter = timeFormatter(timeFormat = TimeFormat.HOUR_24)) { snappedTime ->
                         picked = snappedTime
@@ -171,7 +210,29 @@ fun AddLegScreen(
             )
         }
 
-        // ⬅ Save (+ Delete beside it when editing)
+        // End time picker
+        if (showEndTimePicker) {
+            var picked by remember { mutableStateOf(LocalTime(12, 0)) }
+            AlertDialog(
+                onDismissRequest = { showEndTimePicker = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        val h = picked.hour.toString().padStart(2, '0')
+                        val m = picked.minute.toString().padStart(2, '0')
+                        endTime = "$h:$m"
+                        showEndTimePicker = false
+                    }) { Text(s.ok) }
+                },
+                dismissButton = { TextButton(onClick = { showEndTimePicker = false }) { Text(s.cancel) } },
+                text = {
+                    WheelTimePicker(timeFormatter = timeFormatter(timeFormat = TimeFormat.HOUR_24)) { snappedTime ->
+                        picked = snappedTime
+                    }
+                },
+            )
+        }
+
+        // Save (+ Delete beside it when editing)
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(top = 16.dp, bottom = 60.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -182,16 +243,18 @@ fun AddLegScreen(
                         Leg(
                             id = existing?.id ?: "leg_${kotlin.random.Random.nextLong()}",
                             completed = existing?.completed ?: false,
+                            addedToCalendar = existing?.addedToCalendar ?: false,
                             fromCity = from.ifBlank { "—" },
                             toCity = to.ifBlank { "—" },
                             transport = transport,
-                            date = date!!,                       // ⬅ real LocalDate (button enabled only when set)
-                            timeLabel = time.ifBlank { "" },
+                            date = date!!,
+                            timeLabel = startTime.ifBlank { "" },
+                            endTimeLabel = endTime.ifBlank { "" },           // ⬅ ADD
+                            operator = operator.trim(),                       // ⬅ ADD
                             bookingRef = null,
                         )
                     )
                 },
-
                 enabled = from.isNotBlank() && to.isNotBlank() && date != null,
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 40.dp).padding(bottom = 16.dp),

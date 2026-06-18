@@ -91,7 +91,7 @@ enum class Language(val englishName: String, val nativeName: String) {
  */
 data class Strings(
     val name: String, val surname: String, val dob: String, val street: String, val city: String,
-    val postelCode: String, val appTagline: String, val myTrips: String, val countries: String, val legs: String,
+    val postelCode: String, val appTagline: String, val myTrips: String, val countries: String, val leg: String, val legs: String,
     val done: String, val addLeg: String, val newLeg: String, val from: String, val to: String,
     val transport: String, val date: String, val time: String, val bookingRef: String, val optional: String,
     val saveLeg: String, val tickets: String, val event: String, val beforeYouGo: String, val addItem: String,
@@ -111,6 +111,8 @@ data class Strings(
 
     val choosePhoto: String, val uploadFromGallery: String, val takePhoto: String, val removePhoto: String, val cropAndScale: String, val usePhoto: String,
     val resetPasswordPrompt: String, val resetEmailSent: String, val resetEmailFailed: String, val mobile: String, val today: String, val days: String,
+    val noTripsYet: String, val noTripsSubtitle: String, val noResults: String, val noResultsSubtitle: String, val startTime: String, val endTime: String,
+    val operatorGeneric: String, val busOperator: String, val trainOperator: String, val flightOperator: String, val ferryOperator: String,
 
 
     val add: String, val addToItinerary: String, val travel: String, val place: String,
@@ -124,7 +126,7 @@ data class Strings(
 
 private val EN = Strings(
     name = "Name", surname = "Surname", dob = "Date Of Birth", street = "Street", city = "City",
-    postelCode = "Postal Code", appTagline = "Where Every Journey Begins!", myTrips = "My Trips", countries = "Countries", legs = "Legs",
+    postelCode = "Postal Code", appTagline = "Where Every Journey Begins!", myTrips = "My Trips", countries = "Countries", leg = "Leg", legs = "Legs",
     done = "Done", addLeg = "Add Leg", newLeg = "New Leg", from = "From", to = "To",
     transport = "Transport", date = "Date", time = "Time", bookingRef = "Booking Reference", optional = "Optional",
     saveLeg = "Save Leg", tickets = "Tickets", event = "Event", beforeYouGo = "Before You Go", addItem = "Add Item",
@@ -155,6 +157,8 @@ private val EN = Strings(
     choosePhoto = "Choose Photo", uploadFromGallery = "Upload From Gallery", takePhoto = "Take Photo", removePhoto = "Remove Photo", cropAndScale = "Crop And Scale", usePhoto = "Use Photo",
     resetPasswordPrompt = "Enter your email to reset your password", resetEmailSent = "An email has been sent to reset your password", resetEmailFailed = "Failed to send email to reset password.",
     mobile = "Mobile", today = "Today", days = "30 Days",
+    noTripsYet = "No trips yet :(", noTripsSubtitle = "Tap + to plan your first adventure!", noResults = "Nothing scheduled :(", noResultsSubtitle = "Add legs to your trips to see them here!", startTime = "Start Time", endTime = "End Time",
+    operatorGeneric = "Operator", busOperator = "Bus Operator", trainOperator = "Train Operator", flightOperator = "Flight Operator", ferryOperator = "Ferry Operator",
 )
 
 private val FR = EN.copy(

@@ -11,12 +11,14 @@ fun LocalDate.label(): String {
     return "$dayOfMonth ${months[monthNumber - 1]}"
 }
 /** Mode of transport for a single leg of a journey. */
+@Serializable
 enum class TransportType { FLIGHT, TRAIN, BUS, FERRY, CAR }
 
 /** A stored travel document (ticket, reservation, etc.). */
 enum class DocType { PDF, IMAGE }
 
 /** Simple cover accent for a trip card. */
+@Serializable
 enum class TripAccent { BLUE, GREEN, CORAL, PURPLE }
 
 data class Activity(
@@ -35,6 +37,7 @@ data class Activity(
  * Dates/times are kept as display strings here to keep the skeleton dependency-free.
  * In production, swap these for kotlinx-datetime LocalDateTime values.
  */
+@Serializable
 data class Leg(
     val id: String,
     val fromCity: String,
@@ -42,11 +45,15 @@ data class Leg(
     val transport: TransportType,
     val date: LocalDate,            // ⬅ was dateLabel: String
     val timeLabel: String = "",
+    val endTimeLabel: String = "",     // ⬅ ADD — end time (optional)
+    val operator: String = "",
     val bookingRef: String? = null,
     val completed: Boolean = false,
+    val addedToCalendar: Boolean = false,
 )
 
 /** A trip groups together an ordered list of legs and its documents/checklist. */
+@Serializable
 data class Trip(
     val id: String,
     val title: String,

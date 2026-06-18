@@ -56,6 +56,7 @@ fun ArchivedTripsScreen(
                             trip = trip,
                             countriesWord = s.countries,
                             legsWord = s.legs,
+                            legWordSingular = s.leg,        // ⬅ ADD
                             doneWord = s.done,
                             noDatesWord = s.noDatesYet,
                             onClick = {},
