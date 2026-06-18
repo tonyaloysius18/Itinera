@@ -1,10 +1,12 @@
 package com.itinera.app.data
 
 import com.itinera.app.model.Leg
+import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
 
 /**
@@ -27,7 +29,9 @@ fun Leg.toCalendarEvent(): CalendarEvent {
             .toInstant(tz).toEpochMilliseconds()
 
         val endMillis = if (end != null) {
-            LocalDateTime(date.year, date.monthNumber, date.dayOfMonth, end.hour, end.minute)
+            // If end is earlier than start, it's an overnight leg → end is on the NEXT day.
+            val endDate = if (end < start) date.plus(DatePeriod(days = 1)) else date
+            LocalDateTime(endDate.year, endDate.monthNumber, endDate.dayOfMonth, end.hour, end.minute)
                 .toInstant(tz).toEpochMilliseconds()
         } else {
             startMillis + 60 * 60 * 1000   // default 1-hour duration
