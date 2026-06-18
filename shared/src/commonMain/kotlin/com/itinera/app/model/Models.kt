@@ -47,6 +47,7 @@ data class Leg(
     val timeLabel: String = "",
     val endTimeLabel: String = "",     // ⬅ ADD — end time (optional)
     val operator: String = "",
+    val country: String = "",
     val bookingRef: String? = null,
     val completed: Boolean = false,
     val addedToCalendar: Boolean = false,

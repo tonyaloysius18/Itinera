@@ -3,19 +3,26 @@ package com.itinera.app.ui.screens
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.Leg
 import com.itinera.app.model.TransportType
+import com.itinera.app.ui.components.countries          // ⬅ reuse existing country list
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import dev.darkokoa.datetimewheelpicker.WheelTimePicker
@@ -38,19 +45,20 @@ fun AddLegScreen(
     var to by remember { mutableStateOf(existing?.toCity ?: "") }
     var date by remember { mutableStateOf(existing?.date) }
     var startTime by remember { mutableStateOf(existing?.timeLabel ?: "") }
-    var endTime by remember { mutableStateOf(existing?.endTimeLabel ?: "") }       // ⬅ ADD
-    var operator by remember { mutableStateOf(existing?.operator ?: "") }          // ⬅ ADD
+    var endTime by remember { mutableStateOf(existing?.endTimeLabel ?: "") }
+    var operator by remember { mutableStateOf(existing?.operator ?: "") }
+    var country by remember { mutableStateOf(existing?.country ?: "") }            // ⬅ ADD
     var transport by remember { mutableStateOf(existing?.transport ?: TransportType.TRAIN) }
 
     var showDatePicker by remember { mutableStateOf(false) }
     var showStartTimePicker by remember { mutableStateOf(false) }
-    var showEndTimePicker by remember { mutableStateOf(false) }                    // ⬅ ADD
+    var showEndTimePicker by remember { mutableStateOf(false) }
+    var showCountryPicker by remember { mutableStateOf(false) }                    // ⬅ ADD
     val datePickerState = rememberDatePickerState()
 
     val textFieldShape = RoundedCornerShape(12.dp)
 
-    // Operator field label changes with the selected transport.
-    val operatorLabel = when (transport) {                                        // ⬅ ADD
+    val operatorLabel = when (transport) {
         TransportType.FLIGHT -> s.flightOperator
         TransportType.TRAIN -> s.trainOperator
         TransportType.BUS -> s.busOperator
@@ -75,11 +83,29 @@ fun AddLegScreen(
         }
 
         Column(
-            Modifier.weight(1f).padding(horizontal = 16.dp),
+            Modifier.weight(1f).padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             OutlinedTextField(from, { from = it.toTitleCase() }, label = { Text(s.from) }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = textFieldShape)
             OutlinedTextField(to, { to = it.toTitleCase() }, label = { Text(s.to) }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = textFieldShape)
+
+            // Destination country (optional) — counts toward the trip's country total
+            OutlinedTextField(
+                value = country,
+                onValueChange = {},
+                readOnly = true,
+                enabled = false,
+                label = { Text(s.country) },
+                trailingIcon = { Icon(Icons.Filled.Public, contentDescription = null) },
+                shape = textFieldShape,
+                modifier = Modifier.fillMaxWidth().clickable { showCountryPicker = true },
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                ),
+            )
 
             Text(s.transport, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -161,7 +187,7 @@ fun AddLegScreen(
             // Operator (full width, label changes with transport)
             OutlinedTextField(
                 value = operator,
-                onValueChange = { operator = it },
+                onValueChange = { operator = it.toTitleCase() },
                 label = { Text(operatorLabel) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
@@ -232,7 +258,54 @@ fun AddLegScreen(
             )
         }
 
-        // Save (+ Delete beside it when editing)
+        // Country picker (searchable, reuses the existing `countries` list)
+        if (showCountryPicker) {
+
+            fun String.toTitleCase(): String =
+                split(" ").joinToString(" ") { word ->
+                    word.replaceFirstChar { c ->
+                        if (c.isLowerCase()) c.titlecase() else c.toString()
+                    }
+                }
+
+            var search by remember { mutableStateOf("") }
+            AlertDialog(
+                onDismissRequest = { showCountryPicker = false },
+                confirmButton = {},
+                dismissButton = { TextButton(onClick = { showCountryPicker = false }) { Text(s.cancel) } },
+                title = { Text(s.country) },
+                text = {
+                    Column {
+                        OutlinedTextField(
+                            value = search,
+                            onValueChange = { search = it.toTitleCase() },
+                            label = { Text(s.search) },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        val filtered = countries.filter { it.name.contains(search, ignoreCase = true) }
+                        LazyColumn(Modifier.heightIn(max = 320.dp)) {
+                            items(filtered) { c ->
+                                Row(
+                                    Modifier.fillMaxWidth()
+                                        .clickable { country = c.name; showCountryPicker = false }
+                                        .padding(vertical = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text(c.flag, fontSize = 20.sp)
+                                    Spacer(Modifier.width(12.dp))
+                                    Text(c.name, style = MaterialTheme.typography.bodyLarge)
+                                }
+                            }
+                        }
+                    }
+                },
+            )
+        }
+
+        // Save
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(top = 16.dp, bottom = 60.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -249,8 +322,9 @@ fun AddLegScreen(
                             transport = transport,
                             date = date!!,
                             timeLabel = startTime.ifBlank { "" },
-                            endTimeLabel = endTime.ifBlank { "" },           // ⬅ ADD
-                            operator = operator.trim(),                       // ⬅ ADD
+                            endTimeLabel = endTime.ifBlank { "" },
+                            operator = operator.trim(),
+                            country = country.trim(),                    // ⬅ ADD
                             bookingRef = null,
                         )
                     )

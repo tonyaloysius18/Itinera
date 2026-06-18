@@ -112,7 +112,7 @@ data class Strings(
     val choosePhoto: String, val uploadFromGallery: String, val takePhoto: String, val removePhoto: String, val cropAndScale: String, val usePhoto: String,
     val resetPasswordPrompt: String, val resetEmailSent: String, val resetEmailFailed: String, val mobile: String, val today: String, val days: String,
     val noTripsYet: String, val noTripsSubtitle: String, val noResults: String, val noResultsSubtitle: String, val startTime: String, val endTime: String,
-    val operatorGeneric: String, val busOperator: String, val trainOperator: String, val flightOperator: String, val ferryOperator: String,
+    val operatorGeneric: String, val busOperator: String, val trainOperator: String, val flightOperator: String, val ferryOperator: String, val country: String, val search: String,
 
 
     val add: String, val addToItinerary: String, val travel: String, val place: String,
@@ -158,7 +158,7 @@ private val EN = Strings(
     resetPasswordPrompt = "Enter your email to reset your password", resetEmailSent = "An email has been sent to reset your password", resetEmailFailed = "Failed to send email to reset password.",
     mobile = "Mobile", today = "Today", days = "30 Days",
     noTripsYet = "No trips yet :(", noTripsSubtitle = "Tap + to plan your first adventure!", noResults = "Nothing scheduled :(", noResultsSubtitle = "Add legs to your trips to see them here!", startTime = "Start Time", endTime = "End Time",
-    operatorGeneric = "Operator", busOperator = "Bus Operator", trainOperator = "Train Operator", flightOperator = "Flight Operator", ferryOperator = "Ferry Operator",
+    operatorGeneric = "Operator", busOperator = "Bus Operator", trainOperator = "Train Operator", flightOperator = "Flight Operator", ferryOperator = "Ferry Operator", country = "Country", search = "Search",
 )
 
 private val FR = EN.copy(

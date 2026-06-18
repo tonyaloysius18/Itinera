@@ -395,8 +395,13 @@ fun TripCardContent(
                     }
                     Icon(Icons.Filled.Place, null, tint = labelColor, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text("${trip.countriesCount} $countriesWord", color = labelColor, style = MaterialTheme.typography.labelMedium)
-                }
+                    val countryCount = trip.legs
+                        .map { it.country }
+                        .filter { it.isNotBlank() }
+                        .distinct()
+                        .size
+
+                    Text("$countryCount $countriesWord", color = labelColor, style = MaterialTheme.typography.labelMedium)                }
             }
             Column(Modifier.padding(horizontal = 13.dp, vertical = 11.dp)) {
                 Text(trip.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
