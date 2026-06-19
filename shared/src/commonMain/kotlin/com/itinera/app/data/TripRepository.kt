@@ -10,6 +10,7 @@ import com.itinera.app.model.Leg
 import com.itinera.app.model.Trip
 import com.itinera.app.model.UserProfile
 import com.itinera.app.model.Activity
+import com.itinera.app.model.Traveller
 import com.itinera.app.model.TripAccent
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -22,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
+
 
 
 /**
@@ -340,4 +342,65 @@ class TripRepository {
         println("DOC DOWNLOAD FAILED: ${e.message}")
         null
     }
+
+    /** Ensures the owner (you) is present as a traveller; backfills older trips. */
+    /** Ensures the owner (you) is present as a traveller; rebuilds a broken one. */
+    /** Ensures the owner (you) exists and keeps their details in sync with your profile. */
+    /** Ensures the owner (you) exists and keeps their details in sync with your profile. */
+    fun ensureOwnerTraveller(tripId: String) {
+        val idx = trips.indexOfFirst { it.id == tripId }
+        if (idx < 0) return
+        val trip = trips[idx]
+
+        val existingOwner = trip.travellers.firstOrNull { it.isOwner }
+
+        val owner = Traveller(
+            id = existingOwner?.id ?: "owner_${authService.currentUid ?: "me"}",
+            firstName = profile.name.ifBlank { "Me" },     // ⬅ profile.name
+            surname = profile.surname,                      // ⬅ profile.surname
+            email = profile.email,                          // ⬅ profile.email
+            phone = profile.mobile,                         // ⬅ profile.mobile → Traveller.phone
+            colorIndex = existingOwner?.colorIndex ?: 0,
+            isOwner = true,
+            userId = authService.currentUid ?: "",
+        )
+
+        // skip the write if nothing changed (avoids spamming Firestore on every open)
+        if (existingOwner == owner) return
+
+        val withoutOwner = trip.travellers.filterNot { it.isOwner }
+        val updated = trip.copy(travellers = listOf(owner) + withoutOwner)
+        trips[idx] = updated
+        persist(updated)
+    }
+
+        fun addTraveller(tripId: String, traveller: Traveller) {
+            val idx = trips.indexOfFirst { it.id == tripId }
+            if (idx < 0) return
+            val updated = trips[idx].copy(travellers = trips[idx].travellers + traveller)
+            trips[idx] = updated
+            persist(updated)
+        }
+
+        fun updateTraveller(tripId: String, traveller: Traveller) {
+            val idx = trips.indexOfFirst { it.id == tripId }
+            if (idx < 0) return
+            val updated = trips[idx].copy(
+                travellers = trips[idx].travellers.map { if (it.id == traveller.id) traveller else it },
+            )
+            trips[idx] = updated
+            persist(updated)
+        }
+
+        fun removeTraveller(tripId: String, travellerId: String) {
+            val idx = trips.indexOfFirst { it.id == tripId }
+            if (idx < 0) return
+            val trip = trips[idx]
+            val target = trip.travellers.firstOrNull { it.id == travellerId } ?: return
+            if (target.isOwner) return   // never remove the owner
+            val updated = trip.copy(travellers = trip.travellers.filterNot { it.id == travellerId })
+            trips[idx] = updated
+            persist(updated)
+        }
+
 }

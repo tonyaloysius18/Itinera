@@ -33,6 +33,7 @@ import com.itinera.app.model.label
 import com.itinera.app.ui.components.Progress
 import com.itinera.app.ui.components.TopBar
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
+import androidx.compose.material.icons.filled.People
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -41,6 +42,7 @@ fun TripDetailScreen(
     trip: Trip,
     activities: List<Activity>,
     onBack: () -> Unit,
+    onTravellers: () -> Unit,
     onDocuments: () -> Unit,
     onAddLeg: () -> Unit,
     onAddPlace: () -> Unit,
@@ -77,13 +79,14 @@ fun TripDetailScreen(
         TopBar(
             trip.title,
             onBack = onBack,
-            trailing = {                                          // ⬅ ADD
-                IconButton(onClick = onDocuments) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.InsertDriveFile,
-                        contentDescription = s.documents,
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
+            trailing = {
+                Row {
+                    IconButton(onClick = onTravellers) {
+                        Icon(Icons.Filled.People, contentDescription = s.travellers, tint = MaterialTheme.colorScheme.primary)
+                    }
+                    IconButton(onClick = onDocuments) {
+                        Icon(Icons.AutoMirrored.Filled.InsertDriveFile, contentDescription = s.documents, tint = MaterialTheme.colorScheme.primary)
+                    }
                 }
             },
         )

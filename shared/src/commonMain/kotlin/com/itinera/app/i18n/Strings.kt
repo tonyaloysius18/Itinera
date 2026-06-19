@@ -127,6 +127,8 @@ data class Strings(
     val category: String, val accommodation: String, val attraction: String, val uploading: String, val uploadFailed: String,
     val day: String, val editLeg: String, val close: String,
     val swap: String, val capture: String, val profilePhoto: String, val changePhoto: String, val selected: String, val itineraLogo: String, val share: String, val shareFailed: String,
+    val travellers: String, val addTraveller: String, val editTraveller: String, val deleteTravellerQ: String, val you: String, val phone: String,
+
 )
 
 private val EN = Strings(
@@ -168,7 +170,8 @@ private val EN = Strings(
     addDocument = "Add document", title = "Title", attachTo = "Attach to", wholeTrip = "Whole trip", open = "Open", noDocuments = "No documents yet", noDocumentsSubtitle = "Upload tickets, bookings, and more", deleteDocumentQ = "Delete this document?", fileNotUploaded = "File not uploaded yet",
     category = "Category", accommodation = "Accommodation", attraction = "Attraction", uploading = "Uploading…", uploadFailed = "Couldn't upload the file",
     day = "Day", editLeg = "Edit Leg", close = "Close",
-    swap = "Swap", capture = "Capture", profilePhoto = "Profile photo", changePhoto = "Change photo", selected = "Selected", itineraLogo = "Itinera logo", share = "Share", shareFailed = "Failed to share",
+    swap = "Swap", capture = "Capture", profilePhoto = "Profile photo", changePhoto = "Change photo", selected = "Selected", itineraLogo = "Itinera logo", share = "Share", shareFailed = "Failed to share",  travellers = "Travellers",
+    addTraveller = "Add traveller", editTraveller = "Edit traveller", deleteTravellerQ = "Remove this traveller?", you = "You", phone = "Phone",
 )
 
 private val FR = EN.copy(

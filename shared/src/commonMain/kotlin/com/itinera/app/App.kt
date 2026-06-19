@@ -286,6 +286,7 @@ private fun AppContent(
                                 trip = trip,
                                 activities = repository.activitiesForTrip(screen.tripId),
                                 onBack = { navigator.back() },
+                                onTravellers = { navigator.push(Screen.Travellers(screen.tripId)) },
                                 onDocuments = { navigator.push(Screen.TripDocuments(screen.tripId)) },
                                 onAddLeg = { navigator.push(Screen.AddLeg(screen.tripId)) },
                                 onAddPlace = { navigator.push(Screen.AddPlace(screen.tripId)) },
@@ -344,6 +345,21 @@ private fun AppContent(
                             onUnarchive = { repository.toggleArchive(it) },
                             onDelete = { repository.deleteTrip(it) },
                         )
+
+                        is Screen.Travellers -> {
+                            val trip = repository.tripById(screen.tripId)
+                            if (trip == null) navigator.back()
+                            else {
+                                LaunchedEffect(screen.tripId) { repository.ensureOwnerTraveller(screen.tripId) }
+                                TravellersScreen(
+                                    travellers = trip.travellers,
+                                    onBack = { navigator.back() },
+                                    onAdd = { repository.addTraveller(screen.tripId, it) },
+                                    onUpdate = { repository.updateTraveller(screen.tripId, it) },
+                                    onDelete = { repository.removeTraveller(screen.tripId, it) },
+                                )
+                            }
+                        }
 
                         is Screen.TripDocuments -> {
                             val trip = repository.tripById(screen.tripId)

@@ -10,6 +10,8 @@ fun LocalDate.label(): String {
     val months = listOf("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
     return "$dayOfMonth ${months[monthNumber - 1]}"
 }
+
+
 /** Mode of transport for a single leg of a journey. */
 @Serializable
 enum class TransportType { FLIGHT, TRAIN, BUS, FERRY, CAR }
@@ -60,6 +62,7 @@ data class Leg(
 data class Trip(
     val id: String,
     val title: String,
+    val travellers: List<Traveller> = emptyList(),
     val countriesCount: Int,
     val dateRange: String,
     val accent: TripAccent,
@@ -84,7 +87,20 @@ data class DocItem(
     val attachedToLabel: String = "",  // legacy
 )
 
+@Serializable
+data class Traveller(
+    val id: String,
+    val firstName: String,
+    val surname: String = "",
+    val email: String = "",
+    val phone: String = "",
+    val colorIndex: Int = 0,
+    val isOwner: Boolean = false,
+    val userId: String = "",
+)
 
+val Traveller.fullName: String
+    get() = listOf(firstName, surname).filter { it.isNotBlank() }.joinToString(" ")
 
 /** A single preparation checklist entry. */
 data class ChecklistItem(
