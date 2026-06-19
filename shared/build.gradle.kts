@@ -25,6 +25,7 @@ kotlin {
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
 
+
         compilerOptions {
             jvmTarget = JvmTarget.JVM_17
         }
@@ -59,6 +60,8 @@ kotlin {
             implementation(libs.androidx.credentials)
             implementation(libs.androidx.credentials.play.services.auth)
             implementation(libs.googleid)
+
+            implementation(libs.androidx.activity.compose.v193)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)

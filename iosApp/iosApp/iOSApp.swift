@@ -2,6 +2,7 @@ import SwiftUI
 import FirebaseCore
 import GoogleSignIn
 import EventKitUI
+import UniformTypeIdentifiers
 import Shared
 
 @main
@@ -52,6 +53,9 @@ struct iOSApp: App {
                 rootVC.present(editVC, animated: true)
             }
         }
+        
+        // ===== File picker (document) bridge — inside init() =====
+        IosFilePicker.shared.provider = IosDocumentFilePickerProvider()
     }
 
     var body: some Scene {
@@ -61,6 +65,57 @@ struct iOSApp: App {
                     GIDSignIn.sharedInstance.handle(url)
                 }
         }
+    }
+}
+
+// Holds a strong reference so the delegate isn't deallocated mid-pick.
+final class DocPickerHolder {
+    static let shared = DocPickerHolder()
+    var delegate: DocPickerDelegate?
+}
+
+final class IosDocumentFilePickerProvider: FilePickerProvider {
+    func pick(onResult: @escaping (String?, String?, String?) -> Void) {
+        let delegate = DocPickerDelegate { base64, name, mime in
+            onResult(base64, name, mime)
+        }
+        DocPickerHolder.shared.delegate = delegate   // keep it alive
+
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.item])
+        picker.allowsMultipleSelection = false
+        picker.delegate = delegate
+
+        if let rootVC = UIApplication.shared.connectedScenes
+            .compactMap({ ($0 as? UIWindowScene)?.keyWindow })
+            .first?.rootViewController {
+            rootVC.present(picker, animated: true)
+        }
+    }
+}
+
+final class DocPickerDelegate: NSObject, UIDocumentPickerDelegate {
+    private let onResult: (String?, String?, String?) -> Void
+    init(onResult: @escaping (String?, String?, String?) -> Void) {
+        self.onResult = onResult
+    }
+
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        guard let url = urls.first else { onResult(nil, nil, nil); return }
+        let didStart = url.startAccessingSecurityScopedResource()
+        defer { if didStart { url.stopAccessingSecurityScopedResource() } }
+        do {
+            let data = try Data(contentsOf: url)
+            let base64 = data.base64EncodedString()
+            let name = url.lastPathComponent
+            let mime = UTType(filenameExtension: url.pathExtension)?.preferredMIMEType ?? "application/octet-stream"
+            onResult(base64, name, mime)
+        } catch {
+            onResult(nil, nil, nil)
+        }
+    }
+
+    func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+        onResult(nil, nil, nil)
     }
 }
 

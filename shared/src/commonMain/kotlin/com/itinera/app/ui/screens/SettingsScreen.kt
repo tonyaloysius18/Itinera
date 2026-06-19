@@ -183,6 +183,7 @@ private fun ThinDivider() {
 
 @Composable
 fun ProfileAvatar(profile: UserProfile, size: androidx.compose.ui.unit.Dp) {
+    val s = LocalStrings.current
     val primary = MaterialTheme.colorScheme.primary
 
     // Show photo if we have one (bytes take priority over URL for instant preview)
@@ -192,7 +193,7 @@ fun ProfileAvatar(profile: UserProfile, size: androidx.compose.ui.unit.Dp) {
         if (imageModel != null) {
             AsyncImage(
                 model = imageModel,
-                contentDescription = "Profile photo",
+                contentDescription = s.profilePhoto,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.size(size).clip(CircleShape),
             )

@@ -78,8 +78,8 @@ fun AddLegScreen(
             Modifier.fillMaxWidth().padding(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = onClose) { Icon(Icons.Filled.Close, contentDescription = "Close") }
-            Text(if (existing == null) s.newLeg else "Edit leg", style = MaterialTheme.typography.titleLarge)
+            IconButton(onClick = onClose) { Icon(Icons.Filled.Close, contentDescription = s.close) }
+            Text(if (existing == null) s.newLeg else s.editLeg, style = MaterialTheme.typography.titleLarge)
         }
 
         Column(

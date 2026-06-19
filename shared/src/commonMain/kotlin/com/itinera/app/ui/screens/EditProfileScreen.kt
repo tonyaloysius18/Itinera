@@ -428,7 +428,7 @@ fun EditProfileScreen(
                     ) {
                         Icon(
                             Icons.Filled.CameraAlt,
-                            contentDescription = "Capture",
+                            contentDescription = s.capture,
                             tint = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.size(32.dp),
                         )
@@ -488,6 +488,7 @@ fun ProfilePhotoPicker(
     onPickerRequested: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val s = LocalStrings.current
     // Coil AsyncImage accepts ByteArray OR String URL as `model`
     val imageModel = photoBytes ?: photoUrl?.takeIf { it.isNotBlank() }
 
@@ -509,7 +510,7 @@ fun ProfilePhotoPicker(
             if (imageModel != null) {
                 AsyncImage(
                     model = imageModel,
-                    contentDescription = "Profile photo",
+                    contentDescription = s.profilePhoto,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxSize()
@@ -539,7 +540,7 @@ fun ProfilePhotoPicker(
         ) {
             Icon(
                 Icons.Filled.Edit,
-                contentDescription = "Change photo",
+                contentDescription = s.changePhoto,
                 tint = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.size(14.dp),
             )

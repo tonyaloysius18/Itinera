@@ -101,7 +101,7 @@ fun TripsHomeScreen(
         Column(Modifier.fillMaxSize()) {
             TopBar(s.myTrips.toTitleCase(), trailing = {
                 IconButton(onClick = { searchActive = !searchActive; if (!searchActive) query = "" }) {
-                    Icon(if (searchActive) Icons.Filled.Close else Icons.Filled.Search, contentDescription = "Search")
+                    Icon(if (searchActive) Icons.Filled.Close else Icons.Filled.Search, contentDescription = s.search)
                 }
             })
             if (searchActive) {

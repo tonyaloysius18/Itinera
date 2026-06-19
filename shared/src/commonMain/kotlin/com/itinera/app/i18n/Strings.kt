@@ -122,6 +122,11 @@ data class Strings(
     val delete: String, val deleteTripQ: String, val deletePlaceQ: String, val deleteLegQ: String,
     val cantBeUndone: String, val archivedTrips: String, val noArchivedTrips: String,
     val noDatesYet: String, val tripName: String, val aLegBetween: String, val somewhereToVisit: String,
+
+    val addDocument: String, val title: String, val attachTo: String, val wholeTrip: String, val open: String, val noDocuments: String, val noDocumentsSubtitle: String, val deleteDocumentQ: String, val fileNotUploaded: String,
+    val category: String, val accommodation: String, val attraction: String, val uploading: String, val uploadFailed: String,
+    val day: String, val editLeg: String, val close: String,
+    val swap: String, val capture: String, val profilePhoto: String, val changePhoto: String, val selected: String, val itineraLogo: String, val share: String, val shareFailed: String,
 )
 
 private val EN = Strings(
@@ -159,11 +164,16 @@ private val EN = Strings(
     mobile = "Mobile", today = "Today", days = "30 Days",
     noTripsYet = "No trips yet :(", noTripsSubtitle = "Tap + to plan your first adventure!", noResults = "Nothing scheduled :(", noResultsSubtitle = "Add legs to your trips to see them here!", startTime = "Start Time", endTime = "End Time",
     operatorGeneric = "Operator", busOperator = "Bus Operator", trainOperator = "Train Operator", flightOperator = "Flight Operator", ferryOperator = "Ferry Operator", country = "Country", search = "Search",
+
+    addDocument = "Add document", title = "Title", attachTo = "Attach to", wholeTrip = "Whole trip", open = "Open", noDocuments = "No documents yet", noDocumentsSubtitle = "Upload tickets, bookings, and more", deleteDocumentQ = "Delete this document?", fileNotUploaded = "File not uploaded yet",
+    category = "Category", accommodation = "Accommodation", attraction = "Attraction", uploading = "Uploading…", uploadFailed = "Couldn't upload the file",
+    day = "Day", editLeg = "Edit Leg", close = "Close",
+    swap = "Swap", capture = "Capture", profilePhoto = "Profile photo", changePhoto = "Change photo", selected = "Selected", itineraLogo = "Itinera logo", share = "Share", shareFailed = "Failed to share",
 )
 
 private val FR = EN.copy(
     name = "Prénom", surname = "Nom", dob = "Date de naissance", street = "Rue", city = "Ville",
-    postelCode = "Code postal", appTagline = "Là où commence chaque voyage!", myTrips = "Mes voyages", countries = "pays", legs = "trajets",
+    postelCode = "Code postal", appTagline = "Là où commence chaque voyage!", myTrips = "Mes voyages", countries = "pays", leg = "Trajet", legs = "trajets",
     done = "effectués", addLeg = "Ajouter un trajet", newLeg = "Nouveau trajet", from = "De", to = "À",
     transport = "Transport", date = "Date", time = "Heure", bookingRef = "Référence", optional = "facultatif",
     saveLeg = "Enregistrer", tickets = "Billets", event = "Événement", beforeYouGo = "Avant le départ", addItem = "Ajouter",
@@ -195,11 +205,17 @@ private val FR = EN.copy(
     choosePhoto = "Choisir une photo", uploadFromGallery = "Télécharger depuis la galerie", takePhoto = "Prendre une photo", removePhoto = "Supprimer la photo", cropAndScale = "Couper et agrandir", usePhoto = "Utiliser la photo",
     resetPasswordPrompt = "Entrez votre adresse e-mail pour réinitialiser votre mot de passe", resetEmailSent = "Un email a été envoyé pour réinitialiser votre mot de passe", resetEmailFailed = "Échec de l'envoi d'email pour réinitialiser le mot de passe.",
     mobile = "Mobile", today = "Aujourd'hui", days = "30 jours",
+    noTripsYet = "Pas encore de voyage :(", noTripsSubtitle = "Appuyez sur + pour planifier votre première aventure !", noResults = "Rien de prévu :(", noResultsSubtitle = "Ajoutez des trajets à vos voyages pour les voir ici !", startTime = "Heure de début", endTime = "Heure de fin",
+    operatorGeneric = "Opérateur", busOperator = "Opérateur de bus", trainOperator = "Opérateur de train", flightOperator = "Compagnie aérienne", ferryOperator = "Opérateur de ferry", country = "Pays", search = "Chercher",
+    addDocument = "Ajouter un document", title = "Titre", attachTo = "Joindre à", wholeTrip = "Tout le voyage", open = "Ouvrir", noDocuments = "Pas encore de documents", noDocumentsSubtitle = "Téléchargez des billets, des réservations, et plus", deleteDocumentQ = "Supprimer ce document ?", fileNotUploaded = "Fichier non encore téléchargé",
+    category = "Catégorie", accommodation = "Hébergement", attraction = "Attraction", uploading = "Téléchargement…", uploadFailed = "Impossible de télécharger le fichier",
+    day = "Jour", editLeg = "Modifier le trajet", close = "Fermer",
+    swap = "Inverser", capture = "Capturer", profilePhoto = "Photo de profil", changePhoto = "Changer la photo", selected = "Sélectionné", itineraLogo = "Logo Itinera",
 )
 
 private val ES = EN.copy(
     name = "Nombre", surname = "Apellido", dob = "Fecha de nacimiento", street = "Calle", city = "Ciudad",
-    postelCode = "Código postal", appTagline = "Donde comienza cada viaje!", myTrips = "Mis viajes", countries = "países", legs = "tramos",
+    postelCode = "Código postal", appTagline = "Donde comienza cada viaje!", myTrips = "Mis viajes", countries = "países", leg = "Tramo", legs = "tramos",
     done = "hechos", addLeg = "Añadir tramo", newLeg = "Nuevo tramo", from = "Desde", to = "Hasta",
     date = "Fecha", time = "Hora", bookingRef = "Reserva", optional = "opcional", saveLeg = "Guardar",
     tickets = "Billetes", event = "Evento", beforeYouGo = "Antes de salir", addItem = "Añadir", settings = "Ajustes",
@@ -223,10 +239,6 @@ private val ES = EN.copy(
     uppercase = "Al menos una mayúscula", lowercase = "Al menos una minúscula", number = "Al menos un número", specialCharacter = "Al menos un carácter especial", minimumCharacters = "Mínimo 6 caracteres",
     choosePhoto = "Elegir foto", uploadFromGallery = "Subir desde galería", takePhoto = "Tomar foto", removePhoto = "Eliminar foto", cropAndScale = "Cortar y escalar", usePhoto = "Usar foto",
     resetPasswordPrompt = "Ingrese su correo electrónico para restablecer su contraseña", resetEmailSent = "Se ha enviado un correo electrónico para restablecer su contraseña", resetEmailFailed = "Error al enviar el correo electrónico para restablecer la contraseña.",
-
-
-
-
     add = "Añadir", addToItinerary = "Añadir al itinerario", travel = "Viaje", place = "Lugar",
     newPlace = "Nuevo lugar", editPlace = "Editar lugar", landmark = "Punto de referencia (opcional)", savePlace = "Guardar lugar", searchTrips = "Buscar viajes",
     newTrip = "Nuevo viaje", renameTrip = "Renombrar viaje", create = "Crear", save = "Guardar",
@@ -235,11 +247,17 @@ private val ES = EN.copy(
     cantBeUndone = "Esto no se puede deshacer.", archivedTrips = "Viajes archivados", noArchivedTrips = "Sin viajes archivados",
     noDatesYet = "Sin fechas aún", tripName = "Nombre del viaje", aLegBetween = "Un tramo entre", somewhereToVisit = "Algún lugar para visitar",
     mobile = "Móvil", today = "Hoy", days = "30 días",
+    noTripsYet = "No hay viajes aún :(", noTripsSubtitle = "¡Toca + para planificar tu primera aventura!", noResults = "Nada programado :(", noResultsSubtitle = "¡Añade tramos a tus viajes para verlos aquí!", startTime = "Hora de inicio", endTime = "Hora de fin",
+    operatorGeneric = "Operador", busOperator = "Operador de autobús", trainOperator = "Operador de tren", flightOperator = "Aerolínea", ferryOperator = "Operador de ferry", country = "País", search = "Buscar",
+    addDocument = "Añadir documento", title = "Título", attachTo = "Adjuntar a", wholeTrip = "Todo el viaje", open = "Abrir", noDocuments = "Sin documentos aún", noDocumentsSubtitle = "Sube billetes, reservas y más", deleteDocumentQ = "¿Eliminar este documento?", fileNotUploaded = "Archivo no subido aún",
+    category = "Categoría", accommodation = "Alojamiento", attraction = "Atracción", uploading = "Subiendo…", uploadFailed = "No se pudo subir el archivo",
+    day = "Día", editLeg = "Editar tramo", close = "Cerrar",
+    swap = "Intercambiar", capture = "Capturar", profilePhoto = "Foto de perfil", changePhoto = "Cambiar foto", selected = "Seleccionado", itineraLogo = "Logo de Itinera",
 )
 
 private val DE = EN.copy(
     name = "Vorname", surname = "Nachname", dob = "Geburtsdatum", street = "Straße", city = "Stadt",
-    postelCode = "Postleitzahl", appTagline = "Wo jede Reise beginnt!", myTrips = "Meine Reisen", countries = "Länder", legs = "Etappen",
+    postelCode = "Postleitzahl", appTagline = "Wo jede Reise beginnt!", myTrips = "Meine Reisen", countries = "Länder", leg = "Etappe", legs = "Etappen",
     done = "erledigt", addLeg = "Etappe hinzufügen", newLeg = "Neue Etappe", from = "Von", to = "Nach",
     date = "Datum", time = "Zeit", bookingRef = "Buchung", optional = "optional", saveLeg = "Speichern",
     tickets = "Tickets", event = "Termin", beforeYouGo = "Vor der Abreise", addItem = "Hinzufügen", settings = "Einstellungen",
@@ -261,8 +279,6 @@ private val DE = EN.copy(
     accountCreated = "Ihr Konto wurde erfolgreich erstellt", accountDeleted = "Ihr Konto wurde erfolgreich gelöscht",
     changesSaved = "Ihre Änderungen wurden gespeichert", invalidCredentials = "Ungültige Anmeldedaten",
     uppercase = "Mindestens ein Großbuchstabe", lowercase = "Mindestens ein Kleinbuchstabe", number = "Mindestens eine Zahl", specialCharacter = "Mindestens ein Sonderzeichen", minimumCharacters = "Mindestens 6 Zeichen",
-
-
     add = "Hinzufügen", addToItinerary = "Zum Reiseplan hinzufügen", travel = "Reise", place = "Ort",
     newPlace = "Neuer Ort", editPlace = "Ort bearbeiten", landmark = "Wahrzeichen (optional)", savePlace = "Ort speichern", searchTrips = "Reisen suchen",
     newTrip = "Neue Reise", renameTrip = "Reise umbenennen", create = "Erstellen", save = "Speichern",
@@ -273,11 +289,17 @@ private val DE = EN.copy(
     choosePhoto = "Foto auswählen", uploadFromGallery = "Aus Galerie hochladen", takePhoto = "Foto aufnehmen", removePhoto = "Foto entfernen", cropAndScale = "Zuschneiden und skalieren", usePhoto = "Foto verwenden",
     resetPasswordPrompt = "Geben Sie Ihre E-Mail ein, um Ihr Passwort zurückzusetzen", resetEmailSent = "Eine E-Mail zum Zurücksetzen Ihres Passworts wurde gesendet", resetEmailFailed = "E-Mail zum Zurücksetzen des Passworts konnte nicht gesendet werden.",
     mobile = "Mobil", today = "Heute", days = "30 Tage",
+    noTripsYet = "Noch keine Reisen :(", noTripsSubtitle = "Tippe auf +, um dein erstes Abenteuer zu planen!", noResults = "Nichts geplant :(", noResultsSubtitle = "Füge deinen Reisen Etappen hinzu, um sie hier zu sehen!", startTime = "Startzeit", endTime = "Endzeit",
+    operatorGeneric = "Anbieter", busOperator = "Busunternehmen", trainOperator = "Bahnunternehmen", flightOperator = "Fluggesellschaft", ferryOperator = "Fähranbieter", country = "Land", search = "Suche",
+    addDocument = "Dokument hinzufügen", title = "Titel", attachTo = "Anhängen an", wholeTrip = "Ganze Reise", open = "Öffnen", noDocuments = "Noch keine Dokumente", noDocumentsSubtitle = "Lade Tickets, Buchungen und mehr hoch", deleteDocumentQ = "Dieses Dokument löschen?", fileNotUploaded = "Datei noch nicht hochgeladen",
+    category = "Kategorie", accommodation = "Unterkunft", attraction = "Attraktion", uploading = "Wird hochgeladen…", uploadFailed = "Datei konnte nicht hochgeladen werden",
+    day = "Tag", editLeg = "Etappe bearbeiten", close = "Schließen",
+    swap = "Vertauschen", capture = "Aufnehmen", profilePhoto = "Profilbild", changePhoto = "Foto ändern", selected = "Ausgewählt", itineraLogo = "Itinera-Logo",
 )
 
 private val IT = EN.copy(
     name = "Nome", surname = "Cognome", dob = "Data di nascita", street = "Via", city = "Città",
-    postelCode = "Codice postale", appTagline = "Dove inizia ogni viaggio!", myTrips = "I miei viaggi", countries = "paesi", legs = "tratte",
+    postelCode = "Codice postale", appTagline = "Dove inizia ogni viaggio!", myTrips = "I miei viaggi", countries = "paesi", leg = "Tratta", legs = "tratte",
     done = "completati", addLeg = "Aggiungi tratta", newLeg = "Nuova tratta", from = "Da", to = "A",
     date = "Data", time = "Ora", bookingRef = "Riferimento", optional = "opzionale", saveLeg = "Salva",
     tickets = "Biglietti", event = "Evento", beforeYouGo = "Prima di partire", addItem = "Aggiungi elemento", settings = "Impostazioni",
@@ -299,9 +321,6 @@ private val IT = EN.copy(
     accountCreated = "Il tuo account è stato creato con successo", accountDeleted = "Il tuo account è stato eliminato con successo",
     changesSaved = "Le tue modifiche sono state salvate", invalidCredentials = "Credenziali non valide",
     uppercase = "Almeno una lettera maiuscola", lowercase = "Almeno una lettera minuscola", number = "Almeno un numero", specialCharacter = "Almeno un carattere speciale", minimumCharacters = "Minimo 6 caratteri",
-
-
-
     add = "Aggiungi", addToItinerary = "Aggiungi all'itinerario", travel = "Viaggio", place = "Luogo",
     newPlace = "Nuovo luogo", editPlace = "Modifica luogo", landmark = "Punto di riferimento (opzionale)", savePlace = "Salva luogo", searchTrips = "Cerca viaggi",
     newTrip = "Nuovo viaggio", renameTrip = "Rinomina viaggio", create = "Crea", save = "Salva",
@@ -312,12 +331,18 @@ private val IT = EN.copy(
     choosePhoto = "Scegli foto", uploadFromGallery = "Carica dalla galleria", takePhoto = "Scatta foto", removePhoto = "Rimuovi foto", cropAndScale = "Ritaglia e scala", usePhoto = "Usa foto",
     resetPasswordPrompt = "Inserisci la tua email per reimpostare la password", resetEmailSent = "È stata inviata un'email per reimpostare la password", resetEmailFailed = "Impossibile inviare l'email per reimpostare la password.",
     mobile = "Mobile", today = "Oggi", days = "30 giorni",
+    noTripsYet = "Ancora nessun viaggio :(", noTripsSubtitle = "Tocca + per pianificare la tua prima avventura!", noResults = "Nulla in programma :(", noResultsSubtitle = "Aggiungi tratte ai tuoi viaggi per vederle qui!", startTime = "Ora di inizio", endTime = "Ora di fine",
+    operatorGeneric = "Operatore", busOperator = "Operatore autobus", trainOperator = "Operatore ferroviario", flightOperator = "Compagnia aerea", ferryOperator = "Operatore traghetti", country = "Paese", search = "Cerca",
+    addDocument = "Aggiungi documento", title = "Titolo", attachTo = "Allega a", wholeTrip = "Intero viaggio", open = "Apri", noDocuments = "Ancora nessun documento", noDocumentsSubtitle = "Carica biglietti, prenotazioni e altro", deleteDocumentQ = "Eliminare questo documento?", fileNotUploaded = "File non ancora caricato",
+    category = "Categoria", accommodation = "Alloggio", attraction = "Attrazione", uploading = "Caricamento…", uploadFailed = "Impossibile caricare il file",
+    day = "Giorno", editLeg = "Modifica tratta", close = "Chiudi",
+    swap = "Scambia", capture = "Cattura", profilePhoto = "Foto profilo", changePhoto = "Cambia foto", selected = "Selezionato", itineraLogo = "Logo Itinera",
 )
 
 private val PT = EN.copy(
     name = "Nome", surname = "Sobrenome", dob = "Data de nascimento", street = "Rua", city = "Cidade",
     postelCode = "Código postal", appTagline = "Onde começa cada viagem!", myTrips = "Minhas viagens",
-    countries = "países", legs = "trechos", done = "feito", addLeg = "Adicionar trecho", newLeg = "Novo trecho", from = "De",
+    countries = "países", leg = "Trecho", legs = "trechos", done = "feito", addLeg = "Adicionar trecho", newLeg = "Novo trecho", from = "De",
     to = "Para", date = "Data", time = "Hora", bookingRef = "Reserva", optional = "opcional", saveLeg = "Salvar",
     tickets = "Bilhetes", event = "Evento", beforeYouGo = "Antes de sair", addItem = "Adicionar", settings = "Configurações",
     backupSync = "Backup & sincronização", appearance = "Aparência", language = "Idioma", currencyUnits = "Moeda e unidades",
@@ -339,12 +364,10 @@ private val PT = EN.copy(
     recentLoginRequired = "Não foi possível salvar. Para alterar sua senha, saia e entre novamente e tente de novo.",
     accountCreated = "Sua conta foi criada com sucesso", accountDeleted = "Sua conta foi excluída com sucesso",
     changesSaved = "Suas alterações foram salvas", invalidCredentials = "Credenciais inválidas",
-    uppercase = "Pelo menos uma letra maiúscula", lowercase = "Pelo menos uma letra minúscula", number = "Pelo menos um número", specialCharacter = "Pelo menos um caractere especial", minimumCharacters = "Mínimo de 6 caracteres",
-
-
+    uppercase = "Pelo menos uma letra maiúscula", lowercase = "Pelo menos uma letra minúscula", number = "Pelo menos um número", specialCharacter = "Pelo menos um caráter especial", minimumCharacters = "Mínimo de 6 caracteres",
     add = "Adicionar", addToItinerary = "Adicionar ao itinerário", travel = "Viagem", place = "Lugar",
     newPlace = "Novo lugar", editPlace = "Editar lugar", landmark = "Ponto de referência (opcional)", savePlace = "Salvar lugar", searchTrips = "Pesquisar viagens",
-    newTrip = "Nova viagem", renameTrip = "Renomear viagem", create = "Criar", save = "Salvar",
+    newTrip = "Nova viagem", renameTrip = "Renombrar viagem", create = "Criar", save = "Salvar",
     pin = "Fixar", unpin = "Desafixar", edit = "Editar", archive = "Arquivar", unarchive = "Desarquivar",
     delete = "Excluir", deleteTripQ = "Excluir viagem?", deletePlaceQ = "Excluir lugar?", deleteLegQ = "Excluir trecho?",
     cantBeUndone = "Isso não pode ser desfeito.", archivedTrips = "Viagens arquivadas", noArchivedTrips = "Nenhuma viagem arquivada",
@@ -352,10 +375,16 @@ private val PT = EN.copy(
     choosePhoto = "Escolher foto", uploadFromGallery = "Carregar da galeria", takePhoto = "Tirar foto", removePhoto = "Remover foto", cropAndScale = "Recortar e dimensionar", usePhoto = "Usar foto",
     resetPasswordPrompt = "Insira seu e-mail para redefinir sua senha", resetEmailSent = "Um e-mail foi enviado para redefinir sua senha", resetEmailFailed = "Falha ao enviar e-mail para redefinir a senha.",
     mobile = "Telemóvel", today = "Hoje", days = "30 dias",
+    noTripsYet = "Nenhuma viagem ainda :(", noTripsSubtitle = "Toque em + para planejar sua primeira aventura!", noResults = "Nada agendado :(", noResultsSubtitle = "Adicione trechos às suas viagens para vê-los aqui!", startTime = "Hora de início", endTime = "Hora de término",
+    operatorGeneric = "Operador", busOperator = "Operador de ônibus", trainOperator = "Operador de trem", flightOperator = "Linha aérea", ferryOperator = "Operador de balsa", country = "País", search = "Pesquisar",
+    addDocument = "Adicionar documento", title = "Título", attachTo = "Anexar a", wholeTrip = "Viagem inteira", open = "Abrir", noDocuments = "Nenhum documento ainda", noDocumentsSubtitle = "Carregue passagens, reservas e muito mais", deleteDocumentQ = "Excluir este documento?", fileNotUploaded = "Arquivo ainda não carregado",
+    category = "Categoria", accommodation = "Acomodação", attraction = "Atração", uploading = "Enviando…", uploadFailed = "Não foi possível enviar o arquivo",
+    day = "Dia", editLeg = "Editar trecho", close = "Fechar",
+    swap = "Trocar", capture = "Capturar", profilePhoto = "Foto de perfil", changePhoto = "Alterar foto", selected = "Selecionado", itineraLogo = "Logotipo da Itinera",
 )
 private val NL = EN.copy(
     name = "Naam", surname = "Achternaam", dob = "Geboortedatum", street = "Straat", city = "Stad", postelCode = "Postcode",
-    appTagline = "Waar elke reis begint!", myTrips = "Mijn reizen", countries = "landen", legs = "trajecten",
+    appTagline = "Waar elke reis begint!", myTrips = "Mijn reizen", countries = "landen", leg = "Leg", legs = "trajecten",
     done = "afgerond", addLeg = "Leg toevoegen", newLeg = "Nieuwe leg", from = "Van", to = "Naar",
     date = "Datum", time = "Tijd", bookingRef = "Reserveringsnummer", optional = "optioneel", saveLeg = "Opslaan",
     tickets = "Tickets", event = "Evenement", beforeYouGo = "Voordat je gaat", addItem = "Item toevoegen", settings = "Instellingen",
@@ -378,7 +407,6 @@ private val NL = EN.copy(
     accountCreated = "Uw account is succesvol aangemaakt", accountDeleted = "Uw account is succesvol verwijderd",
     changesSaved = "Uw wijzigingen zijn opgeslagen", invalidCredentials = "Ongeldige inloggegevens",
     uppercase = "Ten minste één hoofdletter", lowercase = "Ten minste één kleine letter", number = "Ten minste één cijfer", specialCharacter = "Ten minste één speciaal teken", minimumCharacters = "Minimaal 6 tekens",
-
     add = "Toevoegen", addToItinerary = "Toevoegen aan reisplan", travel = "Reis", place = "Plaats",
     newPlace = "Nieuwe plaats", editPlace = "Plaats bewerken", landmark = "Bezienswaardigheid (optioneel)", savePlace = "Plaats opslaan", searchTrips = "Reizen zoeken",
     newTrip = "Nieuwe reis", renameTrip = "Reis hernoemen", create = "Maken", save = "Opslaan",
@@ -389,11 +417,17 @@ private val NL = EN.copy(
     choosePhoto = "Foto kiezen", uploadFromGallery = "Uploaden uit galerij", takePhoto = "Foto maken", removePhoto = "Foto verwijderen", cropAndScale = "Bijsnijden en schalen", usePhoto = "Foto gebruiken",
     resetPasswordPrompt = "Voer je e-mailadres in om je wachtwoord te resetten", resetEmailSent = "Er is een e-mail verzonden om je wachtwoord te resetten", resetEmailFailed = "E-mail voor het resetten van wachtwoord verzenden mislukt.",
     mobile = "Mobiel", today = "Vandaag", days = "30 dagen",
+    noTripsYet = "Nog geen reizen :(", noTripsSubtitle = "Tik op + om je eerste avontuur te plannen!", noResults = "Niets gepland :(", noResultsSubtitle = "Voeg legs toe aan je reizen om ze hier te zien!", startTime = "Begintijd", endTime = "Eindtijd",
+    operatorGeneric = "Operator", busOperator = "Busmaatschappij", trainOperator = "Spoorwegmaatschappij", flightOperator = "Luchtvaartmaatschappij", ferryOperator = "Veerbootmaatschappij", country = "Land", search = "Zoeken",
+    addDocument = "Document toevoegen", title = "Titel", attachTo = "Bijvoegen aan", wholeTrip = "Hele reis", open = "Openen", noDocuments = "Nog geen documenten", noDocumentsSubtitle = "Upload tickets, boekingen en meer", deleteDocumentQ = "Dit document verwijderen?", fileNotUploaded = "Bestand nog niet geüpload",
+    category = "Categorie", accommodation = "Accommodatie", attraction = "Attractie", uploading = "Uploaden…", uploadFailed = "Kon het bestand niet uploaden",
+    day = "Dag", editLeg = "Traject wijzigen", close = "Sluiten",
+    swap = "Wisselen", capture = "Vastleggen", profilePhoto = "Profielfoto", changePhoto = "Foto wijzigen", selected = "Geselecteerd", itineraLogo = "Itinera-logo",
 )
 
 private val PL = EN.copy(
     name = "Imię", surname = "Nazwisko", dob = "Data urodzenia", street = "Ulica", city = "Miasto",
-    postelCode = "Kod pocztowy", appTagline = "Tam, gdzie zaczyna się każda podróż!", myTrips = "Moje podróże", countries = "kraje", legs = "odcinki",
+    postelCode = "Kod pocztowy", appTagline = "Tam, gdzie zaczyna się każda podróż!", myTrips = "Moje podróże", countries = "kraje", leg = "Odcinek", legs = "odcinki",
     done = "ukończone", addLeg = "Dodaj odcinek", newLeg = "Nowy odcinek", from = "Z", to = "Do",
     date = "Data", time = "Czas", bookingRef = "Rezerwacja", optional = "opcjonalne", saveLeg = "Zapisz",
     tickets = "Bilety", event = "Wydarzenie", beforeYouGo = "Przed wyjazdem", addItem = "Dodaj element", settings = "Ustawienia",
@@ -405,7 +439,7 @@ private val PL = EN.copy(
     followPhone = "Użyj języka telefonu", ok = "OK", cancel = "Anuluj", address = "Adres", editProfile = "Edytuj profil",
     newPassword = "Nowe hasło", saveChanges = "Zapisz zmiany", systemDefault = "Domyślny system", light = "Jasny", dark = "Ciemny", matchYourPhone = "Dopasuj do telefonu", currency = "Waluta",
     transport = "Transport", orDivider = "lub", convert = "Przelicz",
-    bookings = "Rezerwacje", packing = "Pakowanie", money = "Pieniądze", gadget = "Gadżet", other = "Inne", needToAdd = "Co chcesz dodać?", section = "Sekcja",
+    bookings = "Rezerwacje", packing = "Pakowanie", money = "Pieniądze", gadget = "Gadget", other = "Inne", needToAdd = "Co chcesz dodać?", section = "Sekcja",
     amount = "Kwota", validAmount = "Wprowadź prawidłową kwotę", couldntFetch = "Nie udało się pobrać kursu. Sprawdź połączenie.",
     fillAllFields = "Proszę uzupełnić wszystkie pola", loginFailed = "Logowanie nieudane. Sprawdź poprawność adresu e-mail i hasła.",
     passwordTooShort = "Hasło musi mieć co najmniej 6 znaków", signupFailed = "Nie udało się utworzyć konta. E-mail może być już w użyciu.",
@@ -415,9 +449,6 @@ private val PL = EN.copy(
     accountCreated = "Twoje konto zostało pomyślnie utworzone", accountDeleted = "Twoje konto zostało pomyślnie usunięte",
     changesSaved = "Twoje zmiany zostały zapisane", invalidCredentials = "Nieprawidłowe dane logowania",
     uppercase = "Co najmniej jedna wielka litera", lowercase = "Co najmniej jedna mała litera", number = "Co najmniej jedna cyfra", specialCharacter = "Co najmniej jeden znak specjalny", minimumCharacters = "Minimum 6 znaków",
-
-
-
     add = "Dodaj", addToItinerary = "Dodaj do planu podróży", travel = "Podróż", place = "Miejsce",
     newPlace = "Nowe miejsce", editPlace = "Edytuj miejsce", landmark = "Punkt orientacyjny (opcjonalnie)", savePlace = "Zapisz miejsce", searchTrips = "Szukaj podróży",
     newTrip = "Nowa podróż", renameTrip = "Zmień nazwę podróży", create = "Utwórz", save = "Zapisz",
@@ -428,11 +459,17 @@ private val PL = EN.copy(
     choosePhoto = "Wybierz zdjęcie", uploadFromGallery = "Prześlij z galerii", takePhoto = "Zrób zdjęcie", removePhoto = "Usuń zdjęcie", cropAndScale = "Kadruj i skaluj", usePhoto = "Użyj zdjęcia",
     resetPasswordPrompt = "Wprowadź swój e-mail, aby zresetować hasło", resetEmailSent = "E-mail z instrukcją resetowania hasła został wysłany", resetEmailFailed = "Nie udało się wysłać e-maila do resetowania hasła.",
     mobile = "Komórka", today = "Dzisiaj", days = "30 dni",
+    noTripsYet = "Brak podróży :(", noTripsSubtitle = "Dotknij +, aby zaplanować swoją pierwszą przygodę!", noResults = "Nic nie zaplanowano :(", noResultsSubtitle = "Dodaj odcinki do swoich podróży, aby zobaczyć je tutaj!", startTime = "Czas rozpoczęcia", endTime = "Czas zakończenia",
+    operatorGeneric = "Operator", busOperator = "Operator autobusowy", trainOperator = "Operator kolejowy", flightOperator = "Linia lotnicza", ferryOperator = "Operator promowy", country = "Kraj", search = "Szukaj",
+    addDocument = "Dodaj dokument", title = "Tytuł", attachTo = "Dołącz do", wholeTrip = "Cała podróż", open = "Otwórz", noDocuments = "Brak dokumentów", noDocumentsSubtitle = "Prześlij bilety, rezerwacje i więcej", deleteDocumentQ = "Usunąć ten dokument?", fileNotUploaded = "Plik jeszcze nie został przesłany",
+    category = "Kategoria", accommodation = "Zakwaterowanie", attraction = "Atrakcja", uploading = "Przesyłanie…", uploadFailed = "Nie udało się przesłać pliku",
+    day = "Dzień", editLeg = "Edytuj odcinek", close = "Zamknij",
+    swap = "Zamień", capture = "Przechwyć", profilePhoto = "Zdjęcie profilowe", changePhoto = "Zmień zdjęcie", selected = "Wybrano", itineraLogo = "Logo Itinera",
 )
 
 private val ZH = EN.copy(
     name = "名字", surname = "姓氏", dob = "出生日期", street = "街道", city = "城市", postelCode = "邮政编码", appTagline = "从每趟旅程开始！", myTrips = "我的旅程",
-    countries = "国家", legs = "行程", done = "完成", addLeg = "添加行程", newLeg = "新的行程", from = "从", to = "到",
+    countries = "国家", leg = "行程段", legs = "行程", done = "完成", addLeg = "添加行程", newLeg = "新的行程", from = "从", to = "到",
     date = "日期", time = "时间", bookingRef = "预订参考", optional = "可选的", saveLeg = "保存",
     tickets = "票", event = "事件", beforeYouGo = "准备离开", addItem = "添加项目", settings = "设置", backupSync = "备份与同步", appearance = "外观",
     language = "语言", currencyUnits = "货币与单位", exportTrips = "导出行程", about = "关于", logOut = "退出", welcomeBack = "欢迎回来",
@@ -450,9 +487,6 @@ private val ZH = EN.copy(
     accountCreated = "您的账号已成功创建", accountDeleted = "您的账号已成功删除",
     changesSaved = "您的修改已保存", invalidCredentials = "凭据无效",
     uppercase = "至少一个大写字母", lowercase = "至少一个小写字母", number = "至少一个数字", specialCharacter = "至少一个特殊字符", minimumCharacters = "最少 6 个字符",
-
-
-
     add = "添加", addToItinerary = "添加到行程", travel = "旅行", place = "地点",
     newPlace = "新地点", editPlace = "编辑地点", landmark = "地标（可选）", savePlace = "保存地点", searchTrips = "搜索行程",
     newTrip = "新行程", renameTrip = "重命名行程", create = "创建", save = "保存",
@@ -463,11 +497,17 @@ private val ZH = EN.copy(
     choosePhoto = "选择照片", uploadFromGallery = "从相册上传", takePhoto = "拍照", removePhoto = "移除照片", cropAndScale = "裁剪和缩放", usePhoto = "使用照片",
     resetPasswordPrompt = "输入您的电子邮件以重置密码", resetEmailSent = "重置密码的电子邮件已发送", resetEmailFailed = "发送重置密码电子邮件失败。",
     mobile = "手机", today = "今天", days = "30 天",
+    noTripsYet = "暂无行程 :(", noTripsSubtitle = "点击 + 规划你的第一次冒险！", noResults = "暂无计划 :(", noResultsSubtitle = "添加行程段到你的旅程中，即可在此查看！", startTime = "开始时间", endTime = "结束时间",
+    operatorGeneric = "运营商", busOperator = "巴士运营商", trainOperator = "铁路运营商", flightOperator = "航空公司", ferryOperator = "轮渡运营商", country = "国家", search = "搜索",
+    addDocument = "添加文档", title = "标题", attachTo = "附加到", wholeTrip = "整个行程", open = "打开", noDocuments = "暂无文档", noDocumentsSubtitle = "上传车票、预订信息等", deleteDocumentQ = "删除此文档？", fileNotUploaded = "文件尚未上传",
+    category = "类别", accommodation = "住宿", attraction = "景点", uploading = "正在上传…", uploadFailed = "无法上传文件",
+    day = "天", editLeg = "编辑行程段", close = "关闭",
+    swap = "交换", capture = "拍摄", profilePhoto = "个人资料照片", changePhoto = "更换照片", selected = "已选择", itineraLogo = "Itinera 标志",
 )
 
 private val JP = EN.copy(
     name = "名前", surname = "苗字", dob = "誕生日", street = "住所", city = "都市", postelCode = "郵便番号", appTagline = "旅の始まり！", myTrips = "私の旅",
-    countries = "国", legs = "経路", done = "完了", addLeg = "経路を追加", newLeg = "新しい経路", from = "から", to = "へ", transport = "交通手段",
+    countries = "国", leg = "経路", legs = "経路", done = "完了", addLeg = "経路を追加", newLeg = "新しい経路", from = "から", to = "へ", transport = "交通手段",
     date = "日付", time = "時間", bookingRef = "予約番号", optional = "オプション", saveLeg = "保存", tickets = "チケット", event = "イベント",
     beforeYouGo = "出発前に", addItem = "項目を追加", settings = "設定", backupSync = "バックアップと同期", appearance = "外観", language = "言語",
     currencyUnits = "通貨と単位", exportTrips = "旅をエクスポート", about = "このアプリについて", logOut = "ログアウト", welcomeBack = "おかえり",
@@ -487,8 +527,6 @@ private val JP = EN.copy(
     accountCreated = "アカウントが正常に作成されました", accountDeleted = "アカウントが正常に削除されました",
     changesSaved = "変更が保存されました", invalidCredentials = "資格情報が無効です",
     uppercase = "大文字を1文字以上", lowercase = "小文字を1文字以上", number = "数字を1文字以上", specialCharacter = "記号を1文字以上", minimumCharacters = "6文字以上",
-
-
     add = "追加", addToItinerary = "旅程に追加", travel = "旅行", place = "場所",
     newPlace = "新しい場所", editPlace = "場所を編集", landmark = "目印（オプション）", savePlace = "場所を保存", searchTrips = "旅を検索",
     newTrip = "新しい旅", renameTrip = "旅の名前を変更", create = "作成", save = "保存",
@@ -496,11 +534,19 @@ private val JP = EN.copy(
     delete = "削除", deleteTripQ = "旅を削除しますか？", deletePlaceQ = "場所を削除しますか？", deleteLegQ = "経路を削除しますか？",
     cantBeUndone = "この操作は取り消せません。", archivedTrips = "アーカイブ済みの旅", noArchivedTrips = "アーカイブ済みの旅はありません",
     noDatesYet = "日付が未設定です", tripName = "旅の名前", aLegBetween = "の間の経路", somewhereToVisit = "訪れる場所",
+    choosePhoto = "写真を選択", uploadFromGallery = "からアップロード", takePhoto = "写真を撮る", removePhoto = "写真を削除", cropAndScale = "切り取り", usePhoto = "写真を使用",
+    mobile = "モバイル", today = "今日", days = "30日間",
+    noTripsYet = "まだ旅行はありません :(", noTripsSubtitle = "+ をタップして最初の冒険を計画しましょう！", noResults = "予定はありません :(", noResultsSubtitle = "旅行に経路を追加して、ここに表示させましょう！", startTime = "開始時間", endTime = "終了時間",
+    operatorGeneric = "運行会社", busOperator = "バス会社", trainOperator = "鉄道会社", flightOperator = "航空会社", ferryOperator = "フェリー会社", country = "国", search = "検索",
+    addDocument = "文書を追加", title = "タイトル", attachTo = "添付先", wholeTrip = "旅行全体", open = "開く", noDocuments = "文書はまだありません", noDocumentsSubtitle = "チケットや予約などをアップロードしてください", deleteDocumentQ = "この文書を削除しますか？", fileNotUploaded = "ファイルはまだアップロードされていません",
+    category = "カテゴリ", accommodation = "宿泊施設", attraction = "アトラクション", uploading = "アップロード中…", uploadFailed = "ファイルをアップロードできませんでした",
+    day = "日", editLeg = "経路を編集", close = "閉じる",
+    swap = "入れ替え", capture = "撮影", profilePhoto = "プロフィール写真", changePhoto = "写真を変更", selected = "選択済み", itineraLogo = "Itinera ロゴ",
 )
 
 private val KR = EN.copy(
     name = "이름", surname = "성", dob = "생년월일", street = "거리", city = "도시", postelCode = "우편번호", appTagline = "여행의 시작!", myTrips = "내 여행",
-    countries = "국가", legs = "경로", done = "완료", addLeg = "경로 추가", newLeg = "새로운 경로", from = "출발", to = "도착",
+    countries = "국가", leg = "경로", legs = "경로", done = "완료", addLeg = "경로 추가", newLeg = "새로운 경로", from = "출발", to = "도착",
     transport = "교통수단", date = "날짜", time = "시간", bookingRef = "예약 번호", optional = "선택 사항",
     saveLeg = "경로 저장", tickets = "티켓", event = "이벤트", beforeYouGo = "출발 전", addItem = "항목 추가",
     settings = "설정", backupSync = "백업 및 동기화", appearance = "테마", language = "언어", currencyUnits = "통화 및 단위",
@@ -521,8 +567,6 @@ private val KR = EN.copy(
     accountCreated = "계정이 성공적으로 생성되었습니다", accountDeleted = "계정이 성공적으로 삭제되었습니다",
     changesSaved = "변경 사항이 저장되었습니다", invalidCredentials = "유효하지 않은 자격 증명",
     uppercase = "대문자 최소 1자", lowercase = "소문자 최소 1자", number = "숫자 최소 1자", specialCharacter = "특수 문자 최소 1자", minimumCharacters = "최소 6자",
-
-
     add = "추가", addToItinerary = "일정에 추가", travel = "여행", place = "장소",
     newPlace = "새 장소", editPlace = "장소 편집", landmark = "랜드마크 (선택 사항)", savePlace = "장소 저장", searchTrips = "여행 검색",
     newTrip = "새 여행", renameTrip = "여행 이름 바꾸기", create = "만들기", save = "저장",
@@ -531,19 +575,25 @@ private val KR = EN.copy(
     cantBeUndone = "이 작업은 되돌릴 수 없습니다.", archivedTrips = "보관된 여행", noArchivedTrips = "보관된 여행이 없습니다",
     noDatesYet = "아직 날짜 없음", tripName = "여행 이름", aLegBetween = "사이의 경로", somewhereToVisit = "방문할 장소",
     choosePhoto = "사진 선택", uploadFromGallery = "갤러리에서 업로드", takePhoto = "사진 촬영", removePhoto = "사진 삭제", cropAndScale = "자르기 및 크기 조정", usePhoto = "사진 사용",
-    resetPasswordPrompt = "비밀번호를 재설정하려면 이메일을 입력하세요", resetEmailSent = "비밀번호 재설정을 위한 이메일이 전송되었습니다", resetEmailFailed = "비밀번호 재설정 이메일 전송에 실패했습니다.",
+    resetPasswordPrompt = "비밀번호를 재설정하려면 이메일을 입력하세요", resetEmailSent = "비밀번호 재설정이라는 이메일이 전송되었습니다", resetEmailFailed = "비밀번호 재설정 이메일 전송에 실패했습니다.",
     mobile = "모바일", today = "오늘", days = "30일",
+    noTripsYet = "아직 여행이 없습니다 :(", noTripsSubtitle = "+를 탭하여 첫 번째 모험을 계획하세요!", noResults = "예정된 일정이 없습니다 :(", noResultsSubtitle = "여행에 경로를 추가하여 여기서 확인하세요!", startTime = "시작 시간", endTime = "종료 시간",
+    operatorGeneric = "운영사", busOperator = "버스 운영사", trainOperator = "철도 운영사", flightOperator = "항공사", ferryOperator = "페리 운영사", country = "국가", search = "검색",
+    addDocument = "문서 추가", title = "제목", attachTo = "첨부 대상", wholeTrip = "전체 여행", open = "열기", noDocuments = "아직 문서가 없습니다", noDocumentsSubtitle = "티켓, 예약 정보 등을 업로드하세요", deleteDocumentQ = "이 문서를 삭제할까요?", fileNotUploaded = "파일이 아직 업로드되지 않았습니다",
+    category = "카테고리", accommodation = "숙소", attraction = "명소", uploading = "업로드 중…", uploadFailed = "파일을 업로드할 수 없습니다",
+    day = "일", editLeg = "경로 편집", close = "닫기",
+    swap = "전환", capture = "촬영", profilePhoto = "프로필 사진", changePhoto = "사진 변경", selected = "선택됨", itineraLogo = "Itinera 로고",
 )
 
 private val RU = EN.copy(
     name = "Имя", surname = "Фамилия", dob = "Дата рождения", street = "Улица", city = "Город",
     postelCode = "Почтовый индекс", appTagline = "Начало каждого путешествия!",
-    myTrips = "Мои путешествия", countries = "страны", legs = "пути", done = "выполнено",
+    myTrips = "Мои путешествия", countries = "страны", leg = "Путь", legs = "пути", done = "выполнено",
     addLeg = "Добавить путь", newLeg = "Новый путь", from = "От", to = "До", date = "Дата", time = "Время",
     bookingRef = "Бронирование", optional = "необязательный", saveLeg = "Сохранить", tickets = "Билеты", event = "Событие",
     beforeYouGo = "До вылета", addItem = "Добавить элемент", settings = "Настройки", backupSync = "Резервная копия и синхронизация",
     appearance = "Внешний вид", language = "Язык", currencyUnits = "Валюта и единицы", exportTrips = "Экспорт путешествий", about = "О приложении",
-    logOut = "Выйти", welcomeBack = "Добро пожаловать", logInToTrips = "Войдите в ваши путешествия", email = "E-mail", password = "Пароль",
+    logOut = "Выйти", welcomeBack = "Добро пожаловать", logInToTrips = "Войте в ваши путешествия", email = "E-mail", password = "Пароль",
     forgotPassword = "Забыли пароль?", logIn = "Войти", continueGoogle = "Продолжить с Google", continueApple = "Продолжить с Apple",
     newHere = "Новый?", createAccount = "Создать аккаунт", calendar = "Календарь", documents = "Документы", nextUp = "Следующий",
     legsTravelled = "пути пройдено", syncWholeTrip = "Синхронизировать всю поездку", addToPhoneCalendar = "Добавить в календарь",
@@ -561,7 +611,6 @@ private val RU = EN.copy(
     accountCreated = "Ваш аккаунт был успешно создан", accountDeleted = "Ваш аккаунт был успешно удален",
     changesSaved = "Ваши изменения сохранены", invalidCredentials = "Неверные учетные данные",
     uppercase = "Хотя бы одна заглавная буква", lowercase = "Хотя бы одна строчная буква", number = "Хотя бы одна цифра", specialCharacter = "Хотя бы один спецсимвол", minimumCharacters = "Минимум 6 символов",
-
     add = "Добавить", addToItinerary = "Добавить в маршрут", travel = "Путешествие", place = "Место",
     newPlace = "Новое место", editPlace = "Редактировать место", landmark = "Достопримечательность (необязательно)", savePlace = "Сохранить место", searchTrips = "Поиск путешествий",
     newTrip = "Новое путешествие", renameTrip = "Переименовать путешествие", create = "Создать", save = "Сохранить",
@@ -572,12 +621,18 @@ private val RU = EN.copy(
     choosePhoto = "Выбрать фото", uploadFromGallery = "Загрузить из галереи", takePhoto = "Сделать фото", removePhoto = "Удалить фото", cropAndScale = "Обрезать и масштабировать", usePhoto = "Использовать фото",
     resetPasswordPrompt = "Введите свой e-mail, чтобы сбросить пароль", resetEmailSent = "Письмо для сброса пароля было отправлено", resetEmailFailed = "Не удалось отправить письмо для сброса пароля.",
     mobile = "Мобильный", today = "Сегодня", days = "30 дней",
+    noTripsYet = "Путешествий пока нет :(", noTripsSubtitle = "Нажмите +, чтобы спланировать свое первое приключение!", noResults = "Ничего не запланировано :(", noResultsSubtitle = "Добавьте пути к своим путешествиям, чтобы увидеть их здесь!", startTime = "Время начала", endTime = "Время окончания",
+    operatorGeneric = "Оператор", busOperator = "Автобусный оператор", trainOperator = "Ж/Д оператор", flightOperator = "Авиакомпания", ferryOperator = "Паромный оператор", country = "Страна", search = "Поиск",
+    addDocument = "Добавить документ", title = "Заголовок", attachTo = "Прикрепить к", wholeTrip = "Вся поездка", open = "Открыть", noDocuments = "Документов пока нет", noDocumentsSubtitle = "Загрузите билеты, бронирования и прочее", deleteDocumentQ = "Удалить этот документ?", fileNotUploaded = "Файл еще не загружен",
+    category = "Категория", accommodation = "Жилье", attraction = "Достопримечательность", uploading = "Загрузка…", uploadFailed = "Не удалось загрузить файл",
+    day = "День", editLeg = "Редактировать путь", close = "Закрыть",
+    swap = "Поменять", capture = "Снять", profilePhoto = "Фото профиля", changePhoto = "Изменить фото", selected = "Выбрано", itineraLogo = "Логотип Itinera",
 )
 
 private val TAM = EN.copy(
     name = "பெயர்", surname = "பின்னொட்டு", dob = "பிறந்த தேதி", street = "தெரு", city = "நகரம்",
     postelCode = "அஞ்சல் குறியீடு", appTagline = "ஒவ்வொரு பயணமும் இங்கே தொடங்குகிறது!", myTrips = "எனது பயணங்கள்",
-    countries = "நாடுகள்", legs = "பயணங்கள்", done = "முடிந்தது", addLeg = "பயணத்தைச் சேர்", newLeg = "புதிய பயணம்",
+    countries = "நாடுகள்", leg = "பயணம்", legs = "பயணங்கள்", done = "முடிந்தது", addLeg = "பயணத்தைச் சேர்", newLeg = "புதிய பயணம்",
     from = "இருந்து", to = "வரை", transport = "போக்குவரத்து", date = "தேதி", time = "நேரம்",
     bookingRef = "முன்பதிவு எண்", optional = "விருப்பத்திற்குரியது", saveLeg = "பயணத்தைச் சேமி",
     tickets = "டிக்கெட்டுகள்", event = "நிகழ்வு", beforeYouGo = "செல்வதற்கு முன்", addItem = "பொருளைச் சேர்",
@@ -602,7 +657,6 @@ private val TAM = EN.copy(
     accountCreated = "உங்கள் கணக்கு வெற்றிகரமாக உருவாக்கப்பட்டது", accountDeleted = "உங்கள் கணக்கு வெற்றிகரமாக நீக்கப்பட்டது",
     changesSaved = "உங்கள் மாற்றங்கள் சேமிக்கப்பட்டன", invalidCredentials = "தவறான சான்றுகள்",
     uppercase = "குறைந்தது ஒரு பெரிய எழுத்து", lowercase = "குறைந்தது ஒரு சிறிய எழுத்து", number = "குறைந்தது ஒரு எண்", specialCharacter = "குறைந்தது ஒரு சிறப்பு எழுத்து", minimumCharacters = "குறைந்தது 6 எழுத்துகள்",
-
     add = "சேர்", addToItinerary = "பயணத்திட்டத்தில் சேர்", travel = "பயணம்", place = "இடம்",
     newPlace = "புதிய இடம்", editPlace = "இடத்தைத் திருத்து", landmark = "அடையாளம் (விருப்பத்திற்குரியது)", savePlace = "இடத்தைச் சேமி", searchTrips = "பயணங்களைத் தேடு",
     newTrip = "புதிய பயணம்", renameTrip = "பயணப் பெயரை மாற்று", create = "உருவாக்கு", save = "சேமி",
@@ -610,12 +664,20 @@ private val TAM = EN.copy(
     delete = "நீக்கு", deleteTripQ = "பயணத்தை நீக்கவா?", deletePlaceQ = "இடத்தை நீக்கவா?", deleteLegQ = "பயணத்தை நீக்கவா?",
     cantBeUndone = "இதை மாற்ற முடியாது.", archivedTrips = "காப்பகப்படுத்தப்பட்ட பயணங்கள்", noArchivedTrips = "காப்பகப்படுத்தப்பட்ட பயணங்கள் இல்லை",
     noDatesYet = "தேதிகள் இன்னும் இல்லை", tripName = "பயணப் பெயர்", aLegBetween = "இடையிலான பயணம்", somewhereToVisit = "சந்திக்க வேண்டிய இடம்",
+    choosePhoto = "புகைப்படத்தைத் தேர்ந்தெடு", uploadFromGallery = "கேலரியில் இருந்து பதிவேற்று", takePhoto = "புகைப்படம் எடு", removePhoto = "புகைப்படத்தை அகற்று", cropAndScale = "கிராப் மற்றும் ஸ்கேல்", usePhoto = "புகைப்படத்தைப் பயன்படுத்து",
+    mobile = "மொபைல்", today = "இன்று", days = "30 நாட்கள்",
+    noTripsYet = "இன்னும் பயணங்கள் இல்லை :(", noTripsSubtitle = "உங்கள் முதல் பயணத்தைத் திட்டமிட + ஐத் தட்டவும்!", noResults = "திட்டமிடப்பட்டவை எதுவும் இல்லை :(", noResultsSubtitle = "உங்கள் பயணங்களைப் பார்க்க பயணங்களைச் சேர்க்கவும்!", startTime = "ஆரம்ப நேரம்", endTime = "முடிவு நேரம்",
+    operatorGeneric = "ஆபரேட்டர்", busOperator = "பேருந்து ஆபரேட்டர்", trainOperator = "ரயில் ஆபரேட்டர்", flightOperator = "விமான நிறுவனம்", ferryOperator = "படகு ஆபரேட்டர்", country = "நாடு", search = "தேடு",
+    addDocument = "ஆவணத்தைச் சேர்", title = "தலைப்பு", attachTo = "இணைக்கவும்", wholeTrip = "முழு பயணம்", open = "திற", noDocuments = "இன்னும் ஆவணங்கள் இல்லை", noDocumentsSubtitle = "டிக்கெட்டுகள், முன்பதிவுகள் மற்றும் பலவற்றை பதிவேற்றவும்", deleteDocumentQ = "இந்த ஆவணத்தை நீக்கவா?", fileNotUploaded = "கோப்பு இன்னும் பதிவேற்றப்படவில்லை",
+    category = "வகை", accommodation = "தங்குமிடம்", attraction = "ஈர்ப்பு", uploading = "பதிவேற்றுகிறது…", uploadFailed = "கோப்பைப் பதிவேற்ற முடியவில்லை",
+    day = "நாள்", editLeg = "பயணத்தைத் திருத்து", close = "மூடு",
+    swap = "மாற்று", capture = "பிடி", profilePhoto = "சுயவிவரப் படம்", changePhoto = "படத்தை மாற்று", selected = "தேர்ந்தெடுக்கப்பட்டது", itineraLogo = "இடினெரா லோகோ",
 )
 
 private val HI = EN.copy(
     name = "नाम", surname = "सरनेम", dob = "जन्म तिथि", street = "गली/सड़क", city = "शहर",
     postelCode = "पिन कोड", appTagline = "जहाँ हर यात्रा शुरू होती है!", myTrips = "मेरी यात्राएँ",
-    countries = "देश", legs = "पड़ाव", done = "पूरा हुआ", addLeg = "पड़ाव जोड़ें", newLeg = "नया पड़ाव",
+    countries = "देश", leg = "पड़ाव", legs = "पड़ाव", done = "पूरा हुआ", addLeg = "पड़ाव जोड़ें", newLeg = "नया पड़ाव",
     from = "से", to = "तक", transport = "परिवहन", date = "तारीख", time = "समय",
     bookingRef = "बुकिंग संदर्भ", optional = "वैकल्पिक", saveLeg = "पड़ाव सहेजें",
     tickets = "टिकट", event = "ईवेंट", beforeYouGo = "जाने से पहले", addItem = "आइटम जोड़ें",
@@ -641,8 +703,6 @@ private val HI = EN.copy(
     accountCreated = "आपका खाता सफलतापूर्वक बना लिया गया है", accountDeleted = "आपका खाता सफलतापूर्वक हटा दिया गया है",
     changesSaved = "आपके परिवर्तन सहेजे गए हैं", invalidCredentials = "अमान्य क्रेडेंशियल",
     uppercase = "कम से कम एक बड़ा अक्षर", lowercase = "कम से कम एक छोटा अक्षर", number = "कम से कम एक संख्या", specialCharacter = "कम से कम एक विशेष वर्ण", minimumCharacters = "न्यूनतम 6 अक्षर",
-
-
     add = "जोड़ें", addToItinerary = "यात्रा कार्यक्रम में जोड़ें", travel = "यात्रा", place = "स्थान",
     newPlace = "नया स्थान", editPlace = "स्थान संपादित करें", landmark = "लैंडमार्क (वैकल्पिक)", savePlace = "स्थान सहेजें", searchTrips = "यात्राएं खोजें",
     newTrip = "नई यात्रा", renameTrip = "यात्रा का नाम बदलें", create = "बनाएं", save = "सहेजें",
@@ -650,12 +710,20 @@ private val HI = EN.copy(
     delete = "मिटाएं", deleteTripQ = "यात्रा मिटाएं?", deletePlaceQ = "स्थान मिटाएं?", deleteLegQ = "पड़ाव मिटाएं?",
     cantBeUndone = "इसे वापस नहीं लिया जा सकता।", archivedTrips = "संग्रहीत यात्राएं", noArchivedTrips = "कोई संग्रहीत यात्रा नहीं",
     noDatesYet = "अभी कोई तारीख नहीं", tripName = "यात्रा का नाम", aLegBetween = "के बीच एक पड़ाव", somewhereToVisit = "घूमने की जगह",
+    choosePhoto = "फोटो चुनें", uploadFromGallery = "गैलरी से अपलोड करें", takePhoto = "फोटो लें", removePhoto = "फोटो हटाएं", cropAndScale = "क्रॉप और स्केल", usePhoto = "फोटो का उपयोग करें",
+    mobile = "मोबाइल", today = "आज", days = "30 दिन",
+    noTripsYet = "अभी कोई यात्रा नहीं :(", noTripsSubtitle = "अपनी पहली यात्रा की योजना बनाने के लिए + पर टैप करें!", noResults = "कुछ भी निर्धारित नहीं है :(", noResultsSubtitle = "उन्हें यहाँ देखने के लिए अपनी यात्राओं में पड़ाव जोड़ें!", startTime = "शुरू होने का समय", endTime = "समाप्ति समय",
+    operatorGeneric = "ऑपरेटर", busOperator = "बस ऑपरेटर", trainOperator = "ट्रेन ऑपरेटर", flightOperator = "एयरलाइन", ferryOperator = "फेरी ऑपरेटर", country = "देश", search = "खोजें",
+    addDocument = "दस्तावेज़ जोड़ें", title = "शीर्षक", attachTo = "इसके साथ जोड़ें", wholeTrip = "पूरी यात्रा", open = "खोलें", noDocuments = "अभी कोई दस्तावेज़ नहीं", noDocumentsSubtitle = "टिकट, बुकिंग और बहुत कुछ अपलोड करें", deleteDocumentQ = "इस दस्तावेज़ को मिटाएं?", fileNotUploaded = "फाइल अभी अपलोड नहीं हुई है",
+    category = "श्रेणी", accommodation = "आवास", attraction = "आकर्षण", uploading = "अपलोड हो रहा है…", uploadFailed = "फ़ाइल अपलोड नहीं की जा सकी",
+    day = "दिन", editLeg = "पड़ाव संपादित करें", close = "बंद करें",
+    swap = "बदलें", capture = "कैप्चर", profilePhoto = "प्रोफ़ाइल फोटो", changePhoto = "फोटो बदलें", selected = "चयनित", itineraLogo = "इतिनेरा लोगो",
 )
 
 private val UKR = EN.copy(
     name = "Ім'я", surname = "Прізвище", dob = "Дата народження", street = "Вулиця", city = "Місто",
     postelCode = "Поштовий індекс", appTagline = "Початок кожної подорожі!", myTrips = "Мої подорожі",
-    countries = "країни", legs = "етапи", done = "виконано", addLeg = "Додати етап", newLeg = "Новий етап", from = "Від",
+    countries = "країни", leg = "Етап", legs = "етапи", done = "виконано", addLeg = "Додати етап", newLeg = "Новий етап", from = "Від",
     to = "До", transport = "Транспорт", date = "Дата", time = "Час", bookingRef = "Резерваційний номер",
     optional = "необов'язковий", saveLeg = "Зберегти етап", tickets = "Квитки", event = "Подія", beforeYouGo = "До відправлення",
     addItem = "Додати елемент", settings = "Налаштування", backupSync = "Резервна копія та синхронізація", appearance = "Зовнішній вигляд",
@@ -686,11 +754,18 @@ private val UKR = EN.copy(
     noDatesYet = "Ще немає дат", tripName = "Назва подорожі", aLegBetween = "Етап між", somewhereToVisit = "Місце для відвідування",
     choosePhoto = "Вибрати фото", uploadFromGallery = "Завантажити з галереї", takePhoto = "Зробити фото", removePhoto = "Видалити фото", cropAndScale = "Обрізати та масштабувати", usePhoto = "Використати фото",
     resetPasswordPrompt = "Введіть свою пошту, щоб скинути пароль", resetEmailSent = "Надіслано електронний лист для скидання пароля", resetEmailFailed = "Не вдалося надіслати лист для скидання пароля.",
+    mobile = "Мобільний", today = "Сьогодні", days = "30 днів",
+    noTripsYet = "Подорожей ще немає :(", noTripsSubtitle = "Натисніть +, щоб спланувати свою першу пригоду!", noResults = "Нічого не заплановано :(", noResultsSubtitle = "Додайте етапи до своїх подорожей, щоб побачити їх тут!", startTime = "Час початку", endTime = "Час закінчення",
+    operatorGeneric = "Оператор", busOperator = "Автобусний перевізник", trainOperator = "Залізничний перевізник", flightOperator = "Авіакомпанія", ferryOperator = "Поромний перевізник", country = "Країна", search = "Пошук",
+    addDocument = "Додати документ", title = "Назва", attachTo = "Прикріпити до", wholeTrip = "Вся подорож", open = "Відкрити", noDocuments = "Документів ще немає", noDocumentsSubtitle = "Завантажуйте квитки, бронювання та інше", deleteDocumentQ = "Видалити цей документ?", fileNotUploaded = "Файл ще не завантажено",
+    category = "Категорія", accommodation = "Проживання", attraction = "Визначне місце", uploading = "Завантаження…", uploadFailed = "Не вдалося завантажити файл",
+    day = "День", editLeg = "Редагувати етап", close = "Закрити",
+    swap = "Поміняти", capture = "Зняти", profilePhoto = "Фото профілю", changePhoto = "Змінити фото", selected = "Вибрано", itineraLogo = "Логотип Itinera",
 )
 
 private val HUN = EN.copy(
     name = "Név", surname = "Vezetéknév", dob = "Születési dátum", street = "Utca", city = "Város", postelCode = "Irányítószám",
-    appTagline = "Ahol minden utazás kezdődik!", myTrips = "Saját utazások", countries = "ország", legs = "szakaszok", done = "kész",
+    appTagline = "Ahol minden utazás kezdődik!", myTrips = "Saját utazások", countries = "ország", leg = "Szakasz", legs = "szakaszok", done = "kész",
     addLeg = "Útvonal hozzáadása", newLeg = "Új útvonal", from = "Kezdőpont", to = "Célpont", transport = "Transport", date = "Dátum", time = "Idő",
     bookingRef = "Foglalási azonosító", optional = "opcionális", saveLeg = "Útvonal mentése", tickets = "Jegyek", event = "Esemény", beforeYouGo = "Indulás előtt",
     addItem = "Elem hozzáadása", settings = "Beállítások", backupSync = "Biztonsági mentés és szinkronizálás", appearance = "Megjelenés",
@@ -711,7 +786,6 @@ private val HUN = EN.copy(
     accountCreated = "Fiókja sikeresen létrejött", accountDeleted = "Fiókja sikeresen törölve lett",
     changesSaved = "A változtatásokat elmentettük", invalidCredentials = "Érvénytelen adatok",
     uppercase = "Legalább egy nagybetű", lowercase = "Legalább egy kisbetű", number = "Legalább egy szám", specialCharacter = "Legalább egy speciális karakter", minimumCharacters = "Legalább 6 karakter",
-
     add = "Hozzáadás", addToItinerary = "Hozzáadás az útitervhez", travel = "Utazás", place = "Hely",
     newPlace = "Új hely", editPlace = "Hely szerkesztése", landmark = "Nevezetesség (opcionális)", savePlace = "Hely mentése", searchTrips = "Utazások keresése",
     newTrip = "Új utazás", renameTrip = "Utazás átnevezése", create = "Létrehozás", save = "Mentés",
@@ -719,11 +793,18 @@ private val HUN = EN.copy(
     delete = "Törlés", deleteTripQ = "Törli az utazást?", deletePlaceQ = "Törli a helyet?", deleteLegQ = "Törli az utat?",
     cantBeUndone = "Ez a művelet nem vonható vissza.", archivedTrips = "Archivált utazások", noArchivedTrips = "Nincsenek archivált utazások",
     noDatesYet = "Nincsenek dátumok", tripName = "Utazás neve", aLegBetween = "Egy út a következők között:", somewhereToVisit = "Egy hely, amit érdemes meglátogatni",
+    mobile = "Mobil", today = "Ma", days = "30 nap",
+    noTripsYet = "Nincsenek még utazások :(", noTripsSubtitle = "Koppintson a + gombra az első kaland megtervezéséhez!", noResults = "Nincs semmi ütemezve :(", noResultsSubtitle = "Adjon hozzá szakaszokat az utazásaihoz, hogy itt lássa őket!", startTime = "Kezdési idő", endTime = "Befejezési idő",
+    operatorGeneric = "Szolgáltató", busOperator = "Busztársaság", trainOperator = "Vasúttársaság", flightOperator = "Légitársaság", ferryOperator = "Komptársaság", country = "Ország", search = "Keresés",
+    addDocument = "Dokumentum hozzáadása", title = "Cím", attachTo = "Csatolás ide", wholeTrip = "Teljes utazás", open = "Megnyitás", noDocuments = "Nincsenek még dokumentumok", noDocumentsSubtitle = "Töltsön fel jegyeket, foglalásokat és egyebeket", deleteDocumentQ = "Törli ezt a dokumentumot?", fileNotUploaded = "A fájl még nincs feltöltve",
+    category = "Kategória", accommodation = "Szállás", attraction = "Látnivaló", uploading = "Feltöltés…", uploadFailed = "Nem sikerült feltölteni a fájlt",
+    day = "Nap", editLeg = "Útvonal szerkesztése", close = "Bezárás",
+    swap = "Megcserél", capture = "Rögzít", profilePhoto = "Profilkép", changePhoto = "Kép módosítása", selected = "Kiválasztva", itineraLogo = "Itinera logó",
 )
 
 private val RO = EN.copy(
     name = "Prenume", surname = "Nume", dob = "Data nașterii", street = "Stradă", city = "Oraș", postelCode = "Cod poștal",
-    appTagline = "Unde începe fiecare călătorie!", myTrips = "Călătoriile mele", countries = "țări", legs = "etape", done = "finalizat",
+    appTagline = "Unde începe fiecare călătorie!", myTrips = "Călătoriile mele", countries = "țări", leg = "Etapă", legs = "etape", done = "finalizat",
     addLeg = "Adaugă etapă", newLeg = "Etapă nouă", from = "De la", to = "Până la", transport = "Transport", date = "Dată", time = "Oră",
     bookingRef = "Ref. rezervare", optional = "opțional", saveLeg = "Salvează etapa", tickets = "Bilete", event = "Eveniment", beforeYouGo = "Înainte de plecare",
     addItem = "Adaugă element", settings = "Setări", backupSync = "Backup și sincronizare", appearance = "Aspect",
@@ -744,7 +825,6 @@ private val RO = EN.copy(
     accountCreated = "Contul dvs. a fost creat cu succes", accountDeleted = "Contul dvs. a fost șters cu succes",
     changesSaved = "Modificările dvs. au fost salvate", invalidCredentials = "Date de conectare nevalide",
     uppercase = "Cel puțin o majusculă", lowercase = "Cel puțin o minusculă", number = "Cel puțin o cifră", specialCharacter = "Cel puțin un caracter special", minimumCharacters = "Minimum 6 caractere",
-
     add = "Adaugă", addToItinerary = "Adaugă la itinerar", travel = "Călătorie", place = "Loc",
     newPlace = "Loc nou", editPlace = "Editează locul", landmark = "Punct de reper (opțional)", savePlace = "Salvează locul", searchTrips = "Caută călătorii",
     newTrip = "Călătorie nouă", renameTrip = "Redenumește călătoria", create = "Creează", save = "Salvează",
@@ -755,11 +835,17 @@ private val RO = EN.copy(
     choosePhoto = "Alegeți fotografia", uploadFromGallery = "Încărcați din galerie", takePhoto = "Faceți o fotografie", removePhoto = "Eliminați fotografia", cropAndScale = "Decupați și scalați", usePhoto = "Utilizați fotografia",
     resetPasswordPrompt = "Introduceți e-mailul pentru a reseta parola", resetEmailSent = "A fost trimis un e-mail pentru resetarea parolei", resetEmailFailed = "Trimiterea e-mailului pentru resetarea parolei a eșuat.",
     mobile = "Mobil", today = "Astăzi", days = "30 zile",
+    noTripsYet = "Nicio călătorie încă :(", noTripsSubtitle = "Apasă + pentru a planifica prima ta aventură!", noResults = "Nimic programat :(", noResultsSubtitle = "Adaugă etape călătoriilor tale pentru a le vedea aici!", startTime = "Ora de început", endTime = "Ora de sfârșit",
+    operatorGeneric = "Operator", busOperator = "Operator de autobuz", trainOperator = "Operator feroviar", flightOperator = "Companie aeriană", ferryOperator = "Operator de feribot", country = "Țară", search = "Căutare",
+    addDocument = "Adaugă document", title = "Titlu", attachTo = "Atașează la", wholeTrip = "Toată călătoria", open = "Deschide", noDocuments = "Niciun document încă", noDocumentsSubtitle = "Încarcă bilete, rezervări și multe altele", deleteDocumentQ = "Ștergi acest document?", fileNotUploaded = "Fișierul nu a fost încă încărcat",
+    category = "Categorie", accommodation = "Cazare", attraction = "Atracție", uploading = "Se încarcă…", uploadFailed = "Nu s-a putut încărca fișierul",
+    day = "Zi", editLeg = "Editează etapa", close = "Închide",
+    swap = "Inversare", capture = "Captură", profilePhoto = "Fotografie profil", changePhoto = "Schimbă foto", selected = "Selectat", itineraLogo = "Logo Itinera",
 )
 
 private val GR = EN.copy(
     name = "Όνομα", surname = "Επώνυμο", dob = "Ημερομηνία γέννησης", street = "Οδός", city = "Πόλη", postelCode = "Ταχυδρομικός κώδικας",
-    appTagline = "Εκεί που ξεκινά κάθε ταξίδι!", myTrips = "Τα ταξίδια μου", countries = "χώρες", legs = "σκέλη", done = "ολοκληρώθηκε",
+    appTagline = "Εκεί που ξεκινά κάθε ταξίδι!", myTrips = "Τα ταξίδια μου", countries = "χώρες", leg = "Σκέλος", legs = "σκέλη", done = "ολοκληρώθηκε",
     addLeg = "Προσθήκη σκέλους", newLeg = "Νέο σκέλος", from = "Από", to = "Προς", transport = "Μεταφορά", date = "Ημερομηνία", time = "Ώρα",
     bookingRef = "Αναφ. κράτησης", optional = "προαιρετικό", saveLeg = "Αποθήκευση σκέλους", tickets = "Εισιτήρια", event = "Εκδήλωση", beforeYouGo = "Πριν ξεκινήσετε",
     addItem = "Προσθήκη αντικειμένου", settings = "Ρυθμίσεις", backupSync = "Αντίγραφα & συγχρονισμός", appearance = "Εμφάνιση",
@@ -772,7 +858,7 @@ private val GR = EN.copy(
     followPhone = "Γλώσσα τηλεφώνου", ok = "OK", cancel = "Ακύρωση", address = "Διεύθυνση",
     editProfile = "Επεξεργασία προφίλ", newPassword = "Νέος κωδικός", saveChanges = "Αποθήκευση αλλαγών",
     systemDefault = "Προεπιλογή συστήματος", light = "Ανοιχτό", dark = "Σκούρο", matchYourPhone = "Ταιριάζει με το τηλέφωνό σας", currency = "Νόμισμα", convert = "Μετατροπή", bookings = "Κρατήσεις", packing = "Συσκευασία", money = "Χρήματα", gadget = "Gadget", other = "Άλλα", needToAdd = "Τι πρέπει να προσθέσετε;", section = "Ενότητα",
-    amount = "Ποσό", validAmount = "Εισαγάγετε ένα έγκυρο ποσό", couldntFetch = "Δεν ήταν δυνατή η ανάκτηση της ισοτιμίας. Ελέγξτε τη σύνδεσή σας.",
+    amount = "Ποσό", validAmount = "Εισαγάγετε ένα έγκυρο ποσό", couldntFetch = "Δεν ήταν δυνατή η ανάκτηση της ισοτιμίας. Ελέγξτε τη σύνδεσμη σας.",
     passwordTooShort = "Ο κωδικός πρόσβασης πρέπει να έχει τουλάχιστον 6 χαρακτήρες", signupFailed = "Η δημιουργία λογαριασμού απέτυχε. Το email μπορεί να χρησιμοποιείται ήδη.",
     deleteAccount = "Διαγραφή λογαριασμού", deleteAccountConfirm = "Αυτό θα διαγράψει οριστικά τον λογαριασμό σας και όλα τα δεδομένα σας. Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.", deleteButton = "Διαγραφή",
     showPassword = "Εμφάνιση κωδικού", hidePassword = "Απόκρυψη κωδικού", back = "Πίσω",
@@ -780,7 +866,6 @@ private val GR = EN.copy(
     accountCreated = "Ο λογαριασμός σας δημιουργήθηκε με επιτυχία", accountDeleted = "Ο λογαριασμός σας διαγράφηκε με επιτυχία",
     changesSaved = "Οι αλλαγές σας αποθηκεύτηκαν", invalidCredentials = "Μη έγκυρα διαπιστευτήρια",
     uppercase = "Τουλάχιστον ένα κεφαλαίο γράμμα", lowercase = "Τουλάχιστον ένα πεζό γράμμα", number = "Τουλάχιστον ένας αριθμός", specialCharacter = "Τουλάχιστον ένας ειδικός χαρακτήρας", minimumCharacters = "Ελάχιστο 6 χαρακτήρες",
-
     add = "Προσθήκη", addToItinerary = "Προσθήκη στο δρομολόγιο", travel = "Ταξίδι", place = "Τοποθεσία",
     newPlace = "Νέα τοποθεσία", editPlace = "Επεξεργασία τοποθεσίας", landmark = "Ορόσημο (προαιρετικό)", savePlace = "Αποθήκευση τοποθεσίας", searchTrips = "Αναζήτηση ταξιδιών",
     newTrip = "Νέο ταξίδι", renameTrip = "Μετονομασία ταξιδιού", create = "Δημιουργία", save = "Αποθήκευση",
@@ -791,11 +876,17 @@ private val GR = EN.copy(
     choosePhoto = "Επιλογή φωτογραφίας", uploadFromGallery = "Μεταφόρτωση από τη συλλογή", takePhoto = "Λήψη φωτογραφίας", removePhoto = "Αφαίρεση φωτογραφίας", cropAndScale = "Περικοπή και κλιμάκωση", usePhoto = "Χρήση φωτογραφίας",
     resetPasswordPrompt = "Εισαγάγετε το email σας για επαναφορά κωδικού", resetEmailSent = "Στάλθηκε email για την επαναφορά του κωδικού σας", resetEmailFailed = "Αποτυχία αποστολής email επαναφοράς κωδικού.",
     mobile = "Κινητό", today = "Σήμερα", days = "30 ημέρες",
+    noTripsYet = "Δεν υπάρχουν ακόμα ταξίδια :(", noTripsSubtitle = "Πατήστε + για να σχεδιάσετε την πρώτη σας περιπέτεια!", noResults = "Τίποτα προγραμματισμένο :(", noResultsSubtitle = "Προσθέστε σκέλη στα ταξίδια σας για να τα δείτε εδώ!", startTime = "Ώρα έναρξης", endTime = "Ώρα λήξης",
+    operatorGeneric = "Πάροχος", busOperator = "Εταιρεία λεωφορείων", trainOperator = "Εταιρεία τρένων", flightOperator = "Αεροπορική εταιρεία", ferryOperator = "Εταιρεία φέρι", country = "Χώρα", search = "Αναζήτηση",
+    addDocument = "Προσθήκη εγγράφου", title = "Τίτλος", attachTo = "Επισύναψη σε", wholeTrip = "Όλο το ταξίδι", open = "Άνοιγμα", noDocuments = "Δεν υπάρχουν ακόμα έγγραφα", noDocumentsSubtitle = "Μεταφορτώστε εισιτήρια, κρατήσεις και άλλα", deleteDocumentQ = "Διαγραφή αυτού του εγγράφου;", fileNotUploaded = "Το αρχείο δεν έχει μεταφορτωθεί ακόμα",
+    category = "Κατηγορία", accommodation = "Διαμονή", attraction = "Αξιοθέατο", uploading = "Μεταφόρτωση…", uploadFailed = "Αποτυχία μεταφόρτωσης αρχείου",
+    day = "Ημέρα", editLeg = "Επεξεργασία σκέλους", close = "Κλείσιμο",
+    swap = "Εναλλαγή", capture = "Λήψη", profilePhoto = "Φωτογραφία προφίλ", changePhoto = "Αλλαγή φωτογραφίας", selected = "Επιλέχθηκε", itineraLogo = "Λογότυπο Itinera",
 )
 
 private val KA = EN.copy(
     name = "სახელი", surname = "გვარი", dob = "დაბადების თარიღი", street = "ქუჩა", city = "ქალაქი", postelCode = "საფოსტო ინდექსი",
-    appTagline = "სადაც ყოველი მოგზაურობა იწყება!", myTrips = "ჩემი მოგზაურობები", countries = "ქვეყანა", legs = "ეტაპი", done = "დასრულებული",
+    appTagline = "სადაც ყოველი მოგზაურობა იწყება!", myTrips = "ჩემი მოგზაურობები", countries = "ქვეყანა", leg = "ეტაპი", legs = "ეტაპი", done = "დასრულებული",
     addLeg = "ეტაპის დამატება", newLeg = "ახალი ეტაპი", from = "დან", to = "მდე", transport = "ტრანსპორტი", date = "თარიღი", time = "დრო",
     bookingRef = "ჯავშნის კოდი", optional = "არასავალდებულო", saveLeg = "ეტაპის შენახვა", tickets = "ბილეთები", event = "ღონისძიება", beforeYouGo = "გამგზავრებამდე",
     addItem = "ნივთის დამატება", settings = "პარამეტრები", backupSync = "მარქაფი და სინქრონიზაცია", appearance = "ვიზუალი",
@@ -816,7 +907,6 @@ private val KA = EN.copy(
     accountCreated = "თქვენი ანგარიში წარმატებით შეიქმნა", accountDeleted = "თქვენი ანგარიში წარმატებით წაიშალა",
     changesSaved = "თქვენი ცვლილებები შენახულია", invalidCredentials = "არასწორი მონაცემები",
     uppercase = "მინიმუმ ერთი დიდი ასო", lowercase = "მინიმუმ ერთი პატარა ასო", number = "მინიმუმ ერთი ციფრი", specialCharacter = "მინიმუმ ერთი სპეციალური სიმბოლო", minimumCharacters = "მინიმუმ 6 სიმბოლო",
-
     add = "დამატება", addToItinerary = "მარშრუტში დამატება", travel = "მგზავრობა", place = "ადგილი",
     newPlace = "ახალი ადგილი", editPlace = "ადგილის რედაქტირება", landmark = "ღირსშესანიშნაობა (არასავალდებულო)", savePlace = "ადგილის შენახვა", searchTrips = "მოგზაურობის ძებნა",
     newTrip = "ახალი მოგზაურობა", renameTrip = "მოგზაურობის გადარქმევა", create = "შექმნა", save = "შენახვა",
@@ -827,11 +917,17 @@ private val KA = EN.copy(
     choosePhoto = "ფოტოს არჩევა", uploadFromGallery = "გალერეიდან ატვირთვა", takePhoto = "ფოტოს გადაღება", removePhoto = "ფოტოს წაშლა", cropAndScale = "მოჭრა და მასშტაბირება", usePhoto = "ფოტოს გამოყენება",
     resetPasswordPrompt = "პაროლის აღსადგენად შეიყვანეთ ელფოსტა", resetEmailSent = "პაროლის აღსადგენად ელფოსტა გაიგზავნა", resetEmailFailed = "ელფოსტის გაგზავნა ვერ მოხერხდა.",
     mobile = "მობილური", today = "დღეს", days = "30 დღე",
+    noTripsYet = "ჯერ მოგზაურობები არ გაქვთ :(", noTripsSubtitle = "შეეხეთ +-ს თქვენი პირველი თავგადასავლის დასაგეგმად!", noResults = "დაგეგმილი არაფერია :(", noResultsSubtitle = "დაამატეთ ეტაპები თქვენს მოგზაურობას აქ სანახავად!", startTime = "დაწყების დრო", endTime = "დასრულების დრო",
+    operatorGeneric = "ოპერატორი", busOperator = "ავტობუსის ოპერატორი", trainOperator = "მატარებლის ოპერატორი", flightOperator = "ავიაკომპანია", ferryOperator = "ბორნის ოპერატორი", country = "ქვეყანა", search = "ძებნა",
+    addDocument = "დოკუმენტის დამატება", title = "სათაური", attachTo = "მიმაგრება", wholeTrip = "მთელი მოგზაურობა", open = "გახსნა", noDocuments = "ჯერ დოკუმენტები არ არის", noDocumentsSubtitle = "ატვირთეთ ბილეთები, ჯავშნები და სხვა", deleteDocumentQ = "წაიშალოს ეს დოკუმენტი?", fileNotUploaded = "ფაილი ჯერ არ არის ატვირთული",
+    category = "კატეგორია", accommodation = "განთავსება", attraction = "ატრაქციონი", uploading = "იტვირთება…", uploadFailed = "ფაილის ატვირთვა ვერ მოხერხდა",
+    day = "დღე", editLeg = "ეტაპის რედაქტირება", close = "დახურვა",
+    swap = "შეცვლა", capture = "გადაღება", profilePhoto = "პროფილის ფოტო", changePhoto = "ფოტოს შეცვლა", selected = "არჩეულია", itineraLogo = "Itinera-ს ლოგო",
 )
 
 private val BG = EN.copy(
     name = "Име", surname = "Фамилия", dob = "Дата на раждане", street = "Улица", city = "Град", postelCode = "Пощенски код",
-    appTagline = "Където започва всяко пътуване!", myTrips = "Моите пътувания", countries = "държави", legs = "етапи", done = "завършено",
+    appTagline = "Където започва всяко пътуване!", myTrips = "Моите пътувания", countries = "държави", leg = "Етап", legs = "етапи", done = "завършено",
     addLeg = "Добави етап", newLeg = "Нов етап", from = "От", to = "До", transport = "Транспорт", date = "Дата", time = "Час",
     bookingRef = "Код за резервация", optional = "по избор", saveLeg = "Запази етапа", tickets = "Билети", event = "Събитие", beforeYouGo = "Преди да тръгнете",
     addItem = "Добави елемент", settings = "Настройки", backupSync = "Резервно копие & синхронизация", appearance = "Изглед",
@@ -852,7 +948,6 @@ private val BG = EN.copy(
     accountCreated = "Вашият акаунт беше успешно създаден", accountDeleted = "Вашият акаунт беше успешно изтрит",
     changesSaved = "Вашите промени бяха запазени", invalidCredentials = "Невалидни идентификационни данни",
     uppercase = "Поне една главна буква", lowercase = "Поне една малка буква", number = "Поне една цифра", specialCharacter = "Поне един специален знак", minimumCharacters = "Минимум 6 знака",
-
     add = "Добави", addToItinerary = "Добави към маршрута", travel = "Пътуване", place = "Място",
     newPlace = "Ново място", editPlace = "Редактирай мястото", landmark = "Забележителност (по избор)", savePlace = "Запази мястото", searchTrips = "Търсене на пътувания",
     newTrip = "Ново пътуване", renameTrip = "Преименувай пътуването", create = "Създай", save = "Запази",
@@ -863,11 +958,17 @@ private val BG = EN.copy(
     choosePhoto = "Избор на снимка", uploadFromGallery = "Качване от галерията", takePhoto = "Снимане", removePhoto = "Премахване на снимка", cropAndScale = "Изрязване и мащабиране", usePhoto = "Използване на снимка",
     resetPasswordPrompt = "Въведете имейл за нулиране на паролата", resetEmailSent = "Изпратен е имейл за нулиране на паролата ви", resetEmailFailed = "Неуспешно изпращане на имейл за нулиране.",
     mobile = "Мобилен", today = "Днес", days = "30 дни",
+    noTripsYet = "Все още няма пътувания :(", noTripsSubtitle = "Докоснете +, за да планирате първото си приключение!", noResults = "Нищо планирано :(", noResultsSubtitle = "Добавете етапи към пътуванията си, за да ги видите тук!", startTime = "Начален час", endTime = "Краен час",
+    operatorGeneric = "Оператор", busOperator = "Автобусен оператор", trainOperator = "ЖП оператор", flightOperator = "Авиокомпания", ferryOperator = "Фериботен оператор", country = "Държава", search = "Търсене",
+    addDocument = "Добави документ", title = "Заглавие", attachTo = "Прикачи към", wholeTrip = "Цялото пътуване", open = "Отвори", noDocuments = "Все още няма документи", noDocumentsSubtitle = "Качете билети, резервации и други", deleteDocumentQ = "Изтриване на този документ?", fileNotUploaded = "Файлът все още не е качен",
+    category = "Категория", accommodation = "Настаняване", attraction = "Атракция", uploading = "Качване…", uploadFailed = "Файлът не можа да бъде качен",
+    day = "Ден", editLeg = "Редактирай етапа", close = "Затвори",
+    swap = "Размяна", capture = "Заснемане", profilePhoto = "Профилна снимка", changePhoto = "Промяна на снимка", selected = "Избрано", itineraLogo = "Лого на Itinera",
 )
 
 private val CZ = EN.copy(
     name = "Jméno", surname = "Příjmení", dob = "Datum narození", street = "Ulice", city = "Město", postelCode = "PSČ",
-    appTagline = "Kde každá cesta začíná!", myTrips = "Moje cesty", countries = "země", legs = "etapy", done = "hotovo",
+    appTagline = "Kde každá cesta začíná!", myTrips = "Moje cesty", countries = "země", leg = "Etapa", legs = "etapy", done = "hotovo",
     addLeg = "Přidat etapu", newLeg = "Nová etapa", from = "Z", to = "Do", transport = "Doprava", date = "Datum", time = "Čas",
     bookingRef = "Rezervační kód", optional = "volitelné", saveLeg = "Uložit etapu", tickets = "Jízdenky", event = "Událost", beforeYouGo = "Než vyrazíte",
     addItem = "Přidat položku", settings = "Nastavení", backupSync = "Záloha a synchronizace", appearance = "Vzhled",
@@ -898,14 +999,21 @@ private val CZ = EN.copy(
     noDatesYet = "Zatím žádná data", tripName = "Název cesty", aLegBetween = "Etapa mezi", somewhereToVisit = "Místo k návštěvě",
     choosePhoto = "Vybrat fotku", uploadFromGallery = "Nahrát z galerie", takePhoto = "Pořídit fotku", removePhoto = "Odstranit fotku", cropAndScale = "Oříznout a změnit měřítko", usePhoto = "Použít fotku",
     resetPasswordPrompt = "Zadejte svůj e-mail pro resetování hesla", resetEmailSent = "E-mail k resetování hesla byl odeslán", resetEmailFailed = "Nepodařilo se odeslat e-mail k resetování hesla.",
+    mobile = "Mobil", today = "Dnes", days = "30 dní",
+    noTripsYet = "Zatím žádné cesty :(", noTripsSubtitle = "Klepnutím na + naplánujte své první dobrodružství!", noResults = "Nic naplánováno :(", noResultsSubtitle = "Přidejte etapy ke svým cestám, abyste je viděli zde!", startTime = "Čas zahájení", endTime = "Čas ukončení",
+    operatorGeneric = "Operátor", busOperator = "Autobusový dopravce", trainOperator = "Vlakový dopravce", flightOperator = "Letecká společnost", ferryOperator = "Trajektový dopravce", country = "Země", search = "Hledat",
+    addDocument = "Přidat dokument", title = "Název", attachTo = "Připojit k", wholeTrip = "Celá cesta", open = "Otevřít", noDocuments = "Zatím žádné dokumenty", noDocumentsSubtitle = "Nahrajte jízdenky, rezervace a další", deleteDocumentQ = "Smazat tento dokument?", fileNotUploaded = "Soubor ještě nebyl nahrán",
+    category = "Kategorie", accommodation = "Ubytování", attraction = "Atrakce", uploading = "Nahrávání…", uploadFailed = "Soubor se nepodařilo nahrát",
+    day = "Den", editLeg = "Upravit etapu", close = "Zavřít",
+    swap = "Prohodit", capture = "Snímat", profilePhoto = "Profilová fotka", changePhoto = "Změnit fotku", selected = "Vybráno", itineraLogo = "Logo Itinera",
 )
 
 private val LV = EN.copy(
     name = "Vārds", surname = "Uzvārds", dob = "Dzimšanas datums", street = "Iela", city = "Pilsēta", postelCode = "Pasta indekss",
-    appTagline = "Kur sākas katrs ceļojums!", myTrips = "Mani ceļojumi", countries = "valstis", legs = "posmi", done = "pabeigts",
+    appTagline = "Kur sākas katrs ceļojums!", myTrips = "Mani ceļojumi", countries = "valstis", leg = "Posms", legs = "posmi", done = "pabeigts",
     addLeg = "Pievienot posmu", newLeg = "Jauns posms", from = "No", to = "Uz", transport = "Transports", date = "Datums", time = "Laiks",
     bookingRef = "Rezervācijas kods", optional = "neobligāti", saveLeg = "Saglabāt posmu", tickets = "Biļetes", event = "Pasākums", beforeYouGo = "Pirms došanās",
-    addItem = "Pievienot vienumu", settings = "Iestatījumi", backupSync = "Dublēšana & sinhronizācija", appearance = "Izskats",
+    addItem = "Pievienot vienumu", settings = "Iestatījumi", backupSync = "Dublēšana & sinhronizacija", appearance = "Izskats",
     language = "Valoda", currencyUnits = "Valūta & mērvienības", exportTrips = "Eksportēt ceļojumus", about = "Par lietotni", logOut = "Izrakstīties",
     welcomeBack = "Sveicināti atpakaļ", logInToTrips = "Pieteikties savos ceļojumos", email = "E-pasts", password = "Parole",
     forgotPassword = "Aizmirsu paroli?", logIn = "Pieteikties", orDivider = "vai", continueGoogle = "Turpināt ar Google",
@@ -923,7 +1031,6 @@ private val LV = EN.copy(
     accountCreated = "Jūsu konts ir veiksmīgi izveidots", accountDeleted = "Jūsu konts ir veiksmīgi dzēsts",
     changesSaved = "Jūsu izmaiņas ir saglabātas", invalidCredentials = "Nederīgi akreditācijas dati",
     uppercase = "Vismaz viens lielais burts", lowercase = "Vismaz viens mazais burts", number = "Vismaz viens cipars", specialCharacter = "Vismaz viens speciālais simbols", minimumCharacters = "Vismaz 6 rakstzīmes",
-
     add = "Pievienot", addToItinerary = "Pievienot maršrutam", travel = "Ceļojums", place = "Vieta",
     newPlace = "Jauna vieta", editPlace = "Rediģēt vietu", landmark = "Ievērojama vieta (neobligāti)", savePlace = "Saglabāt vietu", searchTrips = "Meklēt ceļojumus",
     newTrip = "Jauns ceļojums", renameTrip = "Pārdēvēt ceļojumu", create = "Izveidot", save = "Saglabāt",
@@ -932,11 +1039,18 @@ private val LV = EN.copy(
     cantBeUndone = "Šo darbību nevar atsaukt.", archivedTrips = "Arhivētie ceļojumi", noArchivedTrips = "Nav arhivētu ceļojumu",
     noDatesYet = "Vēl nav datumu", tripName = "Ceļojuma nosaukums", aLegBetween = "Posms starp", somewhereToVisit = "Vieta, ko apmeklēt",
     choosePhoto = "Izvēlēties fotoattēlu", uploadFromGallery = "Augšupielādēt no galerijas", takePhoto = "Uzņemt fotoattēlu", removePhoto = "Noņemt fotoattēlu", cropAndScale = "Apgriezt un mērogot", usePhoto = "Izmantot fotoattēlu",
+    mobile = "Mobilais", today = "Šodien", days = "30 dienas",
+    noTripsYet = "Vēl nav ceļojumu :(", noTripsSubtitle = "Pieskarieties +, lai saplānotu savu pirmo piedzīvojumu!", noResults = "Nekas nav ieplānots :(", noResultsSubtitle = "Pievienojiet posmus saviem ceļojumiem, lai tos redzētu šeit!", startTime = "Sākuma laiks", endTime = "Beigu laiks",
+    operatorGeneric = "Operators", busOperator = "Autobusu operators", trainOperator = "Vilcienu operators", flightOperator = "Aviokompānija", ferryOperator = "Prāmju operators", country = "Valsts", search = "Meklēt",
+    addDocument = "Pievienot dokumentu", title = "Virsraksts", attachTo = "Pievienot pie", wholeTrip = "Viss ceļojums", open = "Atvērt", noDocuments = "Vēl nav dokumentu", noDocumentsSubtitle = "Augšupielādējiet biļetes, rezervācijas un citu", deleteDocumentQ = "Dzēst šo dokumentu?", fileNotUploaded = "Fails vēl nav augšupielādēts",
+    category = "Kategorija", accommodation = "Naktsmītne", attraction = "Apskates vieta", uploading = "Augšupielāde…", uploadFailed = "Neizdevās augšupielādēt failu",
+    day = "Diena", editLeg = "Rediģēt posmu", close = "Aizvērt",
+    swap = "Apmainīt", capture = "Uzņemt", profilePhoto = "Profila foto", changePhoto = "Mainīt foto", selected = "Atlasīts", itineraLogo = "Itinera logotips",
 )
 
 private val LT = EN.copy(
     name = "Vardas", surname = "Pavardė", dob = "Gimimo data", street = "Gatvė", city = "Miestas", postelCode = "Pašto kodas",
-    appTagline = "Kur prasideda kiekviena kelionė!", myTrips = "Mano kelionės", countries = "šalys", legs = "etapai", done = "atlikta",
+    appTagline = "Kur prasideda kiekviena kelionė!", myTrips = "Mano kelionės", countries = "šalys", leg = "Etapas", legs = "etapai", done = "atlikta",
     addLeg = "Pridėti etapą", newLeg = "Naujas etapas", from = "Iš", to = "Į", transport = "Transportas", date = "Data", time = "Laikas",
     bookingRef = "Rezervacijos kodas", optional = "nebūtina", saveLeg = "Išsaugoti etapą", tickets = "Bilietai", event = "Renginys", beforeYouGo = "Prieš išvykstant",
     addItem = "Pridėti elementą", settings = "Nustatymai", backupSync = "Atsarginė kopija & sinchronizacija", appearance = "Išvaizda",
@@ -950,6 +1064,7 @@ private val LT = EN.copy(
     editProfile = "Redaguoti profilį", newPassword = "Naujas slaptažodis", saveChanges = "Išsaugoti pakeitimus", systemDefault = "Sistemos numatytasis",
     light = "Šviesi", dark = "Tamsi", matchYourPhone = "Pagal telefoną", currency = "Valiuta", convert = "Konvertuoti", bookings = "Rezervacijos", packing = "Pakavimas", money = "Pinigai", gadget = "Įtaisas", other = "Kita", needToAdd = "Ką jums reikia pridėti?", section = "Skyrius",
     amount = "Suma", validAmount = "Įveskite galiojančią sumą", couldntFetch = "Nepavyko gauti kurso. Patikrinkite ryšį.",
+    fillAllFields = "Užpildykite visus pažymėtus laukus", loginFailed = "Prisijungti nepavyko. Patikrinkite el. paštą ir slaptažodį.",
     passwordTooShort = "Slaptažodis turi būti bent 6 simbolių ilgio", signupFailed = "Paskyros sukurti nepavyko. El. paštas jau gali būti naudojamas.",
     deleteAccount = "Ištrinti paskyrą", deleteAccountConfirm = "Tai visam laikui ištrins jūsų paskyrą ir visus jūsų duomenis. Šio veiksmo negalima atšaukti.", deleteButton = "Ištrinti",
     showPassword = "Rodyti slaptažodį", hidePassword = "Slėpti slaptažodį", back = "Atgal",
@@ -966,11 +1081,19 @@ private val LT = EN.copy(
     cantBeUndone = "Šio veiksmo negalima atšaukti.", archivedTrips = "Archyvuotos kelionės", noArchivedTrips = "Nėra archyvuotų kelionių",
     noDatesYet = "Kol kas nėra datų", tripName = "Kelionės pavadinimas", aLegBetween = "Etapas tarp", somewhereToVisit = "Vieta aplankyti",
     choosePhoto = "Pasirinkti nuotrauką", uploadFromGallery = "Įkelti iš galerijos", takePhoto = "Nufotografuoti", removePhoto = "Pašalinti nuotrauką", cropAndScale = "Apkarpyti ir keisti mastelį", usePhoto = "Naudoti nuotrauką",
+    resetPasswordPrompt = "Įveskite savo el. pašto adresą, kad nustatytumėte slaptažodį iš naujo", resetEmailSent = "El. laiškas slaptažodžiui nustatyti iš naujo buvo išsiųstas", resetEmailFailed = "Nepavyko išsiųsti el. laiško slaptažodžiui nustatyti iš naujo.",
+    mobile = "Mobilusis", today = "Šiandien", days = "30 dienų",
+    noTripsYet = "Kelionių dar nėra :(", noTripsSubtitle = "Bakstelėkite +, kad suplanuotumėte savo pirmąjį nuotykį!", noResults = "Nieko nesuplanuota :(", noResultsSubtitle = "Pridėkite etapų prie savo kelionių, kad pamatytumėte juos čia!", startTime = "Pradžios laikas", endTime = "Pabaigos laikas",
+    operatorGeneric = "Operatorius", busOperator = "Autobusų operatorius", trainOperator = "Traukinių operatorius", flightOperator = "Oro linijų bendrovė", ferryOperator = "Keltų operatorius", country = "Šalis", search = "Paieška",
+    addDocument = "Pridėti dokumentą", title = "Pavadinimas", attachTo = "Pridėti prie", wholeTrip = "Visa kelionė", open = "Atidaryti", noDocuments = "Dokumentų dar nėra", noDocumentsSubtitle = "Įkelkite bilietus, rezervacijas ir daugiau", deleteDocumentQ = "Ištrinti šį dokumentą?", fileNotUploaded = "Failas dar neįkeltas",
+    category = "Kategorija", accommodation = "Apgyvendinimas", attraction = "Atrakcija", uploading = "Įkeliama…", uploadFailed = "Nepavyko įkelti failo",
+    day = "Diena", editLeg = "Redaguoti etapą", close = "Uždaryti",
+    swap = "Sukeisti", capture = "Užfiksuoti", profilePhoto = "Profilio nuotrauka", changePhoto = "Pakeisti nuotrauką", selected = "Pasirinkta", itineraLogo = "„Itinera“ logotipas",
 )
 
 private val SK = EN.copy(
     name = "Meno", surname = "Priezvisko", dob = "Dátum narodenia", street = "Ulica", city = "Mesto", postelCode = "PSČ",
-    appTagline = "Kde každá cesta začína!", myTrips = "Moje cesty", countries = "krajiny", legs = "etapy", done = "hotovo",
+    appTagline = "Kde každá cesta začína!", myTrips = "Moje cesty", countries = "krajiny", leg = "Etapa", legs = "etapy", done = "hotovo",
     addLeg = "Pridať etapu", newLeg = "Nová etapa", from = "Z", to = "Do", transport = "Doprava", date = "Dátum", time = "Čas",
     bookingRef = "Rezervačný kód", optional = "voliteľné", saveLeg = "Uložiť etapu", tickets = "Lístky", event = "Udalosť", beforeYouGo = "Skôr než vyrazíte",
     addItem = "Pridať položku", settings = "Nastavenia", backupSync = "Záloha a synchronizácia", appearance = "Vzhľad",
@@ -984,6 +1107,7 @@ private val SK = EN.copy(
     editProfile = "Upraviť profil", newPassword = "Nové heslo", saveChanges = "Uložiť zmeny", systemDefault = "Systémové výchozí",
     light = "Svetlý", dark = "Tmavý", matchYourPhone = "Podľa telefónu", currency = "Mena", convert = "Previesť", bookings = "Rezervácie", packing = "Balenie", money = "Peniaze", gadget = "Gadget", other = "Iné", needToAdd = "Čo potrebujete pridať?", section = "Sekcia",
     amount = "Suma", validAmount = "Zadajte platnú sumu", couldntFetch = "Nepodarilo sa načítať kurz. Skontrolujte pripojenie.",
+    fillAllFields = "Prosím, vyplňte všetky označené polia", loginFailed = "Prihlásenie zlyhalo. Skontrolujte svoj e-mail a heslo.",
     passwordTooShort = "Heslo musí mať aspoň 6 znakov", signupFailed = "Vytvorenie účtu zlyhalo. E-mail môže byť už používaný.",
     deleteAccount = "Zmazať účet", deleteAccountConfirm = "Týmto natrvalo zmažete svoj účet a všetky svoje údaje. Túto akciu nie je možné vrátiť späť.", deleteButton = "Zmazať",
     showPassword = "Zobraziť heslo", hidePassword = "Skryť heslo", back = "Späť",
@@ -1000,11 +1124,19 @@ private val SK = EN.copy(
     cantBeUndone = "Túto akciu nie je možné vrátiť späť.", archivedTrips = "Archivované cesty", noArchivedTrips = "Žiadne archivované cesty",
     noDatesYet = "Zatiaľ žiadne dátumy", tripName = "Názov cesty", aLegBetween = "Etapa medzi", somewhereToVisit = "Miesto na návštevu",
     choosePhoto = "Vybrať fotku", uploadFromGallery = "Nahrať z galérie", takePhoto = "Odfotografovať", removePhoto = "Odstrániť fotku", cropAndScale = "Orezať a zmeniť mierku", usePhoto = "Použiť fotku",
+    resetPasswordPrompt = "Zadajte svoj e-mail na resetovanie hesla", resetEmailSent = "E-mail na resetovanie hesla bol odoslaný", resetEmailFailed = "Nepodarilo sa odoslať e-mail na resetovanie hesla.",
+    mobile = "Mobil", today = "Dnes", days = "30 dní",
+    noTripsYet = "Zatiaľ žiadne cesty :(", noTripsSubtitle = "Ťuknutím na + naplánujte svoje prvé dobrodružstvo!", noResults = "Nič naplánované :(", noResultsSubtitle = "Pridajte etapy k svojim cestám, aby ste ich videli tu!", startTime = "Čas začiatku", endTime = "Čas ukončenia",
+    operatorGeneric = "Operátor", busOperator = "Autobusový dopravca", trainOperator = "Vlakový dopravca", flightOperator = "Letecká spoločnosť", ferryOperator = "Trajektový dopravce", country = "Krajina", search = "Hľadať",
+    addDocument = "Pridať dokument", title = "Názov", attachTo = "Pripojiť k", wholeTrip = "Celá cesta", open = "Otvoriť", noDocuments = "Zatiaľ žiadne dokumenty", noDocumentsSubtitle = "Nahrajte lístky, rezervácie a ďalšie", deleteDocumentQ = "Zmazať tento dokument?", fileNotUploaded = "Súbor ešte nebol nahraný",
+    category = "Kategória", accommodation = "Ubytovanie", attraction = "Atrakcia", uploading = "Nahrávanie…", uploadFailed = "Súbor sa nepodarilo nahrať",
+    day = "Deň", editLeg = "Upraviť etapu", close = "Zatvoriť",
+    swap = "Vymeniť", capture = "Zasnímať", profilePhoto = "Profilová fotka", changePhoto = "Zmeniť fotku", selected = "Vybrané", itineraLogo = "Logo Itinera",
 )
 
 private val SL = EN.copy(
     name = "Ime", surname = "Priimek", dob = "Datum rojstva", street = "Ulica", city = "Mesto", postelCode = "Poštna številka",
-    appTagline = "Kjer se vsako potovanje začne!", myTrips = "Moja potovanja", countries = "države", legs = "etape", done = "opravljeno",
+    appTagline = "Kjer se vsako potovanje začne!", myTrips = "Moja potovanja", countries = "države", leg = "Etapa", legs = "etape", done = "opravljeno",
     addLeg = "Dodaj etapo", newLeg = "Nova etapa", from = "Od", to = "Do", transport = "Prevoz", date = "Datum", time = "Ura",
     bookingRef = "Koda rezervacije", optional = "neobvezno", saveLeg = "Shrani etapo", tickets = "Vstopnice", event = "Dogodek", beforeYouGo = "Preden odidete",
     addItem = "Dodaj predmet", settings = "Nastavitve", backupSync = "Varnostna kopija & sinhronizacija", appearance = "Videz",
@@ -1018,6 +1150,7 @@ private val SL = EN.copy(
     editProfile = "Uredi profil", newPassword = "Novo geslo", saveChanges = "Shrani spremembe",    systemDefault = "Sistemsko privzeto",
     light = "Svetlo", dark = "Temno", matchYourPhone = "Ujemaj s telefonom", currency = "Valuta", convert = "Pretvori", bookings = "Rezervacije", packing = "Pakiranje", money = "Denar", gadget = "Pripomoček", other = "Drugo", needToAdd = "Kaj morate dodati?", section = "Oddelek",
     amount = "Znesek", validAmount = "Vnesite veljaven znesek", couldntFetch = "Ni bilo mogoče pridobiti tečaja. Preverite povezavo.",
+    fillAllFields = "Prosimo, izpolnite vsa označena polja", loginFailed = "Prijava ni uspela. Preverite e-pošto in geslo.",
     passwordTooShort = "Geslo mora biti dolgo vsaj 6 znakov", signupFailed = "Ustvarjanje računa ni uspelo. E-poštni naslov je morda že v uporabi.",
     deleteAccount = "Izbriši račun", deleteAccountConfirm = "To bo trajno izbrisalo vaš račun in vse vaše podatke. Tega dejanja ni mogoče preklicati.", deleteButton = "Izbriši",
     showPassword = "Pokaži geslo", hidePassword = "Skrij geslo", back = "Nazaj",
@@ -1034,11 +1167,19 @@ private val SL = EN.copy(
     cantBeUndone = "Tega ni mogoče preklicati.", archivedTrips = "Arhivirana potovanja", noArchivedTrips = "Ni arhiviranih potovanj",
     noDatesYet = "Še ni datumov", tripName = "Ime potovanja", aLegBetween = "Etapa med", somewhereToVisit = "Kraj za obisk",
     choosePhoto = "Izberi fotografijo", uploadFromGallery = "Naloži iz galerije", takePhoto = "Posnemi fotografijo", removePhoto = "Odstrani fotografijo", cropAndScale = "Obreži in spremeni velikost", usePhoto = "Uporabi fotografijo",
+    resetPasswordPrompt = "Vnesite e-pošto za ponastavitev gesla", resetEmailSent = "E-poštno sporočilo za ponastavitev gesla je bilo poslano", resetEmailFailed = "Pošiljanje e-pošte za ponastavitev gesla ni uspelo.",
+    mobile = "Mobilni", today = "Danes", days = "30 dni",
+    noTripsYet = "Še ni potovanj :(", noTripsSubtitle = "Tapnite +, da načrtujete svojo prvo pustolovščino!", noResults = "Nič načrtovano :(", noResultsSubtitle = "Dodajte etape svojim potovanjem, da jih vidite tukaj!", startTime = "Začetni čas", endTime = "Končni čas",
+    operatorGeneric = "Operater", busOperator = "Avtobusni prevoznik", trainOperator = "Železniški prevoznik", flightOperator = "Letalska družba", ferryOperator = "Trajektni prevoznik", country = "Država", search = "Išči",
+    addDocument = "Dodaj dokument", title = "Naslov", attachTo = "Pripni na", wholeTrip = "Celotno potovanje", open = "Odpri", noDocuments = "Še ni dokumentov", noDocumentsSubtitle = "Naložite vozovnice, rezervacije in drugo", deleteDocumentQ = "Izbrišem ta dokument?", fileNotUploaded = "Datoteka še ni naložena",
+    category = "Kategorija", accommodation = "Nastanitev", attraction = "Atrakcija", uploading = "Nalaganje…", uploadFailed = "Datoteke ni bilo mogoče naložiti",
+    day = "Dan", editLeg = "Uredi etapo", close = "Zapri",
+    swap = "Zamenjaj", capture = "Zajemi", profilePhoto = "Profilna fotografija", changePhoto = "Spremeni fotografijo", selected = "Izbrano", itineraLogo = "Logotip Itinera",
 )
 
 private val SR = EN.copy(
     name = "Ime", surname = "Prezime", dob = "Datum rođenja", street = "Ulica", city = "Grad", postelCode = "Poštanski broj",
-    appTagline = "Gde svako putovanje počinje!", myTrips = "Moja putovanja", countries = "države", legs = "etape", done = "završeno",
+    appTagline = "Gde svako putovanje počinje!", myTrips = "Moja putovanja", countries = "države", leg = "Etapa", legs = "etape", done = "završeno",
     addLeg = "Dodaj etapu", newLeg = "Nova etapa", from = "Od", to = "Do", transport = "Prevoz", date = "Datum", time = "Vreme",
     bookingRef = "Kod rezervacije", optional = "opciono", saveLeg = "Sačuvaj etapu", tickets = "Karte", event = "Događaj", beforeYouGo = "Pre nego što krenete",
     addItem = "Dodaj stavku", settings = "Podešavanja", backupSync = "Rezervna kopija & sinhronizacija", appearance = "Izgled",
@@ -1059,7 +1200,6 @@ private val SR = EN.copy(
     accountCreated = "Vaš nalog je uspešno kreiran", accountDeleted = "Vaš nalog je uspešno obrisan",
     changesSaved = "Vaše izmene su sačuvane", invalidCredentials = "Neispravni kredencijali",
     uppercase = "Barem jedno veliko slovo", lowercase = "Barem jedno malo slovo", number = "Barem jedan broj", specialCharacter = "Barem jedan specijalan karakter", minimumCharacters = "Najmanje 6 karaktera",
-
     add = "Dodaj", addToItinerary = "Dodaj u plan puta", travel = "Putovanje", place = "Mesto",
     newPlace = "Novo mesto", editPlace = "Izmeni mesto", landmark = "Obeležje (opciono)", savePlace = "Sačuvaj mesto", searchTrips = "Pretraži putovanja",
     newTrip = "Novo putovanje", renameTrip = "Preimenuj putovanje", create = "Napravi", save = "Sačuvaj",
@@ -1068,11 +1208,18 @@ private val SR = EN.copy(
     cantBeUndone = "Ovo se ne može poništiti.", archivedTrips = "Arhivirana putovanja", noArchivedTrips = "Nema arhiviranih putovanja",
     noDatesYet = "Još nema datuma", tripName = "Naziv putovanja", aLegBetween = "Etapa između", somewhereToVisit = "Mesto za posetu",
     choosePhoto = "Izaberi fotografiju", uploadFromGallery = "Otpremi iz galerije", takePhoto = "Snimi fotografiju", removePhoto = "Ukloni fotografiju", cropAndScale = "Opseci i skaliraj", usePhoto = "Koristi fotografiju",
+    mobile = "Mobilni", today = "Danas", days = "30 dana",
+    noTripsYet = "Još nema putovanja :(", noTripsSubtitle = "Dodirnite + da planirate svoju prvu avanturu!", noResults = "Ništa zakazano :(", noResultsSubtitle = "Dodajte etape u svoja putovanja da biste ih videli ovde!", startTime = "Vreme početka", endTime = "Vreme završetka",
+    operatorGeneric = "Operater", busOperator = "Autobuski operater", trainOperator = "Železnički operater", flightOperator = "Aviokompanija", ferryOperator = "Trajektni operater", country = "Država", search = "Pretraži",
+    addDocument = "Dodaj dokument", title = "Naslov", attachTo = "Zakači za", wholeTrip = "Celo putovanje", open = "Otvori", noDocuments = "Još nema dokumenata", noDocumentsSubtitle = "Otpremite karte, rezervacije i još mnogo toga", deleteDocumentQ = "Obrisati ovaj dokument?", fileNotUploaded = "Datoteka još nije otpremljena",
+    category = "Kategorija", accommodation = "Smeštaj", attraction = "Atrakcija", uploading = "Otpremanje…", uploadFailed = "Nije moguće otpremiti datoteku",
+    day = "Dan", editLeg = "Izmeni etapu", close = "Zatvori",
+    swap = "Zamena", capture = "Snimi", profilePhoto = "Profilna slika", changePhoto = "Promeni sliku", selected = "Izabrano", itineraLogo = "Itinera logo",
 )
 
 private val SQ = EN.copy(
     name = "Emri", surname = "Mbiemri", dob = "Datëlindja", street = "Rruga", city = "Qyteti", postelCode = "Kodi postar",
-    appTagline = "Ku çdo udhëtim fillon!", myTrips = "Udhëtimet e mia", countries = "shtete", legs = "etapa", done = "përfunduar",
+    appTagline = "Ku çdo udhëtim fillon!", myTrips = "Udhëtimet e mia", countries = "shtete", leg = "Etapa", legs = "etapa", done = "përfunduar",
     addLeg = "Shto etapë", newLeg = "Etapë e re", from = "Nga", to = "Te", transport = "Transporti", date = "Data", time = "Ora",
     bookingRef = "Ref. i rezervimit", optional = "opsionale", saveLeg = "Ruaj etapën", tickets = "Bileta", event = "Event", beforeYouGo = "Para se të niseni",
     addItem = "Shto artikull", settings = "Cilësimet", backupSync = "Rezervimi & sinkronizimi", appearance = "Pamja",
@@ -1086,6 +1233,7 @@ private val SQ = EN.copy(
     editProfile = "Ndrysho profilin", newPassword = "Fjalëkalim i ri", saveChanges = "Ruaj ndryshimet",
     systemDefault = "Parazgjedhja e sistemit", light = "E çelët", dark = "E errët", matchYourPhone = "Përputh me telefonin", currency = "Monedha", convert = "Konverto", bookings = "Rezervime", packing = "Paketim", money = "Para", gadget = "Gadget", other = "Tjetër", needToAdd = "Çfarë ju duhet të shtoni?", section = "Seksioni",
     amount = "Shuma", validAmount = "Vendosni një shumë të vlefshme", couldntFetch = "Nuk u mor dot kursi. Kontrolloni lidhjen.",
+    fillAllFields = "Ju lutem plotësoni të gjitha fushat e shënuara", loginFailed = "Hyrja dështoi. Kontrolloni email-in dhe fjalëkalimin tuaj.",
     passwordTooShort = "Fjalëkalimi duhet të ketë të paktes 6 karaktere", signupFailed = "Krijimi i llogarisë dështoi. Email-i mund të jetë tashmë në përdorim.",
     deleteAccount = "Fshij llogarinë", deleteAccountConfirm = "Kjo do të fshijë përgjithmonë llogarinë tuaj dhe të gjitha të dhënat tuaja. Ky veprim nuk mund të kthehet mbrapsht.", deleteButton = "Fshij",
     showPassword = "Shfaq fjalëkalimin", hidePassword = "Fshih fjalëkalimin", back = "Mbrapa",
@@ -1102,11 +1250,19 @@ private val SQ = EN.copy(
     cantBeUndone = "Kjo nuk mund të kthehet mbrapsht.", archivedTrips = "Udhëtime të arkivuara", noArchivedTrips = "Nuk ka udhëtime të arkivuara",
     noDatesYet = "Ende pa data", tripName = "Emri i udhëtimit", aLegBetween = "Një etapë mes", somewhereToVisit = "Një vend për të vizituar",
     choosePhoto = "Zgjidh foton", uploadFromGallery = "Ngarko nga galeria", takePhoto = "Bëj foto", removePhoto = "Hiq foton", cropAndScale = "Prit dhe shkallëzo", usePhoto = "Përdor foton",
+    resetPasswordPrompt = "Vendosni email-in tuaj për të rivendosur fjalëkalimin", resetEmailSent = "Një email është dërguar për të rivendosur fjalëkalimin tuaj", resetEmailFailed = "Dështoi dërgimi i email-it për rivendosjen e fjalëkalimit.",
+    mobile = "Celular", today = "Sot", days = "30 ditë",
+    noTripsYet = "Ende nuk ka udhëtime :(", noTripsSubtitle = "Prekni + për të planifikuar aventurën tuaj të parë!", noResults = "Asgjë e planifikuar :(", noResultsSubtitle = "Shtoni etapa në udhëtimet tuaja për t'i parë këtu!", startTime = "Ora e nisjes", endTime = "Ora e mbarimit",
+    operatorGeneric = "Operatori", busOperator = "Operatori i autobusëve", trainOperator = "Operatori i trenave", flightOperator = "Linja ajrore", ferryOperator = "Operatori i trageteve", country = "Shteti", search = "Kërko",
+    addDocument = "Shto dokument", title = "Titulli", attachTo = "Bashkangjit tek", wholeTrip = "Gjithë udhëtimi", open = "Hap", noDocuments = "Ende nuk ka dokumente", noDocumentsSubtitle = "Ngarkoni bileta, rezervime dhe më shumë", deleteDocumentQ = "Fshij këtë dokument?", fileNotUploaded = "Skedari nuk është ngarkuar ende",
+    category = "Kategoria", accommodation = "Akomodimi", attraction = "Atraksioni", uploading = "Duke u ngarkuar…", uploadFailed = "Ngarkimi i skedarit dështoi",
+    day = "Dita", editLeg = "Edito etapën", close = "Mbyll",
+    swap = "Ndërro", capture = "Shkrep", profilePhoto = "Fotoja e profilit", changePhoto = "Ndrysho foton", selected = "E zgjedhur", itineraLogo = "Logoja e Itinera",
 )
 
 private val MK = EN.copy(
     name = "Име", surname = "Презиме", dob = "Датум на раѓање", street = "Улица", city = "Град", postelCode = "Поштенски код",
-    appTagline = "Каде што започнува секое патување!", myTrips = "Мои патувања", countries = "земји", legs = "етапи", done = "завршено",
+    appTagline = "Каде што започнува секое патување!", myTrips = "Мои патувања", countries = "земји", leg = "Етап", legs = "етапи", done = "завршено",
     addLeg = "Додај етапа", newLeg = "Нова етапа", from = "Од", to = "До", transport = "Транспорт", date = "Датум", time = "Време",
     bookingRef = "Код за резервација", optional = "опционално", saveLeg = "Зачувај етапа", tickets = "Билети", event = "Настан", beforeYouGo = "Пред да тргнете",
     addItem = "Додај ставка", settings = "Поставки", backupSync = "Резервна копија & синхронизација", appearance = "Изглед",
@@ -1136,11 +1292,18 @@ private val MK = EN.copy(
     cantBeUndone = "Ова не може да се врати.", archivedTrips = "Архивирани патувања", noArchivedTrips = "Нема архивирани патувања",
     noDatesYet = "Сè уште нема датуми", tripName = "Име на патувањето", aLegBetween = "Етапа помеѓу", somewhereToVisit = "Место за посета",
     choosePhoto = "Избери фотографија", uploadFromGallery = "Постави од галерија", takePhoto = "Сними фотографија", removePhoto = "Отстрани фотографија", cropAndScale = "Исечи и скалирај", usePhoto = "Користи фотографија",
+    mobile = "Мобилен", today = "Денес", days = "30 дена",
+    noTripsYet = "Сè уште нема патувања :(", noTripsSubtitle = "Допрете + за да ја испланирате вашата прва авантура!", noResults = "Ништо не е планирано :(", noResultsSubtitle = "Додајте етапи на вашите патувања за да ги видите тука!", startTime = "Почетно време", endTime = "Крајно време",
+    operatorGeneric = "Оператор", busOperator = "Автобуски оператор", trainOperator = "Железнички оператор", flightOperator = "Авиокомпанија", ferryOperator = "Ферај оператор", country = "Земја", search = "Пребарај",
+    addDocument = "Додај документ", title = "Наслов", attachTo = "Прикачи на", wholeTrip = "Цело патување", open = "Отвори", noDocuments = "Сè уште нема документи", noDocumentsSubtitle = "Прикачете билети, резервации и повеќе", deleteDocumentQ = "Да се избрише овој документ?", fileNotUploaded = "Датотеката сè уште не е прикачена",
+    category = "Категорија", accommodation = "Сместување", attraction = "Атракција", uploading = "Се прикачува…", uploadFailed = "Не може да се прикачи датотеката",
+    day = "Ден", editLeg = "Уреди етапа", close = "Затвори",
+    swap = "Размени", capture = "Сними", profilePhoto = "Профилна слика", changePhoto = "Промени слика", selected = "Избрано", itineraLogo = "Лого на Itinera",
 )
 
 private val MO = EN.copy(
     name = "Prenume", surname = "Nume", dob = "Data nașterii", street = "Stradă", city = "Oraș", postelCode = "Cod poștal",
-    appTagline = "Unde începe fiecare călătorie!", myTrips = "Călătoriile mele", countries = "țări", legs = "etape", done = "finalizat",
+    appTagline = "Unde începe fiecare călătorie!", myTrips = "Călătoriile mele", countries = "țări", leg = "Etapă", legs = "etape", done = "finalizat",
     addLeg = "Adaugă etapă", newLeg = "Etapă nouă", from = "De la", to = "Până la", transport = "Transport", date = "Dată", time = "Oră",
     bookingRef = "Ref. rezervare", optional = "opțional", saveLeg = "Salvează etapa", tickets = "Bilete", event = "Eveniment", beforeYouGo = "Înainte de plecare",
     addItem = "Adaugă element", settings = "Setări", backupSync = "Backup și sincronizare", appearance = "Aspect",
@@ -1172,11 +1335,17 @@ private val MO = EN.copy(
     choosePhoto = "Alegeți fotografia", uploadFromGallery = "Încărcați din galerie", takePhoto = "Faceți o fotografie", removePhoto = "Eliminați fotografia", cropAndScale = "Decupați și scalați", usePhoto = "Utilizați fotografia",
     resetPasswordPrompt = "Introduceți e-mailul pentru a reseta parola", resetEmailSent = "A fost trimis un e-mail pentru resetarea parolei", resetEmailFailed = "Trimiterea e-mailului pentru resetarea parolei a eșuat.",
     mobile = "Mobil", today = "Astăzi", days = "30 zile",
+    noTripsYet = "Nicio călătorie încă :(", noTripsSubtitle = "Apasă + pentru a planifica prima ta aventură!", noResults = "Nimic programat :(", noResultsSubtitle = "Adaugă etape călătoriilor tale pentru a le vedea aici!", startTime = "Ora de început", endTime = "Ora de sfârșit",
+    operatorGeneric = "Operator", busOperator = "Operator de autobuz", trainOperator = "Operator feroviar", flightOperator = "Companie aeriană", ferryOperator = "Operator de feribot", country = "Țară", search = "Căutare",
+    addDocument = "Adaugă document", title = "Titlu", attachTo = "Atașează la", wholeTrip = "Toată călătoria", open = "Deschide", noDocuments = "Niciun document încă", noDocumentsSubtitle = "Încarcă bilete, rezervări și multe altele", deleteDocumentQ = "Ștergi acest document?", fileNotUploaded = "Fișierul nu a fost încă încărcat",
+    category = "Categorie", accommodation = "Cazare", attraction = "Atracție", uploading = "Se încarcă…", uploadFailed = "Nu s-a putut încărca fișierul",
+    day = "Zi", editLeg = "Editează etapa", close = "Închide",
+    swap = "Inversare", capture = "Captură", profilePhoto = "Fotografie profil", changePhoto = "Schimbă foto", selected = "Selectat", itineraLogo = "Logo Itinera",
 )
 
 private val NO = EN.copy(
     name = "Navn", surname = "Etternavn", dob = "Fødselsdato", street = "Gate", city = "By", postelCode = "Postnummer",
-    appTagline = "Hvor hver reise begynner!", myTrips = "Mine reiser", countries = "land", legs = "etapper", done = "ferdig",
+    appTagline = "Hvor hver reise begynner!", myTrips = "Mine reiser", countries = "land", leg = "Etappe", legs = "etapper", done = "ferdig",
     addLeg = "Legg til etappe", newLeg = "Ny etappe", from = "Fra", to = "Til", transport = "Transport", date = "Dato", time = "Tid",
     bookingRef = "Bestillingsref.", optional = "valgfritt", saveLeg = "Lagre etappe", tickets = "Billetter", event = "Hendelse", beforeYouGo = "Før du drar",
     addItem = "Legg til element", settings = "Innstillinger", backupSync = "Sikkerhetskopi & synk", appearance = "Utseende",
@@ -1206,11 +1375,18 @@ private val NO = EN.copy(
     cantBeUndone = "Dette kan ikke angres.", archivedTrips = "Arkiverte reiser", noArchivedTrips = "Ingen arkiverte reiser",
     noDatesYet = "Ingen datoer ennå", tripName = "Reisenavn", aLegBetween = "En etappe mellom", somewhereToVisit = "Et sted å besøke",
     choosePhoto = "Velg bilde", uploadFromGallery = "Last opp fra galleri", takePhoto = "Ta bilde", removePhoto = "Fjern bilde", cropAndScale = "Beskjær og skaler", usePhoto = "Bruk bilde",
+    mobile = "Mobil", today = "I dag", days = "30 dager",
+    noTripsYet = "Ingen reiser ennå :(", noTripsSubtitle = "Trykk på + for å planlegge ditt første eventyr!", noResults = "Ingenting planlagt :(", noResultsSubtitle = "Legg til etapper i reisene dine for å se dem her!", startTime = "Starttid", endTime = "Sluttid",
+    operatorGeneric = "Operatør", busOperator = "Busselskap", trainOperator = "Togselskap", flightOperator = "Flyselskap", ferryOperator = "Fergeselskap", country = "Land", search = "Søk",
+    addDocument = "Legg til dokument", title = "Tittel", attachTo = "Legg til i", wholeTrip = "Hele reisen", open = "Åpne", noDocuments = "Ingen dokumenter ennå", noDocumentsSubtitle = "Last opp billetter, bestillinger og mer", deleteDocumentQ = "Slett dette dokumentet?", fileNotUploaded = "Filen er ikke lastet opp ennå",
+    category = "Kategori", accommodation = "Overnatting", attraction = "Attraksjon", uploading = "Laster opp…", uploadFailed = "Kunne ikke laste opp filen",
+    day = "Dag", editLeg = "Rediger etappe", close = "Lukk",
+    swap = "Bytt", capture = "Ta bilde", profilePhoto = "Profilbilde", changePhoto = "Bytt bilde", selected = "Valgt", itineraLogo = "Itinera-logo",
 )
 
 private val FI = EN.copy(
     name = "Etunimi", surname = "Sukunimi", dob = "Syntymäaika", street = "Katu", city = "Kaupunki", postelCode = "Postinumero",
-    appTagline = "Mistä jokainen matka alkaa!", myTrips = "Omat matkat", countries = "maat", legs = "osuudet", done = "valmis",
+    appTagline = "Mistä jokainen matka alkaa!", myTrips = "Omat matkat", countries = "maat", leg = "Osuus", legs = "osuudet", done = "valmis",
     addLeg = "Lisää osuus", newLeg = "Uusi osuus", from = "Mistä", to = "Minne", transport = "Kuljetus", date = "Päivämäärä", time = "Aika",
     bookingRef = "Varaustunnus", optional = "valinnainen", saveLeg = "Tallenna osuus", tickets = "Liput", event = "Tapahtuma", beforeYouGo = "Ennen lähtöä",
     addItem = "Lisää kohde", settings = "Asetukset", backupSync = "Varmuuskopio & synkronointi", appearance = "Ulkoasu",
@@ -1240,11 +1416,18 @@ private val FI = EN.copy(
     cantBeUndone = "Tätä ei voi kumota.", archivedTrips = "Arkistoidut matkat", noArchivedTrips = "Ei arkistoituja matkoja",
     noDatesYet = "Ei vielä päivämääriä", tripName = "Matkan nimi", aLegBetween = "Osuus välillä", somewhereToVisit = "Paikka vierailtavaksi",
     choosePhoto = "Valitse kuva", uploadFromGallery = "Lataa galleriasta", takePhoto = "Ota kuva", removePhoto = "Poista kuva", cropAndScale = "Rajaa ja skaalaa", usePhoto = "Käytä kuvaa",
+    mobile = "Mobiili", today = "Tänään", days = "30 päivää",
+    noTripsYet = "Ei vielä matkoja :(", noTripsSubtitle = "Napauta + suunnitellaksesi ensimmäisen seikkailusi!", noResults = "Mitään ei ole aikataulutettu :(", noResultsSubtitle = "Lisää osuuksia matkoihisi nähdäksesi ne täällä!", startTime = "Alkamisaika", endTime = "Päättymisaika",
+    operatorGeneric = "Operaattori", busOperator = "Bussiyhtiö", trainOperator = "Junayhtiö", flightOperator = "Lentoyhtiö", ferryOperator = "Lauttayhtiö", country = "Maa", search = "Haku",
+    addDocument = "Lisää asiakirja", title = "Otsikko", attachTo = "Liitä kohteeseen", wholeTrip = "Koko matka", open = "Avaa", noDocuments = "Ei vielä asiakirjoja", noDocumentsSubtitle = "Lataa liput, varaukset ja muut", deleteDocumentQ = "Poistetaanko tämä asiakirja?", fileNotUploaded = "Tiedostoa ei ole vielä ladattu",
+    category = "Kategoria", accommodation = "Majoitus", attraction = "Nähtävyys", uploading = "Ladataan…", uploadFailed = "Tiedoston lataaminen epäonnistui",
+    day = "Päivä", editLeg = "Muokkaa osuutta", close = "Sulje",
+    swap = "Vaihda", capture = "Tallenna", profilePhoto = "Profiilikuva", changePhoto = "Vaihda kuva", selected = "Valittu", itineraLogo = "Itinera-logo",
 )
 
 private val SV = EN.copy(
     name = "Namn", surname = "Efternamn", dob = "Födelsedatum", street = "Gata", city = "Stad", postelCode = "Postnummer",
-    appTagline = "Där varje resa börjar!", myTrips = "Mina resor", countries = "länder", legs = "etapper", done = "klar",
+    appTagline = "Där varje resa börjar!", myTrips = "Mina resor", countries = "länder", leg = "Etapp", legs = "etapper", done = "klar",
     addLeg = "Lägg till etapp", newLeg = "Ny etapp", from = "Från", to = "Till", transport = "Transport", date = "Datum", time = "Tid",
     bookingRef = "Bokningsref.", optional = "valfritt", saveLeg = "Spara etapp", tickets = "Biljetter", event = "Händelse", beforeYouGo = "Innan du åker",
     addItem = "Lägg till objekt", settings = "Inställningar", backupSync = "Säkerhetskopiering & synk", appearance = "Utseende",
@@ -1274,11 +1457,18 @@ private val SV = EN.copy(
     cantBeUndone = "Detta kan inte ångras.", archivedTrips = "Arkiverade resor", noArchivedTrips = "Inga arkiverade resor",
     noDatesYet = "Inga datum ännu", tripName = "Resans namn", aLegBetween = "En etapp mellan", somewhereToVisit = "En plats att besöka",
     choosePhoto = "Välj foto", uploadFromGallery = "Ladda upp från galleri", takePhoto = "Ta foto", removePhoto = "Ta bort foto", cropAndScale = "Beskär och skala", usePhoto = "Använd foto",
+    mobile = "Mobil", today = "Idag", days = "30 dagar",
+    noTripsYet = "Inga resor än :(", noTripsSubtitle = "Tryck på + för att planera ditt första äventyr!", noResults = "Inget inplanerat :(", noResultsSubtitle = "Lägg till etapper i dina resor för att se dem här!" , startTime = "Starttid", endTime = "Sluttid",
+    operatorGeneric = "Operatör", busOperator = "Bussbolag", trainOperator = "Tågbolag", flightOperator = "Flygbolag", ferryOperator = "Färjebolag", country = "Land", search = "Sök",
+    addDocument = "Lägg till dokument", title = "Titel", attachTo = "Bifoga till", wholeTrip = "Hela resan", open = "Öppna", noDocuments = "Inga dokument än", noDocumentsSubtitle = "Ladda upp biljetter, bokningar och mer", deleteDocumentQ = "Radera detta dokument?", fileNotUploaded = "Filen har inte laddats upp än",
+    category = "Kategori", accommodation = "Boende", attraction = "Attraktion", uploading = "Laddar upp…", uploadFailed = "Kunde inte ladda upp filen",
+    day = "Dag", editLeg = "Redigera etapp", close = "Stäng",
+    swap = "Växla", capture = "Fånga", profilePhoto = "Profilbild", changePhoto = "Ändra bild", selected = "Vald", itineraLogo = "Itinera-logotyp",
 )
 
 private val DA = EN.copy(
     name = "Navn", surname = "Efternavn", dob = "Fødselsdato", street = "Vej", city = "By", postelCode = "Postnummer",
-    appTagline = "Hvor enhver rejse begynder!", myTrips = "Mine rejser", countries = "lande", legs = "etaper", done = "færdig",
+    appTagline = "Hvor enhver rejse begynder!", myTrips = "Mine rejser", countries = "lande", leg = "Etape", legs = "etaper", done = "færdig",
     addLeg = "Tilføj etape", newLeg = "Ny etape", from = "Fra", to = "Til", transport = "Transport", date = "Dato", time = "Tid",
     bookingRef = "Bookingref.", optional = "valgfrit", saveLeg = "Gem etape", tickets = "Billetter", event = "Begivenhed", beforeYouGo = "Før du rejser",
     addItem = "Tilføj element", settings = "Indstillinger", backupSync = "Backup & synkronisering", appearance = "Udseende",
@@ -1308,11 +1498,18 @@ private val DA = EN.copy(
     cantBeUndone = "Dette kan ikke fortrydes.", archivedTrips = "Arkiverede rejser", noArchivedTrips = "Ingen arkiverede rejser",
     noDatesYet = "Ingen datoer endnu", tripName = "Rejsenavn", aLegBetween = "En etape mellem", somewhereToVisit = "Et sted at besøge",
     choosePhoto = "Vælg foto", uploadFromGallery = "Upload fra galleri", takePhoto = "Tag foto", removePhoto = "Fjern foto", cropAndScale = "Beskær og skaler", usePhoto = "Brug foto",
+    mobile = "Mobil", today = "I dag", days = "30 dage",
+    noTripsYet = "Ingen rejser endnu :(", noTripsSubtitle = "Tryk på + for at planlægge dit første eventyr!", noResults = "Intet planlagt :(", noResultsSubtitle = "Tilføj etaper til dine rejser for at se dem her!", startTime = "Starttid", endTime = "Sluttid",
+    operatorGeneric = "Operatør", busOperator = "Busselskab", trainOperator = "Togselskab", flightOperator = "Flyselskab", ferryOperator = "Færgeselskab", country = "Land", search = "Søg",
+    addDocument = "Tilføj dokument", title = "Titel", attachTo = "Vedhæft til", wholeTrip = "Hele rejsen", open = "Åbn", noDocuments = "Ingen dokumenter endnu", noDocumentsSubtitle = "Upload billetter, reservationer og mere", deleteDocumentQ = "Slet dette dokument?", fileNotUploaded = "Filen er ikke uploadet endnu",
+    category = "Kategori", accommodation = "Overnatning", attraction = "Attraktion", uploading = "Uploader…", uploadFailed = "Kunne ikke uploade filen",
+    day = "Dag", editLeg = "Rediger etape", close = "Luk",
+    swap = "Byt", capture = "Optag", profilePhoto = "Profilbillede", changePhoto = "Skift billede", selected = "Valgt", itineraLogo = "Itinera-logo",
 )
 
 private val ET = EN.copy(
     name = "Eesnimi", surname = "Perekonnanimi", dob = "Sünnikuupäev", street = "Tänav", city = "Linn", postelCode = "Postiindeks",
-    appTagline = "Kus iga teekond algab!", myTrips = "Minu reisid", countries = "riiki", legs = "etappi", done = "tehtud",
+    appTagline = "Kus iga teekond algab!", myTrips = "Minu reisid", countries = "riiki", leg = "Etapp", legs = "etappi", done = "tehtud",
     addLeg = "Lisa etapp", newLeg = "Uus etapp", from = "Kust", to = "Kuhu", transport = "Transport", date = "Kuupäev", time = "Aeg",
     bookingRef = "Broneeringu nr", optional = "valikuline", saveLeg = "Salvesta etapp", tickets = "Piletid", event = "Sündmus", beforeYouGo = "Enne minekut",
     addItem = "Lisa ese", settings = "Seaded", backupSync = "Varundus ja sünkroonimine", appearance = "Välimus",
@@ -1342,11 +1539,18 @@ private val ET = EN.copy(
     cantBeUndone = "Seda ei saa tagasi võtta.", archivedTrips = "Arhiveeritud reisid", noArchivedTrips = "Arhiveeritud reise pole",
     noDatesYet = "Kuupäevi veel pole", tripName = "Reisi nimi", aLegBetween = "Etapp vahel", somewhereToVisit = "Koht külastamiseks",
     choosePhoto = "Vali foto", uploadFromGallery = "Laadi galeriist üles", takePhoto = "Tee foto", removePhoto = "Eemalda foto", cropAndScale = "Kärbi ja skaleeri", usePhoto = "Kasuta fotot",
+    mobile = "Mobiil", today = "Täna", days = "30 päeva",
+    noTripsYet = "Reise veel pole :(", noTripsSubtitle = "Puuduta +, et planeerida oma esimene seiklus!", noResults = "Midagi pole planeeritud :(", noResultsSubtitle = "Lisa oma reisidele etappe, et näha neid siin!", startTime = "Algusaeg", endTime = "Lõpuaeg",
+    operatorGeneric = "Operaator", busOperator = "Bussiettevõte", trainOperator = "Rongiettevõte", flightOperator = "Lennufirma", ferryOperator = "Parvlaevaettevõte", country = "Riik", search = "Otsi",
+    addDocument = "Lisa dokument", title = "Pealkiri", attachTo = "Lisa üksusele", wholeTrip = "Kogu reis", open = "Ava", noDocuments = "Dokumente veel pole", noDocumentsSubtitle = "Laadi üles piletid, broneeringud ja muud", deleteDocumentQ = "Kustuta see dokument?", fileNotUploaded = "Faili pole veel üles laaditud",
+    category = "Kategooria", accommodation = "Majutus", attraction = "Vaatamisväärsus", uploading = "Üleslaadimine…", uploadFailed = "Faili ei õnnestunud üles laadida",
+    day = "Päev", editLeg = "Muuda etappi", close = "Sulge",
+    swap = "Vaheta", capture = "Jäädvusta", profilePhoto = "Profiilipilt", changePhoto = "Muuda pilti", selected = "Valitud", itineraLogo = "Itinera logo",
 )
 
 private val AR = EN.copy(
     name = "الاسم", surname = "النسبة", dob = "تاريخ الميلاد", street = "الشارع", city = "المدينة", postelCode = "الرمز البريدي",
-    appTagline = "حيث تبدأ كل رحلة!", myTrips = "رحلاتي", countries = "دول", legs = "مراحل", done = "تم",
+    appTagline = "حيث تبدأ كل رحلة!", myTrips = "رحلاتي", countries = "دول", leg = "مرحلة", legs = "مراحل", done = "تم",
     addLeg = "إضافة مرحلة", newLeg = "مرحلة جديدة", from = "من", to = "إلى", transport = "وسيلة النقل", date = "التاريخ", time = "الوقت",
     bookingRef = "رقم الحجز", optional = "اختياري", saveLeg = "حفظ المرحلة", tickets = "التذاكر", event = "حدث", beforeYouGo = "قبل الذهاب",
     addItem = "إضافة عنصر", settings = "الإعدادات", backupSync = "النسخ الاحتياطي والمزامنة", appearance = "المظهر",
@@ -1376,11 +1580,18 @@ private val AR = EN.copy(
     cantBeUndone = "لا يمكن التراجع عن هذا الإجراء.", archivedTrips = "الرحلات المؤرشفة", noArchivedTrips = "لا توجد رحلات مؤرشفة",
     noDatesYet = "لا توجد تواريخ بعد", tripName = "اسم الرحلة", aLegBetween = "مرحلة بين", somewhereToVisit = "مكان للزيارة",
     choosePhoto = "اختر صورة", uploadFromGallery = "تحميل من المعرض", takePhoto = "التقاط صورة", removePhoto = "إزالة الصورة", cropAndScale = "قص وتغيير الحجم", usePhoto = "استخدام الصورة",
+    mobile = "جوال", today = "اليوم", days = "30 يومًا",
+    noTripsYet = "لا توجد رحلات بعد :(", noTripsSubtitle = "اضغط على + للتخطيط لمغامرتك الأولى!", noResults = "لا يوجد شيء مجدول :(", noResultsSubtitle = "أضف مراحل لرحلاتك لرؤيتها هنا!", startTime = "وقت البدء", endTime = "وقت الانتهاء",
+    operatorGeneric = "المشغل", busOperator = "مشغل الحافلات" , trainOperator = "مشغل القطارات", flightOperator = "شركة الطيران", ferryOperator = "مشغل العبارات", country = "البلد", search = "بحث",
+    addDocument = "إضافة مستند", title = "العنوان", attachTo = "إرفاق بـ", wholeTrip = "الرحلة بأكملها", open = "فتح", noDocuments = "لا توجد مستندات بعد", noDocumentsSubtitle = "قم بتحميل التذاكر والحجوزات والمزيد", deleteDocumentQ = "حذف هذا المستند؟", fileNotUploaded = "لم يتم رفع الملف بعد",
+    category = "الفئة", accommodation = "الإقامة", attraction = "معلم جذب", uploading = "جاري الرفع…", uploadFailed = "فشل رفع الملف",
+    day = "يوم", editLeg = "تعديل المرحلة", close = "إغلاق",
+    swap = "تبديل", capture = "التقاط", profilePhoto = "صورة الملف الشخصي", changePhoto = "تغيير الصورة", selected = "محدد", itineraLogo = "شعار Itinera",
 )
 
 private val TR = EN.copy(
     name = "Ad", surname = "Soyad", dob = "Doğum tarihi", street = "Sokak", city = "Şehir", postelCode = "Posta kodu",
-    appTagline = "Her yolculuğun başladığı yer!", myTrips = "Gezilerim", countries = "ülke", legs = "etap", done = "tamamlandı",
+    appTagline = "Her yolculuğun başladığı yer!", myTrips = "Gezilerim", countries = "ülke", leg = "Etap", legs = "etap", done = "tamamlandı",
     addLeg = "Etap ekle", newLeg = "Yeni etap", from = "Nereden", to = "Nereye", transport = "Ulaşım", date = "Tarih", time = "Saat",
     bookingRef = "Rezervasyon no", optional = "isteğe bağlı", saveLeg = "Etabı kaydet", tickets = "Biletler", event = "Etkinlik", beforeYouGo = "Gitmeden önce",
     addItem = "Öğe ekle", settings = "Ayarlar", backupSync = "Yedekle ve senkronize et", appearance = "Görünüm",
@@ -1410,11 +1621,18 @@ private val TR = EN.copy(
     cantBeUndone = "Bu işlem geri alınamaz.", archivedTrips = "Arşivlenen geziler", noArchivedTrips = "Arşivlenen gezi yok",
     noDatesYet = "Henüz tarih yok", tripName = "Gezi adı", aLegBetween = "Arasında bir etap", somewhereToVisit = "Ziyaret edilecek bir yer",
     choosePhoto = "Fotoğraf Seç", uploadFromGallery = "Galeriden Yükle", takePhoto = "Fotoğraf Çek", removePhoto = "Fotoğrafı Kaldır", cropAndScale = "Kırp ve Ölçeklendir", usePhoto = "Fotoğrafı Kullan",
+    mobile = "Mobil", today = "Bugün", days = "30 gün",
+    noTripsYet = "Henüz gezi yok :(", noTripsSubtitle = "İlk maceranızı planlamak için + simgesine dokunun!", noResults = "Planlanmış bir şey yok :(", noResultsSubtitle = "Onları burada görmek için gezilerinize etaplar ekleyin!", startTime = "Başlangıç saati", endTime = "Bitiş saati",
+    operatorGeneric = "Operatör", busOperator = "Otobüs işletmecisi", trainOperator = "Tren işletmecisi", flightOperator = "Havayolu şirketi", ferryOperator = "Feribot işletmecisi", country = "Ülke", search = "Ara",
+    addDocument = "Belge ekle", title = "Başlık", attachTo = "Şuna ekle", wholeTrip = "Tüm gezi", open = "Aç", noDocuments = "Henüz belge yok", noDocumentsSubtitle = "Biletleri, rezervasyonları ve daha fazlasını yükleyin", deleteDocumentQ = "Bu belgeyi silmek istiyor musunuz?", fileNotUploaded = "Dosya henüz yüklenmedi",
+    category = "Kategori", accommodation = "Konaklama", attraction = "Turistik yer", uploading = "Yükleniyor…", uploadFailed = "Dosya yüklenemedi",
+    day = "Gün", editLeg = "Etabı düzenle", close = "Kapat",
+    swap = "Değiştir", capture = "Çek", profilePhoto = "Profil fotoğrafı", changePhoto = "Fotoğrafı değiştir", selected = "Seçildi", itineraLogo = "Itinera logosu",
 )
 
 private val VI = EN.copy(
     name = "Tên", surname = "Họ", dob = "Ngày sinh", street = "Đường", city = "Thành phố", postelCode = "Mã bưu điện",
-    appTagline = "Nơi mọi hành trình bắt đầu!", myTrips = "Chuyến đi của tôi", countries = "quốc gia", legs = "chặng", done = "hoàn thành",
+    appTagline = "Nơi mọi hành trình bắt đầu!", myTrips = "Chuyến đi của tôi", countries = "quốc gia", leg = "Chặng", legs = "chặng", done = "hoàn thành",
     addLeg = "Thêm chặng", newLeg = "Chặng mới", from = "Từ", to = "Đến", transport = "Phương tiện", date = "Ngày", time = "Giờ",
     bookingRef = "Mã đặt chỗ", optional = "tùy chọn", saveLeg = "Lưu chặng", tickets = "Vé", event = "Sự kiện", beforeYouGo = "Trước khi đi",
     addItem = "Thêm mục", settings = "Cài đặt", backupSync = "Sao lưu & đồng bộ", appearance = "Giao diện",
@@ -1444,11 +1662,18 @@ private val VI = EN.copy(
     cantBeUndone = "Hành động này không thể hoàn tác.", archivedTrips = "Chuyến đi đã lưu trữ", noArchivedTrips = "Không có chuyến đi lưu trữ",
     noDatesYet = "Chưa có ngày", tripName = "Tên chuyến đi", aLegBetween = "Một chặng giữa", somewhereToVisit = "Nơi nào đó để ghé thăm",
     choosePhoto = "Chọn ảnh", uploadFromGallery = "Tải lên từ thư viện", takePhoto = "Chụp ảnh", removePhoto = "Xóa ảnh", cropAndScale = "Cắt và thu phóng", usePhoto = "Sử dụng ảnh",
+    mobile = "Di động", today = "Hôm nay", days = "30 ngày",
+    noTripsYet = "Chưa có chuyến đi nào :(", noTripsSubtitle = "Chạm vào + để lập kế hoạch cho cuộc phiêu lưu đầu tiên của bạn!", noResults = "Không có lịch trình :(", noResultsSubtitle = "Thêm các chặng vào chuyến đi của bạn để xem chúng ở đây!", startTime = "Giờ bắt đầu", endTime = "Giờ kết thúc",
+    operatorGeneric = "Nhà điều hành", busOperator = "Hãng xe buýt", trainOperator = "Hãng tàu hỏa", flightOperator = "Hãng hàng không", ferryOperator = "Hãng phà", country = "Quốc gia", search = "Tìm kiếm",
+    addDocument = "Thêm tài liệu", title = "Tiêu đề", attachTo = "Đính kèm vào", wholeTrip = "Toàn bộ chuyến đi", open = "Mở", noDocuments = "Chưa có tài liệu nào", noDocumentsSubtitle = "Tải lên vé, đặt chỗ và nhiều thứ khác", deleteDocumentQ = "Xóa tài liệu này?", fileNotUploaded = "Tệp chưa được tải lên",
+    category = "Danh mục", accommodation = "Chỗ ở", attraction = "Điểm tham quan", uploading = "Đang tải lên…", uploadFailed = "Không thể tải tệp lên",
+    day = "Ngày", editLeg = "Chỉnh sửa chặng", close = "Đóng",
+    swap = "Hoán đổi", capture = "Chụp", profilePhoto = "Ảnh hồ sơ", changePhoto = "Đổi ảnh", selected = "Đã chọn", itineraLogo = "Logo Itinera",
 )
 
 private val ID = EN.copy(
     name = "Nama", surname = "Nama belakang", dob = "Tanggal lahir", street = "Jalan", city = "Kota", postelCode = "Kode pos",
-    appTagline = "Di mana setiap perjalanan dimulai!", myTrips = "Perjalananku", countries = "negara", legs = "tahap", done = "selesai",
+    appTagline = "Di mana setiap perjalanan dimulai!", myTrips = "Perjalananku", countries = "negara", leg = "Tahap", legs = "tahap", done = "selesai",
     addLeg = "Tambah tahap", newLeg = "Tahap baru", from = "Dari", to = "Ke", transport = "Transportasi", date = "Tanggal", time = "Waktu",
     bookingRef = "Ref. pemesanan", optional = "opsional", saveLeg = "Simpan tahap", tickets = "Tiket", event = "Acara", beforeYouGo = "Sebelum pergi",
     addItem = "Tambah item", settings = "Pengaturan", backupSync = "Cadangan & sinkronisasi", appearance = "Tampilan",
@@ -1478,11 +1703,18 @@ private val ID = EN.copy(
     cantBeUndone = "Tindakan ini tidak dapat dibatalkan.", archivedTrips = "Perjalanan diarsipkan", noArchivedTrips = "Tidak ada perjalanan diarsipkan",
     noDatesYet = "Belum ada tanggal", tripName = "Nama perjalanan", aLegBetween = "Tahap antara", somewhereToVisit = "Tempat untuk dikunjungi",
     choosePhoto = "Pilih Foto", uploadFromGallery = "Unggah Dari Galeri", takePhoto = "Ambil Foto", removePhoto = "Hapus Foto", cropAndScale = "Potong dan Skala", usePhoto = "Gunakan Foto",
+    mobile = "Seluler", today = "Hari ini", days = "30 hari",
+    noTripsYet = "Belum ada perjalanan :(", noTripsSubtitle = "Ketuk + untuk merencanakan petualangan pertama Anda!", noResults = "Tidak ada jadwal :(", noResultsSubtitle = "Tambahkan tahapan ke perjalanan Anda untuk melihatnya di sini!", startTime = "Waktu mulai", endTime = "Waktu berakhir",
+    operatorGeneric = "Operator", busOperator = "Operator bus", trainOperator = "Operator kereta api", flightOperator = "Maskapai penerbangan", ferryOperator = "Operator feri", country = "Negara", search = "Cari",
+    addDocument = "Tambah dokumen", title = "Judul", attachTo = "Lampirkan ke", wholeTrip = "Seluruh perjalanan", open = "Buka", noDocuments = "Belum ada dokumen", noDocumentsSubtitle = "Unggah tiket, pemesanan, dan lainnya", deleteDocumentQ = "Hapus dokumen ini?", fileNotUploaded = "File belum diunggah",
+    category = "Kategori", accommodation = "Akomodasi", attraction = "Atraksi", uploading = "Mengunggah…", uploadFailed = "Gagal mengunggah file",
+    day = "Hari", editLeg = "Edit tahap", close = "Tutup",
+    swap = "Tukar", capture = "Ambil", profilePhoto = "Foto profil", changePhoto = "Ubah foto", selected = "Terpilih", itineraLogo = "Logo Itinera",
 )
 
 private val TH = EN.copy(
     name = "ชื่อ", surname = "นามสกุล", dob = "วันเกิด", street = "ถนน", city = "เมือง", postelCode = "รหัสไปรษณีย์",
-    appTagline = "ที่ซึ่งทุกการเดินทางเริ่มต้น!", myTrips = "การเดินทางของฉัน", countries = "ประเทศ", legs = "ช่วง", done = "เสร็จสิ้น",
+    appTagline = "ที่ซึ่งทุกการเดินทางเริ่มต้น!", myTrips = "การเดินทางของฉัน", countries = "ประเทศ", leg = "ช่วง", legs = "ช่วง", done = "เสร็จสิ้น",
     addLeg = "เพิ่มช่วง", newLeg = "ช่วงใหม่", from = "จาก", to = "ถึง", transport = "การเดินทาง", date = "วันที่", time = "เวลา",
     bookingRef = "เลขการจอง", optional = "เลือกได้", saveLeg = "บันทึกช่วง", tickets = "ตั๋ว", event = "กิจกรรม", beforeYouGo = "ก่อนเดินทาง",
     addItem = "เพิ่มรายการ", settings = "ตั้งค่า", backupSync = "สำรองและซิงค์", appearance = "รูปลักษณ์",
@@ -1512,11 +1744,18 @@ private val TH = EN.copy(
     cantBeUndone = "ไม่สามารถย้อนกลับการดำเนินการนี้ได้", archivedTrips = "การเดินทางที่เก็บถาวร", noArchivedTrips = "ไม่มีการเดินทางที่เก็บถาวร",
     noDatesYet = "ยังไม่มีวันที่", tripName = "ชื่อการเดินทาง", aLegBetween = "ช่วงระหว่าง", somewhereToVisit = "สถานที่ที่จะไปเยือน",
     choosePhoto = "เลือกรูปภาพ", uploadFromGallery = "อัปโหลดจากแกลเลอรี", takePhoto = "ถ่ายภาพ", removePhoto = "ลบรูปภาพ", cropAndScale = "ครอบตัดและปรับขนาด", usePhoto = "ใช้รูปภาพ",
+    mobile = "มือถือ", today = "วันนี้", days = "30 วัน",
+    noTripsYet = "ยังไม่มีทริป :(", noTripsSubtitle = "แตะ + เพื่อวางแผนการผจญภัยครั้งแรกของคุณ!", noResults = "ไม่มีกำหนดการ :(", noResultsSubtitle = "เพิ่มช่วงการเดินทางในทริปของคุณเพื่อดูที่นี่!", startTime = "เวลาเริ่ม", endTime = "เวลาสิ้นสุด",
+    operatorGeneric = "ผู้ให้บริการ", busOperator = "ผู้ให้บริการรถบัส", trainOperator = "ผู้ให้บริการรถไฟ", flightOperator = "สายการบิน", ferryOperator = "ผู้ให้บริการเรือเฟอร์รี่", country = "ประเทศ", search = "ค้นหา",
+    addDocument = "เพิ่มเอกสาร", title = "ชื่อเรื่อง", attachTo = "แนบกับ", wholeTrip = "ทั้งทริป", open = "เปิด", noDocuments = "ยังไม่มีเอกสาร", noDocumentsSubtitle = "อัปโหลดตั๋ว การจอง และอื่นๆ", deleteDocumentQ = "ลบเอกสารนี้?", fileNotUploaded = "ยังไม่ได้อัปโหลดไฟล์",
+    category = "หมวดหมู่", accommodation = "ที่พัก", attraction = "สถานที่ท่องเที่ยว", uploading = "กำลังอัปโหลด…", uploadFailed = "ไม่สามารถอัปโหลดไฟล์ได้",
+    day = "วันที่", editLeg = "แก้ไขช่วง", close = "ปิด",
+    swap = "สลับ", capture = "ถ่ายภาพ", profilePhoto = "รูปโปรไฟล์", changePhoto = "เปลี่ยนรูป", selected = "เลือกแล้ว", itineraLogo = "โลโก้ Itinera",
 )
 
 private val HE = EN.copy(
     name = "שם", surname = "שם משפחה", dob = "תאריך לידה", street = "רחוב", city = "עיר", postelCode = "מיקוד",
-    appTagline = "המקום בו כל מסע מתחיל!", myTrips = "הטיולים שלי", countries = "מדינות", legs = "מקטעים", done = "בוצע",
+    appTagline = "המקום בו כל מסע מתחיל!", myTrips = "הטיולים שלי", countries = "מדינות", leg = "מקטע", legs = "מקטעים", done = "בוצע",
     addLeg = "הוספת מקטע", newLeg = "מקטע חדש", from = "מ-", to = "עד", transport = "תחבורה", date = "תאריך", time = "שעה",
     bookingRef = "מספר הזמנה", optional = "אופציונלי", saveLeg = "שמירת מקטע", tickets = "כרטיסים", event = "אירוע", beforeYouGo = "לפני היציאה",
     addItem = "הוספת פריט", settings = "הגדרות", backupSync = "גיבוי וסנכרון", appearance = "מראה",
@@ -1546,11 +1785,18 @@ private val HE = EN.copy(
     cantBeUndone = "לא ניתן לבטל פעולה זו.", archivedTrips = "טיולים בארכיון", noArchivedTrips = "אין טיולים בארכיון",
     noDatesYet = "עדיין אין תאריכים", tripName = "שם הטיול", aLegBetween = "מקטע בין", somewhereToVisit = "מקום לבקר בו",
     choosePhoto = "בחר תמונה", uploadFromGallery = "העלה מהגלריה", takePhoto = "צלם תמונה", removePhoto = "הסר תמונה", cropAndScale = "חתוך ושנה קנה מידה", usePhoto = "השתמש בתמונה",
+    mobile = "נייד", today = "היום", days = "30 ימים",
+    noTripsYet = "אין טיולים עדיין :(", noTripsSubtitle = "הקש על + כדי לתכנן את ההרפתקה הראשונה שלך!", noResults = "שום דבר לא מתוזמן :(", noResultsSubtitle = "הוסף מקטעים לטיולים שלך כדי לראות אותם כאן!", startTime = "זמן התחלה", endTime = "זמן סיום",
+    operatorGeneric = "מפעיל", busOperator = "מפעיל אוטובוסים", trainOperator = "מפעיל רכבות", flightOperator = "חברת תעופה", ferryOperator = "מפעיל מעבורות", country = "מדינה", search = "חיפוש",
+    addDocument = "הוסף מסמך", title = "כותרת", attachTo = "צרף אל", wholeTrip = "כל הטיול", open = "פתח", noDocuments = "אין מסמכים עדיין", noDocumentsSubtitle = "העלה כרטיסים, הזמנות ועוד", deleteDocumentQ = "למחוק מסמך זה?", fileNotUploaded = "הקובץ עדיין לא הועלה",
+    category = "קטגוריה", accommodation = "לינה", attraction = "אטרקציה", uploading = "מעלה…", uploadFailed = "נכשלה העלאת הקובץ",
+    day = "יום", editLeg = "עריכת מקטע", close = "סגור",
+    swap = "החלפה", capture = "צילום", profilePhoto = "תמונת פרופיל", changePhoto = "שינוי תמונה", selected = "נבחר", itineraLogo = "לוגו Itinera",
 )
 
 private val BN = EN.copy(
     name = "নাম", surname = "পদবী", dob = "জন্ম তারিখ", street = "রাস্তা", city = "শহর", postelCode = "পোস্টাল কোড",
-    appTagline = "যেখানে প্রতিটি ভ্রমণ শুরু হয়!", myTrips = "আমার ভ্রমণ", countries = "দেশ", legs = "পর্যায়", done = "সম্পন্ন",
+    appTagline = "যেখানে প্রতিটি ভ্রমণ শুরু হয়!", myTrips = "আমার ভ্রমণ", countries = "দেশ", leg = "পর্যায়", legs = "পর্যায়", done = "সম্পন্ন",
     addLeg = "পর্যায় যোগ করুন", newLeg = "নতুন পর্যায়", from = "থেকে", to = "পর্যন্ত", transport = "পরিবহন", date = "তারিখ", time = "সময়",
     bookingRef = "বুকিং নম্বর", optional = "ঐচ্ছিক", saveLeg = "পর্যায় সংরক্ষণ করুন", tickets = "টিকিট", event = "ইভেন্ট", beforeYouGo = "যাওয়ার আগে",
     addItem = "আইটেম যোগ করুন", settings = "সেটিংস", backupSync = "ব্যাকআপ ও সিঙ্ক", appearance = "চেহারা",
@@ -1580,12 +1826,19 @@ private val BN = EN.copy(
     cantBeUndone = "এই কাজটি ফিরিয়ে নেওয়া যাবে না।", archivedTrips = "আর্কাইভ করা ভ্রমণ", noArchivedTrips = "কোন আর্কাইভ করা ভ্রমণ নেই",
     noDatesYet = "এখনও কোন তারিখ নেই", tripName = "ভ্রমণের নাম", aLegBetween = "এর মধ্যে একটি পর্যায়", somewhereToVisit = "ঘুরে দেখার জায়গা",
     choosePhoto = "ছবি নির্বাচন করুন", uploadFromGallery = "গ্যালারি থেকে আপলোড করুন", takePhoto = "ছবি তুলুন", removePhoto = "ছবি সরান", cropAndScale = "ক্রপ এবং স্কেল করুন", usePhoto = "ছবি ব্যবহার করুন",
+    mobile = "মোবাইল", today = "আজ", days = "৩০ দিন",
+    noTripsYet = "এখনও কোনো ট্রিপ নেই :(", noTripsSubtitle = "আপনার প্রথম অ্যাডভেঞ্চার পরিকল্পনা করতে + ট্যাপ করুন!", noResults = "কিছুই নির্ধারিত নেই :(", noResultsSubtitle = "সেগুলো এখানে দেখতে আপনার ট্রিপে পর্যায় যোগ করুন!", startTime = "শুরু সময়", endTime = "শেষ সময়",
+    operatorGeneric = "অপারেটর", busOperator = "বাস অপারেটর", trainOperator = "ট্রেন অপারেটর", flightOperator = "এয়ারলাইন", ferryOperator = "ফেরি অপারেটর", country = "দেশ", search = "খুঁজুন",
+    addDocument = "ডকুমেন্ট যোগ করুন", title = "শিরোনাম", attachTo = "সংযুক্ত করুন", wholeTrip = "পুরো ট্রিপ", open = "খুলুন", noDocuments = "এখনও কোনো ডকুমেন্ট নেই", noDocumentsSubtitle = "টিকিট, বুকিং এবং আরও অনেক কিছু আপলোড করুন", deleteDocumentQ = "এই ডকুমেন্টটি কি মুছে ফেলবেন?", fileNotUploaded = "ফাইলটি এখনও আপলোড করা হয়নি",
+    category = "বিভাগ", accommodation = "আবাসন", attraction = "আকর্ষণ", uploading = "আপলোড হচ্ছে…", uploadFailed = "ফাইল আপলোড করা যায়নি",
+    day = "দিন", editLeg = "পর্যায় সম্পাদনা করুন", close = "বন্ধ করুন",
+    swap = "বদলান", capture = "ক্যাপচার", profilePhoto = "প্রোফাইল ফটো", changePhoto = "ফটো পরিবর্তন করুন", selected = "নির্বাচিত", itineraLogo = "ইতিনেরা লোগো",
 )
 
 private val TG = EN.copy(
     name = "Pangalan", surname = "Apelyido", dob = "Petsa ng kapanganakan", street = "Kalye", city = "Lungsod",
     postelCode = "Postal code", appTagline = "Kung saan nagsisimula ang bawat paglalakbay!", myTrips = "Aking mga biyahe",
-    countries = "mga bansa", legs = "mga yugto", done = "tapos na", addLeg = "Magdagdag ng yugto", newLeg = "Bagong yugto",
+    countries = "mga bansa", leg = "yugto", legs = "mga yugto", done = "tapos na", addLeg = "Magdagdag ng yugto", newLeg = "Bagong yugto",
     from = "Mula sa", to = "Hanggang sa", transport = "Transportasyon", date = "Petsa", time = "Oras",
     bookingRef = "Booking ref", optional = "opsyonal", saveLeg = "I-save ang yugto",
     tickets = "Mga Tiket", event = "Kaganapan", beforeYouGo = "Bago ka umalis", addItem = "Magdagdag ng item",
@@ -1603,6 +1856,7 @@ private val TG = EN.copy(
     newPassword = "Bagong password", saveChanges = "I-save ang mga pagbabago",
     systemDefault = "Default ng sistema", light = "Maliwanag", dark = "Madilim", matchYourPhone = "Itugma sa telepono", currency = "Pera", convert = "I-convert", bookings = "Mga Booking", packing = "Pag-iimpake", money = "Pera", gadget = "Gadget", other = "Iba pa", needToAdd = "Ano ang kailangan mong idagdag?", section = "Seksyon",
     amount = "Halaga", validAmount = "Maglagay ng wastong halaga", couldntFetch = "Hindi makuha ang rate. Suriin ang iyong koneksyon.",
+    fillAllFields = "Mangyaring punan ang lahat ng mga markadong field", loginFailed = "Nabigo ang Pag-log in. Suriin ang Iyong Email at Password.",
     passwordTooShort = "Ang password ay dapat na hindi bababa sa 6 na character", signupFailed = "Nabigo ang paglikha ng account. Maaaring ginagamit na ang email.",
     deleteAccount = "I-delete ang account", deleteAccountConfirm = "Permanenteng i-de-delete nito ang iyong account at lahat ng iyong data. Hindi na ito mababawi.", deleteButton = "I-delete",
     showPassword = "Ipakita ang password", hidePassword = "Itago ang password", back = "Bumalik",
@@ -1619,11 +1873,19 @@ private val TG = EN.copy(
     cantBeUndone = "Hindi na ito mababawi.", archivedTrips = "Mga naka-archive na biyahe", noArchivedTrips = "Walang mga naka-archive na biyahe",
     noDatesYet = "Wala pang mga petsa", tripName = "Pangalan ng biyahe", aLegBetween = "Isang yugto sa pagitan", somewhereToVisit = "Isang lugar na bibisitahin",
     choosePhoto = "Pumili ng Larawan", uploadFromGallery = "Mag-upload Mula sa Gallery", takePhoto = "Kumuha ng Larawan", removePhoto = "Alisin ang Larawan", cropAndScale = "I-crop at I-scale", usePhoto = "Gamitin ang Larawan",
+    resetPasswordPrompt = "Ipasok ang iyong email upang i-reset ang iyong password", resetEmailSent = "Isang email ang ipinadala upang i-reset ang iyong password", resetEmailFailed = "Nabigong magpadala ng email upang i-reset ang password.",
+    mobile = "Mobile", today = "Ngayon", days = "30 Araw",
+    noTripsYet = "Wala pang mga biyahe :(", noTripsSubtitle = "I-tap ang + para planuhin ang iyong unang adventure!", noResults = "Walang naka-iskedyul :(", noResultsSubtitle = "Magdagdag ng mga yugto sa iyong mga biyahe para makita sila rito!", startTime = "Oras ng Pagsisimula", endTime = "Oras ng Pagtatapos",
+    operatorGeneric = "Operator", busOperator = "Bus Operator", trainOperator = "Train Operator", flightOperator = "Airline", ferryOperator = "Ferry Operator", country = "Bansa", search = "Maghanap",
+    addDocument = "Magdagdag ng dokumento", title = "Pamagat", attachTo = "I-attach sa", wholeTrip = "Buong biyahe", open = "Buksan", noDocuments = "Wala pang mga dokumento", noDocumentsSubtitle = "Mag-upload ng mga tiket, booking, at higit pa", deleteDocumentQ = "I-delete ang dokumentong ito?", fileNotUploaded = "Hindi pa na-upload ang file",
+    category = "Kategorya", accommodation = "Akomodasyon", attraction = "Atraksyon", uploading = "Nag-u-upload…", uploadFailed = "Hindi ma-upload ang file",
+    day = "Araw", editLeg = "I-edit ang yugto", close = "I-close",
+    swap = "Pagpalitin", capture = "Kunan", profilePhoto = "Larawan sa profile", changePhoto = "Palitan ang larawan", selected = "Napili", itineraLogo = "Itinera logo",
 )
 
 private val SI = EN.copy(
     name = "නම", surname = "වාසගම", dob = "උපන් දිනය", street = "වීදිය", city = "නගරය", postelCode = "තැපැල් කේතය",
-    appTagline = "සෑම ගමනක්ම ආරම්භ වන තැන!", myTrips = "මගේ ගමන්", countries = "රටවල්", legs = "ගමන් වාර", done = "අවසන්",
+    appTagline = "සෑම ගමනක්ම ආරම්භ වන තැන!", myTrips = "මගේ ගමන්", countries = "රටවල්", leg = "ගමන් වාරය", legs = "ගමන් වාර", done = "අවසන්",
     addLeg = "ගමන් වාරයක් එක් කරන්න", newLeg = "නව ගමන් වාරය", from = "සිට", to = "දක්වා", transport = "ප්‍රවාහනය", date = "දිනය", time = "වේලාව",
     bookingRef = "වෙන්කිරීමේ අංකය", optional = "විකල්ප", saveLeg = "ගමන් වාරය සුරකින්න", tickets = "ටිකට්පත්", event = "උත්සවය", beforeYouGo = "පිටත්වීමට පෙර",
     addItem = "අයිතමයක් එක් කරන්න", settings = "සැකසුම්", backupSync = "උපස්ථ සහ සමමුහුර්තකරණය", appearance = "පෙනුම",
@@ -1653,6 +1915,13 @@ private val SI = EN.copy(
     cantBeUndone = "මෙය ආපසු හැරවිය නොහැක.", archivedTrips = "සංරක්ෂිත ගමන්", noArchivedTrips = "සංරක්ෂිත ගමන් නැත",
     noDatesYet = "තවම දිනයන් නැත", tripName = "ගමනේ නම", aLegBetween = "අතර ගමන් වාරයක්", somewhereToVisit = "යා යුතු ස්ථානයක්",
     choosePhoto = "ඡායාරූපයක් තෝරන්න", uploadFromGallery = "ගැලරියෙන් උඩුගත කරන්න", takePhoto = "ඡායාරූපයක් ගන්න", removePhoto = "ඡායාරූපය ඉවත් කරන්න", cropAndScale = "කැපීම සහ පරිමාණය කරන්න", usePhoto = "ඡායාරූපය භාවිතා කරන්න",
+    mobile = "ජංගම", today = "අද", days = "දින 30",
+    noTripsYet = "තවම චාරිකා නැත :(", noTripsSubtitle = "ඔබේ පළමු වික්‍රමය සැලසුම් කිරීමට + තට්ටු කරන්න!", noResults = "කිසිවක් සැලසුම් කර නැත :(", noResultsSubtitle = "ඒවා මෙහි දැකීමට ඔබේ චාරිකා වලට ගමන් වාර එක් කරන්න!" , startTime = "ආරම්භක වේලාව", endTime = "අවසන් වේලාව",
+    operatorGeneric = "මෙහෙයුම්කරු", busOperator = "බස් මෙහෙයුම්කරු", trainOperator = "දුම්රිය මෙහෙයුම්කරු", flightOperator = "ගුවන් සමාගම", ferryOperator = "බෝට්ටු මෙහෙයුම්කරු", country = "රට", search = "සොයන්න",
+    addDocument = "ලේඛනයක් එක් කරන්න", title = "මාතෘකාව", attachTo = "අමුණන්න", wholeTrip = "මුළු චාරිකාවම", open = "විවෘත කරන්න", noDocuments = "තවම ලේඛන නැත", noDocumentsSubtitle = "ටිකට්පත්, වෙන් කිරීම් සහ තවත් දේ උඩුගත කරන්න", deleteDocumentQ = "මෙම ලේඛනය මකන්නද?", fileNotUploaded = "ගොනුව තවම උඩුගත කර නැත",
+    category = "ප්‍රවර්ගය", accommodation = "නවාතැන්", attraction = "ආකර්ෂණය", uploading = "උඩුගත වෙමින් පවතී…", uploadFailed = "ගොනුව උඩුගත කිරීමට නොහැකි විය",
+    day = "දිනය", editLeg = "ගමන් වාරය සංස්කරණය කරන්න", close = "වහන්න",
+    swap = "මාරු කරන්න", capture = "ඡායාරූපය ගන්න", profilePhoto = "පැතිකඩ ඡායාරූපය", changePhoto = "ඡායාරූපය වෙනස් කරන්න", selected = "තෝරා ගන්නා ලදී", itineraLogo = "ඉටිනෙරා ලාංඡනය",
 )
 
 /**

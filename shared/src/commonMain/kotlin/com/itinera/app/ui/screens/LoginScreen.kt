@@ -149,7 +149,7 @@ fun LoginScreen(
                     Spacer(Modifier.width(12.dp))
                     Image(
                         painter = painterResource(Res.drawable.itinera_logo),
-                        contentDescription = "Itinera logo",
+                        contentDescription = s.itineraLogo,
                         colorFilter = ColorFilter.tint(onImage),
                         modifier = Modifier.height(90.dp)
                             .padding(top = 2.dp, end = 2.dp)

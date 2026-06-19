@@ -32,6 +32,8 @@ import com.itinera.app.model.Trip
 import com.itinera.app.model.label
 import com.itinera.app.ui.components.Progress
 import com.itinera.app.ui.components.TopBar
+import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
+
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -39,6 +41,7 @@ fun TripDetailScreen(
     trip: Trip,
     activities: List<Activity>,
     onBack: () -> Unit,
+    onDocuments: () -> Unit,
     onAddLeg: () -> Unit,
     onAddPlace: () -> Unit,
     onChecklist: () -> Unit,
@@ -71,7 +74,20 @@ fun TripDetailScreen(
         .firstOrNull { !it.completed }?.id
 
     Column(Modifier.fillMaxSize()) {
-        TopBar(trip.title, onBack = onBack)
+        TopBar(
+            trip.title,
+            onBack = onBack,
+            trailing = {                                          // ⬅ ADD
+                IconButton(onClick = onDocuments) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.InsertDriveFile,
+                        contentDescription = s.documents,
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            },
+        )
+        Spacer(Modifier.height(8.dp))
         Column(Modifier.padding(horizontal = 16.dp)) {
             Text(
                 "$done ${s.legsTravelled}",
@@ -95,7 +111,7 @@ fun TripDetailScreen(
                 allDates.forEachIndexed { index, date ->
                     val dayNumber = index + 1
                     Text(
-                        "Day $dayNumber · ${date.label()}",
+                        "${s.day} $dayNumber · ${date.label()}",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),

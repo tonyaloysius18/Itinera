@@ -1,4 +1,5 @@
 [versions]
+activityCompose = "1.9.3"
 agp = "9.0.1"
 android-compileSdk = "36"
 android-minSdk = "26"
@@ -33,6 +34,7 @@ peekabooUi = "0.5.2"
 
 
 [libraries]
+androidx-activity-compose-v193 = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCore" }
 androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "cameraCore" }
 androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "cameraCore" }

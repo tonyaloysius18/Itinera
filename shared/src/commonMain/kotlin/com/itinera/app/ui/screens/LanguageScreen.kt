@@ -106,6 +106,7 @@ fun LanguageScreen(
 
 @Composable
 private fun LanguageRow(title: String, subtitle: String, selected: Boolean, onClick: () -> Unit) {
+    val s = LocalStrings.current
     val primary = MaterialTheme.colorScheme.primary
     Row(
         Modifier
@@ -132,7 +133,7 @@ private fun LanguageRow(title: String, subtitle: String, selected: Boolean, onCl
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         Icons.Filled.Check,
-                        contentDescription = "Selected",
+                        contentDescription = s.selected,
                         tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(16.dp),
                     )

@@ -15,6 +15,8 @@ fun LocalDate.label(): String {
 enum class TransportType { FLIGHT, TRAIN, BUS, FERRY, CAR }
 
 /** A stored travel document (ticket, reservation, etc.). */
+
+@Serializable
 enum class DocType { PDF, IMAGE }
 
 /** Simple cover accent for a trip card. */
@@ -68,13 +70,21 @@ data class Trip(
 )
 
 /** A document attached either to a whole trip or to a specific leg. */
+@Serializable
 data class DocItem(
     val id: String,
     val tripId: String,
     val title: String,
-    val type: DocType,
-    val attachedToLabel: String,
+    val fileName: String = "",
+    val fileUrl: String = "",
+    val mimeType: String = "",
+    val category: String = "OTHER",    // ⬅ NEW — "TRANSPORT" | "ACCOMMODATION" | "OTHER"
+    val legId: String = "",            // kept for back-compat (unused now)
+    val type: DocType = DocType.IMAGE, // legacy
+    val attachedToLabel: String = "",  // legacy
 )
+
+
 
 /** A single preparation checklist entry. */
 data class ChecklistItem(

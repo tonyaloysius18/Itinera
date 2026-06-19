@@ -44,12 +44,12 @@ object SampleData {
         ),
     )
 
-    val documents = listOf(
-        DocItem("d1", "balkans", "Flight BEG", DocType.PDF, "leg 1"),
-        DocItem("d2", "balkans", "Train pass", DocType.IMAGE, "leg 2"),
-        DocItem("d3", "balkans", "Hotel conf.", DocType.PDF, "trip"),
-        DocItem("d4", "balkans", "Bus QR", DocType.IMAGE, "leg 3"),
-    )
+//    val documents = listOf(
+//        DocItem("d1", "balkans", "Flight BEG", DocType.PDF, "leg 1"),
+//        DocItem("d2", "balkans", "Train pass", DocType.IMAGE, "leg 2"),
+//        DocItem("d3", "balkans", "Hotel conf.", DocType.PDF, "trip"),
+//        DocItem("d4", "balkans", "Bus QR", DocType.IMAGE, "leg 3"),
+//    )
 
     val checklist = listOf(
         ChecklistItem("c1", "balkans", "Passport valid 6+ months", "Documents", done = true),

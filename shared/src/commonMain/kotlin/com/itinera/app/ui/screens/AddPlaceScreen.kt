@@ -53,7 +53,7 @@ fun AddPlaceScreen(
 
     Column(Modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onClose) { Icon(Icons.Filled.Close, contentDescription = "Close") }
+            IconButton(onClick = onClose) { Icon(Icons.Filled.Close, contentDescription = s.close) }
             Text(if (existing == null) s.newPlace else s.editPlace, style = MaterialTheme.typography.titleLarge)        }
 
         Column(

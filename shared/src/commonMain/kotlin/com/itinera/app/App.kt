@@ -78,6 +78,8 @@ fun App() {
                 if (profile != null) repository.updateProfile(profile)
             } catch (e: Exception) { }
             repository.loadTrips(uid)
+            repository.loadTrips(uid)
+            repository.loadDocuments(uid)
             navigator.resetTo(Screen.Home)
         }
         authChecked = true
@@ -133,7 +135,7 @@ private fun AppContent(
     val focusManager = LocalFocusManager.current
 
     val scope = rememberCoroutineScope()
-    val topLevel = remember { setOf(Screen.Home, Screen.Documents, Screen.Calendar, Screen.Currency, Screen.Settings) }
+    val topLevel = remember { setOf(Screen.Home, Screen.Calendar, Screen.Currency, Screen.Settings) }
 
     // Scroll-to-shrink logic
     var barScale by remember { mutableStateOf(1f) }
@@ -208,6 +210,8 @@ private fun AppContent(
                                 }
                             } catch (e: Exception) { }
                             repository.loadTrips(uid)
+                            repository.loadTrips(uid)
+                            repository.loadDocuments(uid)
                         }
                         navigator.resetTo(Screen.Home)
                     }
@@ -282,6 +286,7 @@ private fun AppContent(
                                 trip = trip,
                                 activities = repository.activitiesForTrip(screen.tripId),
                                 onBack = { navigator.back() },
+                                onDocuments = { navigator.push(Screen.TripDocuments(screen.tripId)) },
                                 onAddLeg = { navigator.push(Screen.AddLeg(screen.tripId)) },
                                 onAddPlace = { navigator.push(Screen.AddPlace(screen.tripId)) },
                                 onEditActivity = { actId -> navigator.push(Screen.EditPlace(screen.tripId, actId)) },
@@ -340,18 +345,31 @@ private fun AppContent(
                             onDelete = { repository.deleteTrip(it) },
                         )
 
-                        Screen.Documents -> DocumentsScreen(
-                            documents = repository.documents,
-                            onOpenDoc = { navigator.push(Screen.DocViewer(it)) },
-                        )
+                        is Screen.TripDocuments -> {
+                            val trip = repository.tripById(screen.tripId)
+                            if (trip == null) navigator.back()
+                            else DocumentsScreen(
+                                trip = trip,
+                                documents = repository.documentsForTrip(screen.tripId),
+                                onBack = { navigator.back() },
+                                onOpenDoc = { navigator.push(Screen.DocViewer(it)) },
+                                onDeleteDocument = { repository.deleteDocument(it) },
+                                onMessage = { pillMessage = it },                                  // ⬅ uses your existing pill
+                                onUpload = { file, title, category ->
+                                    repository.addDocumentWithFile(screen.tripId, title, category, file)
+                                },
+                            )
+                        }
 
                         is Screen.DocViewer -> {
                             val doc = repository.documents.firstOrNull { it.id == screen.docId }
-                            if (doc == null) {
-                                navigator.back()
-                            } else {
-                                DocumentViewerScreen(doc = doc, onBack = { navigator.back() })
-                            }
+                            if (doc == null) navigator.back()
+                            else DocumentViewerScreen(
+                                doc = doc,
+                                onBack = { navigator.back() },
+                                onLoadBytes = { url -> repository.downloadBytes(url) },
+                                onMessage = { pillMessage = it },          // ⬅ ADD (your existing pill)
+                            )
                         }
 
                         is Screen.Checklist -> ChecklistScreen(
@@ -426,7 +444,6 @@ private fun AppContent(
         if (showBottomBar) {
             val items = listOf(
                 NavItem(Icons.Filled.Flight, s.myTrips, Screen.Home),
-                NavItem(Icons.Filled.Description, s.documents, Screen.Documents),
                 NavItem(Icons.Filled.CalendarMonth, s.calendar, Screen.Calendar),
                 NavItem(Icons.Filled.CurrencyExchange, s.currencyUnits, Screen.Currency),
                 NavItem(Icons.Filled.Settings, s.settings, Screen.Settings),

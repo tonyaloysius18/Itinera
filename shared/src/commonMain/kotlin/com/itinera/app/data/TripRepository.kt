@@ -12,6 +12,11 @@ import com.itinera.app.model.UserProfile
 import com.itinera.app.model.Activity
 import com.itinera.app.model.TripAccent
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsBytes
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.isSuccess
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -29,13 +34,16 @@ import kotlinx.datetime.LocalDate
 class TripRepository {
 
     val trips = mutableStateListOf<Trip>()
-    val documents = mutableStateListOf<DocItem>().apply { addAll(SampleData.documents) }
+    val documents = mutableStateListOf<DocItem>()
+
+    val docService = DocService()                        // ⬅ ADD
+
     val checklist = mutableStateListOf<ChecklistItem>()
 
     val unsplashApi = UnsplashApi()
     val authService = AuthService()
     val profileService = ProfileService()
-    val tripService = TripService()                                    // ⬅ ADD
+    val tripService = TripService()
 
     private val uploadClient = HttpClient()
 
@@ -262,5 +270,74 @@ class TripRepository {
         checklist.clear()
         activities.clear()
         profile = UserProfile()
+    }
+
+    fun addDocument(doc: DocItem) {
+        documents.add(doc)
+        val uid = authService.currentUid ?: return
+        ioScope.launch { runCatching { docService.saveDocument(uid, doc) } }
+    }
+
+    fun deleteDocument(docId: String) {
+        documents.removeAll { it.id == docId }
+        val uid = authService.currentUid ?: return
+        ioScope.launch { runCatching { docService.deleteDocument(uid, docId) } }
+    }
+
+    suspend fun loadDocuments(uid: String) {
+        runCatching {
+            val remote = docService.loadDocuments(uid)
+            documents.clear()
+            documents.addAll(remote)
+        }
+    }
+
+    suspend fun addDocumentWithFile(
+        tripId: String,
+        title: String,
+        category: String,
+        file: PickedFile,
+    ): Boolean {
+        val uid = authService.currentUid ?: return false
+        return try {
+            val url = uploadFileToStorage(uploadClient, file.bytes, file.fileName, file.mimeType)
+            val doc = DocItem(
+                id = "doc_${kotlin.random.Random.nextLong()}",
+                tripId = tripId,
+                title = title,
+                category = category,
+                fileName = file.fileName,
+                fileUrl = url,
+                mimeType = file.mimeType,
+            )
+            documents.add(doc)
+            docService.saveDocument(uid, doc)
+            true
+        } catch (e: Exception) {
+            println("DOC UPLOAD FAILED: ${e.message}")
+            false
+        }
+    }
+
+    suspend fun loadBytes(url: String): ByteArray? {
+        return try {
+            uploadClient.get(url).bodyAsBytes()
+        } catch (e: Exception) {
+            println("ITINERA: LOAD BYTES FAILED — ${e.message}")
+            null
+        }
+    }
+
+    suspend fun downloadBytes(url: String): ByteArray? = try {
+        val response = uploadClient.get(url)
+        if (response.status.isSuccess()) {
+            response.body<ByteArray>()
+        } else {
+            println("DOC DOWNLOAD HTTP ${response.status}: ${response.bodyAsText().take(200)}")
+            null
+        }
+    } catch (e: Exception) {
+        println("DOC DOWNLOAD FAILED: ${e.message}")
+        null
     }
 }

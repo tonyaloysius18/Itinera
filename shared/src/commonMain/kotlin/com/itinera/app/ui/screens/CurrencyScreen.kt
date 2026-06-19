@@ -295,7 +295,7 @@ fun CurrencyScreen(
                     }) {
                         Icon(
                             Icons.Filled.SwapVert,
-                            contentDescription = "Swap",
+                            contentDescription = s.swap,
                             tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.rotate(iconRotation),
 
@@ -463,6 +463,7 @@ private fun RateChartCard(
     from: String,
     to: String,
 ) {
+    val s = LocalStrings.current
     val accent = MaterialTheme.colorScheme.secondary
     val gridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f)
     val labelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -481,7 +482,7 @@ private fun RateChartCard(
     ) {
         Column(Modifier.padding(16.dp)) {
             Text(
-                "$from \u2192 $to (30 days)",
+                "$from \u2192 $to (${s.days})",
                 style = MaterialTheme.typography.bodySmall,
                 color = labelColor,
             )
@@ -529,7 +530,7 @@ private fun RateChartCard(
             Row(Modifier.fillMaxWidth()) {
                 Text(startLabel, style = MaterialTheme.typography.bodySmall, color = labelColor)
                 Spacer(Modifier.weight(1f))
-                Text("Today", style = MaterialTheme.typography.bodySmall, color = labelColor)
+                Text(s.today, style = MaterialTheme.typography.bodySmall, color = labelColor)
             }
         }
     }
