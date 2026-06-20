@@ -277,7 +277,7 @@ fun TripDetailScreen(
             ) {
                 Button(
                     onClick = onChecklist,
-                    modifier = Modifier.padding(bottom = 60.dp),
+                    modifier = Modifier.padding(bottom = 60.dp).height(50.dp),
                     contentPadding = PaddingValues(horizontal = 25.dp, vertical = 8.dp),
                     shape = androidx.compose.foundation.shape.CircleShape,
                 ) {
@@ -286,7 +286,7 @@ fun TripDetailScreen(
                 Spacer(Modifier.width(30.dp))
                 Button(
                     onClick = { showAddChooser = true },
-                    modifier = Modifier.padding(bottom = 60.dp),
+                    modifier = Modifier.padding(bottom = 60.dp).height(50.dp),
                     contentPadding = PaddingValues(horizontal = 25.dp, vertical = 8.dp),
                     shape = androidx.compose.foundation.shape.CircleShape,
                 ) {

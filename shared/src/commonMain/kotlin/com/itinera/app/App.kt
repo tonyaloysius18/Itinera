@@ -540,7 +540,8 @@ private fun AppContent(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
-                .padding(bottom = 20.dp),   // ⬅ even lower (was 60dp)
+                .padding(bottom = 8.dp)
+                .offset(y = 2.dp),
         )
 
         MessagePill(
@@ -548,7 +549,8 @@ private fun AppContent(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
-                .padding(bottom = 80.dp),   // ⬅ even lower (was 120dp)
+                .padding(bottom = 60.dp)
+                .offset(y = 2.dp),
         )
     }
 }

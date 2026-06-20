@@ -257,7 +257,7 @@ fun AddExpenseScreen(
                 onClick = { if (canSave) save() },
                 enabled = canSave,
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 80.dp).padding(bottom = 60.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 80.dp).padding(bottom = 60.dp).height(50.dp),
             ) { Text(s.save) }
         }
     }
