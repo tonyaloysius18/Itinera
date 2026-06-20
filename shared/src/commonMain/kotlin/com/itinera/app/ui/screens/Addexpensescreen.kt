@@ -24,7 +24,6 @@ import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.Expense
 import com.itinera.app.model.ExpenseShare
 import com.itinera.app.model.Trip
-import com.itinera.app.model.fullName
 import com.itinera.app.ui.components.TopBar
 import kotlin.math.abs
 import kotlin.math.round
@@ -57,7 +56,6 @@ fun AddExpenseScreen(
     existing: Expense?,
     onBack: () -> Unit,
     onSave: (Expense) -> Unit,
-    //onMessage: (String) -> Unit,
 ) {
     val s = LocalStrings.current
     val travellers = trip.travellers
@@ -120,7 +118,7 @@ fun AddExpenseScreen(
         onSave(expense)
     }
 
-    fun nameOf(id: String) = travellers.firstOrNull { it.id == id }?.fullName ?: "?"
+    fun nameOf(id: String) = travellers.firstOrNull { it.id == id }?.firstName ?: "?"
 
     fun String.toTitleCase(): String =
         split(" ").joinToString(" ") { word ->
@@ -129,83 +127,89 @@ fun AddExpenseScreen(
             }
         }
 
-    // fire a toast pill once, the moment custom amounts match a real total
-//    LaunchedEffect(customMode, customMatches, amount) {
-//        if (customMode && customMatches && amount > 0.0) {
-//            onMessage(s.splitMatches)
-//        }
-//    }
+    // local toast pill (positioned just above the nav pill area, only on this screen)
+    var pillText by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(customMode, customMatches, amount) {
+        if (customMode && customMatches && amount > 0.0) {
+            pillText = s.splitMatches
+            kotlinx.coroutines.delay(2000)
+            pillText = null
+        }
+    }
 
-    Column(Modifier.fillMaxSize()) {
-        TopBar(
-            title = if (existing == null) s.addExpense else s.editExpense,
-            onBack = onBack,
-        )
-
-        Column(
-            Modifier.fillMaxSize().padding(16.dp),
-        ) {
-            // Fixed top inputs
-            OutlinedTextField(
-                value = description,
-                onValueChange = { description = it.toTitleCase() },
-                label = { Text(s.description) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
+    Box(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize().imePadding()) {
+            TopBar(
+                title = if (existing == null) s.addExpense else s.editExpense,
+                onBack = onBack,
             )
-            Spacer(Modifier.height(12.dp))
 
-            OutlinedTextField(
-                value = amountText,
-                onValueChange = { amountText = it },
-                label = { Text(s.amount) },
-                prefix = { Text(currencySymbolOrCode(trip.currencyCode)) },
-                singleLine = true,
-                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-            )
-            Spacer(Modifier.height(12.dp))
-
-            // Paid by
-            ExposedDropdownMenuBox(expanded = paidMenuOpen, onExpandedChange = { paidMenuOpen = it }) {
+            // ── Fixed top section (does NOT scroll) ──────────────────────
+            Column(Modifier.padding(horizontal = 16.dp).padding(top = 16.dp)) {
                 OutlinedTextField(
-                    value = nameOf(paidById),
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text(s.paidByLabel) },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = paidMenuOpen) },
-                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                    value = description,
+                    onValueChange = { description = it.toTitleCase() },
+                    label = { Text(s.description) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                 )
-                ExposedDropdownMenu(expanded = paidMenuOpen, onDismissRequest = { paidMenuOpen = false }, shape = RoundedCornerShape(14.dp)) {
-                    travellers.forEach { t ->
-                        DropdownMenuItem(
-                            text = { Text(t.fullName) },
-                            onClick = { paidById = t.id; paidMenuOpen = false },
-                        )
+                Spacer(Modifier.height(12.dp))
+
+                OutlinedTextField(
+                    value = amountText,
+                    onValueChange = { amountText = it },
+                    label = { Text(s.amount) },
+                    prefix = { Text(currencySymbolOrCode(trip.currencyCode)) },
+                    singleLine = true,
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                )
+                Spacer(Modifier.height(12.dp))
+
+                // Paid by
+                ExposedDropdownMenuBox(expanded = paidMenuOpen, onExpandedChange = { paidMenuOpen = it }) {
+                    OutlinedTextField(
+                        value = nameOf(paidById),
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text(s.paidByLabel) },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = paidMenuOpen) },
+                        modifier = Modifier.menuAnchor().fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                    )
+                    ExposedDropdownMenu(expanded = paidMenuOpen, onDismissRequest = { paidMenuOpen = false }) {
+                        travellers.forEach { t ->
+                            DropdownMenuItem(
+                                text = { Text(t.firstName) },
+                                onClick = { paidById = t.id; paidMenuOpen = false },
+                            )
+                        }
                     }
                 }
-            }
-            Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(20.dp))
 
-            // Split mode
-            Text(s.splitBetween, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-            Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(selected = !customMode, onClick = { customMode = false }, label = { Text(s.splitEqually) })
-                FilterChip(selected = customMode, onClick = { customMode = true }, label = { Text(s.splitCustom) })
+                // Split mode
+                Text(s.splitBetween, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                Spacer(Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(selected = !customMode, onClick = { customMode = false }, label = { Text(s.splitEqually) })
+                    FilterChip(selected = customMode, onClick = { customMode = true }, label = { Text(s.splitCustom) })
+                }
             }
-            Spacer(Modifier.height(8.dp))
 
-            // Scrollable list of involved travellers
+            // ── Scrollable travellers list (ONLY this scrolls) ───────────
             Column(
-                Modifier.weight(1f).verticalScroll(rememberScrollState()),
+                Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp),
             ) {
+                Spacer(Modifier.height(8.dp))
                 travellers.forEach { t ->
                     val checked = involved[t.id] == true
-                    Spacer(Modifier.height(12.dp))
                     Row(
                         Modifier
                             .fillMaxWidth()
@@ -216,7 +220,7 @@ fun AddExpenseScreen(
                     ) {
                         RoundCheckbox(checked = checked)
                         Spacer(Modifier.width(12.dp))
-                        Text(t.fullName, Modifier.weight(1f))
+                        Text(t.firstName, Modifier.weight(1f))
                         if (checked) {
                             if (customMode) {
                                 OutlinedTextField(
@@ -235,11 +239,14 @@ fun AddExpenseScreen(
                             }
                         }
                     }
+                    Spacer(Modifier.height(12.dp))
                 }
+            }
 
+            // ── Fixed bottom section (hint + Save, does NOT scroll) ───────
+            Column(Modifier.padding(horizontal = 16.dp)) {
                 // custom sum hint — only show remaining/over while it doesn't match
                 if (customMode && amount > 0.0 && !customMatches) {
-                    Spacer(Modifier.height(8.dp))
                     val diff = amount - customSum
                     val msg = if (diff > 0) "${s.remaining}: ${formatMoney(diff, trip.currencyCode)}"
                     else "${s.over}: ${formatMoney(-diff, trip.currencyCode)}"
@@ -247,18 +254,43 @@ fun AddExpenseScreen(
                         msg,
                         style = MaterialTheme.typography.bodySmall,
                         color = Color(0xFFE8590C),
+                        modifier = Modifier.padding(bottom = 8.dp),
                     )
                 }
-                Spacer(Modifier.height(16.dp))
-            }
 
-            // Fixed bottom save button
-            Button(
-                onClick = { if (canSave) save() },
-                enabled = canSave,
-                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 80.dp).padding(bottom = 60.dp).height(50.dp),
-            ) { Text(s.save) }
+                Button(
+                    onClick = { if (canSave) save() },
+                    enabled = canSave,
+                    colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 100.dp).padding(top = 8.dp, bottom = 32.dp).height(50.dp),
+                ) { Text(s.save) }
+
+                // clears the iPhone home indicator (Surface now bleeds to the bottom edge)
+                Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.safeDrawing))
+            }
+        }
+
+        // local toast pill — sits just above the bottom area
+        androidx.compose.animation.AnimatedVisibility(
+            visible = pillText != null,
+            enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.slideInVertically { it / 2 },
+            exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.slideOutVertically { it / 2 },
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 140.dp),
+        ) {
+            Surface(
+                shape = RoundedCornerShape(24.dp),
+                color = Color.DarkGray.copy(alpha = 0.6f),
+                shadowElevation = 6.dp,
+            ) {
+                Text(
+                    pillText ?: "",
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+                )
+            }
         }
     }
 }

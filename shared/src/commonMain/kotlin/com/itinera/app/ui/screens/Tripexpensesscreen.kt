@@ -28,7 +28,6 @@ import com.itinera.app.model.Trip
 import com.itinera.app.model.computeBalances
 import com.itinera.app.model.computePairwiseDebts
 import com.itinera.app.model.computeSettlements
-import com.itinera.app.model.fullName
 import com.itinera.app.ui.components.CardShape
 import com.itinera.app.ui.components.EmptyState
 import com.itinera.app.ui.components.TopBar
@@ -50,7 +49,7 @@ fun TripExpensesScreen(
     var expandedId by remember { mutableStateOf<String?>(null) }
 
     fun nameOf(id: String): String =
-        trip.travellers.firstOrNull { it.id == id }?.fullName ?: "?"
+        trip.travellers.firstOrNull { it.id == id }?.firstName ?: "?"
 
     val total = expenses.sumOf { it.amount }
     val travellerIds = trip.travellers.map { it.id }
