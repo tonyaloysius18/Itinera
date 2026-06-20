@@ -10,6 +10,7 @@ import com.itinera.app.model.Leg
 import com.itinera.app.model.Trip
 import com.itinera.app.model.UserProfile
 import com.itinera.app.model.Activity
+import com.itinera.app.model.Expense
 import com.itinera.app.model.Traveller
 import com.itinera.app.model.TripAccent
 import io.ktor.client.HttpClient
@@ -46,6 +47,10 @@ class TripRepository {
     val authService = AuthService()
     val profileService = ProfileService()
     val tripService = TripService()
+
+    val expenseService = ExpenseService()
+
+    val expenses = mutableStateListOf<Expense>()
 
     private val uploadClient = HttpClient()
 
@@ -272,6 +277,8 @@ class TripRepository {
         checklist.clear()
         activities.clear()
         profile = UserProfile()
+        expenses.clear()
+
     }
 
     fun addDocument(doc: DocItem) {
@@ -402,5 +409,43 @@ class TripRepository {
             trips[idx] = updated
             persist(updated)
         }
+
+    fun expensesForTrip(tripId: String): List<Expense> =
+        expenses.filter { it.tripId == tripId }
+
+    fun addExpense(expense: Expense) {
+        expenses.add(expense)
+        val uid = authService.currentUid ?: return
+        ioScope.launch { runCatching { expenseService.saveExpense(uid, expense) } }
+    }
+
+    fun updateExpense(expense: Expense) {
+        val i = expenses.indexOfFirst { it.id == expense.id }
+        if (i >= 0) expenses[i] = expense
+        val uid = authService.currentUid ?: return
+        ioScope.launch { runCatching { expenseService.saveExpense(uid, expense) } }
+    }
+
+    fun deleteExpense(expenseId: String) {
+        expenses.removeAll { it.id == expenseId }
+        val uid = authService.currentUid ?: return
+        ioScope.launch { runCatching { expenseService.deleteExpense(uid, expenseId) } }
+    }
+
+    suspend fun loadExpenses(uid: String) {
+        runCatching {
+            val remote = expenseService.loadExpenses(uid)
+            expenses.clear()
+            expenses.addAll(remote)
+        }
+    }
+
+    fun setTripCurrency(tripId: String, code: String) {
+        val i = trips.indexOfFirst { it.id == tripId }
+        if (i >= 0) {
+            trips[i] = trips[i].copy(currencyCode = code)
+            persist(trips[i])
+        }
+    }
 
 }

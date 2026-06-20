@@ -128,6 +128,12 @@ data class Strings(
     val day: String, val editLeg: String, val close: String,
     val swap: String, val capture: String, val profilePhoto: String, val changePhoto: String, val selected: String, val itineraLogo: String, val share: String, val shareFailed: String,
     val travellers: String, val addTraveller: String, val editTraveller: String, val deleteTravellerQ: String, val you: String, val phone: String,
+    val split: String, val noTripsToSplit: String, val noTripsToSplitSubtitle: String, val expenseSingular: String, val expensePlural: String, val noExpenses: String,
+    val noExpensesSubtitle: String, val totalSpent: String, val settleUp: String, val allSettled: String, val expensesLabel: String, val paidBy: String, val paidFor: String, val paid: String,
+    val addExpense: String, val editExpense: String, val tripCurrency: String, val deleteExpenseQ: String, val description: String, val over: String,
+    val paidByLabel: String, val splitBetween: String, val splitEqually: String, val splitCustom: String, val splitMatches: String, val remaining: String,
+    val whoOwesWhom: String, val whoOwesWhomHint: String, val splitLabel: String, val owes: String, val settleUpHint: String,
+
 
 )
 
@@ -171,7 +177,14 @@ private val EN = Strings(
     category = "Category", accommodation = "Accommodation", attraction = "Attraction", uploading = "Uploading…", uploadFailed = "Couldn't upload the file",
     day = "Day", editLeg = "Edit Leg", close = "Close",
     swap = "Swap", capture = "Capture", profilePhoto = "Profile photo", changePhoto = "Change photo", selected = "Selected", itineraLogo = "Itinera logo", share = "Share", shareFailed = "Failed to share",  travellers = "Travellers",
-    addTraveller = "Add traveller", editTraveller = "Edit traveller", deleteTravellerQ = "Remove this traveller?", you = "You", phone = "Phone",
+    addTraveller = "Add traveller", editTraveller = "Edit traveller", deleteTravellerQ = "Remove this traveller?", you = "You", phone = "Phone", split = "Split",
+    noTripsToSplit = "No trips yet", noTripsToSplitSubtitle = "Create a trip to start splitting expenses", expenseSingular = "expense",
+    expensePlural = "expenses", noExpenses = "No expenses yet", noExpensesSubtitle = "Add an expense to start splitting",
+    totalSpent = "Total spent", settleUp = "Settle up", allSettled = "All settled up", expensesLabel = "Expenses",
+    paidBy = "Paid by", addExpense = "Add Expense", editExpense = "Edit Expense", tripCurrency = "Trip currency",
+    deleteExpenseQ = "Delete this expense?", description = "Description", paidByLabel = "Paid by", splitBetween = "Split between",
+    splitEqually = "Equally", splitCustom = "Custom", splitMatches = "Amounts match the total ✓", remaining = "Remaining", over = "Over",
+    paidFor = "Paid for", paid = "Paid", settleUpHint = "Fewest payments", whoOwesWhom = "Who owes whom", whoOwesWhomHint = "Per person, netted", splitLabel = "Split", owes = "owes",
 )
 
 private val FR = EN.copy(

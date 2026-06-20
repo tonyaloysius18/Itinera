@@ -48,6 +48,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.material.icons.filled.ReceiptLong
 import com.itinera.app.data.imageQueryForTrip
 import com.itinera.app.ui.theme.ThemeMode
 import kotlin.math.abs
@@ -80,6 +81,7 @@ fun App() {
             repository.loadTrips(uid)
             repository.loadTrips(uid)
             repository.loadDocuments(uid)
+            repository.loadExpenses(uid)
             navigator.resetTo(Screen.Home)
         }
         authChecked = true
@@ -135,7 +137,7 @@ private fun AppContent(
     val focusManager = LocalFocusManager.current
 
     val scope = rememberCoroutineScope()
-    val topLevel = remember { setOf(Screen.Home, Screen.Calendar, Screen.Currency, Screen.Settings) }
+    val topLevel = remember { setOf(Screen.Home, Screen.Calendar, Screen.Currency, Screen.Split, Screen.Settings) }
 
     // Scroll-to-shrink logic
     var barScale by remember { mutableStateOf(1f) }
@@ -227,10 +229,14 @@ private fun AppContent(
             )
 
             else -> {
-                // All other screens render inside the Surface (with status-bar padding).
+                // Home: only TOP (status-bar) padding so the top bar clears the notch,
+                //       while cards still run edge-to-edge down to the bottom edge.
+                // Every other screen: full safe-area padding (top notch + bottom home indicator).
+                val homeScreen = current is Screen.Home
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()
+                        //.then(if (homeScreen) Modifier.statusBarsPadding() else Modifier.safeDrawingPadding()),
                         .statusBarsPadding(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
@@ -395,6 +401,47 @@ private fun AppContent(
                             onAdd = { text, group -> repository.addChecklistItem(screen.tripId, text, group) },
                         )
 
+                        is Screen.Split -> {
+                            SplitScreen(
+                                trips = repository.activeTrips(),
+                                expenses = repository.expenses,
+                                onOpenTrip = { navigator.push(Screen.TripExpenses(it)) },
+                            )
+                        }
+                        is Screen.TripExpenses -> {
+                            val trip = repository.tripById(screen.tripId)
+                            if (trip == null) navigator.back()
+                            else {
+                                LaunchedEffect(screen.tripId) { repository.ensureOwnerTraveller(screen.tripId) }
+                                TripExpensesScreen(
+                                    trip = trip,
+                                    expenses = repository.expensesForTrip(screen.tripId),
+                                    onBack = { navigator.back() },
+                                    onAddExpense = { navigator.push(Screen.AddExpense(screen.tripId)) },
+                                    onEditExpense = { navigator.push(Screen.AddExpense(screen.tripId, it)) },
+                                    onDeleteExpense = { repository.deleteExpense(it) },
+                                    onSetCurrency = { repository.setTripCurrency(screen.tripId, it) },
+                                )
+                            }
+                        }
+
+                        is Screen.AddExpense -> {
+                            val trip = repository.tripById(screen.tripId)
+                            if (trip == null) navigator.back()
+                            else {
+                                val existing = screen.expenseId?.let { id -> repository.expenses.firstOrNull { it.id == id } }
+                                AddExpenseScreen(
+                                    trip = trip,
+                                    existing = existing,
+                                    onBack = { navigator.back() },
+                                    onSave = { exp ->
+                                        if (existing == null) repository.addExpense(exp) else repository.updateExpense(exp)
+                                        navigator.back()
+                                    },
+                                )
+                            }
+                        }
+
                         Screen.Calendar -> CalendarScreen(
                             trips = repository.trips,
                             onMarkAdded = { tripId, legId -> repository.markLegAddedToCalendar(tripId, legId) },
@@ -462,13 +509,18 @@ private fun AppContent(
                 NavItem(Icons.Filled.Flight, s.myTrips, Screen.Home),
                 NavItem(Icons.Filled.CalendarMonth, s.calendar, Screen.Calendar),
                 NavItem(Icons.Filled.CurrencyExchange, s.currencyUnits, Screen.Currency),
+                NavItem(Icons.Filled.ReceiptLong, s.split, Screen.Split),
                 NavItem(Icons.Filled.Settings, s.settings, Screen.Settings),
             )
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 20.dp)
+                    // keep just above the iPhone home indicator (and Android nav bar),
+                    // but sit low on the screen
+                    .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
+                    .padding(horizontal = 24.dp)
+                    .offset(y = 12.dp)  // ⬅ move it lower on the screen
                     .graphicsLayer {
                         scaleX = animatedScale
                         scaleY = animatedScale
@@ -477,27 +529,26 @@ private fun AppContent(
                         // keep it fully opaque — no translucency that reveals the shadow/background
                         alpha = 1f
                     },
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.BottomCenter,
             ) {
                 SlidingPillBar(current = current, items = items) { navigator.resetTo(it) }
             }
         }
 
-        // Message pill overlay — last child, so it floats above everything on every screen.
         MessagePill(
             message = pillMessage,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .navigationBarsPadding()
-                .padding(bottom = 110.dp),
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
+                .padding(bottom = 20.dp),   // ⬅ even lower (was 60dp)
         )
 
         MessagePill(
             message = pillMessageTop,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .navigationBarsPadding()
-                .padding(bottom = 180.dp),   // ⬅ tweak this value to taste
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
+                .padding(bottom = 80.dp),   // ⬅ even lower (was 120dp)
         )
     }
 }
@@ -611,7 +662,7 @@ private fun MessagePill(message: String?, modifier: Modifier = Modifier) {
         visible = message != null,
         enter = fadeIn() + slideInVertically { it / 2 },
         exit = fadeOut() + slideOutVertically { it / 2 },
-        modifier = modifier.offset(y = 95.dp),
+        modifier = modifier,
     ) {
         Surface(
             shape = RoundedCornerShape(24.dp),

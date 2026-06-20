@@ -213,6 +213,7 @@ fun EditProfileScreen(
                 Modifier
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
+                    .imePadding()
                     .padding(horizontal = 24.dp),
             ) {
                 OutlinedTextField(
@@ -343,6 +344,7 @@ fun EditProfileScreen(
                     }
                 }
                 Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.safeDrawing))
             }
         }
 

@@ -100,39 +100,39 @@ fun SettingsScreen(
                 }
             }
 
-            // Log out — bright red rounded button
+            // Action buttons row (Log out + Delete account)
             Spacer(Modifier.height(120.dp))
-
-            Button(
-                onClick = onLogOut,
-                modifier = Modifier.fillMaxWidth().height(52.dp).padding(horizontal = 60.dp),
-                shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = AccentRed,
-                    contentColor = Color.White,
-                ),
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null, modifier = Modifier.size(20.dp))
-                Spacer(Modifier.width(8.dp))
-                Text(s.logOut, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-            }
-
-            // Delete account — subtle text button below log out
-            Spacer(Modifier.height(12.dp))
-            Button(
-                onClick = { showDeleteDialog = true },              // ⬅ ADD: opens confirmation
-                modifier = Modifier.fillMaxWidth().height(52.dp).padding(horizontal = 80.dp),
-                shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = AccentRed,
-                    contentColor = Color.White,
+                Button(
+                    onClick = onLogOut,
+                    modifier = Modifier.weight(1f).height(52.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = AccentRed,
+                        contentColor = Color.White,
                     ),
-            ) {
-                Text(
-                    s.deleteAccount,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 14.sp,
-                )
+                    contentPadding = PaddingValues(horizontal = 8.dp)
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text(s.logOut, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, maxLines = 1)
+                }
+
+                Button(
+                    onClick = { showDeleteDialog = true },
+                    modifier = Modifier.weight(1f).height(52.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = AccentRed,
+                        contentColor = Color.White,
+                    ),
+                    contentPadding = PaddingValues(horizontal = 8.dp)
+                ) {
+                    Text(s.deleteAccount, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, maxLines = 1)
+                }
             }
 
             Spacer(Modifier.weight(1f))

@@ -70,6 +70,7 @@ data class Trip(
     val imageUrl: String? = null,
     val pinned: Boolean = false,        // ⬅ ADD
     val archived: Boolean = false,
+    val currencyCode: String = "EUR",
 )
 
 /** A document attached either to a whole trip or to a specific leg. */
@@ -111,7 +112,22 @@ data class ChecklistItem(
     val done: Boolean = false,
 )
 
+@Serializable
+data class ExpenseShare(
+    val travellerId: String,
+    val amount: Double,            // this person's share of the expense
+)
 
+@Serializable
+data class Expense(
+    val id: String,
+    val tripId: String,
+    val description: String,
+    val amount: Double,            // total
+    val paidByTravellerId: String,
+    val shares: List<ExpenseShare> = emptyList(),   // sums to amount
+    val createdAt: Long = 0L,
+)
 @Serializable                                   // ⬅ ADD
 data class UserProfile(
     val name: String = "",                      // ⬅ defaults added (Firestore needs them)
