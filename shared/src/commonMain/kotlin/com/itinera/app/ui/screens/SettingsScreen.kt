@@ -2,15 +2,20 @@ package com.itinera.app.ui.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Archive
+import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.ManageAccounts
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,25 +27,25 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.UserProfile
 import com.itinera.app.ui.components.TopBar
 
-private val AccentRed = Color(0xFFE03131)
-
 @Composable
 fun SettingsScreen(
     profile: UserProfile,
     onEditProfile: () -> Unit,
+    onAccount: () -> Unit,
     onAppearance: () -> Unit,
     onOpenLanguage: () -> Unit,
+    onNotifications: () -> Unit,
     onArchivedTrips: () -> Unit,
-    onLogOut: () -> Unit,
-    onDeleteAccount: () -> Unit,                    // ⬅ ADD
+    onExportTrips: () -> Unit,
+    onBackupStatus: () -> Unit,
+    onHelp: () -> Unit,
+    onAbout: () -> Unit,
 ) {
-
     fun String.toTitleCase(): String =
         split(" ").joinToString(" ") { word ->
             word.replaceFirstChar { c ->
@@ -48,17 +53,17 @@ fun SettingsScreen(
             }
         }
 
-
     val s = LocalStrings.current
     val primary = MaterialTheme.colorScheme.primary
-
-    var showDeleteDialog by remember { mutableStateOf(false) }    // ⬅ ADD
 
     Column(Modifier.fillMaxSize()) {
         TopBar(s.settings)
 
         Column(
-            Modifier.fillMaxSize().padding(horizontal = 16.dp),
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp),
         ) {
             // Profile card
             Spacer(Modifier.height(8.dp))
@@ -79,84 +84,51 @@ fun SettingsScreen(
                 }
             }
 
-            // Settings group card
+            // Group 1 — account & display
             Spacer(Modifier.height(20.dp))
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surface,
-                tonalElevation = 2.dp,
-            ) {
-                Column {
-                    SettingsRow(Icons.Filled.DarkMode, s.appearance, primary, onClick = onAppearance)
-                    ThinDivider()
-                    SettingsRow(Icons.Filled.Translate, s.language, primary, onClick = onOpenLanguage)
-                    ThinDivider()
-                    SettingsRow(Icons.Filled.Archive, s.archivedTrips.toTitleCase(), primary, onClick = onArchivedTrips)
-                    ThinDivider()
-                    SettingsRow(Icons.Filled.Download, s.exportTrips.toTitleCase(), primary) {}
-                    ThinDivider()
-                    SettingsRow(Icons.Filled.Info, s.about, primary) {}
-                }
+            SettingsCard {
+                SettingsRow(Icons.Filled.ManageAccounts, s.account, primary, onClick = onAccount)
+                ThinDivider()
+                SettingsRow(Icons.Filled.DarkMode, s.appearance, primary, onClick = onAppearance)
+                ThinDivider()
+                SettingsRow(Icons.Filled.Translate, s.language, primary, onClick = onOpenLanguage)
+                ThinDivider()
+                SettingsRow(Icons.Filled.Notifications, s.notifications, primary, onClick = onNotifications)
             }
 
-            // Action buttons row (Log out + Delete account)
-            Spacer(Modifier.height(120.dp))
-            Row(
-                Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Button(
-                    onClick = onLogOut,
-                    modifier = Modifier.weight(1f).height(52.dp),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = AccentRed,
-                        contentColor = Color.White,
-                    ),
-                    contentPadding = PaddingValues(horizontal = 8.dp)
-                ) {
-                    Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text(s.logOut, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, maxLines = 1)
-                }
-
-                Button(
-                    onClick = { showDeleteDialog = true },
-                    modifier = Modifier.weight(1f).height(52.dp),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = AccentRed,
-                        contentColor = Color.White,
-                    ),
-                    contentPadding = PaddingValues(horizontal = 8.dp)
-                ) {
-                    Text(s.deleteAccount, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, maxLines = 1)
-                }
+            // Group 2 — trips & data
+            Spacer(Modifier.height(16.dp))
+            SettingsCard {
+                SettingsRow(Icons.Filled.Archive, s.archivedTrips.toTitleCase(), primary, onClick = onArchivedTrips)
+                ThinDivider()
+                SettingsRow(Icons.Filled.Download, s.exportTrips.toTitleCase(), primary, onClick = onExportTrips)
+                ThinDivider()
+                SettingsRow(Icons.Filled.Backup, s.backupStatus, primary, onClick = onBackupStatus)
             }
 
-            Spacer(Modifier.weight(1f))
+            // Group 3 — support
+            Spacer(Modifier.height(16.dp))
+            SettingsCard {
+                SettingsRow(Icons.Filled.HelpOutline, s.help, primary, onClick = onHelp)
+                ThinDivider()
+                SettingsRow(Icons.Filled.Info, s.about, primary, onClick = onAbout)
+            }
+
+            Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.safeDrawing))
+            Spacer(Modifier.height(24.dp))
         }
     }
+}
 
-    // Confirmation dialog — deletion is irreversible
-    if (showDeleteDialog) {                                      // ⬅ ADD
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text(s.deleteAccount) },
-            text = { Text(s.deleteAccountConfirm) },
-            confirmButton = {
-                TextButton(onClick = {
-                    showDeleteDialog = false
-                    onDeleteAccount()
-                }) {
-                    Text(s.delete, color = AccentRed)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) { Text(s.cancel) }
-            },
-        )
+@Composable
+private fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 2.dp,
+    ) {
+        Column(content = content)
     }
 }
 

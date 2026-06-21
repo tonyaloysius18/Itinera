@@ -79,7 +79,6 @@ fun App() {
                 if (profile != null) repository.updateProfile(profile)
             } catch (e: Exception) { }
             repository.loadTrips(uid)
-            repository.loadTrips(uid)
             repository.loadDocuments(uid)
             repository.loadExpenses(uid)
             navigator.resetTo(Screen.Home)
@@ -87,9 +86,15 @@ fun App() {
         authChecked = true
     }
 
-    val activeStrings = remember(language) {
-        stringsFor(if (language == Language.SYSTEM) systemLanguage() else language)
-    }
+//    val activeStrings = remember(language) {
+//        stringsFor(if (language == Language.SYSTEM) systemLanguage() else language)
+//    }
+
+    val activeStrings = stringsFor(if (language == Language.SYSTEM) systemLanguage() else language)
+
+
+    //val activeStrings = stringsFor(Language.ENGLISH)
+
 
     val darkTheme = when (themeMode) {
         ThemeMode.SYSTEM -> isSystemInDarkTheme()
@@ -178,6 +183,9 @@ private fun AppContent(
         if (pillMessageTop != null) { delay(2000); pillMessageTop = null }
     }
 
+    var lastSyncedAt by remember { mutableStateOf<Long?>(null) }
+    var syncing by remember { mutableStateOf(false) }
+
     val showBottomBar = current in topLevel
 
     // ===== ROOT BOX: everything overlays here, so the pill shows on every screen incl. Login =====
@@ -212,8 +220,9 @@ private fun AppContent(
                                 }
                             } catch (e: Exception) { }
                             repository.loadTrips(uid)
-                            repository.loadTrips(uid)
                             repository.loadDocuments(uid)
+                            repository.loadExpenses(uid)
+                            lastSyncedAt = nowMillisApp()// ⬅ was missing — expenses now sync on fresh sign-in
                         }
                         navigator.resetTo(Screen.Home)
                     }
@@ -231,12 +240,12 @@ private fun AppContent(
             else -> {
                 // Home: only TOP (status-bar) padding so the top bar clears the notch,
                 //       while cards still run edge-to-edge down to the bottom edge.
-                // Every other screen: full safe-area padding (top notch + bottom home indicator).
-                val homeScreen = current is Screen.Home
+                // Other screens: TOP padding for the notch, but the background bleeds
+                //       to the BOTTOM edge (no black strip above the home indicator).
+                //       Scrollable screens add their own bottom inset where needed.
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()
-                        //.then(if (homeScreen) Modifier.statusBarsPadding() else Modifier.safeDrawingPadding()),
                         .statusBarsPadding(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
@@ -450,12 +459,30 @@ private fun AppContent(
                         Screen.Settings -> SettingsScreen(
                             profile = repository.profile,
                             onEditProfile = { navigator.push(Screen.EditProfile) },
+                            onAccount = { navigator.push(Screen.Account) },
                             onAppearance = { navigator.push(Screen.Appearance) },
                             onOpenLanguage = { navigator.push(Screen.LanguagePicker) },
+                            onNotifications = { navigator.push(Screen.Notifications) },
                             onArchivedTrips = { navigator.push(Screen.ArchivedTrips) },
+                            onExportTrips = { navigator.push(Screen.ExportTrips) },
+                            onBackupStatus = { navigator.push(Screen.BackupStatus) },
+                            onHelp = { navigator.push(Screen.Help) },
+                            onAbout = { navigator.push(Screen.About) },
+                        )
+
+                        Screen.Account -> AccountScreen(
+                            profile = repository.profile,
+                            onBack = { navigator.back() },
+                            onAddAccount = {
+                                // Phase 1: log out current, then show sign-in for a different account.
+                                // Phase 2: keep current session + add to a remembered-accounts list.
+                                repository.clearLocal()
+                                navigator.resetTo(Screen.Login)
+                            },
                             onLogOut = {
                                 repository.clearLocal()
-                                navigator.resetTo(Screen.Login) },
+                                navigator.resetTo(Screen.Login)
+                            },
                             onDeleteAccount = {
                                 scope.launch {
                                     val uid = repository.authService.currentUid
@@ -465,7 +492,7 @@ private fun AppContent(
                                         }
                                         repository.authService.deleteAccount()             // then Auth account
                                         navigator.resetTo(Screen.Login)
-                                        pillMessage = s.accountDeleted                     // ⬅ show success pill
+                                        pillMessage = s.accountDeleted
                                     } catch (e: Exception) {
                                         // likely "requires recent login" — no success pill
                                         navigator.resetTo(Screen.Login)
@@ -473,6 +500,46 @@ private fun AppContent(
                                 }
                             },
                         )
+
+                        Screen.Notifications -> NotificationsScreen(onBack = { navigator.back() })
+                        Screen.BackupStatus -> BackupStatusScreen(
+                            profile = repository.profile,
+                            tripCount = repository.trips.size,
+                            expenseCount = repository.expenses.size,
+                            documentCount = repository.documents.size,
+                            lastSyncedLabel = syncLabel(lastSyncedAt, s),
+                            syncing = syncing,
+                            onSyncNow = {
+                                val uid = repository.authService.currentUid
+                                if (uid != null && !syncing) {
+                                    scope.launch {
+                                        syncing = true
+                                        try {
+                                            repository.loadTrips(uid)
+                                            repository.loadDocuments(uid)
+                                            repository.loadExpenses(uid)
+                                            lastSyncedAt = nowMillisApp()
+                                            pillMessage = s.syncComplete
+                                        } catch (e: Exception) {
+                                            pillMessage = s.syncFailed
+                                        } finally {
+                                            syncing = false
+                                        }
+                                    }
+                                }
+                            },
+                            onBack = { navigator.back() },
+                        )
+                        Screen.Help -> HelpScreen(onBack = { navigator.back() })
+
+                        Screen.ExportTrips -> ExportTripsScreen(
+                            trips = repository.activeTrips(),
+                            activitiesForTrip = { repository.activitiesForTrip(it) },
+                            expensesForTrip = { repository.expensesForTrip(it) },
+                            onBack = { navigator.back() },
+                        )
+
+                        Screen.About -> AboutScreen(onBack = { navigator.back() })
 
                         Screen.Appearance -> AppearanceScreen(
                             selected = themeMode,
@@ -520,7 +587,7 @@ private fun AppContent(
                     // but sit low on the screen
                     .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
                     .padding(horizontal = 24.dp)
-                    .offset(y = 12.dp)  // ⬅ move it lower on the screen
+                    .padding(top = 6.dp)   // ⬅ no extra bottom padding → sits lower
                     .graphicsLayer {
                         scaleX = animatedScale
                         scaleY = animatedScale
@@ -529,19 +596,19 @@ private fun AppContent(
                         // keep it fully opaque — no translucency that reveals the shadow/background
                         alpha = 1f
                     },
-                contentAlignment = Alignment.BottomCenter,
+                contentAlignment = Alignment.Center,
             ) {
                 SlidingPillBar(current = current, items = items) { navigator.resetTo(it) }
             }
         }
 
+        // Message pill overlay — last child, so it floats above everything on every screen.
         MessagePill(
             message = pillMessage,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
-                .padding(bottom = 8.dp)
-                .offset(y = 2.dp),
+                .padding(bottom = 60.dp),   // ⬅ lower on screen (smaller = lower)
         )
 
         MessagePill(
@@ -549,8 +616,7 @@ private fun AppContent(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
-                .padding(bottom = 60.dp)
-                .offset(y = 2.dp),
+                .padding(bottom = 120.dp),   // ⬅ tweak this value to taste (smaller = lower)
         )
     }
 }
@@ -678,5 +744,24 @@ private fun MessagePill(message: String?, modifier: Modifier = Modifier) {
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
             )
         }
+    }
+}
+
+@OptIn(kotlin.time.ExperimentalTime::class)
+private fun nowMillisApp(): Long =
+    kotlin.time.Clock.System.now().toEpochMilliseconds()
+
+/** Human "time ago" label for the last sync, using localized strings. */
+private fun syncLabel(lastSyncedAt: Long?, s: com.itinera.app.i18n.Strings): String {
+    if (lastSyncedAt == null) return s.never
+    val diff = nowMillisApp() - lastSyncedAt
+    val mins = diff / 60_000
+    val hours = diff / 3_600_000
+    val days = diff / 86_400_000
+    return when {
+        diff < 60_000 -> s.justNow
+        mins < 60 -> "$mins ${if (mins == 1L) s.minuteAgo else s.minutesAgo}"
+        hours < 24 -> "$hours ${if (hours == 1L) s.hourAgo else s.hoursAgo}"
+        else -> "$days ${if (days == 1L) s.dayAgo else s.daysAgo}"
     }
 }

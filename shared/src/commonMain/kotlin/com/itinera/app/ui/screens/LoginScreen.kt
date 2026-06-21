@@ -240,13 +240,16 @@ fun LoginScreen(
             OutlinedButton(
                 onClick = {
                     scope.launch {
-                        val tokens = googleHelper.signIn()
-                        if (tokens != null) {
-                            try {
+                        try {
+                            val tokens = googleHelper.signIn()
+                            if (tokens != null) {
                                 authService.signInWithGoogle(tokens.idToken, tokens.accessToken)
                                 onAuthed()
-                            } catch (e: Exception) {
-                                onMessage("Google failed: ${e.message}")
+                            }
+                        } catch (e: Exception) {
+                            val msg = e.message ?: "Unknown error"
+                            if (!msg.contains("cancel", ignoreCase = true)) {
+                                onMessage("Google failed: $msg")
                             }
                         }
                     }

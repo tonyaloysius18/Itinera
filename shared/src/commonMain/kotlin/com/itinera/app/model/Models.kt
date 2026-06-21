@@ -25,6 +25,7 @@ enum class DocType { PDF, IMAGE }
 @Serializable
 enum class TripAccent { BLUE, GREEN, CORAL, PURPLE }
 
+@Serializable
 data class Activity(
     val id: String,
     val tripId: String,

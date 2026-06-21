@@ -33,14 +33,26 @@ sealed interface Screen {
 
     data class TripExpenses(val tripId: String) : Screen
     data class AddExpense(val tripId: String, val expenseId: String? = null) : Screen
-
     data class Travellers(val tripId: String) : Screen
     data class Checklist(val tripId: String) : Screen
     data object Calendar : Screen
     data object Settings : Screen
 
+    data object Account : Screen
+
+    data object Notifications : Screen
+
+    data object BackupStatus : Screen
+
+    data object Help : Screen
+
+    data object About : Screen
+
     data object ArchivedTrips : Screen
     data object LanguagePicker : Screen
+
+    data object ExportTrips : Screen
+
 }
 
 /**

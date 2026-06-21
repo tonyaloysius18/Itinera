@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.itinera.app.i18n.Language
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.ui.components.TopBar
+import androidx.compose.runtime.remember
 
 @Composable
 fun LanguageScreen(
@@ -26,78 +27,91 @@ fun LanguageScreen(
 ) {
     val s = LocalStrings.current
 
-    Surface(                                                    // ⬅ ADDED: themed full-screen backdrop
-        modifier = Modifier.fillMaxSize(),                      // ⬅ ADDED
-        color = MaterialTheme.colorScheme.background,           // ⬅ ADDED: paints under status bar = no light band
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background,
     ) {
         Column(
             Modifier
                 .fillMaxSize()
-                .statusBarsPadding()                            // ⬅ ADDED back: header clears the notch
-                .padding(horizontal = 16.dp)
+                .statusBarsPadding()
         ) {
-            TopBar(s.language, onBack = onBack, modifier = Modifier.offset(x = (-15).dp))
-            Column(
-                Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
+            // Header + fixed cards keep the horizontal inset
+            TopBar(
+                s.language,
+                onBack = onBack,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .offset(x = (-15).dp),
+            )
+
+            // ── Fixed (non-scrolling) section ──
+
+            // "System default" card
+            Spacer(Modifier.height(8.dp))
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 2.dp,
             ) {
-
-                // "System default" card
-                Spacer(Modifier.height(8.dp))
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),         // ⬅ CHANGED: removed .padding(horizontal = 16.dp)
-                    shape = RoundedCornerShape(16.dp),
-                    color = MaterialTheme.colorScheme.surface,
-                    tonalElevation = 2.dp,
-                ) {
-                    LanguageRow(
-                        title = s.followPhone,
-                        subtitle = Language.SYSTEM.englishName,
-                        selected = selected == Language.SYSTEM,
-                        onClick = { onSelect(Language.SYSTEM) },
-                    )
-                }
-
-                // Section header
-                Text(
-                    s.chooseLanguage,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-                    modifier = Modifier.padding(start = 8.dp, top = 24.dp, bottom = 8.dp),  // ⬅ CHANGED: start 24→8 (outer padding now handles indent)
+                LanguageRow(
+                    title = s.followPhone,
+                    subtitle = s.systemDefault,
+                    selected = selected == Language.SYSTEM,
+                    onClick = { onSelect(Language.SYSTEM) },
                 )
+            }
 
-                // Main language list card
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),         // ⬅ CHANGED: removed .padding(horizontal = 16.dp)
-                    shape = RoundedCornerShape(16.dp),
-                    color = MaterialTheme.colorScheme.surface,
-                    tonalElevation = 2.dp,
+            // Section header
+            Text(
+                s.chooseLanguage,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                modifier = Modifier.padding(start = 24.dp, top = 24.dp, bottom = 8.dp),
+            )
+
+            // ── Scrollable section: ONLY the language list, bled to the bottom edge ──
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(horizontal = 16.dp),
+                // round only the TOP corners so the card merges with the bottom edge
+                shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 2.dp,
+            ) {
+                Column(
+                    Modifier.verticalScroll(rememberScrollState())
                 ) {
-                    Column {
-                        val langs = Language.entries
+                    val langs = remember {
+                        Language.entries
                             .filter { it != Language.SYSTEM }
                             .sortedWith(
-                                compareByDescending<Language> { it == Language.ENGLISH }   // English first
-                                    .thenBy { it.nativeName }                              // then A→Z
+                                compareByDescending<Language> { it == Language.ENGLISH }
+                                    .thenBy { it.nativeName }
                             )
-                        langs.forEachIndexed { index, lang ->
-                            LanguageRow(
-                                title = lang.nativeName,
-                                subtitle = lang.englishName,
-                                selected = selected == lang,
-                                onClick = { onSelect(lang) },
-                            )
-                            if (index < langs.lastIndex) {
-                                HorizontalDivider(
-                                    modifier = Modifier.padding(start = 16.dp),
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
-                                )
-                            }
-                        }
-
-                        Spacer(Modifier.navigationBarsPadding())
                     }
+                    langs.forEachIndexed { index, lang ->
+                        LanguageRow(
+                            title = lang.nativeName,
+                            subtitle = lang.englishName,
+                            selected = selected == lang,
+                            onClick = { onSelect(lang) },
+                        )
+                        if (index < langs.lastIndex) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(start = 16.dp),
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                            )
+                        }
+                    }
+
+                    // keeps the LAST item clear of the gesture bar, inside the scroll
+                    Spacer(Modifier.navigationBarsPadding())
                 }
             }
         }
