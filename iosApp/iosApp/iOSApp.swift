@@ -4,9 +4,11 @@ import GoogleSignIn
 import EventKitUI
 import UniformTypeIdentifiers
 import Shared
+import UserNotifications
 
 @main
 struct iOSApp: App {
+    @UIApplicationDelegateAdaptor(NotificationAppDelegate.self) var appDelegate
 
     init() {
         FirebaseApp.configure()
@@ -125,5 +127,35 @@ final class CalendarEditDelegate: NSObject, EKEventEditViewDelegate {
     func eventEditViewController(_ controller: EKEventEditViewController,
                                  didCompleteWith action: EKEventEditViewAction) {
         controller.dismiss(animated: true)
+    }
+}
+
+// Handles notification presentation (foreground) and taps.
+final class NotificationAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+    ) -> Bool {
+        UNUserNotificationCenter.current().delegate = self
+        return true
+    }
+
+    // Show the banner + play sound even when the app is in the FOREGROUND.
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .sound, .list])
+    }
+
+    // Fires when the user TAPS the notification.
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        // The app foregrounds automatically. (Deep-linking handled in Part 2.)
+        completionHandler()
     }
 }

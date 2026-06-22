@@ -81,6 +81,7 @@ fun App() {
             repository.loadTrips(uid)
             repository.loadDocuments(uid)
             repository.loadExpenses(uid)
+            repository.rescheduleAllReminders()
             navigator.resetTo(Screen.Home)
         }
         authChecked = true
@@ -516,7 +517,10 @@ private fun AppContent(
                                     if (uid != null) repository.profileService.saveProfile(uid, updated)
                                 }
                             },
-                            onRequestPermission = { scope.launch { scheduler.requestPermission() } },
+                            onRequestPermission = {
+                                NotificationPermission.request()                       // ⬅ shows Android system dialog
+                                scope.launch { repository.notificationScheduler.requestPermission() }  // iOS path
+                            },
                             onBack = { navigator.back() },
                         )
 
