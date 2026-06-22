@@ -183,6 +183,9 @@ private fun AppContent(
         if (pillMessageTop != null) { delay(2000); pillMessageTop = null }
     }
 
+    val scheduler = remember { NotificationScheduler() }
+
+
     var lastSyncedAt by remember { mutableStateOf<Long?>(null) }
     var syncing by remember { mutableStateOf(false) }
 
@@ -501,7 +504,22 @@ private fun AppContent(
                             },
                         )
 
-                        Screen.Notifications -> NotificationsScreen(onBack = { navigator.back() })
+                        Screen.Notifications -> NotificationsScreen(
+                            offsetMinutes = repository.profile.reminderOffsetMinutes,
+                            hasPermission = scheduler.hasPermission(),
+                            onChangeOffset = { newOffset ->
+                                val updated = repository.profile.copy(reminderOffsetMinutes = newOffset)
+                                repository.updateProfile(updated)
+                                repository.rescheduleAllReminders()
+                                scope.launch {
+                                    val uid = repository.authService.currentUid
+                                    if (uid != null) repository.profileService.saveProfile(uid, updated)
+                                }
+                            },
+                            onRequestPermission = { scope.launch { scheduler.requestPermission() } },
+                            onBack = { navigator.back() },
+                        )
+
                         Screen.BackupStatus -> BackupStatusScreen(
                             profile = repository.profile,
                             tripCount = repository.trips.size,

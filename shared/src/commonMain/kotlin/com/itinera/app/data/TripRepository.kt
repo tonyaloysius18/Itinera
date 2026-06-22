@@ -4,6 +4,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import com.itinera.app.NotificationScheduler
+import com.itinera.app.ReminderOffset
+import com.itinera.app.legReminderFireTime
 import com.itinera.app.model.ChecklistItem
 import com.itinera.app.model.DocItem
 import com.itinera.app.model.Leg
@@ -51,6 +54,25 @@ class TripRepository {
     val expenseService = ExpenseService()
 
     val expenses = mutableStateListOf<Expense>()
+
+    val notificationScheduler = NotificationScheduler()
+
+    @OptIn(kotlin.time.ExperimentalTime::class)
+    private fun nowMillis(): Long =
+        kotlin.time.Clock.System.now().toEpochMilliseconds()
+
+    // Schedule (or refresh) a reminder for one leg, based on the user's offset.
+    private fun scheduleLegReminder(trip: Trip, leg: Leg) {
+        val offset = profile.reminderOffsetMinutes
+        // always cancel first so an edit replaces the old alarm
+        notificationScheduler.cancel(leg.id)
+        if (offset == ReminderOffset.OFF) return
+        if (leg.completed) return
+        val fireAt = legReminderFireTime(leg, offset, nowMillis()) ?: return
+        val title = "${leg.fromCity} → ${leg.toCity}"
+        val body = "Departing ${leg.timeLabel.ifBlank { "soon" }} · ${trip.title}"
+        notificationScheduler.schedule(leg.id, title, body, fireAt)
+    }
 
     private val uploadClient = HttpClient()
 
@@ -186,7 +208,8 @@ class TripRepository {
         if (index < 0) return
         val trip = trips[index]
         trips[index] = trip.copy(legs = trip.legs + leg)
-        persist(trips[index])                                          // ⬅ ADD
+        persist(trips[index])
+        scheduleLegReminder(trips[index], leg)    // ⬅ ADD
     }
 
     fun updateLeg(tripId: String, leg: Leg) {
@@ -194,7 +217,9 @@ class TripRepository {
         if (index < 0) return
         val trip = trips[index]
         trips[index] = trip.copy(legs = trip.legs.map { if (it.id == leg.id) leg else it })
-        persist(trips[index])                                          // ⬅ ADD
+        persist(trips[index])
+        scheduleLegReminder(trips[index], leg)                 // ⬅ ADD
+
     }
 
     fun deleteLeg(tripId: String, legId: String) {
@@ -202,7 +227,8 @@ class TripRepository {
         if (index < 0) return
         val trip = trips[index]
         trips[index] = trip.copy(legs = trip.legs.filterNot { it.id == legId })
-        persist(trips[index])                                          // ⬅ ADD
+        persist(trips[index])
+        notificationScheduler.cancel(legId)
     }
 
     fun markLegAddedToCalendar(tripId: String, legId: String) {        // ⬅ FIXED (was calling missing updateTripLegs)
@@ -214,6 +240,10 @@ class TripRepository {
         }
         trips[index] = trip.copy(legs = newLegs)
         persist(trips[index])                                          // ⬅ ADD
+    }
+
+    fun rescheduleAllReminders() {
+        trips.forEach { trip -> trip.legs.forEach { leg -> scheduleLegReminder(trip, leg) } }
     }
 
     // ===== activities (still in-memory) =====

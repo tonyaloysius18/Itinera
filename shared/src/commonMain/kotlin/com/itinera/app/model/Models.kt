@@ -139,6 +139,7 @@ data class UserProfile(
     val street: String = "",
     val city: String = "",
     val postalCode: String = "",
+    val reminderOffsetMinutes: Int = 0,
     val photoUrl: String = "",
     @Transient val photoBytes: ByteArray? = null,   // ⬅ excluded from Firestore
 ) {
