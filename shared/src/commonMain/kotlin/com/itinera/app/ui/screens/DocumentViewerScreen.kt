@@ -19,6 +19,7 @@ import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.DocItem
 import com.itinera.app.ui.components.CardShape
 import com.itinera.app.ui.components.PdfViewer
+import com.itinera.app.ui.components.PlaneLoader
 import com.itinera.app.ui.components.TopBar
 import kotlinx.coroutines.launch
 
@@ -66,7 +67,8 @@ fun DocumentViewerScreen(
                 if (doc.fileUrl.isNotBlank()) {
                     IconButton(enabled = !sharing, onClick = { shareDoc() }) {
                         if (sharing) {
-                            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                            //CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                            PlaneLoader(Modifier.size(20.dp))
                         } else {
                             Icon(Icons.Filled.Share, contentDescription = s.share, tint = MaterialTheme.colorScheme.primary)
                         }
@@ -97,7 +99,7 @@ fun DocumentViewerScreen(
 
                 Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                     when {
-                        loading -> CircularProgressIndicator()
+                        loading -> PlaneLoader()
                         bytes != null -> PdfViewer(bytes!!, modifier = Modifier.fillMaxSize())
                         else -> Text(
                             s.fileNotUploaded,

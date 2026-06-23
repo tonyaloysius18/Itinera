@@ -27,6 +27,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.launch
 
 
 
@@ -56,6 +59,19 @@ class TripRepository {
     val expenses = mutableStateListOf<Expense>()
 
     val notificationScheduler = NotificationScheduler()
+
+    private var tripsListener: Job? = null
+
+    private val syncJobs = mutableListOf<Job>()
+
+    var tripsSyncedOnce by mutableStateOf(false)
+        private set
+
+    var documentsSyncedOnce by mutableStateOf(false)
+        private set
+    var expensesSyncedOnce by mutableStateOf(false)
+        private set
+
 
     @OptIn(kotlin.time.ExperimentalTime::class)
     private fun nowMillis(): Long =
@@ -302,6 +318,7 @@ class TripRepository {
     }
 
     fun clearLocal() {
+        stopSync()
         trips.clear()
         documents.clear()
         checklist.clear()
@@ -475,6 +492,89 @@ class TripRepository {
         if (i >= 0) {
             trips[i] = trips[i].copy(currencyCode = code)
             persist(trips[i])
+        }
+    }
+
+    /** Start live trip sync. Cancels any previous listener first. */
+    fun startTripSync() {
+        val uid = authService.currentUid ?: return
+        tripsListener?.cancel()
+        tripsListener = ioScope.launch {
+            tripService.tripsFlow(uid)
+                .catch { e -> println("ITINERA: trips sync error — ${e.message}") }
+                .collect { remote ->
+                    trips.clear()
+                    trips.addAll(remote)
+                    println("ITINERA: trips sync — ${remote.size} trips")
+                }
+        }
+    }
+
+    /** Stop live sync (call on logout). */
+    fun stopTripSync() {
+        tripsListener?.cancel()
+        tripsListener = null
+    }
+
+    /** Start live sync for trips, documents, and expenses. Replaces one-time loads. */
+    fun startSync() {
+        val uid = authService.currentUid ?: return
+        stopSync()
+        syncJobs += ioScope.launch {
+            tripService.tripsFlow(uid)
+                .catch { e -> println("ITINERA: trips sync error — ${e.message}") }
+                .collect { remote -> applyTrips(remote)
+                    tripsSyncedOnce = true  }
+        }
+        syncJobs += ioScope.launch {
+            docService.documentsFlow(uid)
+                .catch { e -> println("ITINERA: docs sync error — ${e.message}") }
+                //.collect { remote -> applyDocuments(remote) }
+                .collect { applyDocuments(it); documentsSyncedOnce = true }
+
+        }
+        syncJobs += ioScope.launch {
+            expenseService.expensesFlow(uid)
+                .catch { e -> println("ITINERA: expenses sync error — ${e.message}") }
+                //.collect { remote -> applyExpenses(remote) }
+                .collect { applyExpenses(it); expensesSyncedOnce = true }
+
+        }
+
+
+    }
+
+    /** Stop all live listeners (call on logout). */
+    fun stopSync() {
+        syncJobs.forEach { it.cancel() }
+        syncJobs.clear()
+        tripsSyncedOnce = false
+        documentsSyncedOnce = false
+        expensesSyncedOnce = false
+    }
+
+    // Diff-apply: update only what changed, so lists don't flicker or lose scroll.
+    private fun applyTrips(remote: List<Trip>) {
+        trips.removeAll { local -> remote.none { it.id == local.id } }
+        remote.forEach { r ->
+            val i = trips.indexOfFirst { it.id == r.id }
+            if (i >= 0) { if (trips[i] != r) trips[i] = r } else trips.add(r)
+        }
+    }
+
+    private fun applyDocuments(remote: List<DocItem>) {
+        documents.removeAll { local -> remote.none { it.id == local.id } }
+        remote.forEach { r ->
+            val i = documents.indexOfFirst { it.id == r.id }
+            if (i >= 0) { if (documents[i] != r) documents[i] = r } else documents.add(r)
+        }
+    }
+
+    private fun applyExpenses(remote: List<Expense>) {
+        expenses.removeAll { local -> remote.none { it.id == local.id } }
+        remote.forEach { r ->
+            val i = expenses.indexOfFirst { it.id == r.id }
+            if (i >= 0) { if (expenses[i] != r) expenses[i] = r } else expenses.add(r)
         }
     }
 

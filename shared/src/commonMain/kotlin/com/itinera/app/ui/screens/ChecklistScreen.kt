@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.itinera.app.i18n.LocalStrings
@@ -48,7 +49,35 @@ fun ChecklistScreen(
         }
         Spacer(Modifier.height(16.dp))
         Column(Modifier.weight(1f).padding(horizontal = 16.dp)) {
-            items.groupBy { it.group }.forEach { (group, groupItems) ->
+            if (items.isEmpty()) {
+                Column(
+                    Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Icon(
+                        Icons.Outlined.CheckBoxOutlineBlank,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
+                        modifier = Modifier.size(52.dp),
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        s.noChecklistItems,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        s.noChecklistSubtitle,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 24.dp),
+                    )
+                }
+            } else {
+                items.groupBy { it.group }.forEach { (group, groupItems) ->
                 Text(group, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), modifier = Modifier.padding(vertical = 6.dp))
                 groupItems.forEach { item ->
                     Row(
@@ -72,6 +101,7 @@ fun ChecklistScreen(
                 Spacer(Modifier.height(8.dp))
             }
         }
+    }
         Box(
             modifier = Modifier.fillMaxWidth().padding(16.dp).padding(bottom = 60.dp),
             contentAlignment = Alignment.Center
@@ -174,8 +204,11 @@ private fun AddChecklistItemDialog(
                         readOnly = true,
                         label = { Text(s.section) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                        modifier = Modifier.menuAnchor().fillMaxWidth(),
-                        shape = textFieldShape,
+                        modifier = Modifier.menuAnchor(
+                            type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                            enabled = true
+                        ).fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
                     )
                     ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                         groupOptions.forEach { g ->

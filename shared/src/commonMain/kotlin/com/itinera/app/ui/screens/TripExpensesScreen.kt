@@ -38,6 +38,7 @@ fun TripExpensesScreen(
     trip: Trip,
     expenses: List<Expense>,
     onBack: () -> Unit,
+    isLoading: Boolean = false,
     onAddExpense: () -> Unit,
     onEditExpense: (String) -> Unit,
     onDeleteExpense: (String) -> Unit,

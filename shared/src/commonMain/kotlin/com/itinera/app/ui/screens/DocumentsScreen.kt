@@ -30,6 +30,7 @@ import com.itinera.app.model.DocItem
 import com.itinera.app.model.Trip
 import com.itinera.app.ui.components.CardShape
 import com.itinera.app.ui.components.EmptyState
+import com.itinera.app.ui.components.PlaneLoader
 import com.itinera.app.ui.components.TopBar
 import kotlinx.coroutines.launch
 
@@ -67,6 +68,7 @@ private fun nameWithoutExtension(fileName: String): String =
 fun DocumentsScreen(
     trip: Trip,
     documents: List<DocItem>,                 // already filtered to this trip
+    isLoading: Boolean = false,               // ⬅ ADDED
     onBack: () -> Unit,
     onOpenDoc: (String) -> Unit,
     onUpload: suspend (PickedFile, title: String, category: String) -> Boolean,
@@ -105,43 +107,53 @@ fun DocumentsScreen(
                 },
             )
 
-            if (documents.isEmpty()) {
-                EmptyState(
-                    icon = Icons.AutoMirrored.Filled.InsertDriveFile,
-                    title = s.noDocuments,
-                    subtitle = s.noDocumentsSubtitle,
-                    modifier = Modifier.weight(1f),
-                )
-            } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(11.dp),
-                    verticalArrangement = Arrangement.spacedBy(11.dp),
-                    contentPadding = PaddingValues(vertical = 12.dp),
-                ) {
-                    items(documents, key = { it.id }) { doc ->
-                        Surface(
-                            modifier = Modifier.combinedClickable(
-                                onClick = { onOpenDoc(doc.id) },
-                                onLongClick = { pendingDeleteId = doc.id },
-                            ),
-                            shape = CardShape,
-                            border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
-                        ) {
-                            Column(
-                                Modifier.fillMaxWidth().padding(vertical = 16.dp, horizontal = 10.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
+            when {
+                isLoading -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        PlaneLoader()
+                    }
+                }
+
+                documents.isEmpty() -> {
+                    EmptyState(
+                        icon = Icons.AutoMirrored.Filled.InsertDriveFile,
+                        title = s.noDocuments,
+                        subtitle = s.noDocumentsSubtitle,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+
+                else -> {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(11.dp),
+                        verticalArrangement = Arrangement.spacedBy(11.dp),
+                        contentPadding = PaddingValues(vertical = 12.dp),
+                    ) {
+                        items(documents, key = { it.id }) { doc ->
+                            Surface(
+                                modifier = Modifier.combinedClickable(
+                                    onClick = { onOpenDoc(doc.id) },
+                                    onLongClick = { pendingDeleteId = doc.id },
+                                ),
+                                shape = CardShape,
+                                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
                             ) {
-                                Icon(docIcon(doc.mimeType), null, tint = docColor(doc.mimeType), modifier = Modifier.size(34.dp))
-                                Spacer(Modifier.height(9.dp))
-                                Text(doc.title, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
-                                Text(
-                                    categoryLabel(doc.category, s),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                    textAlign = TextAlign.Center,
-                                )
+                                Column(
+                                    Modifier.fillMaxWidth().padding(vertical = 16.dp, horizontal = 10.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                ) {
+                                    Icon(docIcon(doc.mimeType), null, tint = docColor(doc.mimeType), modifier = Modifier.size(34.dp))
+                                    Spacer(Modifier.height(9.dp))
+                                    Text(doc.title, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
+                                    Text(
+                                        categoryLabel(doc.category, s),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                        textAlign = TextAlign.Center,
+                                    )
+                                }
                             }
                         }
                     }
@@ -160,7 +172,7 @@ fun DocumentsScreen(
                         Modifier.padding(28.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        CircularProgressIndicator()
+                        PlaneLoader(size = 72.dp)
                         Spacer(Modifier.height(14.dp))
                         Text(s.uploading, style = MaterialTheme.typography.bodyMedium)
                     }
@@ -258,6 +270,8 @@ private fun AddDocumentDialog(
                     ExposedDropdownMenu(
                         expanded = menuOpen,
                         onDismissRequest = { menuOpen = false },
+                        modifier = Modifier.background(MaterialTheme.colorScheme.surface),
+                        shape = RoundedCornerShape(12.dp),
                     ) {
                         ALL_CATEGORIES.forEach { value ->
                             DropdownMenuItem(

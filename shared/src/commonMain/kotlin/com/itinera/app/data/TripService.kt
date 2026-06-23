@@ -3,7 +3,9 @@ package com.itinera.app.data
 import com.itinera.app.model.Trip
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.firestore.firestore
-
+import dev.gitlive.firebase.firestore.QuerySnapshot
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 /**
  * Reads and writes the user's trips in Firestore under users/{uid}/trips/{tripId}.
  * Mirrors ProfileService's API exactly: explicit serializer on read, .set() on write.
@@ -27,9 +29,14 @@ class TripService {
             doc.data(Trip.serializer())                 // ⬅ explicit serializer, like ProfileService
         }
     }
-
     /** Remove a trip. */
     suspend fun deleteTrip(uid: String, tripId: String) {
         tripsRef(uid).document(tripId).delete()
     }
+
+    fun tripsFlow(uid: String): Flow<List<Trip>> =
+        tripsRef(uid).snapshots.map { snapshot ->
+            snapshot.documents.map { doc -> doc.data(Trip.serializer()) }
+        }
+
 }

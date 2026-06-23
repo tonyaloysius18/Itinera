@@ -111,8 +111,36 @@ fun TripDetailScreen(
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 16.dp),
             ) {
-                allDates.forEachIndexed { index, date ->
-                    val dayNumber = index + 1
+                if (allDates.isEmpty()) {
+                    Column(
+                        Modifier.fillMaxWidth().padding(top = 300.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Icon(
+                            Icons.Filled.Flight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
+                            modifier = Modifier.size(56.dp),
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            s.noLegsYet,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            s.noLegsSubtitle,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 32.dp),
+                        )
+                    }
+                } else {
+                    allDates.forEachIndexed { index, date ->
+                        val dayNumber = index + 1
                     Text(
                         "${s.day} $dayNumber · ${date.label()}",
                         style = MaterialTheme.typography.titleSmall,
@@ -197,73 +225,74 @@ fun TripDetailScreen(
                     }
 
                     // ---- Places for this day ----
-                    actsByDate[date].orEmpty().forEach { act ->
-                        var showMenu by remember { mutableStateOf(false) }
+                        actsByDate[date].orEmpty().forEach { act ->
+                            var showMenu by remember { mutableStateOf(false) }
 
-                        Box {
-                            Row(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .combinedClickable(
-                                        onClick = { onToggleActivity(act.id) },
-                                        onLongClick = { showMenu = true },
-                                    )
-                                    .padding(vertical = 8.dp),
-                                verticalAlignment = Alignment.Top,
-                            ) {
-                                if (act.completed) {
-                                    Icon(Icons.Filled.CheckCircle, null, tint = Color(0xFF1D9E75), modifier = Modifier.size(20.dp))
-                                } else {
-                                    Icon(Icons.Filled.Place, null, tint = Color(0xFF378ADD), modifier = Modifier.size(20.dp))
-                                }
-                                Spacer(Modifier.width(12.dp))
-                                Column {
-                                    Text(
-                                        act.title,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        textDecoration = if (act.completed) TextDecoration.LineThrough else null,
-                                        color = if (act.completed) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurface,
-                                    )
-                                    val tail = listOf(act.time, act.location).filter { it.isNotBlank() }.joinToString(" · ")
-                                    if (tail.isNotBlank()) {
-                                        Spacer(Modifier.height(2.dp))
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Icon(Icons.Filled.Schedule, null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                                            Spacer(Modifier.width(6.dp))
-                                            Text(
-                                                tail,
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                            )
+                            Box {
+                                Row(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .combinedClickable(
+                                            onClick = { onToggleActivity(act.id) },
+                                            onLongClick = { showMenu = true },
+                                        )
+                                        .padding(vertical = 8.dp),
+                                    verticalAlignment = Alignment.Top,
+                                ) {
+                                    if (act.completed) {
+                                        Icon(Icons.Filled.CheckCircle, null, tint = Color(0xFF1D9E75), modifier = Modifier.size(20.dp))
+                                    } else {
+                                        Icon(Icons.Filled.Place, null, tint = Color(0xFF378ADD), modifier = Modifier.size(20.dp))
+                                    }
+                                    Spacer(Modifier.width(12.dp))
+                                    Column {
+                                        Text(
+                                            act.title,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            textDecoration = if (act.completed) TextDecoration.LineThrough else null,
+                                            color = if (act.completed) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurface,
+                                        )
+                                        val tail = listOf(act.time, act.location).filter { it.isNotBlank() }.joinToString(" · ")
+                                        if (tail.isNotBlank()) {
+                                            Spacer(Modifier.height(2.dp))
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Icon(Icons.Filled.Schedule, null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                                                Spacer(Modifier.width(6.dp))
+                                                Text(
+                                                    tail,
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                                )
+                                            }
                                         }
                                     }
                                 }
-                            }
 
-                            MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(14.dp))) {
-                                DropdownMenu(
-                                    expanded = showMenu,
-                                    onDismissRequest = { showMenu = false },
-                                    offset = DpOffset(x = 280.dp, y = 0.dp),
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                ) {
-                                    DropdownMenuItem(
-                                        text = { Text(s.edit) },
-                                        leadingIcon = { Icon(Icons.Filled.Edit, null) },
-                                        onClick = { showMenu = false; onEditActivity(act.id) },
-                                    )
-                                    DropdownMenuItem(
-                                        text = { Text(s.delete, color = Color(0xFFE03131)) },
-                                        leadingIcon = { Icon(Icons.Filled.Delete, null, tint = Color(0xFFE03131)) },
-                                        onClick = { showMenu = false; pendingDeleteActivityId = act.id },
-                                    )
+                                MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(14.dp))) {
+                                    DropdownMenu(
+                                        expanded = showMenu,
+                                        onDismissRequest = { showMenu = false },
+                                        offset = DpOffset(x = 280.dp, y = 0.dp),
+                                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    ) {
+                                        DropdownMenuItem(
+                                            text = { Text(s.edit) },
+                                            leadingIcon = { Icon(Icons.Filled.Edit, null) },
+                                            onClick = { showMenu = false; onEditActivity(act.id) },
+                                        )
+                                        DropdownMenuItem(
+                                            text = { Text(s.delete, color = Color(0xFFE03131)) },
+                                            leadingIcon = { Icon(Icons.Filled.Delete, null, tint = Color(0xFFE03131)) },
+                                            onClick = { showMenu = false; pendingDeleteActivityId = act.id },
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
+                    // ⬅ clearance so the last rows scroll above the floating buttons
+                    Spacer(Modifier.height(96.dp))
                 }
-                // ⬅ clearance so the last rows scroll above the floating buttons
-                Spacer(Modifier.height(96.dp))
             }
 
             // ⬅ floating buttons pinned to the bottom of the Box

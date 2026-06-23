@@ -3,6 +3,9 @@ package com.itinera.app.data
 import com.itinera.app.model.Expense
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.firestore.firestore
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+
 
 /**
  * Reads and writes the user's expenses in Firestore under
@@ -32,4 +35,9 @@ class ExpenseService {
     suspend fun deleteExpense(uid: String, expenseId: String) {
         expensesRef(uid).document(expenseId).delete()
     }
+
+    fun expensesFlow(uid: String): Flow<List<Expense>> =
+        expensesRef(uid).snapshots.map { snap ->
+            snap.documents.map { it.data(Expense.serializer()) }
+        }
 }

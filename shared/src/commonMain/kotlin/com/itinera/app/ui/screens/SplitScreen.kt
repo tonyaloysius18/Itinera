@@ -24,6 +24,7 @@ import com.itinera.app.ui.components.TopBar
 fun SplitScreen(
     trips: List<Trip>,
     expenses: List<Expense>,
+    isLoading: Boolean = false,
     onOpenTrip: (String) -> Unit,
 ) {
     val s = LocalStrings.current

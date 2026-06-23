@@ -1,9 +1,12 @@
 package com.itinera.app
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -57,6 +60,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import kotlinx.coroutines.launch
 import com.itinera.app.i18n.systemLanguage
+import com.itinera.app.ui.components.PlaneLoader
 import kotlinx.coroutines.delay
 
 
@@ -69,7 +73,7 @@ fun App() {
     var language by remember { mutableStateOf(Language.ENGLISH) }
     var themeMode by remember { mutableStateOf(ThemeMode.SYSTEM) }
     val navigator = rememberNavigator(Screen.Login)
-    var authChecked by remember { mutableStateOf(false) }   // ⬅ ADD
+    var authChecked by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         val uid = repository.authService.currentUid
@@ -78,24 +82,14 @@ fun App() {
                 val profile = repository.profileService.loadProfile(uid)
                 if (profile != null) repository.updateProfile(profile)
             } catch (e: Exception) { }
-            repository.loadTrips(uid)
-            repository.loadDocuments(uid)
-            repository.loadExpenses(uid)
+            repository.startSync()                    // live load + keep in sync
             repository.rescheduleAllReminders()
             navigator.resetTo(Screen.Home)
         }
         authChecked = true
     }
 
-//    val activeStrings = remember(language) {
-//        stringsFor(if (language == Language.SYSTEM) systemLanguage() else language)
-//    }
-
     val activeStrings = stringsFor(if (language == Language.SYSTEM) systemLanguage() else language)
-
-
-    //val activeStrings = stringsFor(Language.ENGLISH)
-
 
     val darkTheme = when (themeMode) {
         ThemeMode.SYSTEM -> isSystemInDarkTheme()
@@ -111,7 +105,7 @@ fun App() {
                         .background(MaterialTheme.colorScheme.background),
                     contentAlignment = Alignment.Center,
                 ) {
-                    CircularProgressIndicator()
+                    PlaneLoader(size = 130.dp)
                 }
             } else {
                 AppContent(
@@ -186,7 +180,6 @@ private fun AppContent(
 
     val scheduler = remember { NotificationScheduler() }
 
-
     var lastSyncedAt by remember { mutableStateOf<Long?>(null) }
     var syncing by remember { mutableStateOf(false) }
 
@@ -223,16 +216,14 @@ private fun AppContent(
                                     }
                                 }
                             } catch (e: Exception) { }
-                            repository.loadTrips(uid)
-                            repository.loadDocuments(uid)
-                            repository.loadExpenses(uid)
-                            lastSyncedAt = nowMillisApp()// ⬅ was missing — expenses now sync on fresh sign-in
+                            repository.startSync()
+                            lastSyncedAt = nowMillisApp()
                         }
                         navigator.resetTo(Screen.Home)
                     }
                 },
                 onCreateAccount = { navigator.push(Screen.CreateAccount) },
-                onMessage = { pillMessage = it },          // ⬅ ADD
+                onMessage = { pillMessage = it },
             )
 
             Screen.LanguagePicker -> LanguageScreen(
@@ -242,11 +233,6 @@ private fun AppContent(
             )
 
             else -> {
-                // Home: only TOP (status-bar) padding so the top bar clears the notch,
-                //       while cards still run edge-to-edge down to the bottom edge.
-                // Other screens: TOP padding for the notch, but the background bleeds
-                //       to the BOTTOM edge (no black strip above the home indicator).
-                //       Scrollable screens add their own bottom inset where needed.
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()
@@ -271,12 +257,13 @@ private fun AppContent(
                                     }
                                 }
                                 navigator.resetTo(Screen.Login)
-                                pillMessage = s.accountCreated               // ⬅ show success pill
+                                pillMessage = s.accountCreated
                             },
                         )
 
                         is Screen.Home -> TripsHomeScreen(
                             trips = repository.activeTrips(),
+                            isLoading = !repository.tripsSyncedOnce,
                             onOpenTrip = { navigator.push(Screen.TripDetail(it)) },
                             onCreateTrip = { name ->
                                 val id = repository.addTrip(name)
@@ -316,8 +303,7 @@ private fun AppContent(
                                 onDeleteLeg = { legId -> repository.deleteLeg(screen.tripId, legId) },
                                 onToggleActivity = { repository.toggleActivity(it) },
                                 onDeleteActivity = { repository.deleteActivity(it) },
-
-                                )
+                            )
                         }
 
                         is Screen.AddPlace -> AddPlaceScreen(
@@ -386,10 +372,11 @@ private fun AppContent(
                             else DocumentsScreen(
                                 trip = trip,
                                 documents = repository.documentsForTrip(screen.tripId),
+                                isLoading = !repository.documentsSyncedOnce,
                                 onBack = { navigator.back() },
                                 onOpenDoc = { navigator.push(Screen.DocViewer(it)) },
                                 onDeleteDocument = { repository.deleteDocument(it) },
-                                onMessage = { pillMessage = it },                                  // ⬅ uses your existing pill
+                                onMessage = { pillMessage = it },
                                 onUpload = { file, title, category ->
                                     repository.addDocumentWithFile(screen.tripId, title, category, file)
                                 },
@@ -403,7 +390,7 @@ private fun AppContent(
                                 doc = doc,
                                 onBack = { navigator.back() },
                                 onLoadBytes = { url -> repository.downloadBytes(url) },
-                                onMessage = { pillMessage = it },          // ⬅ ADD (your existing pill)
+                                onMessage = { pillMessage = it },
                             )
                         }
 
@@ -419,6 +406,7 @@ private fun AppContent(
                                 trips = repository.activeTrips(),
                                 expenses = repository.expenses,
                                 onOpenTrip = { navigator.push(Screen.TripExpenses(it)) },
+                                isLoading = !repository.expensesSyncedOnce,
                             )
                         }
                         is Screen.TripExpenses -> {
@@ -429,6 +417,7 @@ private fun AppContent(
                                 TripExpensesScreen(
                                     trip = trip,
                                     expenses = repository.expensesForTrip(screen.tripId),
+                                    isLoading = !repository.expensesSyncedOnce,
                                     onBack = { navigator.back() },
                                     onAddExpense = { navigator.push(Screen.AddExpense(screen.tripId)) },
                                     onEditExpense = { navigator.push(Screen.AddExpense(screen.tripId, it)) },
@@ -478,8 +467,6 @@ private fun AppContent(
                             profile = repository.profile,
                             onBack = { navigator.back() },
                             onAddAccount = {
-                                // Phase 1: log out current, then show sign-in for a different account.
-                                // Phase 2: keep current session + add to a remembered-accounts list.
                                 repository.clearLocal()
                                 navigator.resetTo(Screen.Login)
                             },
@@ -498,7 +485,6 @@ private fun AppContent(
                                         navigator.resetTo(Screen.Login)
                                         pillMessage = s.accountDeleted
                                     } catch (e: Exception) {
-                                        // likely "requires recent login" — no success pill
                                         navigator.resetTo(Screen.Login)
                                     }
                                 }
@@ -518,7 +504,7 @@ private fun AppContent(
                                 }
                             },
                             onRequestPermission = {
-                                NotificationPermission.request()                       // ⬅ shows Android system dialog
+                                NotificationPermission.request()                       // Android system dialog
                                 scope.launch { repository.notificationScheduler.requestPermission() }  // iOS path
                             },
                             onBack = { navigator.back() },
@@ -574,7 +560,7 @@ private fun AppContent(
                             authService    = repository.authService,
                             profileService = repository.profileService,
                             onBack         = { navigator.back() },
-                            onUploadPhoto  = { bytes ->                          // ⬅ ADD
+                            onUploadPhoto  = { bytes ->
                                 val uid = repository.authService.currentUid
                                     ?: return@EditProfileScreen ""
                                 repository.uploadProfilePhoto(uid, bytes)
@@ -605,17 +591,13 @@ private fun AppContent(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    // keep just above the iPhone home indicator (and Android nav bar),
-                    // but sit low on the screen
                     .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
                     .padding(horizontal = 24.dp)
-                    .padding(top = 6.dp)   // ⬅ no extra bottom padding → sits lower
+                    .padding(top = 6.dp)
                     .graphicsLayer {
                         scaleX = animatedScale
                         scaleY = animatedScale
-                        // scale from the bottom-center so it shrinks "into" the bottom, no floating gap
                         transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 1f)
-                        // keep it fully opaque — no translucency that reveals the shadow/background
                         alpha = 1f
                     },
                 contentAlignment = Alignment.Center,
@@ -630,7 +612,7 @@ private fun AppContent(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
-                .padding(bottom = 60.dp),   // ⬅ lower on screen (smaller = lower)
+                .padding(bottom = 60.dp),
         )
 
         MessagePill(
@@ -638,7 +620,7 @@ private fun AppContent(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
-                .padding(bottom = 120.dp),   // ⬅ tweak this value to taste (smaller = lower)
+                .padding(bottom = 120.dp),
         )
     }
 }
@@ -695,7 +677,22 @@ private fun SlidingPillBar(
 
     val step = if (count <= 1) 2f else 2f / (count - 1)
 
+    // ===== Whole-bar hop on screen change =====
+    val barPulse = remember { Animatable(1f) }
+    LaunchedEffect(current) {
+        barPulse.snapTo(1f)
+        barPulse.animateTo(1.05f, animationSpec = tween(durationMillis = 100))   // subtle swell
+        barPulse.animateTo(
+            targetValue = 1f,
+            animationSpec = spring(dampingRatio = 0.6f, stiffness = 400f),       // gentler settle
+        )
+    }
+
     Surface(
+        modifier = Modifier.graphicsLayer {
+            scaleX = barPulse.value
+            scaleY = barPulse.value
+        },   // ⬅ the bounce
         shape = RoundedCornerShape(32.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
         tonalElevation = 6.dp,

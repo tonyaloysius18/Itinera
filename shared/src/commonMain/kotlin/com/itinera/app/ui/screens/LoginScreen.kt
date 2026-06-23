@@ -40,6 +40,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import kotlinx.coroutines.launch
 import com.itinera.app.data.AuthService
 import com.itinera.app.data.rememberGoogleSignInHelper
+import com.itinera.app.ui.components.PlaneLoader
 
 
 /**
@@ -220,11 +221,12 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 if (loading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                    )
+//                    CircularProgressIndicator(
+//                        modifier = Modifier.size(20.dp),
+//                        strokeWidth = 2.dp,
+//                        color = MaterialTheme.colorScheme.onPrimary,
+//                    )
+                    PlaneLoader()
                 } else {
                     Text(s.logIn)
                 }

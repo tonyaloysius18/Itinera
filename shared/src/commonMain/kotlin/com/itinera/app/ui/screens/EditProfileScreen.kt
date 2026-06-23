@@ -43,6 +43,7 @@ import com.itinera.app.data.AuthService
 import com.itinera.app.data.ProfileService
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.UserProfile
+import com.itinera.app.ui.components.PlaneLoader
 import com.itinera.app.ui.components.cropToCircle
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
@@ -334,11 +335,12 @@ fun EditProfileScreen(
                         .padding(horizontal = 60.dp),
                 ) {
                     if (loading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
-                            strokeWidth = 2.dp,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                        )
+//                        CircularProgressIndicator(
+//                            modifier = Modifier.size(20.dp),
+//                            strokeWidth = 2.dp,
+//                            color = MaterialTheme.colorScheme.onPrimary,
+//                        )
+                        PlaneLoader()
                     } else {
                         Text(s.saveChanges)
                     }

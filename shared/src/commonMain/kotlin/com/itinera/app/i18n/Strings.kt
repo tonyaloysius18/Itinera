@@ -357,6 +357,11 @@ class Strings {
     var syncFailed: String = ""
     var backupHint: String = ""
 
+    var noLegsYet: String =""
+    var noLegsSubtitle: String =""
+    var noChecklistItems: String =""
+    var noChecklistSubtitle: String = ""
+
     fun copyApply(block: Strings.() -> Unit): Strings {
 
         val c = Strings()
@@ -614,6 +619,10 @@ class Strings {
         c.syncComplete = this.syncComplete
         c.syncFailed = this.syncFailed
         c.backupHint = this.backupHint
+        c.noLegsYet = this.noLegsYet
+        c.noLegsSubtitle = this.noLegsSubtitle
+        c.noChecklistItems = this.noChecklistItems
+        c.noChecklistSubtitle = this.noChecklistSubtitle
         c.block()
         return c
     }
@@ -873,6 +882,11 @@ internal val EN: Strings by lazy { Strings().apply {
     syncComplete = "Sync Complete"
     syncFailed = "Sync Failed"
     backupHint = "Your trips expenses and documents are automatically backed up to the cloud and synced across your devices."
+    noLegsYet = "No legs yet"
+    noLegsSubtitle = "Add your first leg to start mapping your journey"
+    noChecklistItems = "Nothing to pack yet"
+    noChecklistSubtitle = "Add items to build your prep list"
+
 } }
 
 internal val FR: Strings by lazy { EN.copyApply {
@@ -1129,6 +1143,10 @@ internal val FR: Strings by lazy { EN.copyApply {
     syncComplete = "Synchronisation terminée"
     syncFailed = "Échec de la synchronisation"
     backupHint = "Vos voyages, dépenses et documents sont automatiquement sauvegardés dans le cloud et synchronisés sur vos appareils."
+    noLegsYet = "Pas encore de trajets"
+    noLegsSubtitle = "Ajoutez votre premier trajet pour commencer à tracer votre itinéraire"
+    noChecklistItems = "Rien à emballer pour l'instant"
+    noChecklistSubtitle = "Ajoutez des articles pour créer votre liste de préparation"
 } }
 
 internal val ES: Strings by lazy { EN.copyApply {
@@ -1385,6 +1403,10 @@ internal val ES: Strings by lazy { EN.copyApply {
     syncComplete = "Sincronización completa"
     syncFailed = "Error de sincronización"
     backupHint = "Tus viajes, gastos y documentos se respaldan automáticamente en la nube y se sincronizan en tus dispositivos."
+    noLegsYet = "Sin tramos aún"
+    noLegsSubtitle = "Añade tu primer tramo para empezar a trazar tu viaje"
+    noChecklistItems = "Nada que empacar aún"
+    noChecklistSubtitle = "Añade artículos para crear tu lista de preparación"
 } }
 
 internal val DE: Strings by lazy { EN.copyApply {
@@ -1641,6 +1663,10 @@ internal val DE: Strings by lazy { EN.copyApply {
     syncComplete = "Synchronisierung abgeschlossen"
     syncFailed = "Synchronisierung fehlgeschlagen"
     backupHint = "Deine Reisen, Ausgaben und Dokumente werden automatisch in der Cloud gesichert und auf deinen Geräten synchronisiert."
+    noLegsYet = "Noch keine Etappen"
+    noLegsSubtitle = "Fügen Sie Ihre erste Etappe hinzu, um Ihre Reise zu planen"
+    noChecklistItems = "Noch nichts einzupacken"
+    noChecklistSubtitle = "Fügen Sie Artikel hinzu, um Ihre Vorbereitungsliste zu erstellen"
 } }
 internal val IT: Strings by lazy { EN.copyApply {
     name = "Nome"
@@ -1896,6 +1922,10 @@ internal val IT: Strings by lazy { EN.copyApply {
     syncComplete = "Sincronizzazione completata"
     syncFailed = "Sincronizzazione non riuscita"
     backupHint = "I tuoi viaggi, spese e documenti vengono automaticamente salvati nel cloud e sincronizzati su tutti i tuoi dispositivi."
+    noLegsYet = "Ancora nessuna tratta"
+    noLegsSubtitle = "Aggiungi la tua prima tratta per iniziare a mappare il tuo viaggio"
+    noChecklistItems = "Ancora niente da mettere in valigia"
+    noChecklistSubtitle = "Aggiungi elementi per creare la tua lista di preparazione"
 } }
 
 internal val PT: Strings by lazy { EN.copyApply {
@@ -2152,6 +2182,10 @@ internal val PT: Strings by lazy { EN.copyApply {
     syncComplete = "Sincronização concluída"
     syncFailed = "Falha na sincronização"
     backupHint = "Suas viagens, despesas e documentos são automaticamente salvos na nuvem e sincronizados entre seus dispositivos."
+    noLegsYet = "Nenhum trecho ainda"
+    noLegsSubtitle = "Adicione seu primeiro trecho para começar a mapear sua jornada"
+    noChecklistItems = "Nada para embalar ainda"
+    noChecklistSubtitle = "Adicione itens para criar sua lista de preparação"
 } }
 internal val NL: Strings by lazy { EN.copyApply {
     name = "Naam"
@@ -2407,6 +2441,10 @@ internal val NL: Strings by lazy { EN.copyApply {
     syncComplete = "Synchronisatie voltooid"
     syncFailed = "Synchronisatie mislukt"
     backupHint = "Je reizen, uitgaven en documenten worden automatisch geback-upt naar de cloud en gesynchroniseerd op je apparaten."
+    noLegsYet = "Nog geen trajecten"
+    noLegsSubtitle = "Voeg je eerste traject toe om je reis in kaart te brengen"
+    noChecklistItems = "Nog niets om in te pakken"
+    noChecklistSubtitle = "Voeg items toe om je voorbereidingslijst op te bouwen"
 } }
 
 internal val PL: Strings by lazy { EN.copyApply {
@@ -2663,6 +2701,10 @@ internal val PL: Strings by lazy { EN.copyApply {
     syncComplete = "Synchronizacja zakończona"
     syncFailed = "Synchronizacja nieudana"
     backupHint = "Twoje podróże, wydatki i dokumenty są automatycznie zapisywane w chmurze i synchronizowane na Twoich urządzeniach."
+    noLegsYet = "Brak odcinków"
+    noLegsSubtitle = "Dodaj swój pierwszy odcinek, aby zacząć mapować swoją podróż"
+    noChecklistItems = "Nic jeszcze do spakowania"
+    noChecklistSubtitle = "Dodaj przedmioty, aby stworzyć swoją listę przygotowań"
 } }
 
 internal val ZH: Strings by lazy { EN.copyApply {
@@ -2919,6 +2961,10 @@ internal val ZH: Strings by lazy { EN.copyApply {
     syncComplete = "同步完成"
     syncFailed = "同步失败"
     backupHint = "您的行程、费用和文档会自动备份到云端，并在您的各设备间同步。"
+    noLegsYet = "暂无行程段"
+    noLegsSubtitle = "添加您的第一个行程段以开始规划您的旅程"
+    noChecklistItems = "暂无物品"
+    noChecklistSubtitle = "添加物品以建立您的准备清单"
 } }
 internal val JP: Strings by lazy { EN.copyApply {
     name = "名前"
@@ -3174,6 +3220,10 @@ internal val JP: Strings by lazy { EN.copyApply {
     syncComplete = "同期完了"
     syncFailed = "同期に失敗しました"
     backupHint = "旅行、費用、文書は自動的にクラウドにバックアップされ、デバイス間で同期されます。"
+    noLegsYet = "経路はまだありません"
+    noLegsSubtitle = "最初の経路を追加して、旅の計画を始めましょう"
+    noChecklistItems = "パッキングするものはまだありません"
+    noChecklistSubtitle = "項目を追加して、準備リストを作成しましょう"
 } }
 
 internal val KR: Strings by lazy { EN.copyApply {
@@ -3430,6 +3480,10 @@ internal val KR: Strings by lazy { EN.copyApply {
     syncComplete = "동기화 완료"
     syncFailed = "동기화 실패"
     backupHint = "여행, 비용 및 문서가 자동으로 클라우드에 백업되고 기기 간에 동기화됩니다."
+    noLegsYet = "아직 경로가 없습니다"
+    noLegsSubtitle = "첫 번째 경로를 추가하여 여행 계획을 시작하세요"
+    noChecklistItems = "아직 챙길 것이 없습니다"
+    noChecklistSubtitle = "항목을 추가하여 준비 리스트를 만드세요"
 } }
 
 internal val RU: Strings by lazy { EN.copyApply {
@@ -3686,6 +3740,10 @@ internal val RU: Strings by lazy { EN.copyApply {
     syncComplete = "Синхронизация завершена"
     syncFailed = "Ошибка синхронизации"
     backupHint = "Ваши путешествия, расходы и документы автоматически сохраняются в облаке и синхронизируются между устройствами."
+    noLegsYet = "Путей пока нет"
+    noLegsSubtitle = "Добавьте свой первый путь, чтобы начать планировать путешествие"
+    noChecklistItems = "Пока нечего упаковывать"
+    noChecklistSubtitle = "Добавьте пункты, чтобы составить список подготовки"
 } }
 
 internal val TAM: Strings by lazy { EN.copyApply {
@@ -3942,6 +4000,10 @@ internal val TAM: Strings by lazy { EN.copyApply {
     syncComplete = "ஒத்திசைவு முடிந்தது"
     syncFailed = "ஒத்திசைவு தோல்வியடைந்தது"
     backupHint = "உங்கள் பயணங்கள், செலவுகள் மற்றும் ஆவணங்கள் தானாகவே கிளவுடில் காப்புப் பிரதி எடுக்கப்பட்டு உங்கள் சாதனங்கள் முழுவதும் ஒத்திசைக்கப்படும்."
+    noLegsYet = "இன்னும் பயணங்கள் இல்லை"
+    noLegsSubtitle = "உங்கள் பயணத்தைத் திட்டமிட முதல் பயணத்தைச் சேர்க்கவும்"
+    noChecklistItems = "இன்னும் பேக் செய்ய எதுவுமில்லை"
+    noChecklistSubtitle = "உங்கள் தயாரிப்புப் பட்டியலை உருவாக்கப் பொருட்களைச் சேர்க்கவும்"
 } }
 
 internal val HI: Strings by lazy { EN.copyApply {
@@ -4198,6 +4260,10 @@ internal val HI: Strings by lazy { EN.copyApply {
     syncComplete = "सिंक पूरा हुआ"
     syncFailed = "सिंक विफल रहा"
     backupHint = "आपकी यात्राएँ, खर्चे और दस्तावेज़ स्वचालित रूप से क्लाउड पर बैकअप हो जाते हैं और आपके सभी डिवाइसों में सिंक हो जाते हैं।"
+    noLegsYet = "अभी तक कोई पड़ाव नहीं है"
+    noLegsSubtitle = "अपनी यात्रा की योजना शुरू करने के लिए अपना पहला पड़ाव जोड़ें"
+    noChecklistItems = "अभी पैक करने के लिए कुछ भी नहीं है"
+    noChecklistSubtitle = "अपनी तैयारी सूची बनाने के लिए आइटम जोड़ें"
 } }
 
 internal val UKR: Strings by lazy { EN.copyApply {
@@ -4454,6 +4520,10 @@ internal val UKR: Strings by lazy { EN.copyApply {
     syncComplete = "Синхронізацію завершено"
     syncFailed = "Помилка синхронізації"
     backupHint = "Ваші подорожі, витрати та документи автоматично зберігаються в хмарі та синхронізуються між усіма вашими пристроями."
+    noLegsYet = "Ще немає етапів"
+    noLegsSubtitle = "Додайте свій перший етап, щоб почати планувати подорож"
+    noChecklistItems = "Ще нічого пакувати"
+    noChecklistSubtitle = "Додайте пункти, щоб створити список підготовки"
 } }
 
 internal val HUN: Strings by lazy { EN.copyApply {
@@ -4710,6 +4780,10 @@ internal val HUN: Strings by lazy { EN.copyApply {
     syncComplete = "Szinkronizálás kész"
     syncFailed = "Szinkronizálás sikertelen"
     backupHint = "Az utazásaid, kiadásaid és dokumentumaid automatikusan mentésre kerülnek a felhőbe, és szinkronizálódnak az eszközeid között."
+    noLegsYet = "Nincsenek még szakaszok"
+    noLegsSubtitle = "Adja hozzá az első szakaszt az utazás megtervezéséhez"
+    noChecklistItems = "Még nincs mit bepakolni"
+    noChecklistSubtitle = "Adjon hozzá elemeket a felkészülési lista összeállításához"
 } }
 
 internal val RO: Strings by lazy { EN.copyApply {
@@ -4966,6 +5040,10 @@ internal val RO: Strings by lazy { EN.copyApply {
     syncComplete = "Sincronizare completă"
     syncFailed = "Sincronizare eșuată"
     backupHint = "Călătoriile, cheltuielile și documentele tale sunt salvate automat în cloud și se sincronizează pe toate dispozitivele tale."
+    noLegsYet = "Nicio etapă încă"
+    noLegsSubtitle = "Adaugă prima etapă pentru a începe planificarea călătoriei"
+    noChecklistItems = "Nimic de împachetat încă"
+    noChecklistSubtitle = "Adaugă articole pentru a-ți crea lista de pregătire"
 } }
 
 internal val GR: Strings by lazy { EN.copyApply {
@@ -5222,6 +5300,10 @@ internal val GR: Strings by lazy { EN.copyApply {
     syncComplete = "Ο Συγχρονισμός Ολοκληρώθηκε"
     syncFailed = "Ο Συγχρονισμός Απέτυχε"
     backupHint = "Τα ταξίδια, τα έξοδα και τα έγγραφά σας δημιουργούνται αυτόματα αντίγραφα ασφαλείας στο cloud και συγχρονίζονται σε όλες τις συσκευές σας."
+    noLegsYet = "Δεν υπάρχουν σκέλη ακόμα"
+    noLegsSubtitle = "Προσθέστε το πρώτο σας σκέλος για να ξεκινήσετε τη χαρτογράφηση του ταξιδιού σας"
+    noChecklistItems = "Τίποτα για πακετάρισμα ακόμα"
+    noChecklistSubtitle = "Προσθέστε αντικείμενα για να δημιουργήσετε τη λίστα προετοιμασίας σας"
 } }
 
 internal val KA: Strings by lazy { EN.copyApply {
@@ -5478,6 +5560,10 @@ internal val KA: Strings by lazy { EN.copyApply {
     syncComplete = "სინქრონიზაცია დასრულდა"
     syncFailed = "სინქრონიზაცია ვერ მოხერხდა"
     backupHint = "თქვენი მოგზაურობები, ხარჯები და დოკუმენტები ავტომატურად ინახება ღრუბელში და სინქრონიზდება თქვენს ყველა მოწყობილობას შორის."
+    noLegsYet = "ეტაპები ჯერ არ არის"
+    noLegsSubtitle = "დაამატეთ თქვენი პირველი ეტაპი მოგზაურობის დასაგეგმად"
+    noChecklistItems = "ჩასალაგებელი ჯერ არაფერია"
+    noChecklistSubtitle = "დაამატეთ ნივთები მოსამზადებელი სიის შესადგენად"
 } }
 
 internal val BG: Strings by lazy { EN.copyApply {
@@ -5734,6 +5820,10 @@ internal val BG: Strings by lazy { EN.copyApply {
     syncComplete = "Синхронизацията завърши"
     syncFailed = "Синхронизацията се провали"
     backupHint = "Вашите пътувания, разходи и документи автоматично се архивират в облака и се синхронизират между устройствата ви."
+    noLegsYet = "Все още няма етапи"
+    noLegsSubtitle = "Добавете първия си етап, за да започнете планирането на пътуването"
+    noChecklistItems = "Все още няма нищо за опаковане"
+    noChecklistSubtitle = "Добавете елементи, за да съставите своя списък за подготовка"
 } }
 
 
@@ -5991,6 +6081,10 @@ internal val SK: Strings by lazy { EN.copyApply {
     syncComplete = "Synchronizácia dokončená"
     syncFailed = "Synchronizácia zlyhala"
     backupHint = "Vaše cesty, výdavky a dokumenty sa automaticky zálohujú do cloudu a synchronizujú sa vo všetkých vašich zariadeniach."
+    noLegsYet = "Zatiaľ žiadne úseky"
+    noLegsSubtitle = "Pridajte svoj prvý úsek a začnite plánovať svoju cestu"
+    noChecklistItems = "Zatiaľ nie je čo baliť"
+    noChecklistSubtitle = "Pridajte položky a vytvorte si zoznam príprav"
 } }
 
 internal val SL: Strings by lazy { EN.copyApply {
@@ -6247,6 +6341,10 @@ internal val SL: Strings by lazy { EN.copyApply {
     syncComplete = "Sinhronizacija končana"
     syncFailed = "Sinhronizacija ni uspela"
     backupHint = "Vaša potovanja, stroški in dokumenti se samodejno varnostno kopirajo v oblak in sinhronizirajo v vseh vaših napravah."
+    noLegsYet = "Še ni delov poti"
+    noLegsSubtitle = "Dodajte svoj prvi del poti, da začnete načrtovati svoje potovanje"
+    noChecklistItems = "Še ni ničesar za spakirati"
+    noChecklistSubtitle = "Dodajte predmete, da ustvarite svoj seznam priprav"
 } }
 
 internal val SR: Strings by lazy { EN.copyApply {
@@ -6503,6 +6601,10 @@ internal val SR: Strings by lazy { EN.copyApply {
     syncComplete = "Sinhronizacija završena"
     syncFailed = "Sinhronizacija nije uspela"
     backupHint = "Vaša putovanja, troškovi i dokumenti se automatski čuvaju u klaudu i sinhronizuju na svim vašim uređajima."
+    noLegsYet = "Još nema deonica"
+    noLegsSubtitle = "Dodajte svoju prvu deonicu da biste počeli sa planiranjem putovanja"
+    noChecklistItems = "Još nema ništa za pakovanje"
+    noChecklistSubtitle = "Dodajte stavke da biste napravili svoju listu priprema"
 } }
 
 internal val SQ: Strings by lazy { EN.copyApply {
@@ -6759,6 +6861,10 @@ internal val SQ: Strings by lazy { EN.copyApply {
     syncComplete = "Sinkronizimi u Krye"
     syncFailed = "Sinkronizimi Dështoi"
     backupHint = "Udhëtimet, shpenzimet dhe dokumentet tuaja rezervohen automatikisht në re dhe sinkronizohen në të gjitha pajisjet tuaja."
+    noLegsYet = "Asnjë etapë ende"
+    noLegsSubtitle = "Shtoni etapën tuaj të parë për të filluar planifikimin e udhëtimit"
+    noChecklistItems = "Asgjë për të paketuar ende"
+    noChecklistSubtitle = "Shtoni artikuj për të krijuar listën tuaj të përgatitjes"
 } }
 
 internal val MK: Strings by lazy { EN.copyApply {
@@ -7015,6 +7121,10 @@ internal val MK: Strings by lazy { EN.copyApply {
     syncComplete = "Синхронизацијата е завршена"
     syncFailed = "Синхронизацијата не успеа"
     backupHint = "Вашите патувања, трошоци и документи автоматски се зачувуваат во облак и се синхронизираат на сите ваши уреди."
+    noLegsYet = "Сè уште нема делови од пат"
+    noLegsSubtitle = "Додајте го вашиот прв дел од пат за да започнете со планирање на патувањето"
+    noChecklistItems = "Сè уште нема ништо за пакување"
+    noChecklistSubtitle = "Додајте ставки за да ја креирате вашата листа за подготовка"
 } }
 
 internal val MO: Strings by lazy { EN.copyApply {
@@ -7271,6 +7381,14 @@ internal val MO: Strings by lazy { EN.copyApply {
     syncComplete = "Sincronizare finalizată"
     syncFailed = "Sincronizare eșuată"
     backupHint = "Călătoriile, cheltuielile și documentele tale sunt salvate automat în cloud și se sincronizează pe toate dispozitivele tale."
+    noLegsYet = "Nicio etapă încă"
+    noLegsSubtitle = "Adaugă prima etapă pentru a începe planificarea călătoriei"
+    noChecklistItems = "Nimic de împachetat încă"
+    noChecklistSubtitle = "Adaugă articole pentru a-ți crea lista de pregătire"
+    noLegsYet = "Nicio etapă încă"
+    noLegsSubtitle = "Adaugă prima etapă pentru a începe planificarea călătoriei"
+    noChecklistItems = "Nimic de împachetat încă"
+    noChecklistSubtitle = "Adaugă articole pentru a-ți crea lista de pregătire"
 } }
 
 internal val NO: Strings by lazy { EN.copyApply {
@@ -7527,6 +7645,10 @@ internal val NO: Strings by lazy { EN.copyApply {
     syncComplete = "Synkronisering fullført"
     syncFailed = "Synkronisering mislyktes"
     backupHint = "Reisene, utgiftene og dokumentene dine sikkerhetskopieres automatisk til skyen og synkroniseres på tvers av alle enhetene dine."
+    noLegsYet = "Ingen etapper ennå"
+    noLegsSubtitle = "Legg til din første etappe for å begynne å planlegge reisen"
+    noChecklistItems = "Ingenting å pakke ennå"
+    noChecklistSubtitle = "Legg til punkter for å lage din forberedelsesliste"
 } }
 
 internal val FI: Strings by lazy { EN.copyApply {
@@ -7783,6 +7905,10 @@ internal val FI: Strings by lazy { EN.copyApply {
     syncComplete = "Synkronointi valmis"
     syncFailed = "Synkronointi epäonnistui"
     backupHint = "Matkasi, kulusi ja asiakirjasi varmuuskopioidaan automaattisesti pilveen ja ne synkronoidaan kaikkien laitteidesi välillä."
+    noLegsYet = "Ei vielä matkaosuuksia"
+    noLegsSubtitle = "Lisää ensimmäinen matkaosuutesi aloittaaksesi matkan suunnittelun"
+    noChecklistItems = "Ei vielä mitään pakattavaa"
+    noChecklistSubtitle = "Lisää kohteita luodaksesi valmistelulistasi"
 } }
 
 internal val SV: Strings by lazy { EN.copyApply {
@@ -8039,6 +8165,10 @@ internal val SV: Strings by lazy { EN.copyApply {
     syncComplete = "Synkroniseringen klar"
     syncFailed = "Synkroniseringen misslyckades"
     backupHint = "Dina resor, utgifter och dokument säkerhetskopieras automatiskt till molnet och synkroniseras mellan alla dina enheter."
+    noLegsYet = "Inga etapper än"
+    noLegsSubtitle = "Lägg till din första etapp för att börja planera din resa"
+    noChecklistItems = "Inget att packa än"
+    noChecklistSubtitle = "Lägg till föremål för att skapa din förberedelselista"
 } }
 
 internal val DA: Strings by lazy { EN.copyApply {
@@ -8295,6 +8425,10 @@ internal val DA: Strings by lazy { EN.copyApply {
     syncComplete = "Synkronisering fuldført"
     syncFailed = "Synkronisering mislykkedes"
     backupHint = "Dine rejser, udgifter og dokumenter sikkerhedskopieres automatisk til skyen og synkroniseres på tværs af alle dine enheder."
+    noLegsYet = "Ingen etapper endnu"
+    noLegsSubtitle = "Tilføj din første etappe for at begynde at planlægge din rejse"
+    noChecklistItems = "Intet at pakke endnu"
+    noChecklistSubtitle = "Tilføj punkter for at opbygge din forberedelsesliste"
 } }
 
 internal val ET: Strings by lazy { EN.copyApply {
@@ -8551,6 +8685,10 @@ internal val ET: Strings by lazy { EN.copyApply {
     syncComplete = "Sünkroonimine lõpetatud"
     syncFailed = "Sünkroonimine ebaõnnestus"
     backupHint = "Sinu reisid, kulud ja dokumendid varundatakse automaatselt pilve ning sünkroonitakse kõigi Sinu seadmete vahel."
+    noLegsYet = "Reisietappe pole veel"
+    noLegsSubtitle = "Lisa esimene reisietapp, et alustada reisi planeerimist"
+    noChecklistItems = "Pole veel midagi pakkida"
+    noChecklistSubtitle = "Lisa esemeid, et koostada oma ettevalmistusnimekiri"
 } }
 
 internal val CZ: Strings by lazy { EN.copyApply {
@@ -8807,6 +8945,10 @@ internal val CZ: Strings by lazy { EN.copyApply {
     syncComplete = "Synchronizace dokončena"
     syncFailed = "Synchronizace selhala"
     backupHint = "Vaše cesty, výdaje a dokumenty se automaticky zálohují do cloudu a synchronizují se mezi všemi vašimi zařízeními."
+    noLegsYet = "Zatím žádné úseky"
+    noLegsSubtitle = "Přidejte svůj první úsek a začněte plánovat svou cestu"
+    noChecklistItems = "Zatím není co balit"
+    noChecklistSubtitle = "Přidejte položky a vytvořte si seznam příprav"
 } }
 
 internal val LV: Strings by lazy { EN.copyApply {
@@ -9063,6 +9205,10 @@ internal val LV: Strings by lazy { EN.copyApply {
     syncComplete = "Sinhronizācija pabeigta"
     syncFailed = "Sinhronizācija neizdevās"
     backupHint = "Jūsu ceļojumi, izdevumi un dokumenti tiek automātiski dublēti mākonī un sinhronizēti visās jūsu ierīcēs."
+    noLegsYet = "Vēl nav neviena posma"
+    noLegsSubtitle = "Pievienojiet savu pirmo posmu, lai sāktu plānot ceļojumu"
+    noChecklistItems = "Vēl nav nekā, ko pakot"
+    noChecklistSubtitle = "Pievienojiet lietas, lai izveidotu savu sagatavošanās sarakstu"
 } }
 
 internal val LT: Strings by lazy { EN.copyApply {
@@ -9319,6 +9465,10 @@ internal val LT: Strings by lazy { EN.copyApply {
     syncComplete = "Sinchronizavimas baigtas"
     syncFailed = "Sinchronizavimas nepavyko"
     backupHint = "Jūsų kelionės, išlaidos ir dokumentai automatiškai išsaugomi debesyje ir sinchronizuojami visuose jūsų įrenginiuose."
+    noLegsYet = "Dar nėra etapų"
+    noLegsSubtitle = "Pridėkite savo pirmąjį etapą, kad pradėtumėte planuoti kelionę"
+    noChecklistItems = "Dar nėra ko pakuoti"
+    noChecklistSubtitle = "Pridėkite daiktų, kad sudarytumėte pasiruošimo sąrašą"
 } }
 
 internal val AR: Strings by lazy { EN.copyApply {
@@ -9575,6 +9725,10 @@ internal val AR: Strings by lazy { EN.copyApply {
     syncComplete = "اكتملت المزامنة"
     syncFailed = "فشلت المزامنة"
     backupHint = "يتم نسخ رحلاتك، مصاريفك، ومستنداتك احتياطياً إلى السحابة تلقائياً ومزامنتها عبر جميع أجهزتك."
+    noLegsYet = "لا توجد مراحل بعد"
+    noLegsSubtitle = "أضف مرحلتك الأولى لبدء التخطيط لرحلتك"
+    noChecklistItems = "لا يوجد شيء لتعبئته بعد"
+    noChecklistSubtitle = "أضف عناصر لإنشاء قائمة التحضير الخاصة بك"
 } }
 
 internal val TR: Strings by lazy { EN.copyApply {
@@ -9831,6 +9985,10 @@ internal val TR: Strings by lazy { EN.copyApply {
     syncComplete = "Senkronizasyon tamamlandı"
     syncFailed = "Senkronizasyon başarısız oldu"
     backupHint = "Seyahatleriniz, masraflarınız ve belgeleriniz otomatik olarak buluta yedeklenir ve tüm cihazlarınız arasında senkronize edilir."
+    noLegsYet = "Henüz ayak yok"
+    noLegsSubtitle = "Yolculuğunuzu planlamaya başlamak için ilk ayağınızı ekleyin"
+    noChecklistItems = "Henüz paketlenecek bir şey yok"
+    noChecklistSubtitle = "Hazırlık listenizi oluşturmak için öğeler ekleyin"
 } }
 
 internal val VI: Strings by lazy { EN.copyApply {
@@ -10087,6 +10245,10 @@ internal val VI: Strings by lazy { EN.copyApply {
     syncComplete = "Đồng bộ thành công"
     syncFailed = "Đồng bộ thất bại"
     backupHint = "Chuyến đi, chi phí và tài liệu của bạn sẽ tự động được sao lưu lên đám mây và đồng bộ hóa trên tất cả các thiết bị."
+    noLegsYet = "Chưa có chặng nào"
+    noLegsSubtitle = "Thêm chặng đầu tiên để bắt đầu lập kế hoạch hành trình của bạn"
+    noChecklistItems = "Chưa có gì để chuẩn bị hành lý"
+    noChecklistSubtitle = "Thêm các đồ dùng để xây dựng danh sách chuẩn bị của bạn"
 } }
 
 internal val ID: Strings by lazy { EN.copyApply {
@@ -10343,6 +10505,10 @@ internal val ID: Strings by lazy { EN.copyApply {
     syncComplete = "Sinkronisasi selesai"
     syncFailed = "Sinkronisasi gagal"
     backupHint = "Perjalanan, pengeluaran, dan dokumen Anda secara otomatis dicadangkan ke cloud dan disinkronkan di semua perangkat Anda."
+    noLegsYet = "Belum ada rute"
+    noLegsSubtitle = "Tambahkan rute pertama Anda untuk mulai merencanakan perjalanan"
+    noChecklistItems = "Belum ada yang perlu dipacking"
+    noChecklistSubtitle = "Tambahkan barang untuk membuat daftar persiapan Anda"
 } }
 
 internal val TH: Strings by lazy { EN.copyApply {
@@ -10599,6 +10765,10 @@ internal val TH: Strings by lazy { EN.copyApply {
     syncComplete = "ซิงค์ข้อมูลเสร็จสิ้น"
     syncFailed = "ซิงค์ข้อมูลล้มเหลว"
     backupHint = "ทริป รายการค่าใช้จ่าย และเอกสารของคุณจะได้รับการสำรองข้อมูลไปยังระบบคลาวด์โดยอัตโนมัติ และซิงค์เชื่อมโยงกันในทุกอุปกรณ์ของคุณ"
+    noLegsYet = "ยังไม่มีช่วงการเดินทาง"
+    noLegsSubtitle = "เพิ่มช่วงการเดินทางแรกของคุณเพื่อเริ่มวางแผนการเดินทาง"
+    noChecklistItems = "ยังไม่มีอะไรให้จัดกระเป๋า"
+    noChecklistSubtitle = "เพิ่มรายการเพื่อสร้างรายการเตรียมตัวของคุณ"
 } }
 
 internal val HE: Strings by lazy { EN.copyApply {
@@ -10855,6 +11025,10 @@ internal val HE: Strings by lazy { EN.copyApply {
     syncComplete = "הסנכרון הושלם"
     syncFailed = "הסנכרון נכשל"
     backupHint = "הטיולים, ההוצאות והמסמכים שלך מגובים באופן אוטומטי לענן ומסונכרנים בין כל המכשירים שלך."
+    noLegsYet = "אין עדיין חלקים במסלול"
+    noLegsSubtitle = "הוסף את החלק הראשון כדי להתחיל לתכנן את המסע שלך"
+    noChecklistItems = "אין עדיין מה לארוז"
+    noChecklistSubtitle = "הוסף פריטים כדי לבנות את רשימת ההכנות שלך"
 } }
 
 internal val BN: Strings by lazy { EN.copyApply {
@@ -11111,6 +11285,10 @@ internal val BN: Strings by lazy { EN.copyApply {
     syncComplete = "সিঙ্ক সম্পন্ন হয়েছে"
     syncFailed = "সিঙ্ক ব্যর্থ হয়েছে"
     backupHint = "আপনার ভ্রমণ, খরচ এবং ডকুমেন্টসমূহ স্বয়ংক্রিয়ভাবে ক্লাউডে ব্যাকআপ নেওয়া হবে এবং আপনার সব ডিভাইসে সিঙ্ক হয়ে যাবে।"
+    noLegsYet = "এখনো কোনো ভ্রমণের অংশ নেই"
+    noLegsSubtitle = "আপনার যাত্রা ম্যাপ করা শুরু করতে প্রথম অংশটি যোগ করুন"
+    noChecklistItems = "প্যাক করার মতো এখনো কিছুই নেই"
+    noChecklistSubtitle = "আপনার প্রস্তুতির তালিকা তৈরি করতে আইটেম যোগ করুন"
 } }
 
 internal val TG: Strings by lazy { EN.copyApply {
@@ -11367,6 +11545,10 @@ internal val TG: Strings by lazy { EN.copyApply {
     syncComplete = "Ҳамзамонсозӣ ба охир расид"
     syncFailed = "Ҳамзамонсозӣ нобарор буд"
     backupHint = "Сафарҳо, хароҷот ва ҳуҷҷатҳои шумо ба таври худкор дар абр нусхабардорӣ мешаванд ва дар тамоми дастгоҳҳоятон ҳамзамон мегарданд."
+    noLegsYet = "Ҳанӯз марҳилае нест"
+    noLegsSubtitle = "Марҳилаи аввалини худро илова кунед, то нақшаи сафарро оғоз кунед"
+    noChecklistItems = "Ҳанӯз чизе барои ҷобаҷокунӣ нест"
+    noChecklistSubtitle = "Ашёҳоро илова кунед, то рӯйхати омодагии худро созед"
 } }
 
 internal val SI: Strings by lazy { EN.copyApply {
@@ -11623,6 +11805,10 @@ internal val SI: Strings by lazy { EN.copyApply {
     syncComplete = "සමමුහුර්තකරණය අවසන්"
     syncFailed = "සමමුහුර්තකරණය අසාර්ථකයි"
     backupHint = "ඔබේ චාරිකා, වියදම් සහ ලේඛන ස්වයංක්‍රීයව Cloud වෙත සුරැකෙන අතර ඔබගේ සියලුම උපාංග අතර සමමුහුර්ත කරනු ලැබේ."
+    noLegsYet = "තවමත් ගමන් පියවර නැත"
+    noLegsSubtitle = "ඔබේ ගමන සැලසුම් කිරීම ආරම්භ කිරීමට පළමු ගමන් පියවර එක් කරන්න"
+    noChecklistItems = "තවමත් අසුරන්න දෙයක් නැත"
+    noChecklistSubtitle = "ඔබේ සූදානම් වීමේ ලැයිස්තුව සැකසීමට අයිතම එක් කරන්න"
 } }
 
 

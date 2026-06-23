@@ -3,6 +3,8 @@ package com.itinera.app.data
 import com.itinera.app.model.DocItem
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.firestore.firestore
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 /**
  * Reads and writes the user's documents in Firestore under
@@ -35,4 +37,9 @@ class DocService {
     suspend fun deleteDocument(uid: String, docId: String) {
         docsRef(uid).document(docId).delete()
     }
+
+    fun documentsFlow(uid: String): Flow<List<DocItem>> =
+        docsRef(uid).snapshots.map { snap ->
+            snap.documents.map { it.data(DocItem.serializer()) }
+        }
 }

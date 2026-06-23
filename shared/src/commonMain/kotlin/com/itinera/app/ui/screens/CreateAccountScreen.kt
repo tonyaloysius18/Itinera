@@ -38,6 +38,7 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import com.itinera.app.ui.components.PhoneNumberField
+import com.itinera.app.ui.components.PlaneLoader
 import com.itinera.app.ui.components.countries
 
 /**
@@ -288,11 +289,12 @@ fun CreateAccountScreen(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 45.dp),
             ) {
                 if (loading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                    )
+//                    CircularProgressIndicator(
+//                        modifier = Modifier.size(20.dp),
+//                        strokeWidth = 2.dp,
+//                        color = MaterialTheme.colorScheme.onPrimary,
+//                    )
+                    PlaneLoader()
                 } else {
                     Text(s.createAccount)
                 }

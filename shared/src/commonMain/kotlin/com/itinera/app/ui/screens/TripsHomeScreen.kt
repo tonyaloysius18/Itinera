@@ -52,6 +52,7 @@ import com.itinera.app.model.TripAccent
 import com.itinera.app.model.label
 import com.itinera.app.ui.components.CardShape
 import com.itinera.app.ui.components.EmptyState                          // ⬅ ADD
+import com.itinera.app.ui.components.PlaneLoader
 import com.itinera.app.ui.components.TopBar
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -66,6 +67,7 @@ fun accentColor(accent: TripAccent): Color = when (accent) {
 @Composable
 fun TripsHomeScreen(
     trips: List<Trip>,
+    isLoading: Boolean = false,
     onOpenTrip: (String) -> Unit,
     onCreateTrip: (String) -> Unit,                 // ⬅ was onAddTrip
     onRenameTrip: (String, String) -> Unit,         // ⬅ was onEditTrip
@@ -118,6 +120,12 @@ fun TripsHomeScreen(
             Spacer(Modifier.height(12.dp))
 
             when {
+                isLoading -> {                          // ⬅ ADD FIRST
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        PlaneLoader(size = 130.dp)
+
+                    }
+                }
                 // No trips at all → friendly empty state
                 trips.isEmpty() -> EmptyState(
                     icon = Icons.Filled.Luggage,
