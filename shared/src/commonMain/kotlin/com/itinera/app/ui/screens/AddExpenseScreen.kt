@@ -178,7 +178,7 @@ fun AddExpenseScreen(
                         modifier = Modifier.menuAnchor().fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                     )
-                    ExposedDropdownMenu(expanded = paidMenuOpen, onDismissRequest = { paidMenuOpen = false }) {
+                    ExposedDropdownMenu(expanded = paidMenuOpen, onDismissRequest = { paidMenuOpen = false }, shape = RoundedCornerShape(12.dp)) {
                         travellers.forEach { t ->
                             DropdownMenuItem(
                                 text = { Text(t.firstName) },

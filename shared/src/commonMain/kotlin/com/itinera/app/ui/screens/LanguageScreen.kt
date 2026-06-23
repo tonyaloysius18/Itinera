@@ -88,11 +88,27 @@ fun LanguageScreen(
                     Modifier.verticalScroll(rememberScrollState())
                 ) {
                     val langs = remember {
+                        // European languages to surface right after English (alphabetical among themselves)
+                        val european = setOf(
+                            Language.FRENCH, Language.SPANISH, Language.GERMAN, Language.ITALIAN,
+                            Language.PORTUGUESE, Language.DUTCH, Language.POLISH, Language.RUSSIAN,
+                            Language.UKRAINIAN, Language.HUNGARIAN, Language.ROMANIAN, Language.GREEK,
+                            Language.BULGARIAN, Language.CZECH, Language.LATVIAN, Language.LITHUANIAN,
+                            Language.SLOVAK, Language.SLOVENIAN, Language.SERBIAN, Language.ALBANIAN,
+                            Language.MACEDONIAN, Language.MOLDAVIAN, Language.NORWEGIAN, Language.FINNISH,
+                            Language.SWEDISH, Language.DANISH, Language.ESTONIAN,
+                        )
                         Language.entries
                             .filter { it != Language.SYSTEM }
                             .sortedWith(
-                                compareByDescending<Language> { it == Language.ENGLISH }
-                                    .thenBy { it.nativeName }
+                                // tier 0 = English, tier 1 = European, tier 2 = everything else
+                                compareBy<Language> {
+                                    when {
+                                        it == Language.ENGLISH -> 0
+                                        it in european -> 1
+                                        else -> 2
+                                    }
+                                }.thenBy { it.englishName }   // alphabetical within each tier
                             )
                     }
                     langs.forEachIndexed { index, lang ->

@@ -132,7 +132,7 @@ fun ChecklistScreen(
 }
 
 // ---- Add-item dialog ----                                         // ⬅ new composable
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun AddChecklistItemDialog(
     existingGroups: List<String>,
@@ -210,11 +210,16 @@ private fun AddChecklistItemDialog(
                         ).fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                     )
-                    ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
                         groupOptions.forEach { g ->
                             DropdownMenuItem(
                                 text = { Text(g) },
                                 onClick = { group = g; userPicked = true; expanded = false },
+                                shape = RoundedCornerShape(12.dp),
                             )
                         }
                     }

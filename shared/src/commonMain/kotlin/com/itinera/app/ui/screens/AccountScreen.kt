@@ -83,7 +83,8 @@ fun AccountScreen(
             // Log out
             Button(
                 onClick = onLogOut,
-                modifier = Modifier.fillMaxWidth().height(52.dp).padding(horizontal = 90.dp),
+                modifier = Modifier.fillMaxWidth().height(52.dp).padding(horizontal = 45
+                    .dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = AccentRed, contentColor = Color.White),
             ) {
@@ -97,7 +98,7 @@ fun AccountScreen(
             // Delete account
             Button(
                 onClick = { showDeleteDialog = true },
-                modifier = Modifier.fillMaxWidth().height(52.dp).padding(horizontal = 90.dp),
+                modifier = Modifier.fillMaxWidth().height(52.dp).padding(horizontal = 45.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = AccentRed, contentColor = Color.White),
             ) {
