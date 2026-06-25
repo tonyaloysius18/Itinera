@@ -29,23 +29,23 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.launch
 
 
 
 /**
  * Repository holding app data as observable Compose state.
  *
- * Trips now persist to Firestore (via TripService): every trip mutation mirrors a
- * write to the cloud, and loadTrips() pulls the user's data on login. Documents,
- * checklist, and activities remain in-memory for now (next persistence increment).
+ * Trips, documents, and expenses persist to Firestore under the shared top-level
+ * trips/{tripId} structure (with documents/ and expenses/ sub-collections). A trip is
+ * visible to any user whose uid is in its memberIds; docs/expenses carry a denormalized
+ * memberIds copy so a single collection-group query streams them per member.
  */
 class TripRepository {
 
     val trips = mutableStateListOf<Trip>()
     val documents = mutableStateListOf<DocItem>()
 
-    val docService = DocService()                        // ⬅ ADD
+    val docService = DocService()
 
     val checklist = mutableStateListOf<ChecklistItem>()
 
@@ -54,11 +54,15 @@ class TripRepository {
     val profileService = ProfileService()
     val tripService = TripService()
 
+    val activityService = ActivityService()
+
     val expenseService = ExpenseService()
 
     val expenses = mutableStateListOf<Expense>()
 
     val notificationScheduler = NotificationScheduler()
+
+    val inviteService = InviteService()
 
     private var tripsListener: Job? = null
 
@@ -66,10 +70,12 @@ class TripRepository {
 
     var tripsSyncedOnce by mutableStateOf(false)
         private set
-
     var documentsSyncedOnce by mutableStateOf(false)
         private set
     var expensesSyncedOnce by mutableStateOf(false)
+        private set
+
+    var activitiesSyncedOnce by mutableStateOf(false)
         private set
 
 
@@ -77,10 +83,13 @@ class TripRepository {
     private fun nowMillis(): Long =
         kotlin.time.Clock.System.now().toEpochMilliseconds()
 
+    /** Current memberIds for a trip (used to stamp docs/expenses for sharing). */
+    private fun memberIdsForTrip(tripId: String): List<String> =
+        trips.firstOrNull { it.id == tripId }?.memberIds ?: emptyList()
+
     // Schedule (or refresh) a reminder for one leg, based on the user's offset.
     private fun scheduleLegReminder(trip: Trip, leg: Leg) {
         val offset = profile.reminderOffsetMinutes
-        // always cancel first so an edit replaces the old alarm
         notificationScheduler.cancel(leg.id)
         if (offset == ReminderOffset.OFF) return
         if (leg.completed) return
@@ -92,15 +101,15 @@ class TripRepository {
 
     private val uploadClient = HttpClient()
 
-    // Background scope for fire-and-forget cloud writes (mutations stay synchronous for the UI).
-    private val ioScope = CoroutineScope(Dispatchers.Default + SupervisorJob())   // ⬅ ADD
+    // Background scope for fire-and-forget cloud writes.
+    private val ioScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     // ===== cloud helpers =====
     private fun persist(trip: Trip) {
-        val uid = authService.currentUid ?: run { println("ITINERA: PERSIST skipped — no uid"); return }
+        if (authService.currentUid == null) { println("ITINERA: PERSIST skipped — no uid"); return }
         ioScope.launch {
             try {
-                tripService.saveTrip(uid, trip)
+                tripService.saveTrip(trip)
                 println("ITINERA: PERSIST ok — ${trip.title}")
             } catch (e: Exception) {
                 println("ITINERA: PERSIST FAILED — ${e.message}")
@@ -108,12 +117,11 @@ class TripRepository {
         }
     }
 
-    private fun removeRemote(tripId: String) {                         // ⬅ ADD
-        val uid = authService.currentUid ?: return
-        ioScope.launch { runCatching { tripService.deleteTrip(uid, tripId) } }
+    private fun removeRemote(tripId: String) {
+        ioScope.launch { runCatching { tripService.deleteTrip(tripId) } }
     }
 
-    /** Replace the in-memory trips with the user's cloud data. Call on login. */
+    /** Replace the in-memory trips with the user's cloud data (trips they're a member of). */
     suspend fun loadTrips(uid: String) {
         try {
             val remote = tripService.loadTrips(uid)
@@ -126,6 +134,7 @@ class TripRepository {
     }
 
     fun addTrip(title: String): String {
+        val uid = authService.currentUid ?: ""
         val id = "trip_${kotlin.random.Random.nextLong()}"
         val trip = Trip(
             id = id,
@@ -134,9 +143,16 @@ class TripRepository {
             dateRange = "",
             accent = TripAccent.values().random(),
             legs = emptyList(),
+            ownerId = uid,
+            members = mapOf(uid to "owner"),
+            memberIds = listOf(uid),
+            memberInfo = mapOf(uid to com.itinera.app.model.MemberInfo(
+                name = listOf(profile.name, profile.surname).filter { it.isNotBlank() }.joinToString(" "),
+                email = profile.email,
+            )),
         )
         trips.add(trip)
-        persist(trip)                                                  // ⬅ ADD
+        persist(trip)
         return id
     }
 
@@ -144,7 +160,7 @@ class TripRepository {
         val i = trips.indexOfFirst { it.id == id }
         if (i >= 0) {
             trips[i] = trips[i].copy(imageUrl = url)
-            persist(trips[i])                                          // ⬅ ADD
+            persist(trips[i])
         }
     }
 
@@ -152,20 +168,20 @@ class TripRepository {
         val i = trips.indexOfFirst { it.id == id }
         if (i >= 0) {
             trips[i] = trips[i].copy(title = title.trim())
-            persist(trips[i])                                          // ⬅ ADD
+            persist(trips[i])
         }
     }
 
     fun deleteTrip(id: String) {
         trips.removeAll { it.id == id }
-        removeRemote(id)                                               // ⬅ ADD
+        removeRemote(id)
     }
 
     fun togglePin(id: String) {
         val i = trips.indexOfFirst { it.id == id }
         if (i >= 0) {
             trips[i] = trips[i].copy(pinned = !trips[i].pinned)
-            persist(trips[i])                                          // ⬅ ADD
+            persist(trips[i])
         }
     }
 
@@ -173,7 +189,7 @@ class TripRepository {
         val i = trips.indexOfFirst { it.id == id }
         if (i >= 0) {
             trips[i] = trips[i].copy(archived = !trips[i].archived)
-            persist(trips[i])                                          // ⬅ ADD
+            persist(trips[i])
         }
     }
 
@@ -198,7 +214,7 @@ class TripRepository {
             if (it.id == legId) it.copy(completed = !it.completed) else it
         }
         trips[tripIndex] = trip.copy(legs = newLegs)
-        persist(trips[tripIndex])                                      // ⬅ ADD
+        persist(trips[tripIndex])
     }
 
     fun toggleChecklistItem(itemId: String) {
@@ -225,7 +241,7 @@ class TripRepository {
         val trip = trips[index]
         trips[index] = trip.copy(legs = trip.legs + leg)
         persist(trips[index])
-        scheduleLegReminder(trips[index], leg)    // ⬅ ADD
+        scheduleLegReminder(trips[index], leg)
     }
 
     fun updateLeg(tripId: String, leg: Leg) {
@@ -234,8 +250,7 @@ class TripRepository {
         val trip = trips[index]
         trips[index] = trip.copy(legs = trip.legs.map { if (it.id == leg.id) leg else it })
         persist(trips[index])
-        scheduleLegReminder(trips[index], leg)                 // ⬅ ADD
-
+        scheduleLegReminder(trips[index], leg)
     }
 
     fun deleteLeg(tripId: String, legId: String) {
@@ -247,7 +262,7 @@ class TripRepository {
         notificationScheduler.cancel(legId)
     }
 
-    fun markLegAddedToCalendar(tripId: String, legId: String) {        // ⬅ FIXED (was calling missing updateTripLegs)
+    fun markLegAddedToCalendar(tripId: String, legId: String) {
         val index = trips.indexOfFirst { it.id == tripId }
         if (index < 0) return
         val trip = trips[index]
@@ -255,7 +270,7 @@ class TripRepository {
             if (it.id == legId) it.copy(addedToCalendar = true) else it
         }
         trips[index] = trip.copy(legs = newLegs)
-        persist(trips[index])                                          // ⬅ ADD
+        persist(trips[index])
     }
 
     fun rescheduleAllReminders() {
@@ -268,23 +283,42 @@ class TripRepository {
         activities.filter { it.tripId == tripId }
 
     fun addActivity(tripId: String, date: LocalDate, title: String, time: String, location: String) {
-        activities.add(
-            Activity(
-                id = "a_${kotlin.random.Random.nextLong()}",
-                tripId = tripId,
-                date = date,
-                title = title.trim(),
-                time = time.trim(),
-                location = location.trim(),
-            )
+        val act = Activity(
+            id = "a_${kotlin.random.Random.nextLong()}",
+            tripId = tripId,
+            date = date,
+            title = title.trim(),
+            time = time.trim(),
+            location = location.trim(),
+            memberIds = memberIdsForTrip(tripId),
         )
+        activities.add(act)
+        ioScope.launch { runCatching { activityService.saveActivity(act) } }
     }
 
     fun updateActivity(id: String, date: LocalDate, title: String, time: String, location: String) {
         val i = activities.indexOfFirst { it.id == id }
-        if (i >= 0) activities[i] = activities[i].copy(
+        if (i < 0) return
+        val updated = activities[i].copy(
             date = date, title = title.trim(), time = time.trim(), location = location.trim(),
+            memberIds = memberIdsForTrip(activities[i].tripId),
         )
+        activities[i] = updated
+        ioScope.launch { runCatching { activityService.saveActivity(updated) } }
+    }
+
+    fun toggleActivity(id: String) {
+        val i = activities.indexOfFirst { it.id == id }
+        if (i < 0) return
+        val updated = activities[i].copy(completed = !activities[i].completed)
+        activities[i] = updated
+        ioScope.launch { runCatching { activityService.saveActivity(updated) } }
+    }
+
+    fun deleteActivity(id: String) {
+        val act = activities.firstOrNull { it.id == id }
+        activities.removeAll { it.id == id }
+        if (act != null) ioScope.launch { runCatching { activityService.deleteActivity(act.tripId, id) } }
     }
 
     fun tripDates(tripId: String): List<LocalDate> {
@@ -296,15 +330,6 @@ class TripRepository {
     fun dayNumberFor(tripId: String, date: LocalDate): Int {
         val rank = tripDates(tripId).indexOf(date)
         return if (rank >= 0) rank + 1 else 1
-    }
-
-    fun toggleActivity(id: String) {
-        val i = activities.indexOfFirst { it.id == id }
-        if (i >= 0) activities[i] = activities[i].copy(completed = !activities[i].completed)
-    }
-
-    fun deleteActivity(id: String) {
-        activities.removeAll { it.id == id }
     }
 
     // ===== profile =====
@@ -325,28 +350,24 @@ class TripRepository {
         activities.clear()
         profile = UserProfile()
         expenses.clear()
-
     }
 
+    // ===== documents (now under trips/{tripId}/documents) =====
     fun addDocument(doc: DocItem) {
-        documents.add(doc)
-        val uid = authService.currentUid ?: return
-        ioScope.launch { runCatching { docService.saveDocument(uid, doc) } }
+        val stamped = doc.copy(memberIds = memberIdsForTrip(doc.tripId))
+        documents.add(stamped)
+        ioScope.launch { runCatching { docService.saveDocument(stamped) } }
     }
 
     fun deleteDocument(docId: String) {
+        val doc = documents.firstOrNull { it.id == docId }
         documents.removeAll { it.id == docId }
-        val uid = authService.currentUid ?: return
-        ioScope.launch { runCatching { docService.deleteDocument(uid, docId) } }
+        if (doc != null) ioScope.launch { runCatching { docService.deleteDocument(doc.tripId, docId) } }
     }
 
-    suspend fun loadDocuments(uid: String) {
-        runCatching {
-            val remote = docService.loadDocuments(uid)
-            documents.clear()
-            documents.addAll(remote)
-        }
-    }
+    /** No longer needed for live sync (collection-group flow handles it); kept as a no-op
+     *  so the Backup "Sync Now" call site still compiles. */
+    suspend fun loadDocuments(uid: String) { /* handled by live collection-group sync */ }
 
     suspend fun addDocumentWithFile(
         tripId: String,
@@ -354,7 +375,6 @@ class TripRepository {
         category: String,
         file: PickedFile,
     ): Boolean {
-        val uid = authService.currentUid ?: return false
         return try {
             val url = uploadFileToStorage(uploadClient, file.bytes, file.fileName, file.mimeType)
             val doc = DocItem(
@@ -365,9 +385,10 @@ class TripRepository {
                 fileName = file.fileName,
                 fileUrl = url,
                 mimeType = file.mimeType,
+                memberIds = memberIdsForTrip(tripId),
             )
             documents.add(doc)
-            docService.saveDocument(uid, doc)
+            docService.saveDocument(doc)
             true
         } catch (e: Exception) {
             println("DOC UPLOAD FAILED: ${e.message}")
@@ -397,9 +418,6 @@ class TripRepository {
         null
     }
 
-    /** Ensures the owner (you) is present as a traveller; backfills older trips. */
-    /** Ensures the owner (you) is present as a traveller; rebuilds a broken one. */
-    /** Ensures the owner (you) exists and keeps their details in sync with your profile. */
     /** Ensures the owner (you) exists and keeps their details in sync with your profile. */
     fun ensureOwnerTraveller(tripId: String) {
         val idx = trips.indexOfFirst { it.id == tripId }
@@ -410,16 +428,15 @@ class TripRepository {
 
         val owner = Traveller(
             id = existingOwner?.id ?: "owner_${authService.currentUid ?: "me"}",
-            firstName = profile.name.ifBlank { "Me" },     // ⬅ profile.name
-            surname = profile.surname,                      // ⬅ profile.surname
-            email = profile.email,                          // ⬅ profile.email
-            phone = profile.mobile,                         // ⬅ profile.mobile → Traveller.phone
+            firstName = profile.name.ifBlank { "Me" },
+            surname = profile.surname,
+            email = profile.email,
+            phone = profile.mobile,
             colorIndex = existingOwner?.colorIndex ?: 0,
             isOwner = true,
             userId = authService.currentUid ?: "",
         )
 
-        // skip the write if nothing changed (avoids spamming Firestore on every open)
         if (existingOwner == owner) return
 
         val withoutOwner = trip.travellers.filterNot { it.isOwner }
@@ -428,64 +445,60 @@ class TripRepository {
         persist(updated)
     }
 
-        fun addTraveller(tripId: String, traveller: Traveller) {
-            val idx = trips.indexOfFirst { it.id == tripId }
-            if (idx < 0) return
-            val updated = trips[idx].copy(travellers = trips[idx].travellers + traveller)
-            trips[idx] = updated
-            persist(updated)
-        }
+    fun addTraveller(tripId: String, traveller: Traveller) {
+        val idx = trips.indexOfFirst { it.id == tripId }
+        if (idx < 0) return
+        val updated = trips[idx].copy(travellers = trips[idx].travellers + traveller)
+        trips[idx] = updated
+        persist(updated)
+    }
 
-        fun updateTraveller(tripId: String, traveller: Traveller) {
-            val idx = trips.indexOfFirst { it.id == tripId }
-            if (idx < 0) return
-            val updated = trips[idx].copy(
-                travellers = trips[idx].travellers.map { if (it.id == traveller.id) traveller else it },
-            )
-            trips[idx] = updated
-            persist(updated)
-        }
+    fun updateTraveller(tripId: String, traveller: Traveller) {
+        val idx = trips.indexOfFirst { it.id == tripId }
+        if (idx < 0) return
+        val updated = trips[idx].copy(
+            travellers = trips[idx].travellers.map { if (it.id == traveller.id) traveller else it },
+        )
+        trips[idx] = updated
+        persist(updated)
+    }
 
-        fun removeTraveller(tripId: String, travellerId: String) {
-            val idx = trips.indexOfFirst { it.id == tripId }
-            if (idx < 0) return
-            val trip = trips[idx]
-            val target = trip.travellers.firstOrNull { it.id == travellerId } ?: return
-            if (target.isOwner) return   // never remove the owner
-            val updated = trip.copy(travellers = trip.travellers.filterNot { it.id == travellerId })
-            trips[idx] = updated
-            persist(updated)
-        }
+    fun removeTraveller(tripId: String, travellerId: String) {
+        val idx = trips.indexOfFirst { it.id == tripId }
+        if (idx < 0) return
+        val trip = trips[idx]
+        val target = trip.travellers.firstOrNull { it.id == travellerId } ?: return
+        if (target.isOwner) return   // never remove the owner
+        val updated = trip.copy(travellers = trip.travellers.filterNot { it.id == travellerId })
+        trips[idx] = updated
+        persist(updated)
+    }
 
+    // ===== expenses (now under trips/{tripId}/expenses) =====
     fun expensesForTrip(tripId: String): List<Expense> =
         expenses.filter { it.tripId == tripId }
 
     fun addExpense(expense: Expense) {
-        expenses.add(expense)
-        val uid = authService.currentUid ?: return
-        ioScope.launch { runCatching { expenseService.saveExpense(uid, expense) } }
+        val stamped = expense.copy(memberIds = memberIdsForTrip(expense.tripId))
+        expenses.add(stamped)
+        ioScope.launch { runCatching { expenseService.saveExpense(stamped) } }
     }
 
     fun updateExpense(expense: Expense) {
+        val stamped = expense.copy(memberIds = memberIdsForTrip(expense.tripId))
         val i = expenses.indexOfFirst { it.id == expense.id }
-        if (i >= 0) expenses[i] = expense
-        val uid = authService.currentUid ?: return
-        ioScope.launch { runCatching { expenseService.saveExpense(uid, expense) } }
+        if (i >= 0) expenses[i] = stamped
+        ioScope.launch { runCatching { expenseService.saveExpense(stamped) } }
     }
 
     fun deleteExpense(expenseId: String) {
+        val exp = expenses.firstOrNull { it.id == expenseId }
         expenses.removeAll { it.id == expenseId }
-        val uid = authService.currentUid ?: return
-        ioScope.launch { runCatching { expenseService.deleteExpense(uid, expenseId) } }
+        if (exp != null) ioScope.launch { runCatching { expenseService.deleteExpense(exp.tripId, expenseId) } }
     }
 
-    suspend fun loadExpenses(uid: String) {
-        runCatching {
-            val remote = expenseService.loadExpenses(uid)
-            expenses.clear()
-            expenses.addAll(remote)
-        }
-    }
+    /** No longer needed for live sync; kept as a no-op so Backup "Sync Now" compiles. */
+    suspend fun loadExpenses(uid: String) { /* handled by live collection-group sync */ }
 
     fun setTripCurrency(tripId: String, code: String) {
         val i = trips.indexOfFirst { it.id == tripId }
@@ -495,62 +508,102 @@ class TripRepository {
         }
     }
 
-    /** Start live trip sync. Cancels any previous listener first. */
-    fun startTripSync() {
-        val uid = authService.currentUid ?: return
-        tripsListener?.cancel()
-        tripsListener = ioScope.launch {
-            tripService.tripsFlow(uid)
-                .catch { e -> println("ITINERA: trips sync error — ${e.message}") }
-                .collect { remote ->
-                    trips.clear()
-                    trips.addAll(remote)
-                    println("ITINERA: trips sync — ${remote.size} trips")
-                }
+    // ===== one-time migrations =====
+
+    /**
+     * Copy trips from the old users/{uid}/trips into shared top-level trips/, stamping
+     * the current user as owner. Runs once (gated by profile.migratedToShared). Does NOT
+     * delete the old data.
+     */
+    suspend fun migrateToSharedIfNeeded(uid: String) {
+        if (profile.migratedToShared) return
+        try {
+            val legacy = tripService.loadLegacyTrips(uid)
+            println("ITINERA: TRIP MIGRATION — found ${legacy.size} legacy trips")
+            for (old in legacy) {
+                val migrated = old.copy(
+                    ownerId = uid,
+                    members = mapOf(uid to "owner"),
+                    memberIds = listOf(uid),
+                )
+                tripService.saveTrip(migrated)
+            }
+            val updated = profile.copy(migratedToShared = true)
+            profile = updated
+            profileService.saveProfile(uid, updated)
+            println("ITINERA: TRIP MIGRATION — done")
+        } catch (e: Exception) {
+            println("ITINERA: TRIP MIGRATION FAILED — ${e.message}")
         }
     }
 
-    /** Stop live sync (call on logout). */
-    fun stopTripSync() {
-        tripsListener?.cancel()
-        tripsListener = null
+    /**
+     * Copy documents/expenses from old users/{uid}/... into trips/{tripId}/..., stamping
+     * memberIds from their parent trip. Runs once (gated by profile.migratedDocsExpenses).
+     * Must run AFTER migrateToSharedIfNeeded so memberIdsForTrip resolves.
+     */
+    suspend fun migrateDocsExpensesIfNeeded(uid: String) {
+        if (profile.migratedDocsExpenses) return
+        try {
+            val legacyDocs = docService.loadLegacyDocuments(uid)
+            for (d in legacyDocs) {
+                val ids = memberIdsForTrip(d.tripId).ifEmpty { listOf(uid) }
+                docService.saveDocument(d.copy(memberIds = ids))
+            }
+            val legacyExp = expenseService.loadLegacyExpenses(uid)
+            for (e in legacyExp) {
+                val ids = memberIdsForTrip(e.tripId).ifEmpty { listOf(uid) }
+                expenseService.saveExpense(e.copy(memberIds = ids))
+            }
+            val updated = profile.copy(migratedDocsExpenses = true)
+            profile = updated
+            profileService.saveProfile(uid, updated)
+            println("ITINERA: DOCS/EXP MIGRATION — ${legacyDocs.size} docs, ${legacyExp.size} expenses")
+        } catch (e: Exception) {
+            println("ITINERA: DOCS/EXP MIGRATION FAILED — ${e.message}")
+        }
     }
 
-    /** Start live sync for trips, documents, and expenses. Replaces one-time loads. */
+    // ===== real-time sync =====
+
+    /** Start live sync for trips, documents, and expenses (collection-group for the latter two). */
     fun startSync() {
         val uid = authService.currentUid ?: return
         stopSync()
         syncJobs += ioScope.launch {
             tripService.tripsFlow(uid)
                 .catch { e -> println("ITINERA: trips sync error — ${e.message}") }
-                .collect { remote -> applyTrips(remote)
-                    tripsSyncedOnce = true  }
+                .collect { remote -> applyTrips(remote); tripsSyncedOnce = true }
         }
         syncJobs += ioScope.launch {
             docService.documentsFlow(uid)
                 .catch { e -> println("ITINERA: docs sync error — ${e.message}") }
-                //.collect { remote -> applyDocuments(remote) }
                 .collect { applyDocuments(it); documentsSyncedOnce = true }
-
         }
         syncJobs += ioScope.launch {
             expenseService.expensesFlow(uid)
                 .catch { e -> println("ITINERA: expenses sync error — ${e.message}") }
-                //.collect { remote -> applyExpenses(remote) }
                 .collect { applyExpenses(it); expensesSyncedOnce = true }
-
         }
 
-
+        syncJobs += ioScope.launch {
+            activityService.activitiesFlow(uid)
+                .catch { e -> println("ITINERA: activities sync error — ${e.message}") }
+                .collect { applyActivities(it); activitiesSyncedOnce = true }
+        }
     }
 
     /** Stop all live listeners (call on logout). */
     fun stopSync() {
         syncJobs.forEach { it.cancel() }
         syncJobs.clear()
+        tripsListener?.cancel()
+        tripsListener = null
         tripsSyncedOnce = false
         documentsSyncedOnce = false
         expensesSyncedOnce = false
+        activitiesSyncedOnce = false
+
     }
 
     // Diff-apply: update only what changed, so lists don't flicker or lose scroll.
@@ -578,4 +631,122 @@ class TripRepository {
         }
     }
 
+    private fun applyActivities(remote: List<Activity>) {
+        activities.removeAll { local -> remote.none { it.id == local.id } }
+        remote.forEach { r ->
+            val i = activities.indexOfFirst { it.id == r.id }
+            if (i >= 0) { if (activities[i] != r) activities[i] = r } else activities.add(r)
+        }
+    }
+
+    // ===== invites / sharing =====
+
+    /** Generate a short human code like "ITIN-A4F9". */
+    private fun generateInviteCode(): String {
+        val chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"   // no ambiguous O/0/I/1
+        val suffix = (1..4).map { chars.random() }.joinToString("")
+        return "ITIN-$suffix"
+    }
+
+    /**
+     * Owner creates an invite for a trip. Returns the code to share, or null on failure.
+     */
+    suspend fun createTripInvite(tripId: String): String? {
+        val uid = authService.currentUid ?: return null
+        val trip = tripById(tripId) ?: return null
+        return try {
+            val code = generateInviteCode()
+            val invite = com.itinera.app.model.Invite(
+                id = "inv_${kotlin.random.Random.nextLong()}",
+                tripId = tripId,
+                tripTitle = trip.title,
+                code = code,
+                createdBy = uid,
+                status = "active",
+                createdAt = nowMillis(),
+            )
+            inviteService.createInvite(invite)
+            code
+        } catch (e: Exception) {
+            println("ITINERA: CREATE INVITE FAILED — ${e.message}")
+            null
+        }
+    }
+
+    /**
+     * Invitee joins a trip by code. Two-phase: add self as viewer (blind write),
+     * then fan out to the trip's docs/expenses. Returns the trip title on success, null otherwise.
+     */
+    suspend fun joinTripByCode(code: String): String? {
+        val uid = authService.currentUid ?: return null
+        return try {
+            val invite = inviteService.findByCode(code) ?: run {
+                println("ITINERA: JOIN — no active invite for code $code")
+                return null
+            }
+            // Phase 1: add self as viewer (makes us a member)
+            val joinerName = listOf(profile.name, profile.surname).filter { it.isNotBlank() }.joinToString(" ")
+            inviteService.joinTripAddSelf(invite.tripId, uid, joinerName, profile.email)
+            // Phase 2: now a member, fan out to docs/expenses
+            inviteService.fanOutToSubcollections(invite.tripId, uid)
+            println("ITINERA: JOIN — joined ${invite.tripTitle}")
+            invite.tripTitle
+
+        } catch (e: Exception) {
+            println("ITINERA: JOIN FAILED — ${e.message}")
+            null
+        }
+    }
+
+    /**
+     * Leave a shared trip: remove self from the trip's docs/expenses/activities first
+     * (while still a member), then from the trip itself. Owners cannot leave.
+     * Returns true on success.
+     */
+    suspend fun leaveTrip(tripId: String): Boolean {
+        val uid = authService.currentUid ?: return false
+        val trip = tripById(tripId) ?: return false
+        if (trip.ownerId == uid) return false   // owner can't leave their own trip
+        return try {
+            // Phase 1: remove self from sub-items while still permitted
+            inviteService.removeSelfFromSubcollections(tripId, uid)
+            // Phase 2: remove self from the trip
+            inviteService.leaveTripRemoveSelf(tripId, uid)
+            // Local: drop the trip + its sub-items from memory immediately
+            trips.removeAll { it.id == tripId }
+            documents.removeAll { it.tripId == tripId }
+            expenses.removeAll { it.tripId == tripId }
+            activities.removeAll { it.tripId == tripId }
+            println("ITINERA: LEFT trip ${trip.title}")
+            true
+        } catch (e: Exception) {
+            println("ITINERA: LEAVE FAILED — ${e.message}")
+            false
+        }
+    }
+
+    /** Owner changes a member's role (editor/viewer) or the owner can remove a member. */
+    fun setMemberRole(tripId: String, memberUid: String, role: String) {
+        val idx = trips.indexOfFirst { it.id == tripId }
+        if (idx < 0) return
+        val trip = trips[idx]
+        val newMembers = trip.members.toMutableMap().apply { put(memberUid, role) }
+        val newIds = (trip.memberIds + memberUid).distinct()
+        val updated = trip.copy(members = newMembers, memberIds = newIds)
+        trips[idx] = updated
+        persist(updated)
+    }
+
+    fun removeMember(tripId: String, memberUid: String) {
+        val idx = trips.indexOfFirst { it.id == tripId }
+        if (idx < 0) return
+        val trip = trips[idx]
+        if (trip.ownerId == memberUid) return
+        val newMembers = trip.members.toMutableMap().apply { remove(memberUid) }
+        val newIds = trip.memberIds.filterNot { it == memberUid }
+        val newInfo = trip.memberInfo.toMutableMap().apply { remove(memberUid) }   // ⬅ drop info
+        val updated = trip.copy(members = newMembers, memberIds = newIds, memberInfo = newInfo)
+        trips[idx] = updated
+        persist(updated)
+    }
 }

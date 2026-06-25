@@ -17,25 +17,12 @@ fun LocalDate.label(): String {
 enum class TransportType { FLIGHT, TRAIN, BUS, FERRY, CAR }
 
 /** A stored travel document (ticket, reservation, etc.). */
-
 @Serializable
 enum class DocType { PDF, IMAGE }
 
 /** Simple cover accent for a trip card. */
 @Serializable
 enum class TripAccent { BLUE, GREEN, CORAL, PURPLE }
-
-@Serializable
-data class Activity(
-    val id: String,
-    val tripId: String,
-    val date: LocalDate,
-    val title: String,       // "Eiffel Tower"
-    val time: String = "",   // "10:00" (optional)
-    val location: String = "", // "Champ de Mars, Paris" (optional)
-    val note: String = "",   // optional
-    val completed: Boolean = false,
-)
 
 /**
  * A single segment of a journey: from one place to another at a given time.
@@ -72,7 +59,35 @@ data class Trip(
     val pinned: Boolean = false,        // ⬅ ADD
     val archived: Boolean = false,
     val currencyCode: String = "EUR",
+    val ownerId: String = "",
+    val members: Map<String, String> = emptyMap(),     // uid -> role (rules check this)
+    val memberIds: List<String> = emptyList(),         // uid list (for querying)  ⬅ ADD
+    val memberInfo: Map<String, MemberInfo> = emptyMap(),
 )
+
+@Serializable
+data class MemberInfo(
+    val name: String = "",
+    val email: String = "",
+)
+
+@Serializable
+enum class TripRole { OWNER, EDITOR, VIEWER }
+
+/** The current user's role on a trip, or null if not a member. */
+fun Trip.roleOf(uid: String): TripRole? = when (members[uid]) {
+    "owner" -> TripRole.OWNER
+    "editor" -> TripRole.EDITOR
+    "viewer" -> TripRole.VIEWER
+    else -> null
+}
+
+/** True if this user can edit the trip (owner or editor). */
+fun Trip.canEdit(uid: String): Boolean =
+    members[uid] == "owner" || members[uid] == "editor"
+
+/** True if this user owns the trip. */
+fun Trip.isOwnedBy(uid: String): Boolean = members[uid] == "owner"
 
 /** A document attached either to a whole trip or to a specific leg. */
 @Serializable
@@ -87,6 +102,21 @@ data class DocItem(
     val legId: String = "",            // kept for back-compat (unused now)
     val type: DocType = DocType.IMAGE, // legacy
     val attachedToLabel: String = "",  // legacy
+    val memberIds: List<String> = emptyList(),
+
+    )
+
+@Serializable
+data class Activity(
+    val id: String,
+    val tripId: String,
+    val date: LocalDate,
+    val title: String,
+    val time: String = "",
+    val location: String = "",
+    val note: String = "",
+    val completed: Boolean = false,
+    val memberIds: List<String> = emptyList(),   // ⬅ ADD
 )
 
 @Serializable
@@ -128,7 +158,9 @@ data class Expense(
     val paidByTravellerId: String,
     val shares: List<ExpenseShare> = emptyList(),   // sums to amount
     val createdAt: Long = 0L,
-)
+    val memberIds: List<String> = emptyList(),
+
+    )
 @Serializable                                   // ⬅ ADD
 data class UserProfile(
     val name: String = "",                      // ⬅ defaults added (Firestore needs them)
@@ -141,9 +173,22 @@ data class UserProfile(
     val postalCode: String = "",
     val reminderOffsetMinutes: Int = 0,
     val photoUrl: String = "",
+    val migratedToShared: Boolean = false,
+    val migratedDocsExpenses: Boolean = false,
     @Transient val photoBytes: ByteArray? = null,   // ⬅ excluded from Firestore
 ) {
     val fullName: String get() = "$name $surname".trim()
     val initials: String get() =
         ((name.firstOrNull()?.toString() ?: "") + (surname.firstOrNull()?.toString() ?: "")).uppercase()
 }
+
+@Serializable
+data class Invite(
+    val id: String,
+    val tripId: String,
+    val tripTitle: String = "",
+    val code: String,
+    val createdBy: String = "",
+    val status: String = "active",   // "active" | "revoked"
+    val createdAt: Long = 0L,
+)
