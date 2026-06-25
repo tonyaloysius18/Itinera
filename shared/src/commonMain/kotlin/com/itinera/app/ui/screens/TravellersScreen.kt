@@ -49,6 +49,7 @@ fun TravellersScreen(
     onUpdate: (Traveller) -> Unit,
     onDelete: (String) -> Unit,
     canEdit: Boolean = true,
+    currentUid: String = "",
 
     ) {
     val s = LocalStrings.current
@@ -100,8 +101,7 @@ fun TravellersScreen(
                     Column(Modifier.weight(1f)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(t.fullName, style = MaterialTheme.typography.bodyLarge)
-                            if (t.isOwner) {
-                                Spacer(Modifier.width(8.dp))
+                            if (t.userId == currentUid && currentUid.isNotBlank()) {                                Spacer(Modifier.width(8.dp))
                                 Surface(
                                     shape = RoundedCornerShape(6.dp),
                                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),

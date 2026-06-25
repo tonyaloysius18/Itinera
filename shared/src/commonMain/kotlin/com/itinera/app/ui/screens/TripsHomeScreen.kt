@@ -251,7 +251,7 @@ private fun JoinTripDialog(
     val s = LocalStrings.current
     val scope = rememberCoroutineScope()
 
-    var code by remember { mutableStateOf("") }
+    var suffix by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf(false) }
     var joinedTitle by remember { mutableStateOf<String?>(null) }
@@ -281,9 +281,14 @@ private fun JoinTripDialog(
                         )
                         Spacer(Modifier.height(12.dp))
                         OutlinedTextField(
-                            value = code,
-                            onValueChange = { code = it.uppercase().trim(); error = false },
-                            placeholder = { Text("ITIN-XXXX") },
+                            value = suffix,
+                            onValueChange = {
+                                // keep only A-Z and 2-9, max 4 chars (matches your invite alphabet)
+                                suffix = it.uppercase().filter { c -> c in "ABCDEFGHJKLMNPQRSTUVWXYZ23456789" }.take(4)
+                                error = false
+                            },
+                            prefix = { Text("ITIN-", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)) },
+                            placeholder = { Text("XXXX") },
                             singleLine = true,
                             isError = error,
                             modifier = Modifier.fillMaxWidth(),
@@ -310,12 +315,12 @@ private fun JoinTripDialog(
                         scope.launch {
                             loading = true
                             error = false
-                            val title = onJoinByCode(code)
+                            val title = onJoinByCode("ITIN-$suffix")   // ⬅ reconstruct full code
                             loading = false
                             if (title != null) joinedTitle = title else error = true
                         }
                     },
-                    enabled = code.isNotBlank(),
+                    enabled = suffix.length == 4,                       // ⬅ enable only when 4 entered
                 ) { Text(s.join) }
             }
         },

@@ -365,14 +365,18 @@ private fun AppContent(
                             val trip = repository.tripById(screen.tripId)
                             if (trip == null) navigator.back()
                             else {
-                                LaunchedEffect(screen.tripId) { repository.ensureOwnerTraveller(screen.tripId) }
+                                LaunchedEffect(screen.tripId) {
+                                    repository.ensureOwnerTraveller(screen.tripId)
+                                    repository.reconcileMembersToTravellers(screen.tripId)   // ⬅ ADD
+                                }
                                 TravellersScreen(
                                     travellers = trip.travellers,
                                     onBack = { navigator.back() },
                                     onAdd = { repository.addTraveller(screen.tripId, it) },
                                     onUpdate = { repository.updateTraveller(screen.tripId, it) },
                                     onDelete = { repository.removeTraveller(screen.tripId, it) },
-                                    canEdit = trip.canEdit(repository.authService.currentUid ?: "")
+                                    canEdit = trip.canEdit(repository.authService.currentUid ?: ""),
+                                    currentUid = repository.authService.currentUid ?: "",
                                 )
                             }
                         }
@@ -449,7 +453,10 @@ private fun AppContent(
                             val trip = repository.tripById(screen.tripId)
                             if (trip == null) navigator.back()
                             else {
-                                LaunchedEffect(screen.tripId) { repository.ensureOwnerTraveller(screen.tripId) }
+                                LaunchedEffect(screen.tripId) {
+                                    repository.ensureOwnerTraveller(screen.tripId)
+                                    repository.reconcileMembersToTravellers(screen.tripId)   // ⬅ ADD
+                                }
                                 TripExpensesScreen(
                                     trip = trip,
                                     expenses = repository.expensesForTrip(screen.tripId),

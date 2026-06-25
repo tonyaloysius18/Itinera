@@ -424,6 +424,8 @@ class TripRepository {
         if (idx < 0) return
         val trip = trips[idx]
 
+        if (trip.ownerId != authService.currentUid) return
+
         val existingOwner = trip.travellers.firstOrNull { it.isOwner }
 
         val owner = Traveller(
@@ -443,6 +445,64 @@ class TripRepository {
         val updated = trip.copy(travellers = listOf(owner) + withoutOwner)
         trips[idx] = updated
         persist(updated)
+    }
+
+    /**
+     * Keep the travellers list in sync with the trip's members: every member gets a
+     * matching traveller (linked by userId) for expense-splitting, and auto-linked
+     * travellers for members who left are removed. Manual travellers (blank userId,
+     * e.g. non-app people) are never touched. Owner-only; runs on trip open.
+     */
+    fun reconcileMembersToTravellers(tripId: String) {
+        val idx = trips.indexOfFirst { it.id == tripId }
+        if (idx < 0) return
+        val trip = trips[idx]
+        // Only the actual owner maintains the shared travellers list.
+        if (trip.ownerId != authService.currentUid) return
+
+        val memberUids = trip.members.keys
+        val covered = trip.travellers
+            .mapNotNull { it.userId.takeIf { u -> u.isNotBlank() } }
+            .toSet()
+
+        // 1) Remove auto-linked travellers whose member has left.
+        //    (Only ones we linked: userId set, not the owner row, not a current member.)
+        var newTravellers = trip.travellers.filterNot { t ->
+            t.userId.isNotBlank() && t.userId !in memberUids && !t.isOwner
+        }
+
+        // 2) Add a traveller for any member not yet represented (skip the owner —
+        //    they already have their owner-traveller from ensureOwnerTraveller).
+        var colorCursor = (newTravellers.maxOfOrNull { it.colorIndex } ?: -1) + 1
+        for (uid in memberUids) {
+            if (uid == trip.ownerId) continue
+            if (uid in covered) continue
+
+            val info = trip.memberInfo[uid]
+            val fullName = info?.name?.takeIf { it.isNotBlank() }
+                ?: info?.email?.takeIf { it.isNotBlank() }
+                ?: uid.take(6)
+            val parts = fullName.trim().split(" ")
+            val first = parts.firstOrNull().orEmpty()
+            val rest = parts.drop(1).joinToString(" ")
+
+            newTravellers = newTravellers + com.itinera.app.model.Traveller(
+                id = "m_$uid",                       // deterministic → no duplicates on re-run
+                firstName = first,
+                surname = rest,
+                email = info?.email ?: "",
+                colorIndex = colorCursor,
+                isOwner = false,
+                userId = uid,
+            )
+            colorCursor += 1
+        }
+
+        if (newTravellers != trip.travellers) {
+            val updated = trip.copy(travellers = newTravellers)
+            trips[idx] = updated
+            persist(updated)
+        }
     }
 
     fun addTraveller(tripId: String, traveller: Traveller) {
