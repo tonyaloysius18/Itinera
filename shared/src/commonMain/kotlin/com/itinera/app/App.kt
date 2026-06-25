@@ -287,6 +287,7 @@ private fun AppContent(
                             currentUid = repository.authService.currentUid ?: "",
                             onOpenMembers = { navigator.push(Screen.Members(it)) },   // ⬅ CHANGED from onCreateInvite
                             onJoinByCode = { repository.joinTripByCode(it) },
+
                         )
 
                         Screen.Currency -> CurrencyScreen(

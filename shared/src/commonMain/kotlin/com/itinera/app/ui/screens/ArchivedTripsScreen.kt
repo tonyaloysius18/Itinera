@@ -70,6 +70,7 @@ fun ArchivedTripsScreen(
                             doneWord = s.done,
                             noDatesWord = s.noDatesYet,
                             onClick = {},
+                            isPinned = trip.pinned,
                         )
                         // action row beneath the card
                         Row(

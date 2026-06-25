@@ -79,6 +79,7 @@ fun TripsHomeScreen(
     onPinTrip: (String) -> Unit,
     onArchiveTrip: (String) -> Unit,
     onDeleteTrip: (String) -> Unit,
+    pinnedTripIds: Set<String> = emptySet(),
 ) {
 
     val s = LocalStrings.current
@@ -167,6 +168,7 @@ fun TripsHomeScreen(
                             onArchive = { onArchiveTrip(trip.id); openCardId = null },
                             onDelete = { pendingDeleteId = trip.id; openCardId = null },
                             isOwner = trip.isOwnedBy(currentUid),
+                            isPinned = trip.id in pinnedTripIds,
                         )
                     }
                 }
@@ -350,6 +352,8 @@ private fun SwipeableTripCard(
     onArchive: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier,
+    isPinned: Boolean,
+
 
     ) {
     val s = LocalStrings.current
@@ -381,7 +385,7 @@ private fun SwipeableTripCard(
             ) {
                 if (isOwner) {
                     Row(Modifier.weight(1f)) {
-                        ActionButton(Icons.Filled.PushPin, if (trip.pinned) s.unpin else s.pin, Color(0xFF4F7CC0), progress, Modifier.weight(1f), onPin)
+                        ActionButton(Icons.Filled.PushPin, if (isPinned) s.unpin else s.pin, Color(0xFF4F7CC0), progress, Modifier.weight(1f), onPin)
                         ActionButton(Icons.Filled.Edit, s.edit, Color(0xFF5B8A4B), progress, Modifier.weight(1f), onEdit)
                     }
                     Row(Modifier.weight(1f)) {
@@ -389,7 +393,7 @@ private fun SwipeableTripCard(
                         ActionButton(Icons.Filled.Delete, s.delete, Color(0xFFB23B3B), progress, Modifier.weight(1f), onDelete)
                     }
                 } else {
-                    ActionButton(Icons.Filled.PushPin, if (trip.pinned) s.unpin else s.pin, Color(0xFF4F7CC0), progress, Modifier.weight(1f), onPin)
+                    ActionButton(Icons.Filled.PushPin, if (isPinned) s.unpin else s.pin, Color(0xFF4F7CC0), progress, Modifier.weight(1f), onPin)
                     ActionButton(Icons.Filled.Archive, s.archive, Color(0xFF8A7B3B), progress, Modifier.weight(1f), onArchive)
                 }
             }
@@ -436,7 +440,8 @@ private fun SwipeableTripCard(
                     if (offsetX.value != 0f) {
                         scope.launch { offsetX.animateTo(0f, tween(250)); onOpenChange(false) }
                     } else onClick()
-                }
+                },
+                isPinned = isPinned,
             )
         }
     }
@@ -496,7 +501,9 @@ fun TripCardContent(
     canShare: Boolean = false,
     onShare: () -> Unit = {},
     onClick: () -> Unit,
-) {
+    isPinned: Boolean,
+
+    ) {
     val accent = accentColor(trip.accent)
     val doneCount = trip.legs.count { it.completed }
 
@@ -531,7 +538,7 @@ fun TripCardContent(
 
                 Row(Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
                     val labelColor = if (trip.imageUrl != null) Color.White else accent
-                    if (trip.pinned) {
+                    if (isPinned) {
                         Icon(Icons.Filled.PushPin, null, tint = labelColor, modifier = Modifier.size(14.dp))
                         Spacer(Modifier.width(6.6.dp))
                     }

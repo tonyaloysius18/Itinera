@@ -175,6 +175,8 @@ data class UserProfile(
     val photoUrl: String = "",
     val migratedToShared: Boolean = false,
     val migratedDocsExpenses: Boolean = false,
+    val pinnedTripIds: List<String> = emptyList(),      // ⬅ ADD
+    val archivedTripIds: List<String> = emptyList(),
     @Transient val photoBytes: ByteArray? = null,   // ⬅ excluded from Firestore
 ) {
     val fullName: String get() = "$name $surname".trim()

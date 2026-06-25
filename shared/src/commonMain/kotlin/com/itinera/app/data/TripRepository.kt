@@ -177,26 +177,33 @@ class TripRepository {
         removeRemote(id)
     }
 
+    fun isPinned(tripId: String): Boolean = tripId in profile.pinnedTripIds
+    fun isArchived(tripId: String): Boolean = tripId in profile.archivedTripIds
+
     fun togglePin(id: String) {
-        val i = trips.indexOfFirst { it.id == id }
-        if (i >= 0) {
-            trips[i] = trips[i].copy(pinned = !trips[i].pinned)
-            persist(trips[i])
+        val pinned = profile.pinnedTripIds.toMutableList()
+        if (id in pinned) pinned.remove(id) else pinned.add(id)
+        val updated = profile.copy(pinnedTripIds = pinned)
+        profile = updated
+        ioScope.launch {
+            runCatching { authService.currentUid?.let { profileService.saveProfile(it, updated) } }
         }
     }
 
     fun toggleArchive(id: String) {
-        val i = trips.indexOfFirst { it.id == id }
-        if (i >= 0) {
-            trips[i] = trips[i].copy(archived = !trips[i].archived)
-            persist(trips[i])
+        val archived = profile.archivedTripIds.toMutableList()
+        if (id in archived) archived.remove(id) else archived.add(id)
+        val updated = profile.copy(archivedTripIds = archived)
+        profile = updated
+        ioScope.launch {
+            runCatching { authService.currentUid?.let { profileService.saveProfile(it, updated) } }
         }
     }
 
     fun activeTrips(): List<Trip> =
-        trips.filter { !it.archived }.sortedByDescending { it.pinned }
+        trips.filter { !isArchived(it.id) }.sortedByDescending { isPinned(it.id) }
 
-    fun archivedTrips(): List<Trip> = trips.filter { it.archived }
+    fun archivedTrips(): List<Trip> = trips.filter { isArchived(it.id) }
 
     fun tripById(id: String): Trip? = trips.firstOrNull { it.id == id }
 
