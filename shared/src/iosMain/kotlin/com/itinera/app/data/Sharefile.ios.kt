@@ -32,6 +32,14 @@ actual class FileSharer {
         // iPad: a popover anchor would be required; iPhone presents fine as-is.
         root?.presentViewController(activityVC, animated = true, completion = null)
     }
+actual fun shareText(text: String) {
+        val activityVC = UIActivityViewController(
+            activityItems = listOf(text),
+            applicationActivities = null,
+        )
+        val root = UIApplication.sharedApplication.keyWindow?.rootViewController
+        root?.presentViewController(activityVC, animated = true, completion = null)
+    }
 }
 
 @Composable

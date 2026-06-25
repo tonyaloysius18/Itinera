@@ -7,39 +7,41 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 /**
- * Reads and writes the user's documents in Firestore under
- * users/{uid}/documents/{docId}. Each document carries a tripId field, so the
- * repository can filter them per trip in memory (same shape as the flat list).
+ * Reads and writes documents under trips/{tripId}/documents/{docId}.
+ * Each DocItem carries memberIds (denormalized from its parent trip) so a single
+ * collection-group query can stream all documents across the trips a user belongs to.
  *
- * Mirrors ProfileService/TripService: explicit serializer on read, .set() on write.
+ * (Previously documents lived under users/{uid}/documents. Moved under trips for sharing.)
  */
 class DocService {
 
     private val db = Firebase.firestore
 
-    private fun docsRef(uid: String) =
-        db.collection("users").document(uid).collection("documents")
+    private fun docsRef(tripId: String) =
+        db.collection("trips").document(tripId).collection("documents")
 
-    /** Load all of the user's documents (across all trips). */
-    suspend fun loadDocuments(uid: String): List<DocItem> {
-        val snapshot = docsRef(uid).get()
-        return snapshot.documents.map { doc ->
-            doc.data(DocItem.serializer())
-        }
+    /** Save (create or overwrite) a single document under its trip. */
+    suspend fun saveDocument(doc: DocItem) {
+        docsRef(doc.tripId).document(doc.id).set(doc)
     }
 
-    /** Save (create or overwrite) a single document record. */
-    suspend fun saveDocument(uid: String, doc: DocItem) {
-        docsRef(uid).document(doc.id).set(doc)
+    /** Remove a document under its trip. */
+    suspend fun deleteDocument(tripId: String, docId: String) {
+        docsRef(tripId).document(docId).delete()
     }
 
-    /** Remove a document record. */
-    suspend fun deleteDocument(uid: String, docId: String) {
-        docsRef(uid).document(docId).delete()
-    }
-
+    /** Live stream of all documents across trips this user is a member of. */
     fun documentsFlow(uid: String): Flow<List<DocItem>> =
-        docsRef(uid).snapshots.map { snap ->
-            snap.documents.map { it.data(DocItem.serializer()) }
-        }
+        db.collectionGroup("documents")
+            .where { "memberIds" contains uid }
+            .snapshots
+            .map { snapshot ->
+                snapshot.documents.map { it.data(DocItem.serializer()) }
+            }
+
+    // ── one-off migration helper: reads the OLD users/{uid}/documents location ──
+    suspend fun loadLegacyDocuments(uid: String): List<DocItem> {
+        val snapshot = db.collection("users").document(uid).collection("documents").get()
+        return snapshot.documents.map { it.data(DocItem.serializer()) }
+    }
 }
