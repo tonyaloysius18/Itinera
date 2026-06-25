@@ -438,6 +438,7 @@ private fun AppContent(
                                 onBack = { navigator.back() },
                                 onToggle = { repository.toggleChecklistItem(it) },
                                 onAdd = { text, group -> repository.addChecklistItem(screen.tripId, text, group) },
+                                onDelete = { repository.deleteChecklistItem(it) },
 
                             )
                         }

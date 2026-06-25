@@ -135,11 +135,12 @@ val Traveller.fullName: String
     get() = listOf(firstName, surname).filter { it.isNotBlank() }.joinToString(" ")
 
 /** A single preparation checklist entry. */
+@Serializable
 data class ChecklistItem(
-    val id: String,
-    val tripId: String,
-    val text: String,
-    val group: String,
+    val id: String = "",
+    val tripId: String = "",
+    val text: String = "",
+    val group: String = "",
     val done: Boolean = false,
 )
 
@@ -178,7 +179,8 @@ data class UserProfile(
     val pinnedTripIds: List<String> = emptyList(),      // ⬅ ADD
     val archivedTripIds: List<String> = emptyList(),
     @Transient val photoBytes: ByteArray? = null,   // ⬅ excluded from Firestore
-) {
+)
+{
     val fullName: String get() = "$name $surname".trim()
     val initials: String get() =
         ((name.firstOrNull()?.toString() ?: "") + (surname.firstOrNull()?.toString() ?: "")).uppercase()

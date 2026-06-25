@@ -64,6 +64,8 @@ class TripRepository {
 
     val inviteService = InviteService()
 
+    val checklistService = ChecklistService()
+
     private var tripsListener: Job? = null
 
     private val syncJobs = mutableListOf<Job>()
@@ -77,6 +79,10 @@ class TripRepository {
 
     var activitiesSyncedOnce by mutableStateOf(false)
         private set
+
+    var checklistSyncedOnce by mutableStateOf(false)
+        private set
+
 
 
     @OptIn(kotlin.time.ExperimentalTime::class)
@@ -227,19 +233,28 @@ class TripRepository {
     fun toggleChecklistItem(itemId: String) {
         val index = checklist.indexOfFirst { it.id == itemId }
         if (index < 0) return
-        val item = checklist[index]
-        checklist[index] = item.copy(done = !item.done)
+        val updated = checklist[index].copy(done = !checklist[index].done)
+        checklist[index] = updated
+        val uid = authService.currentUid ?: return
+        ioScope.launch { runCatching { checklistService.saveItem(uid, updated) } }
     }
 
     fun addChecklistItem(tripId: String, text: String, group: String) {
-        checklist.add(
-            ChecklistItem(
-                id = "c_${kotlin.random.Random.nextLong()}",
-                tripId = tripId,
-                text = text.trim(),
-                group = group,
-            )
+        val item = ChecklistItem(
+            id = "c_${kotlin.random.Random.nextLong()}",
+            tripId = tripId,
+            text = text.trim(),
+            group = group,
         )
+        checklist.add(item)
+        val uid = authService.currentUid ?: return
+        ioScope.launch { runCatching { checklistService.saveItem(uid, item) } }
+    }
+
+    fun deleteChecklistItem(itemId: String) {
+        checklist.removeAll { it.id == itemId }
+        val uid = authService.currentUid ?: return
+        ioScope.launch { runCatching { checklistService.deleteItem(uid, itemId) } }
     }
 
     fun addLeg(tripId: String, leg: Leg) {
@@ -658,6 +673,11 @@ class TripRepository {
                 .catch { e -> println("ITINERA: activities sync error — ${e.message}") }
                 .collect { applyActivities(it); activitiesSyncedOnce = true }
         }
+        syncJobs += ioScope.launch {
+            checklistService.checklistFlow(uid)
+                .catch { e -> println("ITINERA: checklist sync error — ${e.message}") }
+                .collect { applyChecklist(it); checklistSyncedOnce = true }
+        }
     }
 
     /** Stop all live listeners (call on logout). */
@@ -670,6 +690,8 @@ class TripRepository {
         documentsSyncedOnce = false
         expensesSyncedOnce = false
         activitiesSyncedOnce = false
+        checklistSyncedOnce = false
+
 
     }
 
@@ -703,6 +725,14 @@ class TripRepository {
         remote.forEach { r ->
             val i = activities.indexOfFirst { it.id == r.id }
             if (i >= 0) { if (activities[i] != r) activities[i] = r } else activities.add(r)
+        }
+    }
+
+    private fun applyChecklist(remote: List<ChecklistItem>) {
+        checklist.removeAll { local -> remote.none { it.id == local.id } }
+        remote.forEach { r ->
+            val i = checklist.indexOfFirst { it.id == r.id }
+            if (i >= 0) { if (checklist[i] != r) checklist[i] = r } else checklist.add(r)
         }
     }
 

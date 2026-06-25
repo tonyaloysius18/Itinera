@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.outlined.CheckBoxOutlineBlank
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +27,7 @@ fun ChecklistScreen(
     onBack: () -> Unit,
     onToggle: (String) -> Unit,
     onAdd: (String, String) -> Unit,
+    onDelete: (String) -> Unit,
 ) {
     val s = LocalStrings.current
     val doneCount = items.count { it.done }
@@ -77,29 +79,38 @@ fun ChecklistScreen(
                     )
                 }
             } else {
-                items.groupBy { it.group }.forEach { (group, groupItems) ->
-                Text(group, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), modifier = Modifier.padding(vertical = 6.dp))
-                groupItems.forEach { item ->
+                items.forEach { item ->
                     Row(
-                        Modifier.fillMaxWidth().clickable { onToggle(item.id) }.padding(vertical = 7.dp),
+                        Modifier.fillMaxWidth().padding(vertical = 1.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        if (item.done) {
-                            Icon(Icons.Filled.CheckBox, null, tint = Color(0xFF1D9E75))
-                        } else {
-                            Icon(Icons.Outlined.CheckBoxOutlineBlank, null, tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
+                        Row(
+                            Modifier.weight(1f).clickable { onToggle(item.id) }.padding(vertical = 7.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            if (item.done) {
+                                Icon(Icons.Filled.CheckBox, null, tint = Color(0xFF1D9E75))
+                            } else {
+                                Icon(Icons.Outlined.CheckBoxOutlineBlank, null, tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
+                            }
+                            Spacer(Modifier.width(10.dp))
+                            Text(
+                                item.text,
+                                style = MaterialTheme.typography.bodyLarge,
+                                textDecoration = if (item.done) TextDecoration.LineThrough else null,
+                                color = if (item.done) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurface,
+                            )
                         }
-                        Spacer(Modifier.width(10.dp))
-                        Text(
-                            item.text,
-                            style = MaterialTheme.typography.bodyLarge,
-                            textDecoration = if (item.done) TextDecoration.LineThrough else null,
-                            color = if (item.done) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurface,
-                        )
+                        IconButton(onClick = { onDelete(item.id) }) {
+                            Icon(
+                                Icons.Outlined.Delete,
+                                contentDescription = s.delete,
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                                modifier = Modifier.size(20.dp),
+                            )
+                        }
                     }
                 }
-                Spacer(Modifier.height(8.dp))
-            }
         }
     }
         Box(
