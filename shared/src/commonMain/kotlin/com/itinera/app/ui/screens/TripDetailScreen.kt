@@ -33,6 +33,7 @@ import com.itinera.app.model.label
 import com.itinera.app.ui.components.Progress
 import com.itinera.app.ui.components.TopBar
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.People
 
 
@@ -53,6 +54,8 @@ fun TripDetailScreen(
     onDeleteLeg: (String) -> Unit,
     onToggleActivity: (String) -> Unit,
     onDeleteActivity: (String) -> Unit,
+    canEdit: Boolean = true,
+    onMembers: () -> Unit,
 ) {
     val s = LocalStrings.current
     val done = trip.legs.count { it.completed }
@@ -86,6 +89,9 @@ fun TripDetailScreen(
                     }
                     IconButton(onClick = onDocuments) {
                         Icon(Icons.AutoMirrored.Filled.InsertDriveFile, contentDescription = s.documents, tint = MaterialTheme.colorScheme.primary)
+                    }
+                    IconButton(onClick = onMembers) {
+                        Icon(Icons.Filled.Groups, contentDescription = s.members, tint = MaterialTheme.colorScheme.primary)
                     }
                 }
             },
@@ -159,8 +165,8 @@ fun TripDetailScreen(
                                 Modifier
                                     .fillMaxWidth()
                                     .combinedClickable(
-                                        onClick = { onToggleLeg(leg.id) },
-                                        onLongClick = { showMenu = true },
+                                        onClick = { if (canEdit) onToggleLeg(leg.id) },
+                                        onLongClick = { if (canEdit) showMenu = true },
                                     )
                                     .padding(vertical = 8.dp),
                                 verticalAlignment = Alignment.Top,
@@ -233,8 +239,8 @@ fun TripDetailScreen(
                                     Modifier
                                         .fillMaxWidth()
                                         .combinedClickable(
-                                            onClick = { onToggleActivity(act.id) },
-                                            onLongClick = { showMenu = true },
+                                            onClick = { if (canEdit) onToggleActivity(act.id) },
+                                            onLongClick = { if (canEdit) showMenu = true },
                                         )
                                         .padding(vertical = 8.dp),
                                     verticalAlignment = Alignment.Top,
@@ -312,17 +318,19 @@ fun TripDetailScreen(
                 ) {
                     Text(s.beforeYouGo, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
                 }
-                Spacer(Modifier.width(30.dp))
-                Button(
-                    onClick = { showAddChooser = true },
-                    modifier = Modifier.padding(bottom = 60.dp).height(50.dp),
-                    contentPadding = PaddingValues(horizontal = 25.dp, vertical = 8.dp),
-                    shape = androidx.compose.foundation.shape.CircleShape,
-                ) {
-                    Icon(Icons.Filled.Add, null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text(s.add, style = MaterialTheme.typography.bodyMedium)
-                }
+                if (canEdit) {                                          // ⬅ wrap starts
+                    Spacer(Modifier.width(30.dp))
+                    Button(
+                        onClick = { showAddChooser = true },
+                        modifier = Modifier.padding(bottom = 60.dp).height(50.dp),
+                        contentPadding = PaddingValues(horizontal = 25.dp, vertical = 8.dp),
+                        shape = androidx.compose.foundation.shape.CircleShape,
+                    ) {
+                        Icon(Icons.Filled.Add, null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(s.add, style = MaterialTheme.typography.bodyMedium)
+                    }
+                }                                                       // ⬅ wrap ends
             }
         }
     }

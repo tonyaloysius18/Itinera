@@ -258,6 +258,11 @@ internal val FR: Strings by lazy { EN.copyApply {
     noLegsSubtitle = "Ajoutez votre premier trajet pour commencer à tracer votre itinéraire"
     noChecklistItems = "Rien à emballer pour l'instant"
     noChecklistSubtitle = "Ajoutez des articles pour créer votre liste de préparation"
+    inviteToTrip = "Inviter au voyage"
+    inviteFailed = "Impossible de créer l'invitation. Réessayez."
+    inviteCodeHint = "Partagez ce code. Ils peuvent rejoindre via \"Rejoindre un voyage\"."
+    inviteShareMessage = "Rejoignez mon voyage sur Itinera :"
+    copy = "Copier"
 } }
 
 internal val ES: Strings by lazy { EN.copyApply {
@@ -518,6 +523,11 @@ internal val ES: Strings by lazy { EN.copyApply {
     noLegsSubtitle = "Añade tu primer tramo para empezar a trazar tu viaje"
     noChecklistItems = "Nada que empacar aún"
     noChecklistSubtitle = "Añade artículos para crear tu lista de preparación"
+    inviteToTrip = "Invitar al viaje"
+    inviteFailed = "No se pudo crear la invitación. Inténtalo de nuevo."
+    inviteCodeHint = "Comparte este código. Pueden unirse desde \"Unirse a un viaje\"."
+    inviteShareMessage = "Únete a mi viaje en Itinera:"
+    copy = "Copiar"
 } }
 
 internal val DE: Strings by lazy { EN.copyApply {
@@ -778,6 +788,11 @@ internal val DE: Strings by lazy { EN.copyApply {
     noLegsSubtitle = "Fügen Sie Ihre erste Etappe hinzu, um Ihre Reise zu planen"
     noChecklistItems = "Noch nichts einzupacken"
     noChecklistSubtitle = "Fügen Sie Artikel hinzu, um Ihre Vorbereitungsliste zu erstellen"
+    inviteToTrip = "Zum Trip einladen"
+    inviteFailed = "Einladung konnte nicht erstellt werden. Erneut versuchen."
+    inviteCodeHint = "Teile diesen Code. Andere können über „Trip beitreten“ beitreten."
+    inviteShareMessage = "Tritt meinem Trip auf Itinera bei:"
+    copy = "Kopieren"
 } }
 
 internal val IT: Strings by lazy { EN.copyApply {
@@ -1038,6 +1053,11 @@ internal val IT: Strings by lazy { EN.copyApply {
     noLegsSubtitle = "Aggiungi la tua prima tratta per iniziare a mappare il tuo viaggio"
     noChecklistItems = "Ancora niente da mettere in valigia"
     noChecklistSubtitle = "Aggiungi elementi per creare la tua lista di preparazione"
+    inviteToTrip = "Invita al viaggio"
+    inviteFailed = "Impossibile creare l'invito. Riprova."
+    inviteCodeHint = "Condividi questo codice. Possono partecipare da \"Unisciti a un viaggio\"."
+    inviteShareMessage = "Unisciti al mio viaggio su Itinera:"
+    copy = "Copia"
 } }
 
 internal val PT: Strings by lazy { EN.copyApply {
@@ -1297,7 +1317,12 @@ internal val PT: Strings by lazy { EN.copyApply {
     noLegsYet = "Nenhum trecho ainda"
     noLegsSubtitle = "Adicione seu primeiro trecho para começar a mapear sua jornada"
     noChecklistItems = "Nada para embalar ainda"
-    noChecklistSubtitle = "Adicione itens para criar sua lista de preparação"
+    noChecklistSubtitle = "Adicione itens para crear sua lista de preparação"
+    inviteToTrip = "Convidar para a viagem"
+    inviteFailed = "Não foi possível criar o convite. Tente novamente."
+    inviteCodeHint = "Compartilhe este código. Eles podem entrar em \"Participar de uma viagem\"."
+    inviteShareMessage = "Participe da minha viagem no Itinera:"
+    copy = "Copiar"
 } }
 
 internal val NL: Strings by lazy { EN.copyApply {
@@ -1558,6 +1583,11 @@ internal val NL: Strings by lazy { EN.copyApply {
     noLegsSubtitle = "Voeg je eerste traject toe om je reis in kaart te brengen"
     noChecklistItems = "Nog niets om in te pakken"
     noChecklistSubtitle = "Voeg items toe om je voorbereidingslijst op te bouwen"
+    inviteToTrip = "Uitnodigen voor reis"
+    inviteFailed = "Kon uitnodiging niet maken. Probeer het opnieuw."
+    inviteCodeHint = "Deel deze code. Ze kunnen deelnemen via \"Deelnemen aan een reis\"."
+    inviteShareMessage = "Neem deel aan mijn reis op Itinera:"
+    copy = "Kopiëren"
 } }
 
 internal val PL: Strings by lazy { EN.copyApply {
@@ -1817,7 +1847,12 @@ internal val PL: Strings by lazy { EN.copyApply {
     noLegsYet = "Brak odcinków"
     noLegsSubtitle = "Dodaj swój pierwszy odcinek, aby zacząć mapować swoją podróż"
     noChecklistItems = "Nic jeszcze do spakowania"
-    noChecklistSubtitle = "Dodaj przedmioty, aby stworzyć swoją listę przygotowań"
+    noChecklistSubtitle = "Dodaj przedmioty, aby stworzyć swoją lista przygotowań"
+    inviteToTrip = "Zaproś do podróży"
+    inviteFailed = "Nie udało się utworzyć zaproszenia. Spróbuj ponownie."
+    inviteCodeHint = "Udostępnij ten kod. Mogą dołączyć przez „Dołącz do podróży”."
+    inviteShareMessage = "Dołącz do mojej podróży w Itinera:"
+    copy = "Kopiuj"
 } }
 
 internal val ZH: Strings by lazy { EN.copyApply {
@@ -2078,6 +2113,11 @@ internal val ZH: Strings by lazy { EN.copyApply {
     noLegsSubtitle = "添加您的第一个行程段以开始规划您的旅程"
     noChecklistItems = "暂无物品"
     noChecklistSubtitle = "添加物品以建立您的准备清单"
+    inviteToTrip = "邀请加入行程"
+    inviteFailed = "无法创建邀请。请重试。"
+    inviteCodeHint = "分享此代码。他们可以通过“加入行程”加入。"
+    inviteShareMessage = "在 Itinera 上加入我的行程："
+    copy = "复制"
 } }
 
 internal val JP: Strings by lazy { EN.copyApply {
@@ -2338,6 +2378,11 @@ internal val JP: Strings by lazy { EN.copyApply {
     noLegsSubtitle = "最初の経路を追加して、旅の計画を始めましょう"
     noChecklistItems = "パッキングするものはまだありません"
     noChecklistSubtitle = "項目を追加して、準備リストを作成しましょう"
+    inviteToTrip = "旅行に招待"
+    inviteFailed = "招待を作成できませんでした。もう一度お試しください。"
+    inviteCodeHint = "このコードを共有してください。「旅行に参加」から参加できます。"
+    inviteShareMessage = "Itineraで私の旅行に参加しましょう："
+    copy = "コピー"
 } }
 
 internal val KR: Strings by lazy { EN.copyApply {
@@ -2598,5 +2643,10 @@ internal val KR: Strings by lazy { EN.copyApply {
     noLegsSubtitle = "첫 번째 경로를 추가하여 여행 계획을 시작하세요"
     noChecklistItems = "아직 챙길 것이 없습니다"
     noChecklistSubtitle = "항목을 추가하여 준비 리스트를 만드세요"
+    inviteToTrip = "여행에 초대하기"
+    inviteFailed = "초대장을 생성할 수 없습니다. 다시 시도해 주세요."
+    inviteCodeHint = "이 코드를 공유하세요. \"여행 참여하기\"에서 참여할 수 있습니다."
+    inviteShareMessage = "Itinera에서 제 여행에 참여하세요:"
+    copy = "복사"
 } }
 

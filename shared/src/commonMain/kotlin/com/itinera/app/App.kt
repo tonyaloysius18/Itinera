@@ -60,6 +60,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import kotlinx.coroutines.launch
 import com.itinera.app.i18n.systemLanguage
+import com.itinera.app.model.canEdit
 import com.itinera.app.ui.components.PlaneLoader
 import kotlinx.coroutines.delay
 
@@ -82,7 +83,9 @@ fun App() {
                 val profile = repository.profileService.loadProfile(uid)
                 if (profile != null) repository.updateProfile(profile)
             } catch (e: Exception) { }
-            repository.startSync()                    // live load + keep in sync
+            repository.migrateToSharedIfNeeded(uid)    // ⬅ ADD — before startSync
+            repository.migrateDocsExpensesIfNeeded(uid)   // ⬅ ADD — after trips migration
+            repository.startSync()
             repository.rescheduleAllReminders()
             navigator.resetTo(Screen.Home)
         }
@@ -216,6 +219,8 @@ private fun AppContent(
                                     }
                                 }
                             } catch (e: Exception) { }
+                            repository.migrateToSharedIfNeeded(uid)
+                            repository.migrateDocsExpensesIfNeeded(uid)   // ⬅ ADD — after trips migration
                             repository.startSync()
                             lastSyncedAt = nowMillisApp()
                         }
@@ -279,6 +284,9 @@ private fun AppContent(
                             onPinTrip = { repository.togglePin(it) },
                             onArchiveTrip = { repository.toggleArchive(it) },
                             onDeleteTrip = { repository.deleteTrip(it) },
+                            currentUid = repository.authService.currentUid ?: "",
+                            onOpenMembers = { navigator.push(Screen.Members(it)) },   // ⬅ CHANGED from onCreateInvite
+                            onJoinByCode = { repository.joinTripByCode(it) },
                         )
 
                         Screen.Currency -> CurrencyScreen(
@@ -303,6 +311,8 @@ private fun AppContent(
                                 onDeleteLeg = { legId -> repository.deleteLeg(screen.tripId, legId) },
                                 onToggleActivity = { repository.toggleActivity(it) },
                                 onDeleteActivity = { repository.deleteActivity(it) },
+                                canEdit = trip.canEdit(repository.authService.currentUid ?: ""),
+                                onMembers = { navigator.push(Screen.Members(screen.tripId)) },
                             )
                         }
 
@@ -362,8 +372,28 @@ private fun AppContent(
                                     onAdd = { repository.addTraveller(screen.tripId, it) },
                                     onUpdate = { repository.updateTraveller(screen.tripId, it) },
                                     onDelete = { repository.removeTraveller(screen.tripId, it) },
+                                    canEdit = trip.canEdit(repository.authService.currentUid ?: "")
                                 )
                             }
+                        }
+
+                        is Screen.Members -> {
+                            val trip = repository.tripById(screen.tripId)
+                            if (trip == null) navigator.back()
+                            else MembersScreen(
+                                trip = trip,
+                                currentUid = repository.authService.currentUid ?: "",
+                                onSetRole = { uid, role -> repository.setMemberRole(screen.tripId, uid, role) },
+                                onRemoveMember = { uid -> repository.removeMember(screen.tripId, uid) },
+                                onCreateInvite = { repository.createTripInvite(it) },
+                                onLeaveTrip = {
+                                    scope.launch {
+                                        val left = repository.leaveTrip(screen.tripId)
+                                        if (left) navigator.resetTo(Screen.Home)
+                                    }
+                                },
+                                onBack = { navigator.back() },
+                            )
                         }
 
                         is Screen.TripDocuments -> {
@@ -380,6 +410,7 @@ private fun AppContent(
                                 onUpload = { file, title, category ->
                                     repository.addDocumentWithFile(screen.tripId, title, category, file)
                                 },
+                                canEdit = trip.canEdit(repository.authService.currentUid ?: "")
                             )
                         }
 
@@ -394,12 +425,17 @@ private fun AppContent(
                             )
                         }
 
-                        is Screen.Checklist -> ChecklistScreen(
-                            items = repository.checklistForTrip(screen.tripId),
-                            onBack = { navigator.back() },
-                            onToggle = { repository.toggleChecklistItem(it) },
-                            onAdd = { text, group -> repository.addChecklistItem(screen.tripId, text, group) },
-                        )
+                        is Screen.Checklist -> {
+                            val trip = repository.tripById(screen.tripId)
+                            if (trip == null) navigator.back()
+                            else ChecklistScreen(
+                                items = repository.checklistForTrip(screen.tripId),
+                                onBack = { navigator.back() },
+                                onToggle = { repository.toggleChecklistItem(it) },
+                                onAdd = { text, group -> repository.addChecklistItem(screen.tripId, text, group) },
+
+                            )
+                        }
 
                         is Screen.Split -> {
                             SplitScreen(
@@ -423,6 +459,7 @@ private fun AppContent(
                                     onEditExpense = { navigator.push(Screen.AddExpense(screen.tripId, it)) },
                                     onDeleteExpense = { repository.deleteExpense(it) },
                                     onSetCurrency = { repository.setTripCurrency(screen.tripId, it) },
+                                    canEdit = trip.canEdit(repository.authService.currentUid ?: "")
                                 )
                             }
                         }

@@ -48,7 +48,9 @@ fun TravellersScreen(
     onAdd: (Traveller) -> Unit,
     onUpdate: (Traveller) -> Unit,
     onDelete: (String) -> Unit,
-) {
+    canEdit: Boolean = true,
+
+    ) {
     val s = LocalStrings.current
     var showAdd by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf<Traveller?>(null) }
@@ -59,8 +61,10 @@ fun TravellersScreen(
             title = s.travellers,
             onBack = onBack,
             trailing = {
+                if (canEdit) {
                 IconButton(onClick = { showAdd = true }) {
                     Icon(Icons.Filled.PersonAdd, contentDescription = s.addTraveller, tint = MaterialTheme.colorScheme.primary)
+                    }
                 }
             },
         )
@@ -74,8 +78,8 @@ fun TravellersScreen(
                     Modifier
                         .fillMaxWidth()
                         .combinedClickable(
-                            onClick = { editing = t },
-                            onLongClick = { if (!t.isOwner) pendingDelete = t },
+                            onClick = { if (canEdit) editing = t },
+                            onLongClick = { if (canEdit && !t.isOwner) pendingDelete = t },
                         )
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,

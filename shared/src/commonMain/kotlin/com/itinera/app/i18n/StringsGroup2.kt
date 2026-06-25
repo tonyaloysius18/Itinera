@@ -258,6 +258,11 @@ internal val RU: Strings by lazy { EN.copyApply {
     noLegsSubtitle = "Добавьте свой первый путь, чтобы начать планировать путешествие"
     noChecklistItems = "Пока нечего упаковывать"
     noChecklistSubtitle = "Добавьте пункты, чтобы составить список подготовки"
+    inviteToTrip = "Пригласить в поездку"
+    inviteFailed = "Не удалось создать приглашение. Попробуйте снова."
+    inviteCodeHint = "Поделитесь этим кодом. Они могут присоединиться через «Присоединиться к поездке»."
+    inviteShareMessage = "Присоединяйтесь к моей поездке в Itinera:"
+    copy = "Копировать"
 } }
 
 internal val TAM: Strings by lazy { EN.copyApply {
@@ -518,6 +523,11 @@ internal val TAM: Strings by lazy { EN.copyApply {
     noLegsSubtitle = "உங்கள் பயணத்தைத் திட்டமிட முதல் பயணத்தைச் சேர்க்கவும்"
     noChecklistItems = "இன்னும் பேக் செய்ய எதுவுமில்லை"
     noChecklistSubtitle = "உங்கள் தயாரிப்புப் பட்டியலை உருவாக்கப் பொருட்களைச் சேர்க்கவும்"
+    inviteToTrip = "பயணத்திற்கு அழைக்கவும்"
+    inviteFailed = "அழைப்பை உருவாக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்."
+    inviteCodeHint = "இந்தக் குறியீட்டைப் பகிரவும். அவர்கள் \"பயணத்தில் சேர்\" என்பதிலிருந்து சேரலாம்."
+    inviteShareMessage = "Itinera-வில் எனது பயணத்தில் இணையுங்கள்:"
+    copy = "நகலெடு"
 } }
 
 internal val HI: Strings by lazy { EN.copyApply {
@@ -778,6 +788,11 @@ internal val HI: Strings by lazy { EN.copyApply {
     noLegsSubtitle = "अपनी यात्रा की योजना शुरू करने के लिए अपना पहला पड़ाव जोड़ें"
     noChecklistItems = "अभी पैक करने के लिए कुछ भी नहीं है"
     noChecklistSubtitle = "अपनी तैयारी सूची बनाने के लिए आइटम जोड़ें"
+    inviteToTrip = "यात्रा के लिए आमंत्रित करें"
+    inviteFailed = "आमंत्रण नहीं बनाया जा सका। फिर से प्रयास करें।"
+    inviteCodeHint = "यह कोड साझा करें। वे \"यात्रा में शामिल हों\" से शामिल हो सकते हैं।"
+    inviteShareMessage = "Itinera पर मेरी यात्रा में शामिल हों:"
+    copy = "कॉपी करें"
 } }
 
 internal val UKR: Strings by lazy { EN.copyApply {
@@ -1038,6 +1053,11 @@ internal val UKR: Strings by lazy { EN.copyApply {
     noLegsSubtitle = "Додайте свій перший етап, щоб почати планувати подорож"
     noChecklistItems = "Ще нічого пакувати"
     noChecklistSubtitle = "Додайте пункти, щоб створити список підготовки"
+    inviteToTrip = "Запросити до подорожі"
+    inviteFailed = "Не вдалося створити запрошення. Спробуйте ще раз."
+    inviteCodeHint = "Поділіться цим кодом. Вони можуть приєднатися через «Приєднатися до подорожі»."
+    inviteShareMessage = "Приєднуйтесь до моєї подорожі в Itinera:"
+    copy = "Копіювати"
 } }
 
 internal val HUN: Strings by lazy { EN.copyApply {
@@ -1298,6 +1318,11 @@ internal val HUN: Strings by lazy { EN.copyApply {
     noLegsSubtitle = "Adja hozzá az első szakaszt az utazás megtervezéséhez"
     noChecklistItems = "Még nincs mit bepakolni"
     noChecklistSubtitle = "Adjon hozzá elemeket a felkészülési lista összeállításához"
+    inviteToTrip = "Meghívás az utazásra"
+    inviteFailed = "Nem sikerült létrehozni a meghívót. Próbálja újra."
+    inviteCodeHint = "Ossza meg ezt a kódot. A „Csatlakozás utazáshoz” menüpontban csatlakozhatnak."
+    inviteShareMessage = "Csatlakozz az utazásomhoz az Itinera-n:"
+    copy = "Másolás"
 } }
 
 internal val RO: Strings by lazy { EN.copyApply {
@@ -1558,6 +1583,11 @@ internal val RO: Strings by lazy { EN.copyApply {
     noLegsSubtitle = "Adaugă prima etapă pentru a începe planificarea călătoriei"
     noChecklistItems = "Nimic de împachetat încă"
     noChecklistSubtitle = "Adaugă articole pentru a-ți crea lista de pregătire"
+    inviteToTrip = "Invită în călătorie"
+    inviteFailed = "Nu s-a putut crea invitația. Încearcă din nou."
+    inviteCodeHint = "Trimite acest cod. Se pot alătura din „Alătură-te unei călătorii”."
+    inviteShareMessage = "Alătură-te călătoriei mele pe Itinera:"
+    copy = "Copiază"
 } }
 
 internal val GR: Strings by lazy { EN.copyApply {
@@ -1818,6 +1848,11 @@ internal val GR: Strings by lazy { EN.copyApply {
     noLegsSubtitle = "Προσθέστε το πρώτο σας σκέλος για να ξεκινήσετε τη χαρτογράφηση του ταξιδιού σας"
     noChecklistItems = "Τίποτα για πακετάρισμα ακόμα"
     noChecklistSubtitle = "Προσθέστε αντικείμενα για να δημιουργήσετε τη λίστα προετοιμασίας σας"
+    inviteToTrip = "Πρόσκληση στο ταξίδι"
+    inviteFailed = "Αδυναμία δημιουργίας πρόσκλησης. Δοκιμάστε ξανά."
+    inviteCodeHint = "Μοιραστείτε αυτόν τον κωδικό. Μπορούν να συμμετάσχουν από το \"Συμμετοχή σε ταξίδι\"."
+    inviteShareMessage = "Ελάτε στο ταξίδι μου στο Itinera:"
+    copy = "Αντιγραφή"
 } }
 
 internal val KA: Strings by lazy { EN.copyApply {
@@ -2078,6 +2113,11 @@ internal val KA: Strings by lazy { EN.copyApply {
     noLegsSubtitle = "დაამატეთ თქვენი პირველი ეტაპი მოგზაურობის დასაგეგმად"
     noChecklistItems = "ჩასალაგებელი ჯერ არაფერია"
     noChecklistSubtitle = "დაამატეთ ნივთები მოსამზადებელი სიის შესადგენად"
+    inviteToTrip = "მოწვევა მოგზაურობაში"
+    inviteFailed = "მოწვევის შექმნა ვერ მოხერხდა. სცადეთ თავიდან."
+    inviteCodeHint = "გააზიარეთ ეს კოდი. მათ შეუძლიათ შემოერთება „მოგზაურობაში შემოერთებიდან“."
+    inviteShareMessage = "შემომიერთდით მოგზაურობაში Itinera-ზე:"
+    copy = "კოპირება"
 } }
 
 internal val BG: Strings by lazy { EN.copyApply {
@@ -2338,6 +2378,11 @@ internal val BG: Strings by lazy { EN.copyApply {
     noLegsSubtitle = "Добавете първия си етап, за да започнете планирането на пътуването"
     noChecklistItems = "Все още няма нищо за опаковане"
     noChecklistSubtitle = "Добавете елементи, за да съставите своя списък за подготовка"
+    inviteToTrip = "Покани в пътуването"
+    inviteFailed = "Неуспешно създаване на покана. Опитайте пак."
+    inviteCodeHint = "Споделете този код. Те могат да се присъединят чрез „Присъединяване към пътуване“."
+    inviteShareMessage = "Присъедини се към моето пътуване в Itinera:"
+    copy = "Копирай"
 } }
 
 internal val SK: Strings by lazy { EN.copyApply {
@@ -2598,5 +2643,10 @@ internal val SK: Strings by lazy { EN.copyApply {
     noLegsSubtitle = "Pridajte svoj prvý úsek a začnite plánovať svoju cestu"
     noChecklistItems = "Zatiaľ nie je čo baliť"
     noChecklistSubtitle = "Pridajte položky a vytvorte si zoznam príprav"
+    inviteToTrip = "Pozvať na cestu"
+    inviteFailed = "Nepodarilo sa vytvoriť pozvánku. Skúste to znova."
+    inviteCodeHint = "Zdieľajte tento kód. Môžu sa pridať cez „Pridať sa k ceste“."
+    inviteShareMessage = "Pridaj sa k mojej ceste na Itinera:"
+    copy = "Kopírovať"
 } }
 

@@ -43,6 +43,7 @@ fun TripExpensesScreen(
     onEditExpense: (String) -> Unit,
     onDeleteExpense: (String) -> Unit,
     onSetCurrency: (String) -> Unit,
+    canEdit: Boolean = true,
 ) {
     val s = LocalStrings.current
     var pendingDelete by remember { mutableStateOf<Expense?>(null) }
@@ -153,8 +154,8 @@ fun TripExpensesScreen(
                                     Modifier
                                         .fillMaxWidth()
                                         .combinedClickable(
-                                            onClick = { expandedId = if (expanded) null else exp.id },
-                                            onLongClick = { pendingDelete = exp },
+                                            onClick = { /* existing onClick */ },
+                                            onLongClick = { if (canEdit) pendingDelete = exp },
                                         )
                                         .padding(14.dp),
                                     verticalAlignment = Alignment.CenterVertically,
@@ -198,10 +199,12 @@ fun TripExpensesScreen(
                                                 }
                                             }
                                         Spacer(Modifier.height(6.dp))
-                                        TextButton(onClick = { onEditExpense(exp.id) }, contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)) {
+                                        if (canEdit) {
+                                            TextButton(onClick = { onEditExpense(exp.id) }, contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)) {
                                             Icon(Icons.Filled.Edit, null, modifier = Modifier.size(16.dp))
                                             Spacer(Modifier.width(6.dp))
                                             Text(s.edit)
+                                            }
                                         }
                                     }
                                 }
@@ -214,6 +217,8 @@ fun TripExpensesScreen(
             }
         }
 
+        if (canEdit) {
+
         FloatingActionButton(
             onClick = onAddExpense,
             modifier = Modifier
@@ -225,6 +230,8 @@ fun TripExpensesScreen(
             Icon(Icons.Filled.Add, contentDescription = null)            //text = { Text(s.addExpense) },
         }
     }
+}
+
 
     if (showCurrencyPicker) {
         AlertDialog(

@@ -29,6 +29,8 @@ sealed interface Screen {
     data class TripDocuments(val tripId: String) : Screen
     data class DocViewer(val docId: String) : Screen
 
+    data class Members(val tripId: String) : Screen
+
     data object Split : Screen
 
     data class TripExpenses(val tripId: String) : Screen

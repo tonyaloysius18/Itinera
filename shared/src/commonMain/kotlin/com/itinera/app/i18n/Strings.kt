@@ -362,6 +362,32 @@ class Strings {
     var noChecklistItems: String =""
     var noChecklistSubtitle: String = ""
 
+    var inviteToTrip: String = ""
+    var inviteFailed: String = ""
+    var inviteCodeHint: String = ""
+    var inviteShareMessage: String = ""
+    var copy: String = ""
+
+    var createTripOption: String = ""
+    var joinTripOption: String = ""
+    var enterInviteCode: String = ""
+    var invalidCode: String = ""
+    var joined: String = ""
+    var join: String = ""
+
+    var members: String = ""
+    var roleOwner: String = ""
+    var roleEditor: String = ""
+    var roleViewer: String = ""
+    var removeMember: String = ""
+    var removeMemberQ: String = ""
+    var removeMemberDesc: String = ""
+    var remove: String = ""
+
+    var leaveTrip: String = ""
+    var leaveTripQ: String = ""
+    var leaveTripDesc: String = ""
+
     fun copyApply(block: Strings.() -> Unit): Strings {
 
         val c = Strings()
@@ -623,6 +649,29 @@ class Strings {
         c.noLegsSubtitle = this.noLegsSubtitle
         c.noChecklistItems = this.noChecklistItems
         c.noChecklistSubtitle = this.noChecklistSubtitle
+        c.inviteToTrip = this.inviteToTrip
+        c.inviteFailed = this.inviteFailed
+        c.inviteCodeHint = this.inviteCodeHint
+        c.inviteShareMessage = this.inviteShareMessage
+        c.copy = this.copy
+        c.createTripOption = this.createTripOption
+        c. joinTripOption = this.joinTripOption
+        c.enterInviteCode = this.enterInviteCode
+        c.invalidCode = this.invalidCode
+        c.joined = this.joined
+        c.join = this.join
+
+        c.members = this.members
+        c.roleOwner = this.roleOwner
+        c.roleEditor = this.roleEditor
+        c.roleViewer = this.roleViewer
+        c.removeMember = this.removeMember
+        c.removeMemberQ = this.removeMemberQ
+        c.removeMemberDesc = this.removeMemberDesc
+        c.remove = this.remove
+        c.leaveTrip = this.leaveTrip
+        c.leaveTripQ = this.leaveTripQ
+        c.leaveTripDesc = this.leaveTripDesc
         c.block()
         return c
     }

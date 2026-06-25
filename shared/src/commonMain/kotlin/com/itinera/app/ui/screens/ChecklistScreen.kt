@@ -210,11 +210,7 @@ private fun AddChecklistItemDialog(
                         ).fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                     )
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false },
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
+                    ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                         groupOptions.forEach { g ->
                             DropdownMenuItem(
                                 text = { Text(g) },

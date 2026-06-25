@@ -258,6 +258,31 @@ internal val EN: Strings by lazy { Strings().apply {
     noLegsSubtitle = "Add your first leg to start mapping your journey"
     noChecklistItems = "Nothing to pack yet"
     noChecklistSubtitle = "Add items to build your prep list"
+    inviteToTrip = "Invite To Trip"
+    inviteFailed = "Couldn't create invite. Try again."
+    inviteCodeHint = "Share this code. They can join from \"Join a trip\"."
+    inviteShareMessage = "Join my trip on Itinera:"
+    copy = "Copy"
+
+    createTripOption = "Create Trip"
+    joinTripOption = "Join a trip"
+    enterInviteCode = "Enter the invite code your host shared with you."
+    invalidCode = "Invalid or expired code"
+    joined = "Joined"
+    join = "Join"
+
+    members            = "Members"
+    roleOwner          = "Owner"
+    roleEditor         = "Editor"
+    roleViewer         = "Viewer"
+    removeMember       = "Remove Member"
+    removeMemberQ      = "Remove this member?"
+    removeMemberDesc   = "They'll lose access to this trip."
+    remove             = "Remove"
+
+    leaveTrip          = "Leave Trip"
+    leaveTripQ         = "Leave this trip?"
+    leaveTripDesc      = "You'll lose access to this trip."
 
 } }
 

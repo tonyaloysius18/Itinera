@@ -72,8 +72,9 @@ fun DocumentsScreen(
     onBack: () -> Unit,
     onOpenDoc: (String) -> Unit,
     onUpload: suspend (PickedFile, title: String, category: String) -> Boolean,
-    onDeleteDocument: (String) -> Unit,
     onMessage: (String) -> Unit,
+    onDeleteDocument: (String) -> Unit,
+    canEdit: Boolean = true,
 ) {
     val s = LocalStrings.current
     val filePicker = rememberFilePicker()
@@ -90,19 +91,25 @@ fun DocumentsScreen(
                 title = s.documents,
                 onBack = onBack,
                 trailing = {
-                    IconButton(
-                        enabled = !uploading,
-                        onClick = {
-                            scope.launch {
-                                val file = filePicker.pickFile()
-                                if (file != null) {
-                                    pickedFile = file
-                                    showDialog = true
+                    if (canEdit) {
+                        IconButton(
+                            enabled = !uploading,
+                            onClick = {
+                                scope.launch {
+                                    val file = filePicker.pickFile()
+                                    if (file != null) {
+                                        pickedFile = file
+                                        showDialog = true
+                                    }
                                 }
-                            }
-                        },
-                    ) {
-                        Icon(Icons.Filled.Upload, contentDescription = s.addDocument, tint = MaterialTheme.colorScheme.primary)
+                            },
+                        ) {
+                            Icon(
+                                Icons.Filled.Upload,
+                                contentDescription = s.addDocument,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 },
             )
@@ -135,7 +142,7 @@ fun DocumentsScreen(
                             Surface(
                                 modifier = Modifier.combinedClickable(
                                     onClick = { onOpenDoc(doc.id) },
-                                    onLongClick = { pendingDeleteId = doc.id },
+                                    onLongClick = { if (canEdit) pendingDeleteId = doc.id },
                                 ),
                                 shape = CardShape,
                                 border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
