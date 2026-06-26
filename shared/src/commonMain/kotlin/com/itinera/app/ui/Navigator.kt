@@ -55,6 +55,8 @@ sealed interface Screen {
 
     data object ExportTrips : Screen
 
+    data object WorldClock : Screen
+
 }
 
 /**

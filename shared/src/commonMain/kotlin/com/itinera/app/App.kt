@@ -498,13 +498,20 @@ private fun AppContent(
                                 TripExpensesScreen(
                                     trip = trip,
                                     expenses = repository.expensesForTrip(screen.tripId),
+                                    payments = repository.paymentsForTrip(screen.tripId),          // ⬅ ADD
                                     isLoading = !repository.expensesSyncedOnce,
                                     onBack = { navigator.back() },
                                     onAddExpense = { navigator.push(Screen.AddExpense(screen.tripId)) },
                                     onEditExpense = { navigator.push(Screen.AddExpense(screen.tripId, it)) },
                                     onDeleteExpense = { repository.deleteExpense(it) },
                                     onSetCurrency = { repository.setTripCurrency(screen.tripId, it) },
-                                    canEdit = trip.canEdit(repository.authService.currentUid ?: "")
+                                    canEdit = trip.canEdit(repository.authService.currentUid ?: ""),
+                                    currentUid = repository.authService.currentUid ?: "",
+                                    onSetSettled = { repository.setTripSettled(screen.tripId, it) },
+                                    onMarkPaid = { from, to, amount ->                              // ⬅ ADD
+                                        repository.addPayment(screen.tripId, from, to, amount)
+                                    },
+                                    onDeletePayment = { repository.deletePayment(it) },             // ⬅ ADD
                                 )
                             }
                         }
@@ -538,6 +545,7 @@ private fun AppContent(
                             onAppearance = { navigator.push(Screen.Appearance) },
                             onOpenLanguage = { navigator.push(Screen.LanguagePicker) },
                             onNotifications = { navigator.push(Screen.Notifications) },
+                            onWorldClock = { navigator.push(Screen.WorldClock) },
                             onArchivedTrips = { navigator.push(Screen.ArchivedTrips) },
                             onExportTrips = { navigator.push(Screen.ExportTrips) },
                             onBackupStatus = { navigator.push(Screen.BackupStatus) },
@@ -587,6 +595,8 @@ private fun AppContent(
                             onBack = { navigator.back() },
                         )
 
+
+
                         Screen.Notifications -> NotificationsScreen(
                             offsetMinutes = repository.profile.reminderOffsetMinutes,
                             hasPermission = scheduler.hasPermission(),
@@ -605,6 +615,22 @@ private fun AppContent(
                             },
                             onBack = { navigator.back() },
                         )
+
+                        Screen.WorldClock -> {
+                            var zones by remember { mutableStateOf(repository.worldClockStore.all()) }
+                            WorldClockScreen(
+                                zones = zones,
+                                onAddZone = { label, zoneId ->
+                                    repository.worldClockStore.add(label, zoneId)
+                                    zones = repository.worldClockStore.all()
+                                },
+                                onRemoveZone = { entry ->
+                                    repository.worldClockStore.remove(entry)
+                                    zones = repository.worldClockStore.all()
+                                },
+                                onBack = { navigator.back() },
+                            )
+                        }
 
                         Screen.BackupStatus -> BackupStatusScreen(
                             profile = repository.profile,

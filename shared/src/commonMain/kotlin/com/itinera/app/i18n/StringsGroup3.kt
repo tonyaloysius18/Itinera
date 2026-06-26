@@ -266,42 +266,54 @@ internal val SL: Strings by lazy { EN.copyApply {
     inviteShareMessage = "Pridruži se mojemu potovanju na Itinera:"
     copy = "Kopiraj"
 
-    allowNotificationsPrompt = "Dozvolite obaveštenja u sistemskim podešavanjima da biste primali podsetnike."
-    customReminder = "Prilagođeni podsetnik"
-    remindBeforeDeparture = "Podseti me ovoliko vremena pre polaska:"
-    hours = "sati"
-    minutes = "minuta"
-    set = "Postavi"
-    pickAtLeast5 = "Izaberite najmanje 5 minuta"
-    hourSingular = "sat"
-    hoursPlural = "sati"
-    minuteSingular = "minut"
-    minutesPlural = "minuta"
-    before = "pre"
-    custom = "Prilagođeno…"
+    allowNotificationsPrompt = "Dovolite obvestila v sistemskih nastavitvah, da boste prejemali opomnike."
+    customReminder = "Opomnik po meri"
+    remindBeforeDeparture = "Opomni me toliko časa pred odhodom:"
+    hours = "ure"
+    minutes = "minute"
+    set = "Nastavi"
+    pickAtLeast5 = "Izberite vsaj 5 minut"
+    hourSingular = "ura"
+    hoursPlural = "ure"
+    minuteSingular = "minuta"
+    minutesPlural = "minute"
+    before = "prej"
+    custom = "Po meri…"
 
-    createTripOption = "Kreiraj putovanje"
-    joinTripOption = "Pridruži se putovanju"
-    enterInviteCode = "Unesite kod za pozivnicu koji je organizator podelio sa vama."
-    invalidCode = "Nevažeći ili istekao kod"
+    createTripOption = "Ustvari potovanje"
+    joinTripOption = "Pridruži se potovanju"
+    enterInviteCode = "Vnesite povabilno kodo, ki jo je gostitelj delil z vami."
+    invalidCode = "Neveljavna ali potekla koda"
     joined = "Pridružen/a"
     join = "Pridruži se"
 
-    members = "Članovi"
-    roleOwner = "Vlasnik"
+    members = "Člani"
+    roleOwner = "Lastnik"
     roleEditor = "Urednik"
-    roleViewer = "Posmatrač"
-    removeMember = "Ukloni člana"
-    removeMemberQ = "Ukloniti ovog člana?"
-    removeMemberDesc = "On/ona će izgubiti pristup ovom putovanju."
-    remove = "Ukloni"
+    roleViewer = "Ogledovalec"
+    removeMember = "Odstrani člana"
+    removeMemberQ = "Odstranim tega člana?"
+    removeMemberDesc = "Izgubil bo dostop do tega potovanja."
+    remove = "Odstrani"
 
-    leaveTrip = "Napusti putovanje"
-    leaveTripQ = "Napustiti ovo putovanje?"
-    leaveTripDesc = "Izgubićete pristup ovom putovanju."
+    leaveTrip = "Zapusti potovanje"
+    leaveTripQ = "Zapustim to potovanje?"
+    leaveTripDesc = "Izgubili boste dostop do tega potovanja."
 
-    removeAccount = "Ukloni nalog"
-    removeAccountConfirm = "Ukloniti ovaj nalog sa ovog uređaja? Možete se ponovo prijaviti u bilo kom trenutku."
+    removeAccount = "Odstrani račun"
+    removeAccountConfirm = "Odstranim ta račun s te naprave? Ponovno se lahko prijavite kadar koli."
+
+    markPaid = "Označi kot plačano"
+    unsettleTrip = "Prekliči poravnavo"
+    settleUpTrip = "Poravnaj potovanje"
+    payments = "Plačila"
+    recordedRepayments = "Zabeležena vračila"
+    undoPayment = "Razveljavi plačilo"
+    theOwner = "Lastnik"
+    markedAsSettled = "je označi to potovanje kot poravnano."
+    youOweBanner = "Dolguješ %s — čas je za plačilo."
+    youAreOwedBanner = "Dolgujejo ti %s."
+    allSquareBanner = "Vse je poravnano."
 } }
 
 internal val SR: Strings by lazy { EN.copyApply {
@@ -606,6 +618,18 @@ internal val SR: Strings by lazy { EN.copyApply {
 
     removeAccount = "Ukloni nalog"
     removeAccountConfirm = "Ukloniti ovaj nalog sa ovog uređaja? Možete se ponovo prijaviti u bilo kom trenutku."
+
+    markPaid = "Označi kao plaćeno"
+    unsettleTrip = "Poništi sravnjenje"
+    settleUpTrip = "Sravni putovanje"
+    payments = "Plaćanja"
+    recordedRepayments = "Zabeležene otplate"
+    undoPayment = "Poništi plaćanje"
+    theOwner = "Vlasnik"
+    markedAsSettled = "je označio ovo putovanje kao sravnjeno."
+    youOweBanner = "Duguješ %s — vreme je za plaćanje."
+    youAreOwedBanner = "Duguju ti %s."
+    allSquareBanner = "Sve je sravnjeno."
 } }
 
 internal val SQ: Strings by lazy { EN.copyApply {
@@ -887,6 +911,18 @@ internal val SQ: Strings by lazy { EN.copyApply {
     minutesPlural = "minuta"
     before = "përpara"
     custom = "E personalizuar…"
+
+    markPaid = "Shëno si të paguar"
+    unsettleTrip = "Anulo shlyerjen"
+    settleUpTrip = "Shlyej udhëtimin"
+    payments = "Pagesat"
+    recordedRepayments = "Rimbursimet e regjistruara"
+    undoPayment = "Anulo pagesën"
+    theOwner = "Pronari"
+    markedAsSettled = "e shënoi këtë udhëtim si të shlyer."
+    youOweBanner = "Ti i detyrohesh %s — është koha për të paguar."
+    youAreOwedBanner = "Të detyrohen %s."
+    allSquareBanner = "Jeni barazim."
 } }
 
 internal val MK: Strings by lazy { EN.copyApply {
@@ -1168,6 +1204,18 @@ internal val MK: Strings by lazy { EN.copyApply {
     minutesPlural = "минути"
     before = "пред"
     custom = "Прилагодено…"
+
+    markPaid = "Означи како платено"
+    unsettleTrip = "Поништи го расквитувањето"
+    settleUpTrip = "Расквитај го патувањето"
+    payments = "Плаќања"
+    recordedRepayments = "Забележани отплати"
+    undoPayment = "Поништи го плаќањето"
+    theOwner = "Сопственикот"
+    markedAsSettled = "го означи ова патување како расквитано."
+    youOweBanner = "Должиш %s — време е за плаќање."
+    youAreOwedBanner = "Ти должат %s."
+    allSquareBanner = "Сè е расквитано."
 } }
 
 internal val MO: Strings by lazy { EN.copyApply {
@@ -1453,6 +1501,18 @@ internal val MO: Strings by lazy { EN.copyApply {
     minutesPlural = "minute"
     before = "înainte"
     custom = "Personalizat…"
+
+    markPaid = "Marchează ca plătit"
+    unsettleTrip = "Anulează decontarea"
+    settleUpTrip = "Decontează călătoria"
+    payments = "Plăți"
+    recordedRepayments = "Rambursări înregistrate"
+    undoPayment = "Anulează plata"
+    theOwner = "Proprietarul"
+    markedAsSettled = "a marcat această călătorie ca decontată."
+    youOweBanner = "Datorezi %s — e timpul să plătești."
+    youAreOwedBanner = "Ți se datorează %s."
+    allSquareBanner = "Sunteți la zi."
 } }
 
 internal val NO: Strings by lazy { EN.copyApply {
@@ -1734,6 +1794,18 @@ internal val NO: Strings by lazy { EN.copyApply {
     minutesPlural = "minutter"
     before = "før"
     custom = "Egendefinert…"
+
+    markPaid = "Marker som betalt"
+    unsettleTrip = "Angre oppgjør"
+    settleUpTrip = "Gjør opp reisen"
+    payments = "Betalinger"
+    recordedRepayments = "Registrerte tilbakebetalinger"
+    undoPayment = "Angre betaling"
+    theOwner = "Eieren"
+    markedAsSettled = "markerte denne reisen som oppgjort."
+    youOweBanner = "Du skylder %s — på tide å betale."
+    youAreOwedBanner = "Du har %s til gode."
+    allSquareBanner = "Alt er i orden."
 } }
 
 internal val FI: Strings by lazy { EN.copyApply {
@@ -2015,6 +2087,18 @@ internal val FI: Strings by lazy { EN.copyApply {
     minutesPlural = "minuuttia"
     before = "ennen"
     custom = "Mukautettu…"
+
+    markPaid = "Merkitse maksetuksi"
+    unsettleTrip = "Peru tasaus"
+    settleUpTrip = "Tasaa matka"
+    payments = "Maksut"
+    recordedRepayments = "Kirjatut takaisinmaksut"
+    undoPayment = "Peru maksu"
+    theOwner = "Omistaja"
+    markedAsSettled = "merkkasi tämän matkan tasatuksi."
+    youOweBanner = "Olet velkaa %s — aika maksaa."
+    youAreOwedBanner = "Sinulle ollaan velkaa %s."
+    allSquareBanner = "Kaikki tasan."
 } }
 
 internal val SV: Strings by lazy { EN.copyApply {
@@ -2297,6 +2381,17 @@ internal val SV: Strings by lazy { EN.copyApply {
     before = "före"
     custom = "Anpassad…"
 
+    markPaid = "Markera som betald"
+    unsettleTrip = "Ångra reglering"
+    settleUpTrip = "Reglera resan"
+    payments = "Betalningar"
+    recordedRepayments = "Registrerade återbetalningar"
+    undoPayment = "Ångra betalning"
+    theOwner = "Ägaren"
+    markedAsSettled = "markerade denna resa som reglerad."
+    youOweBanner = "Du är skyldig %s — dags att betala."
+    youAreOwedBanner = "Du har %s att fordra."
+    allSquareBanner = "Allt är reglerat."
 } }
 
 internal val DA: Strings by lazy { EN.copyApply {
@@ -2578,6 +2673,18 @@ internal val DA: Strings by lazy { EN.copyApply {
     minutesPlural = "minutter"
     before = "før"
     custom = "Egendefinert…"
+
+    markPaid = "Marker som betalt"
+    unsettleTrip = "Angre oppgjør"
+    settleUpTrip = "Gjør opp reisen"
+    payments = "Betalinger"
+    recordedRepayments = "Registrerte tilbakebetalinger"
+    undoPayment = "Angre betaling"
+    theOwner = "Eieren"
+    markedAsSettled = "markerte denne reisen som oppgjort."
+    youOweBanner = "Du skylder %s — på tide å betale."
+    youAreOwedBanner = "Du har %s til gode."
+    allSquareBanner = "Alt er i orden."
 } }
 
 internal val ET: Strings by lazy { EN.copyApply {
@@ -2860,5 +2967,16 @@ internal val ET: Strings by lazy { EN.copyApply {
     before = "enne"
     custom = "Kohandatud…"
 
+    markPaid = "Märgi makstuks"
+    unsettleTrip = "Tühista klaarimine"
+    settleUpTrip = "Klaari reis"
+    payments = "Maksed"
+    recordedRepayments = "Registreeritud tagasimaksed"
+    undoPayment = "Tühista makse"
+    theOwner = "Omanik"
+    markedAsSettled = "märkis selle reisi klaariks."
+    youOweBanner = "Sa võlgned %s — aeg on maksta."
+    youAreOwedBanner = "Sulle võlgetakse %s."
+    allSquareBanner = "Kõik on klaar."
 } }
 

@@ -407,6 +407,18 @@ class Strings {
     var before: String = ""
     var custom: String = ""
 
+    var markPaid: String = ""
+    var unsettleTrip: String = ""
+    var settleUpTrip: String = ""
+    var payments: String = ""
+    var recordedRepayments: String = ""
+    var undoPayment: String = ""
+    var theOwner: String = ""
+    var markedAsSettled: String = ""
+    var youOweBanner: String = ""
+    var youAreOwedBanner: String = ""
+    var allSquareBanner: String = ""
+
     fun copyApply(block: Strings.() -> Unit): Strings {
 
         val c = Strings()
@@ -708,6 +720,18 @@ class Strings {
         c.minutesPlural = this.minutesPlural
         c.before = this.before
         c.custom = this.custom
+
+        c.markPaid = this.markPaid
+        c.unsettleTrip = this.unsettleTrip
+        c.settleUpTrip = this.settleUpTrip
+        c.payments = this.payments
+        c.recordedRepayments = this.recordedRepayments
+        c.undoPayment = this.undoPayment
+        c.theOwner = this.theOwner
+        c.markedAsSettled = this.markedAsSettled
+        c.youOweBanner = this.youOweBanner
+        c.youAreOwedBanner = this.youAreOwedBanner
+        c.allSquareBanner = this.allSquareBanner
 
         c.block()
         return c

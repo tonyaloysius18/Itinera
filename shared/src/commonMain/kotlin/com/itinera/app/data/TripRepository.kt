@@ -16,6 +16,7 @@ import com.itinera.app.model.Activity
 import com.itinera.app.model.Expense
 import com.itinera.app.model.Traveller
 import com.itinera.app.model.TripAccent
+import com.itinera.app.model.isOwnedBy
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -60,6 +61,10 @@ class TripRepository {
 
     val expenses = mutableStateListOf<Expense>()
 
+    val paymentService = PaymentService()
+
+    val payments = mutableStateListOf<com.itinera.app.model.Payment>()
+
     val notificationScheduler = NotificationScheduler()
 
     val inviteService = InviteService()
@@ -67,6 +72,8 @@ class TripRepository {
     val checklistService = ChecklistService()
 
     val accountStore = AccountStore()
+
+    val worldClockStore = WorldClockStore
 
 
     private var tripsListener: Job? = null
@@ -78,6 +85,9 @@ class TripRepository {
     var documentsSyncedOnce by mutableStateOf(false)
         private set
     var expensesSyncedOnce by mutableStateOf(false)
+        private set
+
+    var paymentsSyncedOnce by mutableStateOf(false)
         private set
 
     var activitiesSyncedOnce by mutableStateOf(false)
@@ -374,6 +384,8 @@ class TripRepository {
         activities.clear()
         profile = UserProfile()
         expenses.clear()
+        payments.clear()
+
     }
 
     // ===== documents (now under trips/{tripId}/documents) =====
@@ -592,6 +604,41 @@ class TripRepository {
         }
     }
 
+    fun setTripSettled(tripId: String, settled: Boolean) {
+        val uid = authService.currentUid ?: return
+        val i = trips.indexOfFirst { it.id == tripId }
+        if (i < 0) return
+        if (!trips[i].isOwnedBy(uid)) return          // owner only
+        trips[i] = trips[i].copy(
+            settledAt = if (settled) nowMillis() else 0L,
+            settledBy = if (settled) uid else "",
+        )
+        persist(trips[i])
+    }
+
+    fun paymentsForTrip(tripId: String): List<com.itinera.app.model.Payment> =
+        payments.filter { it.tripId == tripId }
+
+    fun addPayment(tripId: String, fromTravellerId: String, toTravellerId: String, amount: Double) {
+        val payment = com.itinera.app.model.Payment(
+            id = "pay_${kotlin.random.Random.nextLong()}",
+            tripId = tripId,
+            fromTravellerId = fromTravellerId,
+            toTravellerId = toTravellerId,
+            amount = amount,
+            createdAt = nowMillis(),
+            memberIds = memberIdsForTrip(tripId),
+        )
+        payments.add(payment)
+        ioScope.launch { runCatching { paymentService.savePayment(payment) } }
+    }
+
+    fun deletePayment(paymentId: String) {
+        val p = payments.firstOrNull { it.id == paymentId }
+        payments.removeAll { it.id == paymentId }
+        if (p != null) ioScope.launch { runCatching { paymentService.deletePayment(p.tripId, paymentId) } }
+    }
+
     // ===== one-time migrations =====
 
     /**
@@ -680,6 +727,11 @@ class TripRepository {
                 .catch { e -> println("ITINERA: checklist sync error — ${e.message}") }
                 .collect { applyChecklist(it); checklistSyncedOnce = true }
         }
+        syncJobs += ioScope.launch {
+            paymentService.paymentsFlow(uid)
+                .catch { e -> println("ITINERA: payments sync error — ${e.message}") }
+                .collect { applyPayments(it); paymentsSyncedOnce = true }
+        }
     }
 
     /** Stop all live listeners (call on logout). */
@@ -693,6 +745,8 @@ class TripRepository {
         expensesSyncedOnce = false
         activitiesSyncedOnce = false
         checklistSyncedOnce = false
+        paymentsSyncedOnce = false
+
 
 
     }
@@ -719,6 +773,13 @@ class TripRepository {
         remote.forEach { r ->
             val i = expenses.indexOfFirst { it.id == r.id }
             if (i >= 0) { if (expenses[i] != r) expenses[i] = r } else expenses.add(r)
+        }
+    }
+    private fun applyPayments(remote: List<com.itinera.app.model.Payment>) {
+        payments.removeAll { local -> remote.none { it.id == local.id } }
+        remote.forEach { r ->
+            val i = payments.indexOfFirst { it.id == r.id }
+            if (i >= 0) { if (payments[i] != r) payments[i] = r } else payments.add(r)
         }
     }
 

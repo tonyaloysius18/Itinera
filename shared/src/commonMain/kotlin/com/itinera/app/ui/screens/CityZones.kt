@@ -1,0 +1,146 @@
+package com.itinera.app.ui.screens
+
+/**
+ * Curated map of common city names → their IANA time-zone id.
+ *
+ * The IANA database names each zone after ONE representative city (e.g. all of
+ * India is "Asia/Kolkata"), so searching "Chennai" or "Delhi" against the raw
+ * zone list finds nothing. This map adds the major cities travellers actually
+ * search for, pointing them at the correct zone. The picker shows the searched
+ * label (e.g. "Chennai") while using the mapped zone for the time.
+ *
+ * Not exhaustive — covers major world cities. Extend freely.
+ */
+val cityZones: List<Pair<String, String>> = listOf(
+    // ── India (all Asia/Kolkata) ──
+    "Mumbai" to "Asia/Kolkata",
+    "Delhi" to "Asia/Kolkata",
+    "New Delhi" to "Asia/Kolkata",
+    "Bangalore" to "Asia/Kolkata",
+    "Bengaluru" to "Asia/Kolkata",
+    "Chennai" to "Asia/Kolkata",
+    "Kolkata" to "Asia/Kolkata",
+    "Hyderabad" to "Asia/Kolkata",
+    "Pune" to "Asia/Kolkata",
+    "Ahmedabad" to "Asia/Kolkata",
+    "Jaipur" to "Asia/Kolkata",
+    "Kochi" to "Asia/Kolkata",
+    "Goa" to "Asia/Kolkata",
+
+    // ── Europe ──
+    "London" to "Europe/London",
+    "Paris" to "Europe/Paris",
+    "Toulouse" to "Europe/Paris",
+    "Lyon" to "Europe/Paris",
+    "Marseille" to "Europe/Paris",
+    "Nice" to "Europe/Paris",
+    "Berlin" to "Europe/Berlin",
+    "Munich" to "Europe/Berlin",
+    "Frankfurt" to "Europe/Berlin",
+    "Hamburg" to "Europe/Berlin",
+    "Madrid" to "Europe/Madrid",
+    "Barcelona" to "Europe/Madrid",
+    "Rome" to "Europe/Rome",
+    "Milan" to "Europe/Rome",
+    "Venice" to "Europe/Rome",
+    "Naples" to "Europe/Rome",
+    "Amsterdam" to "Europe/Amsterdam",
+    "Brussels" to "Europe/Brussels",
+    "Lisbon" to "Europe/Lisbon",
+    "Porto" to "Europe/Lisbon",
+    "Vienna" to "Europe/Vienna",
+    "Zurich" to "Europe/Zurich",
+    "Geneva" to "Europe/Zurich",
+    "Dublin" to "Europe/Dublin",
+    "Copenhagen" to "Europe/Copenhagen",
+    "Stockholm" to "Europe/Stockholm",
+    "Oslo" to "Europe/Oslo",
+    "Helsinki" to "Europe/Helsinki",
+    "Warsaw" to "Europe/Warsaw",
+    "Prague" to "Europe/Prague",
+    "Budapest" to "Europe/Budapest",
+    "Athens" to "Europe/Athens",
+    "Istanbul" to "Europe/Istanbul",
+    "Moscow" to "Europe/Moscow",
+
+    // ── Middle East ──
+    "Dubai" to "Asia/Dubai",
+    "Abu Dhabi" to "Asia/Dubai",
+    "Doha" to "Asia/Qatar",
+    "Riyadh" to "Asia/Riyadh",
+    "Tel Aviv" to "Asia/Jerusalem",
+    "Jerusalem" to "Asia/Jerusalem",
+
+    // ── Asia ──
+    "Tokyo" to "Asia/Tokyo",
+    "Osaka" to "Asia/Tokyo",
+    "Kyoto" to "Asia/Tokyo",
+    "Seoul" to "Asia/Seoul",
+    "Beijing" to "Asia/Shanghai",
+    "Shanghai" to "Asia/Shanghai",
+    "Guangzhou" to "Asia/Shanghai",
+    "Shenzhen" to "Asia/Shanghai",
+    "Hong Kong" to "Asia/Hong_Kong",
+    "Taipei" to "Asia/Taipei",
+    "Singapore" to "Asia/Singapore",
+    "Bangkok" to "Asia/Bangkok",
+    "Kuala Lumpur" to "Asia/Kuala_Lumpur",
+    "Jakarta" to "Asia/Jakarta",
+    "Bali" to "Asia/Makassar",
+    "Manila" to "Asia/Manila",
+    "Hanoi" to "Asia/Ho_Chi_Minh",
+    "Ho Chi Minh City" to "Asia/Ho_Chi_Minh",
+    "Colombo" to "Asia/Colombo",
+    "Kathmandu" to "Asia/Kathmandu",
+    "Dhaka" to "Asia/Dhaka",
+    "Karachi" to "Asia/Karachi",
+    "Lahore" to "Asia/Karachi",
+    "Islamabad" to "Asia/Karachi",
+
+    // ── Africa ──
+    "Cairo" to "Africa/Cairo",
+    "Casablanca" to "Africa/Casablanca",
+    "Lagos" to "Africa/Lagos",
+    "Nairobi" to "Africa/Nairobi",
+    "Johannesburg" to "Africa/Johannesburg",
+    "Cape Town" to "Africa/Johannesburg",
+    "Tunis" to "Africa/Tunis",
+    "Addis Ababa" to "Africa/Addis_Ababa",
+
+    // ── Americas ──
+    "New York" to "America/New_York",
+    "Boston" to "America/New_York",
+    "Washington" to "America/New_York",
+    "Miami" to "America/New_York",
+    "Atlanta" to "America/New_York",
+    "Chicago" to "America/Chicago",
+    "Houston" to "America/Chicago",
+    "Dallas" to "America/Chicago",
+    "Denver" to "America/Denver",
+    "Phoenix" to "America/Phoenix",
+    "Los Angeles" to "America/Los_Angeles",
+    "San Francisco" to "America/Los_Angeles",
+    "Seattle" to "America/Los_Angeles",
+    "Las Vegas" to "America/Los_Angeles",
+    "Toronto" to "America/Toronto",
+    "Montreal" to "America/Toronto",
+    "Vancouver" to "America/Vancouver",
+    "Mexico City" to "America/Mexico_City",
+    "Cancun" to "America/Cancun",
+    "Bogota" to "America/Bogota",
+    "Lima" to "America/Lima",
+    "Santiago" to "America/Santiago",
+    "Buenos Aires" to "America/Argentina/Buenos_Aires",
+    "Sao Paulo" to "America/Sao_Paulo",
+    "Rio de Janeiro" to "America/Sao_Paulo",
+
+    // ── Oceania ──
+    "Sydney" to "Australia/Sydney",
+    "Melbourne" to "Australia/Melbourne",
+    "Brisbane" to "Australia/Brisbane",
+    "Perth" to "Australia/Perth",
+    "Auckland" to "Pacific/Auckland",
+    "Wellington" to "Pacific/Auckland",
+    "Fiji" to "Pacific/Fiji",
+    "Honolulu" to "Pacific/Honolulu",
+)

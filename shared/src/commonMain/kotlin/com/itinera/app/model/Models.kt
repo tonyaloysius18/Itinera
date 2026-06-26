@@ -63,6 +63,8 @@ data class Trip(
     val members: Map<String, String> = emptyMap(),     // uid -> role (rules check this)
     val memberIds: List<String> = emptyList(),         // uid list (for querying)  ⬅ ADD
     val memberInfo: Map<String, MemberInfo> = emptyMap(),
+    val settledAt: Long = 0L,        // 0 = not settled; epoch millis when owner settled
+    val settledBy: String = "",
 )
 
 @Serializable
@@ -162,6 +164,17 @@ data class Expense(
     val memberIds: List<String> = emptyList(),
 
     )
+
+@Serializable
+data class Payment(
+    val id: String,
+    val tripId: String,
+    val fromTravellerId: String,   // who paid back (the debtor)
+    val toTravellerId: String,     // who received
+    val amount: Double,
+    val createdAt: Long = 0L,
+    val memberIds: List<String> = emptyList(),
+)
 @Serializable                                   // ⬅ ADD
 data class UserProfile(
     val name: String = "",                      // ⬅ defaults added (Firestore needs them)

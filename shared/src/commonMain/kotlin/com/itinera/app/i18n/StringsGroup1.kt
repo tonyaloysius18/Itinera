@@ -302,6 +302,18 @@ internal val FR: Strings by lazy { EN.copyApply {
 
     removeAccount = "Supprimer le compte"
     removeAccountConfirm = "Supprimer ce compte de cet appareil ? Vous pourrez vous reconnecter à tout moment."
+
+    markPaid = "Marquer comme payé"
+    unsettleTrip = "Annuler le règlement"
+    settleUpTrip = "Régler les comptes"
+    payments = "Paiements"
+    recordedRepayments = "Remboursements enregistrés"
+    undoPayment = "Annuler le paiement"
+    theOwner = "Le propriétaire"
+    markedAsSettled = "a marqué ce voyage comme réglé."
+    youOweBanner = "Vous devez %s — il est temps de payer."
+    youAreOwedBanner = "On vous doit %s."
+    allSquareBanner = "Tout est en règle."
 } }
 
 internal val ES: Strings by lazy { EN.copyApply {
@@ -606,6 +618,18 @@ internal val ES: Strings by lazy { EN.copyApply {
 
     removeAccount = "Eliminar cuenta"
     removeAccountConfirm = "¿Eliminar esta cuenta de este dispositivo? Puedes volver a iniciar sesión en cualquier momento."
+
+    markPaid = "Marcar como pagado"
+    unsettleTrip = "Anular liquidación"
+    settleUpTrip = "Saldar cuentas del viaje"
+    payments = "Pagos"
+    recordedRepayments = "Reembolsos registrados"
+    undoPayment = "Deshacer pago"
+    theOwner = "El propietario"
+    markedAsSettled = "marcó este viaje como saldado."
+    youOweBanner = "Debes %s — es hora de pagar."
+    youAreOwedBanner = "Te deben %s."
+    allSquareBanner = "Estás al día."
 } }
 
 internal val DE: Strings by lazy { EN.copyApply {
@@ -910,6 +934,18 @@ internal val DE: Strings by lazy { EN.copyApply {
 
     removeAccount = "Konto entfernen"
     removeAccountConfirm = "Dieses Konto von diesem Gerät entfernen? Du kannst dich jederzeit wieder anmelden."
+
+    markPaid = "Als bezahlt markieren"
+    unsettleTrip = "Abrechnung aufheben"
+    settleUpTrip = "Reise abrechnen"
+    payments = "Zahlungen"
+    recordedRepayments = "Erfasste Rückzahlungen"
+    undoPayment = "Zahlung rückgängig machen"
+    theOwner = "Der Eigentümer"
+    markedAsSettled = "hat diese Reise als abgerechnet markiert."
+    youOweBanner = "Du schuldest %s — Zeit zu bezahlen."
+    youAreOwedBanner = "Dir werden %s geschuldet."
+    allSquareBanner = "Alles ausgeglichen."
 } }
 
 internal val IT: Strings by lazy { EN.copyApply {
@@ -1214,6 +1250,18 @@ internal val IT: Strings by lazy { EN.copyApply {
 
     removeAccount = "Rimuovi account"
     removeAccountConfirm = "Rimuovere questo account da questo dispositivo? Potrai accedere di nuovo in qualsiasi momento."
+
+    markPaid = "Segna come pagato"
+    unsettleTrip = "Annulla saldo"
+    settleUpTrip = "Salda i conti del viaggio"
+    payments = "Pagamenti"
+    recordedRepayments = "Rimborsi registrati"
+    undoPayment = "Annulla pagamento"
+    theOwner = "Il proprietario"
+    markedAsSettled = "ha segnato questo viaggio come saldato."
+    youOweBanner = "Devi %s — è ora di pagare."
+    youAreOwedBanner = "Ti devono %s."
+    allSquareBanner = "Siete pari."
 } }
 
 internal val PT: Strings by lazy { EN.copyApply {
@@ -1518,6 +1566,18 @@ internal val PT: Strings by lazy { EN.copyApply {
 
     removeAccount = "Remover conta"
     removeAccountConfirm = "Remover esta conta deste dispositivo? Você pode entrar novamente a qualquer momento."
+
+    markPaid = "Marcar como pago"
+    unsettleTrip = "Anular liquidação"
+    settleUpTrip = "Acertar contas da viagem"
+    payments = "Pagamentos"
+    recordedRepayments = "Remborsos registrados"
+    undoPayment = "Desfazer pagamento"
+    theOwner = "O proprietário"
+    markedAsSettled = "marcou esta viagem como acertada."
+    youOweBanner = "Você deve %s — hora de pagar."
+    youAreOwedBanner = "Devem-te %s."
+    allSquareBanner = "Tudo certo."
 } }
 
 internal val NL: Strings by lazy { EN.copyApply {
@@ -1822,6 +1882,18 @@ internal val NL: Strings by lazy { EN.copyApply {
 
     removeAccount = "Account verwijderen"
     removeAccountConfirm = "Dit account van dit apparaat verwijderen? Je kunt op elk moment opnieuw inloggen."
+
+    markPaid = "Markeren als betaald"
+    unsettleTrip = "Afrekening ongedaan maken"
+    settleUpTrip = "Trip afrekenen"
+    payments = "Betalingen"
+    recordedRepayments = "Geregistreerde terugbetalingen"
+    undoPayment = "Betaling ongedaan maken"
+    theOwner = "De eigenaar"
+    markedAsSettled = "heeft deze reis als afgerekend gemarkeerd."
+    youOweBanner = "Je bent %s verschuldigd — tijd om te betalen."
+    youAreOwedBanner = "Je krijgt nog %s."
+    allSquareBanner = "Alles is vereffend."
 } }
 
 internal val PL: Strings by lazy { EN.copyApply {
@@ -2126,6 +2198,18 @@ internal val PL: Strings by lazy { EN.copyApply {
 
     removeAccount = "Usuń konto"
     removeAccountConfirm = "Usunąć to konto z tego urządzenia? Możesz zalogować się ponownie w dowolnym momencie."
+
+    markPaid = "Oznacz jako zapłacone"
+    unsettleTrip = "Anuluj rozliczenie"
+    settleUpTrip = "Rozlicz wyjazd"
+    payments = "Płatności"
+    recordedRepayments = "Zarejestrowane spłaty"
+    undoPayment = "Cofnij płatność"
+    theOwner = "Właściciel"
+    markedAsSettled = "oznaczył tę podróż jako rozliczoną."
+    youOweBanner = "Wisisz %s — czas zapłacić."
+    youAreOwedBanner = "Są Ci winni %s."
+    allSquareBanner = "Wszystko uregulowane."
 } }
 
 internal val ZH: Strings by lazy { EN.copyApply {
@@ -2430,6 +2514,18 @@ internal val ZH: Strings by lazy { EN.copyApply {
 
     removeAccount = "移除账号"
     removeAccountConfirm = "确定要从此设备中移除此账号吗？你可以随时重新登录。"
+
+    markPaid = "标记为已支付"
+    unsettleTrip = "取消结算"
+    settleUpTrip = "结算旅程"
+    payments = "支付记录"
+    recordedRepayments = "已记录的还款"
+    undoPayment = "撤销支付"
+    theOwner = "所有者"
+    markedAsSettled = "已将此行程标记为已结清。"
+    youOweBanner = "你欠 %s — 该付钱了。"
+    youAreOwedBanner = "你应收回 %s。"
+    allSquareBanner = "全部结清。"
 } }
 
 internal val JP: Strings by lazy { EN.copyApply {
@@ -2734,6 +2830,18 @@ internal val JP: Strings by lazy { EN.copyApply {
 
     removeAccount = "アカウントを削除"
     removeAccountConfirm = "このデバイスからこのアカウントを削除しますか？いつでも再ログインできます。"
+
+    markPaid = "支払い済みにする"
+    unsettleTrip = "精算を解除"
+    settleUpTrip = "旅行を精算する"
+    payments = "支払い"
+    recordedRepayments = "記録された返金"
+    undoPayment = "支払いを元に戻す"
+    theOwner = "オーナー"
+    markedAsSettled = "がこの旅行を精算済みとしてマークしました。"
+    youOweBanner = "%s の支払いが残っています — 支払いの時間です。"
+    youAreOwedBanner = "%s 受け取り予定です。"
+    allSquareBanner = "すべて精算されました。"
 } }
 
 internal val KR: Strings by lazy { EN.copyApply {
@@ -3038,5 +3146,17 @@ internal val KR: Strings by lazy { EN.copyApply {
 
     removeAccount = "계정 삭제"
     removeAccountConfirm = "이 기기에서 이 계정을 삭제하시겠습니까? 언제든지 다시 로그인할 수 있습니다."
+
+    markPaid = "결제 완료로 표시"
+    unsettleTrip = "정산 취소"
+    settleUpTrip = "여행 정산하기"
+    payments = "결제 내역"
+    recordedRepayments = "기록된 상환"
+    undoPayment = "결제 취소"
+    theOwner = "소유자"
+    markedAsSettled = "님이 이 여행을 정산 완료로 표시했습니다."
+    youOweBanner = "%s 를 갚아야 합니다 — 결제할 시간입니다."
+    youAreOwedBanner = "%s 를 받을 예정입니다."
+    allSquareBanner = "모두 정산되었습니다."
 } }
 

@@ -302,6 +302,18 @@ internal val RU: Strings by lazy { EN.copyApply {
 
     removeAccount = "Удалить аккаунт"
     removeAccountConfirm = "Удалить этот аккаунт с этого устройства? Вы сможете войти снова в любое время."
+
+    markPaid = "Отметить как оплаченное"
+    unsettleTrip = "Отменить расчет"
+    settleUpTrip = "Рассчитаться за поездку"
+    payments = "Платежи"
+    recordedRepayments = "Записанные выплаты"
+    undoPayment = "Отменить платеж"
+    theOwner = "Владелец"
+    markedAsSettled = "отметил эту поездку как рассчитанную."
+    youOweBanner = "Вы должны %s — пора платить."
+    youAreOwedBanner = "Вам должны %s."
+    allSquareBanner = "Все в расчете."
 } }
 
 internal val TAM: Strings by lazy { EN.copyApply {
@@ -606,6 +618,18 @@ internal val TAM: Strings by lazy { EN.copyApply {
 
     removeAccount = "கணக்கை நீக்கு"
     removeAccountConfirm = "இந்தச் சாதனத்திலிருந்து இந்தக் கணக்கை நீக்கவா? நீங்கள் எப்போது வேண்டுமானாலும் மீண்டும் உள்நுழையலாம்."
+
+    markPaid = "செலுத்தப்பட்டதாகக் குறிக்கவும்"
+    unsettleTrip = "செட்டில்மென்ட்டை ரத்துசெய்"
+    settleUpTrip = "பயணக் கணக்கைத் தீர்க்கவும்"
+    payments = "பணம் செலுத்துதல்கள்"
+    recordedRepayments = "பதிவுசெய்யப்பட்ட திருப்பிச் செலுத்துதல்கள்"
+    undoPayment = "பணப் பரிமாற்றத்தை ரத்துசெய்"
+    theOwner = "உரிமையாளர்"
+    markedAsSettled = "இந்த பயணத்தை செட்டில் செய்யப்பட்டதாகக் குறித்துள்ளார்."
+    youOweBanner = "நீங்கள் %s தர வேண்டும் — பணம் செலுத்த வேண்டிய நேரம்."
+    youAreOwedBanner = "உங்களுக்கு %s வர வேண்டியுள்ளது."
+    allSquareBanner = "எல்லாம் சரியாக உள்ளது."
 } }
 
 internal val HI: Strings by lazy { EN.copyApply {
@@ -910,6 +934,18 @@ internal val HI: Strings by lazy { EN.copyApply {
 
     removeAccount = "अकाउंट हटाएँ"
     removeAccountConfirm = "इस अकाउंट को इस डिवाइस से हटाएँ? आप किसी भी समय फिर से लॉग इन कर सकते हैं।"
+
+    markPaid = "भुगतान किया गया चिह्नित करें"
+    unsettleTrip = "हिसाब रद्द करें"
+    settleUpTrip = "यात्रा का हिसाब चुकता करें"
+    payments = "भुगतान"
+    recordedRepayments = "दर्ज किए गए पुनर्भुगतान"
+    undoPayment = "भुगतान वापस लें"
+    theOwner = "मालिक"
+    markedAsSettled = "ने इस यात्रा को चुकता चिह्नित किया है।"
+    youOweBanner = "आपके पास %s बकाया है — भुगतान करने का समय है।"
+    youAreOwedBanner = "आपको %s मिलने हैं।"
+    allSquareBanner = "सब बराबर है।"
 } }
 
 internal val UKR: Strings by lazy { EN.copyApply {
@@ -1214,6 +1250,18 @@ internal val UKR: Strings by lazy { EN.copyApply {
 
     removeAccount = "Вилучити акаунт"
     removeAccountConfirm = "Вилучити цей акаунт із цього пристрою? Ви зможете увійти знову в будь-який час."
+
+    markPaid = "Позначити як оплачено"
+    unsettleTrip = "Скасувати розрахунок"
+    settleUpTrip = "Розрахуватися за поїздку"
+    payments = "Платежі"
+    recordedRepayments = "Записані виплати"
+    undoPayment = "Скасувати платіж"
+    theOwner = "Власник"
+    markedAsSettled = "позначив цю поїздку як розраховану."
+    youOweBanner = "Ви винні %s — час платити."
+    youAreOwedBanner = "Вам винні %s."
+    allSquareBanner = "Все розраховано."
 } }
 
 internal val HUN: Strings by lazy { EN.copyApply {
@@ -1518,6 +1566,18 @@ internal val HUN: Strings by lazy { EN.copyApply {
 
     removeAccount = "Fiók eltávolítása"
     removeAccountConfirm = "Eltávolítod ezt a fiókot erről az eszközről? Bármikor újra bejelentkezhetsz."
+
+    markPaid = "Megjelölés fizetettként"
+    unsettleTrip = "Elszámolás visszavonása"
+    settleUpTrip = "Utazás elszámolása"
+    payments = "Fizetések"
+    recordedRepayments = "Rögzített visszafizetések"
+    undoPayment = "Fizetés visszavonása"
+    theOwner = "A tulajdonos"
+    markedAsSettled = "elszámoltnak jelölte ezt az utazást."
+    youOweBanner = "Tartozol %s összeggel — ideje fizetni."
+    youAreOwedBanner = "Neked tartoznak %s összeggel."
+    allSquareBanner = "Mindenki egálban van."
 } }
 
 internal val RO: Strings by lazy { EN.copyApply {
@@ -1822,6 +1882,18 @@ internal val RO: Strings by lazy { EN.copyApply {
 
     removeAccount = "Elimină contul"
     removeAccountConfirm = "Elimini acest cont de pe acest dispozitiv? Te poți reconecta oricând."
+
+    markPaid = "Marchează ca plătit"
+    unsettleTrip = "Anulează decontarea"
+    settleUpTrip = "Decontează călătoria"
+    payments = "Plăți"
+    recordedRepayments = "Rambursări înregistrate"
+    undoPayment = "Anulează plata"
+    theOwner = "Proprietarul"
+    markedAsSettled = "a marcat această călătorie ca decontată."
+    youOweBanner = "Datorezi %s — e timpul să plătești."
+    youAreOwedBanner = "Ți se datorează %s."
+    allSquareBanner = "Sunteți la zi."
 } }
 
 internal val GR: Strings by lazy { EN.copyApply {
@@ -2126,6 +2198,18 @@ internal val GR: Strings by lazy { EN.copyApply {
 
     removeAccount = "Αφαίρεση λογαριασμού"
     removeAccountConfirm = "Αφαίρεση αυτού του λογαριασμού από αυτήν τη συσκευή; Μπορείτε να συνδεθείτε ξανά ανά πάσα στιγμή."
+
+    markPaid = "Σήμανση ως πληρωμένο"
+    unsettleTrip = "Ακύρωση τακτοποίησης"
+    settleUpTrip = "Τακτοποίηση ταξιδιού"
+    payments = "Πληρωμές"
+    recordedRepayments = "Καταγεγραμμένες αποπληρωμές"
+    undoPayment = "Ακύρωση πληρωμής"
+    theOwner = "Ο ιδιοκτήτης"
+    markedAsSettled = "σημείωσε αυτό το ταξίδι ως τακτοποιημένο."
+    youOweBanner = "Χρωστάτε %s — ώρα να πληρώσετε."
+    youAreOwedBanner = "Σας χρωστάνε %s."
+    allSquareBanner = "Είστε εντάξει."
 } }
 
 internal val KA: Strings by lazy { EN.copyApply {
@@ -2430,6 +2514,18 @@ internal val KA: Strings by lazy { EN.copyApply {
 
     removeAccount = "ანგარიშის წაშლა"
     removeAccountConfirm = "წავშალოთ ეს ანგარიში ამ მოწყობილობიდან? თქვენ შეძლებთ ხელახლა შესვლას ნებისმიერ დროს."
+
+    markPaid = "მონიშნე როგორც გადახდილი"
+    unsettleTrip = "ანგარიშსწორების გაუქმება"
+    settleUpTrip = "მოგზაურობის გასწორება"
+    payments = "გადახდები"
+    recordedRepayments = "ჩაწერილი დაბრუნებები"
+    undoPayment = "გადახდის გაუქმება"
+    theOwner = "მფლობელი"
+    markedAsSettled = "-მა მონიშნა ეს მოგზაურობა გასწორებულად."
+    youOweBanner = "შენ გმართებს %s — გადახდის დროა."
+    youAreOwedBanner = "შენი მართებთ %s."
+    allSquareBanner = "ყველაფერი გასწორებულია."
 } }
 
 internal val BG: Strings by lazy { EN.copyApply {
@@ -2734,6 +2830,18 @@ internal val BG: Strings by lazy { EN.copyApply {
 
     removeAccount = "Премахни акаунта"
     removeAccountConfirm = "Премахване на този акаунт от това устройство? Можете да влезете отново по всяко време."
+
+    markPaid = "Маркирай като платено"
+    unsettleTrip = "Отмени уреждането"
+    settleUpTrip = "Уреди пътуването"
+    payments = "Плащания"
+    recordedRepayments = "Записани плащания"
+    undoPayment = "Отмени плащането"
+    theOwner = "Собственикът"
+    markedAsSettled = "маркира това пътуване като уредено."
+    youOweBanner = "Дължите %s — време е за плащане."
+    youAreOwedBanner = "Имате да взимате %s."
+    allSquareBanner = "Всичко е уредено."
 } }
 
 internal val SK: Strings by lazy { EN.copyApply {
@@ -3038,5 +3146,17 @@ internal val SK: Strings by lazy { EN.copyApply {
 
     removeAccount = "Odstrániť účet"
     removeAccountConfirm = "Odstrániť tento účet z tohto zariadenia? Môžete sa kedykoľvek znova prihlásiť."
+
+    markPaid = "Označiť ako zaplatené"
+    unsettleTrip = "Zrušiť vyrovnanie"
+    settleUpTrip = "Vyrovnať cestu"
+    payments = "Platby"
+    recordedRepayments = "Zaznamenané splátky"
+    undoPayment = "Zrušiť platbu"
+    theOwner = "Vlastník"
+    markedAsSettled = "označil túto cestu ako vyrovnanú."
+    youOweBanner = "Dlhuješ %s — čas zaplatiť."
+    youAreOwedBanner = "Dlžia ti %s."
+    allSquareBanner = "Všetko je vyrovnané."
 } }
 

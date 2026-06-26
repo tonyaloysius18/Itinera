@@ -302,5 +302,17 @@ internal val EN: Strings by lazy { Strings().apply {
     minutesPlural = "minutes"
     before = "before"
     custom = "Custom…"
+
+    markPaid = "Mark paid"
+    unsettleTrip = "Un-settle trip"
+    settleUpTrip = "Settle up trip"
+    payments = "Payments"
+    recordedRepayments = "Recorded repayments"
+    undoPayment = "Undo payment"
+    theOwner = "The owner"
+    markedAsSettled = "marked this trip as settled."
+    youOweBanner = "You owe %s — time to pay up."
+    youAreOwedBanner = "You're owed %s."
+    allSquareBanner = "You're all square."
 } }
 

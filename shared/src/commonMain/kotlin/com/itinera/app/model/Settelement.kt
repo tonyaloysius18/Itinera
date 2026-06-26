@@ -97,3 +97,33 @@ fun computePairwiseDebts(expenses: List<Expense>): List<PairDebt> {
     }
     return result
 }
+
+/**
+ * Net balance per traveller, factoring in recorded repayments.
+ *
+ * Expenses set the baseline (paid - shares). A payment from A to B means A has
+ * handed B money to settle up, so it moves A's net UP (less in debt) and B's net
+ * DOWN (less owed). Once a debt is fully repaid, the two nets even out and that
+ * debt disappears from computeSettlements — no fragile per-row markers needed.
+ */
+fun computeBalances(
+    expenses: List<Expense>,
+    payments: List<Payment>,
+    travellerIds: List<String>,
+): List<TravellerBalance> {
+    val base = travellerIds.associateWith { id ->
+        val paid = expenses.filter { it.paidByTravellerId == id }.sumOf { it.amount }
+        val owed = expenses.sumOf { exp ->
+            exp.shares.firstOrNull { it.travellerId == id }?.amount ?: 0.0
+        }
+        paid - owed
+    }.toMutableMap()
+
+    // Apply repayments: from-traveller's debt decreases, to-traveller's credit decreases.
+    for (p in payments) {
+        if (p.fromTravellerId in base) base[p.fromTravellerId] = base[p.fromTravellerId]!! + p.amount
+        if (p.toTravellerId in base) base[p.toTravellerId] = base[p.toTravellerId]!! - p.amount
+    }
+
+    return travellerIds.map { TravellerBalance(it, base[it] ?: 0.0) }
+}

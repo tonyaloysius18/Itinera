@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ReceiptLong
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,6 +29,7 @@ import com.itinera.app.model.Trip
 import com.itinera.app.model.computeBalances
 import com.itinera.app.model.computePairwiseDebts
 import com.itinera.app.model.computeSettlements
+import com.itinera.app.model.isOwnedBy
 import com.itinera.app.ui.components.CardShape
 import com.itinera.app.ui.components.EmptyState
 import com.itinera.app.ui.components.TopBar
@@ -37,6 +39,7 @@ import com.itinera.app.ui.components.TopBar
 fun TripExpensesScreen(
     trip: Trip,
     expenses: List<Expense>,
+    payments: List<com.itinera.app.model.Payment> = emptyList(),   // ⬅ ADD
     onBack: () -> Unit,
     isLoading: Boolean = false,
     onAddExpense: () -> Unit,
@@ -44,6 +47,10 @@ fun TripExpensesScreen(
     onDeleteExpense: (String) -> Unit,
     onSetCurrency: (String) -> Unit,
     canEdit: Boolean = true,
+    currentUid: String = "",
+    onSetSettled: (Boolean) -> Unit = {},
+    onMarkPaid: (String, String, Double) -> Unit = { _, _, _ -> },  // ⬅ ADD (from, to, amount)
+    onDeletePayment: (String) -> Unit = {},                          // ⬅ ADD
 ) {
     val s = LocalStrings.current
     var pendingDelete by remember { mutableStateOf<Expense?>(null) }
@@ -55,9 +62,19 @@ fun TripExpensesScreen(
 
     val total = expenses.sumOf { it.amount }
     val travellerIds = trip.travellers.map { it.id }
-    val balances = computeBalances(expenses, travellerIds)
+    val balances = computeBalances(expenses, payments, travellerIds)
     val settlements = computeSettlements(balances)
     val pairwise = computePairwiseDebts(expenses)
+
+    // ---- settle-up state ----
+    val isOwner = trip.isOwnedBy(currentUid)
+    val isSettled = trip.settledAt > 0L
+    // the traveller linked to the current member (via reconciliation: traveller.userId == uid)
+    val myTravellerId = trip.travellers.firstOrNull { it.userId == currentUid }?.id
+    val iOwe = if (myTravellerId == null) 0.0
+    else settlements.filter { it.fromTravellerId == myTravellerId }.sumOf { it.amount }
+    val iAmOwed = if (myTravellerId == null) 0.0
+    else settlements.filter { it.toTravellerId == myTravellerId }.sumOf { it.amount }
 
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
@@ -88,6 +105,21 @@ fun TripExpensesScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
+                    // ---- Settled banner (non-owners, when the owner has settled) ----
+                    if (isSettled && !isOwner) {
+                        item {
+                            val settledByName = trip.memberInfo[trip.settledBy]?.name?.takeIf { it.isNotBlank() }
+                                ?: trip.travellers.firstOrNull { it.userId == trip.settledBy }?.firstName
+                                ?: s.theOwner
+                            SettledBanner(
+                                settledByName = settledByName,
+                                iOwe = iOwe,
+                                iAmOwed = iAmOwed,
+                                currencyCode = trip.currencyCode,
+                            )
+                        }
+                    }
+
                     // ---- Total ----
                     item {
                         TotalCard(
@@ -108,7 +140,94 @@ fun TripExpensesScreen(
                                     Text(s.allSettled, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
                                 } else {
                                     settlements.forEach { st ->
-                                        DebtRow(nameOf(st.fromTravellerId), nameOf(st.toTravellerId), formatMoney(st.amount, trip.currencyCode))
+                                        val iAmDebtor = trip.travellers
+                                            .firstOrNull { it.id == st.fromTravellerId }?.userId == currentUid
+                                        Row(
+                                            Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            Text(
+                                                "${nameOf(st.fromTravellerId)} → ${nameOf(st.toTravellerId)}",
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                modifier = Modifier.weight(1f),
+                                            )
+                                            Text(
+                                                formatMoney(st.amount, trip.currencyCode),
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = MaterialTheme.colorScheme.primary,
+                                            )
+                                            if (iAmDebtor) {
+                                                Spacer(Modifier.width(8.dp))
+                                                TextButton(
+                                                    onClick = { onMarkPaid(st.fromTravellerId, st.toTravellerId, st.amount) },
+                                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
+                                                ) { Text(s.markPaid) }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // Owner-only settle / un-settle control
+                                if (isOwner) {
+                                    Spacer(Modifier.height(14.dp))
+                                    if (isSettled) {
+                                        OutlinedButton(
+                                            onClick = { onSetSettled(false) },
+                                            modifier = Modifier.fillMaxWidth(),
+                                        ) { Text(s.unsettleTrip) }
+                                    } else {
+                                        Button(
+                                            onClick = { onSetSettled(true) },
+                                            modifier = Modifier.fillMaxWidth(),
+                                            enabled = settlements.isNotEmpty(),
+                                        ) { Text(s.settleUpTrip) }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    // ---- Payments history ----
+                    if (payments.isNotEmpty()) {
+                        item {
+                            Surface(shape = CardShape, color = MaterialTheme.colorScheme.surfaceVariant) {
+                                Column(Modifier.fillMaxWidth().padding(16.dp)) {
+                                    Text(s.payments, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                                    Text(
+                                        s.recordedRepayments,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    payments.sortedByDescending { it.createdAt }.forEach { p ->
+                                        val iMadeIt = trip.travellers
+                                            .firstOrNull { it.id == p.fromTravellerId }?.userId == currentUid
+                                        Row(
+                                            Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            Text(
+                                                "${nameOf(p.fromTravellerId)} → ${nameOf(p.toTravellerId)}",
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                modifier = Modifier.weight(1f),
+                                            )
+                                            Text(
+                                                formatMoney(p.amount, trip.currencyCode),
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.Medium,
+                                            )
+                                            // only the person who recorded it can undo it
+                                            if (iMadeIt) {
+                                                IconButton(onClick = { onDeletePayment(p.id) }) {
+                                                    Icon(
+                                                        Icons.Outlined.Delete,
+                                                        contentDescription = s.undoPayment,
+                                                        modifier = Modifier.size(18.dp),
+                                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                                    )
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -154,7 +273,7 @@ fun TripExpensesScreen(
                                     Modifier
                                         .fillMaxWidth()
                                         .combinedClickable(
-                                            onClick = { /* existing onClick */ },
+                                            onClick = { expandedId = if (expanded) null else exp.id },
                                             onLongClick = { if (canEdit) pendingDelete = exp },
                                         )
                                         .padding(14.dp),
@@ -201,9 +320,9 @@ fun TripExpensesScreen(
                                         Spacer(Modifier.height(6.dp))
                                         if (canEdit) {
                                             TextButton(onClick = { onEditExpense(exp.id) }, contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)) {
-                                            Icon(Icons.Filled.Edit, null, modifier = Modifier.size(16.dp))
-                                            Spacer(Modifier.width(6.dp))
-                                            Text(s.edit)
+                                                Icon(Icons.Filled.Edit, null, modifier = Modifier.size(16.dp))
+                                                Spacer(Modifier.width(6.dp))
+                                                Text(s.edit)
                                             }
                                         }
                                     }
@@ -219,18 +338,18 @@ fun TripExpensesScreen(
 
         if (canEdit) {
 
-        FloatingActionButton(
-            onClick = onAddExpense,
-            modifier = Modifier
-                .align(Alignment.BottomEnd).offset(x = (-25).dp, y = 60.dp)
-                .padding(end = 20.dp, bottom = 220.dp),
-            containerColor = MaterialTheme.colorScheme.primary,
-            shape = CircleShape,
-        ) {
-            Icon(Icons.Filled.Add, contentDescription = null)            //text = { Text(s.addExpense) },
+            FloatingActionButton(
+                onClick = onAddExpense,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd).offset(x = (-25).dp, y = 60.dp)
+                    .padding(end = 20.dp, bottom = 220.dp),
+                containerColor = MaterialTheme.colorScheme.primary,
+                shape = CircleShape,
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = null)            //text = { Text(s.addExpense) },
+            }
         }
     }
-}
 
 
     if (showCurrencyPicker) {
@@ -276,6 +395,48 @@ fun TripExpensesScreen(
             },
             dismissButton = { TextButton(onClick = { pendingDelete = null }) { Text(s.cancel) } },
         )
+    }
+}
+
+@Composable
+private fun SettledBanner(
+    settledByName: String,
+    iOwe: Double,
+    iAmOwed: Double,
+    currencyCode: String,
+) {
+    val s = LocalStrings.current
+    val owes = iOwe > 0.01
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = CardShape,
+        color = if (owes) MaterialTheme.colorScheme.primaryContainer
+        else MaterialTheme.colorScheme.surfaceVariant,
+    ) {
+        Row(
+            Modifier.fillMaxWidth().padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("💰", style = MaterialTheme.typography.titleLarge)
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    "$settledByName ${s.markedAsSettled}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    when {
+                        owes -> s.youOweBanner.replace("%s", formatMoney(iOwe, currencyCode))
+                        iAmOwed > 0.01 -> s.youAreOwedBanner.replace("%s", formatMoney(iAmOwed, currencyCode))
+                        else -> s.allSquareBanner
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
+                )
+            }
+        }
     }
 }
 

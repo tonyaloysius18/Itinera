@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.ManageAccounts
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -40,12 +41,14 @@ fun SettingsScreen(
     onAppearance: () -> Unit,
     onOpenLanguage: () -> Unit,
     onNotifications: () -> Unit,
+    onWorldClock: () -> Unit,
     onArchivedTrips: () -> Unit,
     onExportTrips: () -> Unit,
     onBackupStatus: () -> Unit,
     onHelp: () -> Unit,
     onAbout: () -> Unit,
-) {
+
+    ) {
     fun String.toTitleCase(): String =
         split(" ").joinToString(" ") { word ->
             word.replaceFirstChar { c ->
@@ -94,6 +97,8 @@ fun SettingsScreen(
                 SettingsRow(Icons.Filled.Translate, s.language, primary, onClick = onOpenLanguage)
                 ThinDivider()
                 SettingsRow(Icons.Filled.Notifications, s.notifications, primary, onClick = onNotifications)
+                ThinDivider()
+                SettingsRow(Icons.Filled.Schedule, "World Clock", primary, onClick = onWorldClock)
             }
 
             // Group 2 — trips & data
