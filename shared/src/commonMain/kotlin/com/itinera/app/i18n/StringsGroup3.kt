@@ -64,6 +64,8 @@ internal val SL: Strings by lazy { EN.copyApply {
     systemDefault = "Sistemsko privzeto"
     light = "Svetel"
     dark = "Temen"
+    alwaysLight = "Vedno svetel"
+    alwaysDark = "Vedno temen"
     matchYourPhone = "Uskladi s telefonom"
     currency = "Valuta"
     convert = "Pretvori"
@@ -263,6 +265,43 @@ internal val SL: Strings by lazy { EN.copyApply {
     inviteCodeHint = "Deli to kodo. Pridružijo se lahko prek „Pridruži se potovanju“."
     inviteShareMessage = "Pridruži se mojemu potovanju na Itinera:"
     copy = "Kopiraj"
+
+    allowNotificationsPrompt = "Dozvolite obaveštenja u sistemskim podešavanjima da biste primali podsetnike."
+    customReminder = "Prilagođeni podsetnik"
+    remindBeforeDeparture = "Podseti me ovoliko vremena pre polaska:"
+    hours = "sati"
+    minutes = "minuta"
+    set = "Postavi"
+    pickAtLeast5 = "Izaberite najmanje 5 minuta"
+    hourSingular = "sat"
+    hoursPlural = "sati"
+    minuteSingular = "minut"
+    minutesPlural = "minuta"
+    before = "pre"
+    custom = "Prilagođeno…"
+
+    createTripOption = "Kreiraj putovanje"
+    joinTripOption = "Pridruži se putovanju"
+    enterInviteCode = "Unesite kod za pozivnicu koji je organizator podelio sa vama."
+    invalidCode = "Nevažeći ili istekao kod"
+    joined = "Pridružen/a"
+    join = "Pridruži se"
+
+    members = "Članovi"
+    roleOwner = "Vlasnik"
+    roleEditor = "Urednik"
+    roleViewer = "Posmatrač"
+    removeMember = "Ukloni člana"
+    removeMemberQ = "Ukloniti ovog člana?"
+    removeMemberDesc = "On/ona će izgubiti pristup ovom putovanju."
+    remove = "Ukloni"
+
+    leaveTrip = "Napusti putovanje"
+    leaveTripQ = "Napustiti ovo putovanje?"
+    leaveTripDesc = "Izgubićete pristup ovom putovanju."
+
+    removeAccount = "Ukloni nalog"
+    removeAccountConfirm = "Ukloniti ovaj nalog sa ovog uređaja? Možete se ponovo prijaviti u bilo kom trenutku."
 } }
 
 internal val SR: Strings by lazy { EN.copyApply {
@@ -329,6 +368,8 @@ internal val SR: Strings by lazy { EN.copyApply {
     systemDefault = "Sistemski podrazumevano"
     light = "Svetla"
     dark = "Tamna"
+    alwaysLight = "Uvek svetla"
+    alwaysDark = "Uvek tamna"
     matchYourPhone = "Uskladi sa telefonom"
     currency = "Valuta"
     convert = "Pretvori"
@@ -528,6 +569,43 @@ internal val SR: Strings by lazy { EN.copyApply {
     inviteCodeHint = "Podeli ovaj kod. Mogu se pridružiti preko „Pridruži se putovanju“."
     inviteShareMessage = "Pridruži se mom putovanju na Itinera:"
     copy = "Kopiraj"
+
+    allowNotificationsPrompt = "Dozvolite obaveštenja u sistemskim podešavanjima da biste primali podsetnike."
+    customReminder = "Prilagođeni podsetnik"
+    remindBeforeDeparture = "Podseti me ovoliko vremena pre polaska:"
+    hours = "sati"
+    minutes = "minuta"
+    set = "Postavi"
+    pickAtLeast5 = "Izaberite najmanje 5 minuta"
+    hourSingular = "sat"
+    hoursPlural = "sati"
+    minuteSingular = "minut"
+    minutesPlural = "minuta"
+    before = "pre"
+    custom = "Prilagođeno…"
+
+    createTripOption = "Kreiraj putovanje"
+    joinTripOption = "Pridruži se putovanju"
+    enterInviteCode = "Unesite kod za pozivnicu koji je organizator podelio sa vama."
+    invalidCode = "Nevažeći ili istekao kod"
+    joined = "Pridružen/a"
+    join = "Pridruži se"
+
+    members = "Članovi"
+    roleOwner = "Vlasnik"
+    roleEditor = "Urednik"
+    roleViewer = "Posmatrač"
+    removeMember = "Ukloni člana"
+    removeMemberQ = "Ukloniti ovog člana?"
+    removeMemberDesc = "On/ona će izgubiti pristup ovom putovanju."
+    remove = "Ukloni"
+
+    leaveTrip = "Napusti putovanje"
+    leaveTripQ = "Napustiti ovo putovanje?"
+    leaveTripDesc = "Izgubićete pristup ovom putovanju."
+
+    removeAccount = "Ukloni nalog"
+    removeAccountConfirm = "Ukloniti ovaj nalog sa ovog uređaja? Možete se ponovo prijaviti u bilo kom trenutku."
 } }
 
 internal val SQ: Strings by lazy { EN.copyApply {
@@ -594,6 +672,8 @@ internal val SQ: Strings by lazy { EN.copyApply {
     systemDefault = "Paracaktuar nga Sistemi"
     light = "Dritë"
     dark = "Errët"
+    alwaysLight = "Gjithmonë dritë"
+    alwaysDark = "Gjithmonë errët"
     matchYourPhone = "Përshtat me Telefonin"
     currency = "Monedha"
     convert = "Konverto"
@@ -793,6 +873,20 @@ internal val SQ: Strings by lazy { EN.copyApply {
     inviteCodeHint = "Shpërndaj këtë kod. Ata mund të bashkohen nga \"Bashkohu në një udhëtim\"."
     inviteShareMessage = "Bashkohu në udhëtimin tim në Itinera:"
     copy = "Kopjo"
+
+    allowNotificationsPrompt = "Lejoni njoftimet në cilësimet e sistemit për të marrë kujtesa."
+    customReminder = "Kujtesë e personalizuar"
+    remindBeforeDeparture = "Më kujto kaq kohë para nisjes:"
+    hours = "orë"
+    minutes = "minuta"
+    set = "Vendos"
+    pickAtLeast5 = "Zgjidhni të paktën 5 minuta"
+    hourSingular = "orë"
+    hoursPlural = "orë"
+    minuteSingular = "minutë"
+    minutesPlural = "minuta"
+    before = "përpara"
+    custom = "E personalizuar…"
 } }
 
 internal val MK: Strings by lazy { EN.copyApply {
@@ -859,6 +953,8 @@ internal val MK: Strings by lazy { EN.copyApply {
     systemDefault = "Стандардно од системот"
     light = "Светла"
     dark = "Темна"
+    alwaysLight = "Секогаш светла"
+    alwaysDark = "Секогаш темна"
     matchYourPhone = "Усогласи со телефонот"
     currency = "Валута"
     convert = "Конвертирај"
@@ -1058,6 +1154,20 @@ internal val MK: Strings by lazy { EN.copyApply {
     inviteCodeHint = "Споделете го овој код. Можат да се приклучат преку „Приклучи се на патување“."
     inviteShareMessage = "Приклучи се на моето патување на Itinera:"
     copy = "Копирај"
+
+    allowNotificationsPrompt = "Дозволете известувања во системските поставки за да добивате потсетници."
+    customReminder = "Прилагоден потсетник"
+    remindBeforeDeparture = "Потсети ме толку време пред тръгнување:"
+    hours = "часови"
+    minutes = "минути"
+    set = "Постави"
+    pickAtLeast5 = "Изберете барем 5 минути"
+    hourSingular = "час"
+    hoursPlural = "часови"
+    minuteSingular = "минута"
+    minutesPlural = "минути"
+    before = "пред"
+    custom = "Прилагодено…"
 } }
 
 internal val MO: Strings by lazy { EN.copyApply {
@@ -1124,6 +1234,8 @@ internal val MO: Strings by lazy { EN.copyApply {
     systemDefault = "Setări implicite de sistem"
     light = "Luminos"
     dark = "Întunecat"
+    alwaysLight = "Întotdeauna luminos"
+    alwaysDark = "Întotdeauna întunecat"
     matchYourPhone = "Potrivește cu telefonul"
     currency = "Valută"
     convert = "Convertește"
@@ -1327,6 +1439,20 @@ internal val MO: Strings by lazy { EN.copyApply {
     inviteCodeHint = "Trimite acest cod. Se pot alătura din „Alătură-te unei călătorii”."
     inviteShareMessage = "Alătură-te călătoriei mele pe Itinera:"
     copy = "Copiază"
+
+    allowNotificationsPrompt = "Permiteți notificările în setările sistemului pentru a primi memento-uri."
+    customReminder = "Memento personalizat"
+    remindBeforeDeparture = "Amintește-mi cu atâta timp înainte de plecare:"
+    hours = "ore"
+    minutes = "minute"
+    set = "Setează"
+    pickAtLeast5 = "Alege cel puțin 5 minute"
+    hourSingular = "oră"
+    hoursPlural = "ore"
+    minuteSingular = "minut"
+    minutesPlural = "minute"
+    before = "înainte"
+    custom = "Personalizat…"
 } }
 
 internal val NO: Strings by lazy { EN.copyApply {
@@ -1393,6 +1519,8 @@ internal val NO: Strings by lazy { EN.copyApply {
     systemDefault = "Systemstandard"
     light = "Lys"
     dark = "Mørk"
+    alwaysLight = "Alltid lys"
+    alwaysDark = "Alltid mørk"
     matchYourPhone = "Følg telefonen"
     currency = "Valuta"
     convert = "Konverter"
@@ -1592,6 +1720,20 @@ internal val NO: Strings by lazy { EN.copyApply {
     inviteCodeHint = "Del denne koden. De kan bli med via \"Bli med på en reise\"."
     inviteShareMessage = "Bli med på reisen min på Itinera:"
     copy = "Kopier"
+
+    allowNotificationsPrompt = "Tillat varslinger i systeminnstillingene for å motta påminnelser."
+    customReminder = "Egendefinert påminnelse"
+    remindBeforeDeparture = "Påminn meg så lenge før avreise:"
+    hours = "timer"
+    minutes = "minutter"
+    set = "Angi"
+    pickAtLeast5 = "Velg minst 5 minutter"
+    hourSingular = "time"
+    hoursPlural = "timer"
+    minuteSingular = "minutt"
+    minutesPlural = "minutter"
+    before = "før"
+    custom = "Egendefinert…"
 } }
 
 internal val FI: Strings by lazy { EN.copyApply {
@@ -1658,6 +1800,8 @@ internal val FI: Strings by lazy { EN.copyApply {
     systemDefault = "Järjestelmän oletus"
     light = "Vaalea"
     dark = "Tumma"
+    alwaysLight = "Aina vaalea"
+    alwaysDark = "Aina tumma"
     matchYourPhone = "Puhelimen mukaan"
     currency = "Valuutta"
     convert = "Muunna"
@@ -1857,6 +2001,20 @@ internal val FI: Strings by lazy { EN.copyApply {
     inviteCodeHint = "Jaa tämä koodi. He voivat liittyä kohdasta \"Liity matkalle\"."
     inviteShareMessage = "Liity matkalleni Itinerassa:"
     copy = "Kopioi"
+
+    allowNotificationsPrompt = "Salli ilmoitukset järjestelmän asetuksista saadaksesi muistutuksia."
+    customReminder = "Mukautettu muistutus"
+    remindBeforeDeparture = "Muistuta minua näin paljon ennen lähtöä:"
+    hours = "tuntia"
+    minutes = "minuuttia"
+    set = "Aseta"
+    pickAtLeast5 = "Valitse vähintään 5 minuuttia"
+    hourSingular = "tunti"
+    hoursPlural = "tuntia"
+    minuteSingular = "minuutti"
+    minutesPlural = "minuuttia"
+    before = "ennen"
+    custom = "Mukautettu…"
 } }
 
 internal val SV: Strings by lazy { EN.copyApply {
@@ -1923,6 +2081,8 @@ internal val SV: Strings by lazy { EN.copyApply {
     systemDefault = "Systemstandard"
     light = "Ljust"
     dark = "Mörkt"
+    alwaysLight = "Alltid ljust"
+    alwaysDark = "Alltid mörkt"
     matchYourPhone = "Anpassa efter telefonen"
     currency = "Valuta"
     convert = "Konvertera"
@@ -2122,6 +2282,21 @@ internal val SV: Strings by lazy { EN.copyApply {
     inviteCodeHint = "Dela denna kod. De kan gå med via \"Gå med i en resa\"."
     inviteShareMessage = "Gå med i min resa på Itinera:"
     copy = "Kopiera"
+
+    allowNotificationsPrompt = "Tillåt notiser i systeminställningarna för att få påminnelser."
+    customReminder = "Anpassad påminnelse"
+    remindBeforeDeparture = "Påminn meg så här långt före avresa:"
+    hours = "timmar"
+    minutes = "minuter"
+    set = "Ställ in"
+    pickAtLeast5 = "Välj minst 5 minuter"
+    hourSingular = "timme"
+    hoursPlural = "timmar"
+    minuteSingular = "minut"
+    minutesPlural = "minuter"
+    before = "före"
+    custom = "Anpassad…"
+
 } }
 
 internal val DA: Strings by lazy { EN.copyApply {
@@ -2188,6 +2363,8 @@ internal val DA: Strings by lazy { EN.copyApply {
     systemDefault = "Systemstandard"
     light = "Lys"
     dark = "Mørk"
+    alwaysLight = "Altid lys"
+    alwaysDark = "Altid mørk"
     matchYourPhone = "Følg telefonen"
     currency = "Valuta"
     convert = "Konverter"
@@ -2387,6 +2564,20 @@ internal val DA: Strings by lazy { EN.copyApply {
     inviteCodeHint = "Del denne kode. De kan deltage via \"Deltag i en rejse\"."
     inviteShareMessage = "Deltag i min rejse på Itinera:"
     copy = "Kopier"
+
+    allowNotificationsPrompt = "Tillat varslinger i systeminnstillingene for å motta påminnelser."
+    customReminder = "Egendefinert påminnelse"
+    remindBeforeDeparture = "Påminn meg så lenge før avreise:"
+    hours = "timer"
+    minutes = "minutter"
+    set = "Angi"
+    pickAtLeast5 = "Velg minst 5 minutter"
+    hourSingular = "time"
+    hoursPlural = "timer"
+    minuteSingular = "minutt"
+    minutesPlural = "minutter"
+    before = "før"
+    custom = "Egendefinert…"
 } }
 
 internal val ET: Strings by lazy { EN.copyApply {
@@ -2453,6 +2644,8 @@ internal val ET: Strings by lazy { EN.copyApply {
     systemDefault = "Süsteemi vaikeseade"
     light = "Hele"
     dark = "Tume"
+    alwaysLight = "Alati hele"
+    alwaysDark = "Alati tume"
     matchYourPhone = "Sama mis telefonil"
     currency = "Valuuta"
     convert = "Teisenda"
@@ -2652,5 +2845,20 @@ internal val ET: Strings by lazy { EN.copyApply {
     inviteCodeHint = "Jaga seda koodi. Nad saavad liituda menüüst \"Liitu reisiga\"."
     inviteShareMessage = "Liitu minu reisiga Itineras:"
     copy = "Kopeeri"
+
+    allowNotificationsPrompt = "Luba teavitused süsteemi seadetes, et saada meeldetuletusi."
+    customReminder = "Kohandatud meeldetuletus"
+    remindBeforeDeparture = "Tuleta meelde nii palju aega enne väljumist:"
+    hours = "tundi"
+    minutes = "minutit"
+    set = "Määra"
+    pickAtLeast5 = "Vali vähemalt 5 minutit"
+    hourSingular = "tund"
+    hoursPlural = "tundi"
+    minuteSingular = "minut"
+    minutesPlural = "minutit"
+    before = "enne"
+    custom = "Kohandatud…"
+
 } }
 

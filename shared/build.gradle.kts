@@ -92,6 +92,10 @@ kotlin {
             // Image picking (KMP — Android + iOS)
             implementation(libs.peekaboo.ui)
             implementation(libs.peekaboo.image.picker)
+
+            implementation(libs.multiplatform.settings)
+            implementation(libs.multiplatform.settings.no.arg)
+            implementation(libs.multiplatform.settings.no.arg.v130)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

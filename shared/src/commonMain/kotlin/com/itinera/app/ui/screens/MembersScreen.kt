@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -329,7 +330,8 @@ private fun MemberRow(
                     onClick = { menuOpen = true },
                     label = { Text(roleLabel) },
                 )
-                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                val shape: Shape = RoundedCornerShape(16.dp)
+                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }, shape = shape) {
                     DropdownMenuItem(
                         text = { Text(s.roleEditor) },
                         trailingIcon = { if (role == "editor") Icon(Icons.Filled.Check, null) },

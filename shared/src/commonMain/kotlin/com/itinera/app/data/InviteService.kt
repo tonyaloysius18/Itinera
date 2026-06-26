@@ -41,18 +41,6 @@ class InviteService {
     }
 
     /**
-     * Phase 1: blind self-add to the trip as a viewer. Does not read the trip first
-     * (the joiner can't read it until they're a member). Uses a field-path update for
-     * the members map and arrayUnion for memberIds.
-     */
-    suspend fun joinTripAddSelf(tripId: String, uid: String) {
-        tripsRef().document(tripId).update(
-            "members.$uid" to "viewer",
-            "memberIds" to FieldValue.arrayUnion(uid),
-        )
-    }
-
-    /**
      * Phase 2: now a member, fan out the joiner's uid to every document and expense
      * under the trip so the collection-group listeners include them.
      */

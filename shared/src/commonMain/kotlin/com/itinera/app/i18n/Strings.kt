@@ -162,6 +162,8 @@ class Strings {
     var systemDefault: String = ""
     var light: String = ""
     var dark: String = ""
+    var alwaysLight: String = ""
+    var alwaysDark: String = ""
     var matchYourPhone: String = ""
     var currency: String = ""
     var convert: String = ""
@@ -387,6 +389,23 @@ class Strings {
     var leaveTrip: String = ""
     var leaveTripQ: String = ""
     var leaveTripDesc: String = ""
+
+    var removeAccount: String = ""
+    var removeAccountConfirm: String = ""
+
+    var allowNotificationsPrompt: String = ""
+    var customReminder: String = ""
+    var remindBeforeDeparture: String = ""
+    var hours: String = ""
+    var minutes: String = ""
+    var set: String = ""
+    var pickAtLeast5: String = ""
+    var hourSingular: String = ""
+    var hoursPlural: String = ""
+    var minuteSingular: String = ""
+    var minutesPlural: String = ""
+    var before: String = ""
+    var custom: String = ""
 
     fun copyApply(block: Strings.() -> Unit): Strings {
 
@@ -672,6 +691,24 @@ class Strings {
         c.leaveTrip = this.leaveTrip
         c.leaveTripQ = this.leaveTripQ
         c.leaveTripDesc = this.leaveTripDesc
+
+        c.removeAccount = this.removeAccount
+        c.removeAccountConfirm = this.removeAccountConfirm
+
+        c.allowNotificationsPrompt = this.allowNotificationsPrompt
+        c.customReminder = this.customReminder
+        c.remindBeforeDeparture = this.remindBeforeDeparture
+        c.hours = this.hours
+        c.minutes = this.minutes
+        c.set = this.set
+        c.pickAtLeast5 = this.pickAtLeast5
+        c.hourSingular = this.hourSingular
+        c.hoursPlural = this.hoursPlural
+        c.minuteSingular = this.minuteSingular
+        c.minutesPlural = this.minutesPlural
+        c.before = this.before
+        c.custom = this.custom
+
         c.block()
         return c
     }

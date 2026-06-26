@@ -43,14 +43,17 @@ actual class NotificationScheduler actual constructor() {
         return true
     }
 
-    actual fun schedule(id: String, title: String, body: String, atEpochMillis: Long) {
+    actual fun schedule(id: String, title: String, body: String, atEpochMillis: Long, tripId: String) {
+        // persist so the reminder list survives (mirrors Android; harmless on iOS)
+        ReminderStore.put(PendingReminder(id, title, body, atEpochMillis, tripId))
+
         val seconds = (atEpochMillis - currentTimeMillisIos()) / 1000.0
         if (seconds <= 0) return
-
         val content = UNMutableNotificationContent().apply {
             setTitle(title)
             setBody(body)
             setSound(UNNotificationSound.defaultSound)
+            setUserInfo(mapOf("tripId" to tripId))      // ⬅ carry tripId for deep-link
         }
         val trigger = UNTimeIntervalNotificationTrigger.triggerWithTimeInterval(
             timeInterval = seconds,
@@ -65,6 +68,7 @@ actual class NotificationScheduler actual constructor() {
     }
 
     actual fun cancel(id: String) {
+        ReminderStore.remove(id)
         center.removePendingNotificationRequestsWithIdentifiers(listOf(id))
     }
 }

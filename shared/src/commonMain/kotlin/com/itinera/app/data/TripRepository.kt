@@ -66,6 +66,9 @@ class TripRepository {
 
     val checklistService = ChecklistService()
 
+    val accountStore = AccountStore()
+
+
     private var tripsListener: Job? = null
 
     private val syncJobs = mutableListOf<Job>()
@@ -102,8 +105,7 @@ class TripRepository {
         val fireAt = legReminderFireTime(leg, offset, nowMillis()) ?: return
         val title = "${leg.fromCity} → ${leg.toCity}"
         val body = "Departing ${leg.timeLabel.ifBlank { "soon" }} · ${trip.title}"
-        notificationScheduler.schedule(leg.id, title, body, fireAt)
-    }
+        notificationScheduler.schedule(leg.id, title, body, fireAt, trip.id)    }
 
     private val uploadClient = HttpClient()
 

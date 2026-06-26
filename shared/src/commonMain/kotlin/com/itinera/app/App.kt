@@ -79,18 +79,29 @@ fun App() {
     LaunchedEffect(Unit) {
         val uid = repository.authService.currentUid
         if (uid != null) {
+            var profile: com.itinera.app.model.UserProfile? = null
             try {
-                val profile = repository.profileService.loadProfile(uid)
+                profile = repository.profileService.loadProfile(uid)
                 if (profile != null) repository.updateProfile(profile)
             } catch (e: Exception) { }
-            repository.migrateToSharedIfNeeded(uid)    // ⬅ ADD — before startSync
-            repository.migrateDocsExpensesIfNeeded(uid)   // ⬅ ADD — after trips migration
+            repository.migrateToSharedIfNeeded(uid)
+            repository.migrateDocsExpensesIfNeeded(uid)
             repository.startSync()
+            repository.accountStore.remember(
+                com.itinera.app.data.RememberedAccount(
+                    uid = uid,
+                    email = repository.profile.email,
+                    name = repository.profile.fullName,
+                    photoUrl = repository.profile.photoUrl,
+                    method = repository.authService.currentSignInMethod(),
+                )
+            )
             repository.rescheduleAllReminders()
             navigator.resetTo(Screen.Home)
         }
         authChecked = true
     }
+
 
     val activeStrings = stringsFor(if (language == Language.SYSTEM) systemLanguage() else language)
 
@@ -142,6 +153,8 @@ private fun AppContent(
     val scope = rememberCoroutineScope()
     val topLevel = remember { setOf(Screen.Home, Screen.Calendar, Screen.Currency, Screen.Split, Screen.Settings) }
 
+    var prefillEmail by remember { mutableStateOf("") }
+
     // Scroll-to-shrink logic
     var barScale by remember { mutableStateOf(1f) }
     val animatedScale by animateFloatAsState(
@@ -165,6 +178,14 @@ private fun AppContent(
 
     LaunchedEffect(current) {
         barScale = 1f
+    }
+
+    LaunchedEffect(current, repository.tripsSyncedOnce) {
+        val pending = PendingDeepLink.tripId
+        if (pending != null && repository.tripById(pending) != null) {
+            PendingDeepLink.tripId = null
+            navigator.push(Screen.TripDetail(pending))
+        }
     }
 
     // ===== app-level message pill =====
@@ -202,6 +223,7 @@ private fun AppContent(
         when (current) {
             Screen.Login -> LoginScreen(
                 authService = repository.authService,
+                prefillEmail = prefillEmail,
                 onAuthed = {
                     scope.launch {
                         val uid = repository.authService.currentUid
@@ -215,16 +237,30 @@ private fun AppContent(
                                     val googleProfile = repository.authService.currentUserProfile()
                                     if (googleProfile != null) {
                                         repository.updateProfile(googleProfile)
-                                        repository.profileService.saveProfile(uid, googleProfile)  // persist it
+                                        repository.profileService.saveProfile(uid, googleProfile)
                                     }
                                 }
                             } catch (e: Exception) { }
+
+                            // record this account for the switcher (after profile is set, both paths)
+                            repository.accountStore.remember(
+                                com.itinera.app.data.RememberedAccount(
+                                    uid = uid,
+                                    email = repository.profile.email,
+                                    name = repository.profile.fullName,
+                                    photoUrl = repository.profile.photoUrl,
+                                    method = repository.authService.currentSignInMethod(),
+                                )
+                            )
+
                             repository.migrateToSharedIfNeeded(uid)
-                            repository.migrateDocsExpensesIfNeeded(uid)   // ⬅ ADD — after trips migration
+                            repository.migrateDocsExpensesIfNeeded(uid)
                             repository.startSync()
                             lastSyncedAt = nowMillisApp()
                         }
                         navigator.resetTo(Screen.Home)
+                        prefillEmail = ""
+
                     }
                 },
                 onCreateAccount = { navigator.push(Screen.CreateAccount) },
@@ -511,7 +547,20 @@ private fun AppContent(
 
                         Screen.Account -> AccountScreen(
                             profile = repository.profile,
-                            onBack = { navigator.back() },
+                            accounts = repository.accountStore.all(),
+                            currentUid = repository.authService.currentUid ?: "",
+                            onSwitchAccount = { account ->
+                                scope.launch {
+                                    prefillEmail = account.email
+                                    repository.clearLocal()
+                                    repository.authService.signOut()
+                                    navigator.resetTo(Screen.Login)
+                                }
+                            },
+                            onForgetAccount = { account ->                       // ⬅ ADD
+                                repository.accountStore.forget(account.uid)
+                                navigator.resetTo(Screen.Account)                // refresh the screen
+                            },
                             onAddAccount = {
                                 repository.clearLocal()
                                 navigator.resetTo(Screen.Login)
@@ -535,6 +584,7 @@ private fun AppContent(
                                     }
                                 }
                             },
+                            onBack = { navigator.back() },
                         )
 
                         Screen.Notifications -> NotificationsScreen(

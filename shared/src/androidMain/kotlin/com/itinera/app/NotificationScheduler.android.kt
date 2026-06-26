@@ -67,14 +67,18 @@ actual class NotificationScheduler actual constructor() {
      */
     actual suspend fun requestPermission(): Boolean = hasPermission()
 
-    actual fun schedule(id: String, title: String, body: String, atEpochMillis: Long) {
+    actual fun schedule(id: String, title: String, body: String, atEpochMillis: Long, tripId: String) {
         if (atEpochMillis <= System.currentTimeMillis()) return
         ensureChannel()
+
+        // persist so we can reschedule after a reboot
+        ReminderStore.put(PendingReminder(id, title, body, atEpochMillis, tripId))
 
         val intent = Intent(ctx, AlarmReceiver::class.java).apply {
             putExtra("id", id)
             putExtra("title", title)
             putExtra("body", body)
+            putExtra("tripId", tripId)          // ⬅ carry tripId
         }
         val pending = PendingIntent.getBroadcast(
             ctx,
@@ -94,6 +98,7 @@ actual class NotificationScheduler actual constructor() {
     }
 
     actual fun cancel(id: String) {
+        ReminderStore.remove(id)               // ⬅ forget persisted copy
         val intent = Intent(ctx, AlarmReceiver::class.java)
         val pending = PendingIntent.getBroadcast(
             ctx,
@@ -113,6 +118,7 @@ class AlarmReceiver : BroadcastReceiver() {
         val id = intent.getStringExtra("id") ?: return
         val title = intent.getStringExtra("title") ?: "Itinera"
         val body = intent.getStringExtra("body") ?: ""
+        val tripId = intent.getStringExtra("tripId") ?: ""
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val mgr = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -126,7 +132,10 @@ class AlarmReceiver : BroadcastReceiver() {
         // Tap -> open the app (launcher intent; no cross-module class reference needed).
         val launchIntent = context.packageManager
             .getLaunchIntentForPackage(context.packageName)
-            ?.apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP }
+            ?.apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                putExtra("tripId", tripId)                    // ⬅ ADD
+            }
         val contentPending = launchIntent?.let {
             PendingIntent.getActivity(
                 context,
@@ -162,6 +171,17 @@ class AlarmReceiver : BroadcastReceiver() {
     }
 }
 
+class BootReceiver : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action != Intent.ACTION_BOOT_COMPLETED) return
+        AndroidApp.init(context)
+        val scheduler = NotificationScheduler()
+        val now = System.currentTimeMillis()
+        ReminderStore.all()
+            .filter { it.atEpochMillis > now }
+            .forEach { scheduler.schedule(it.id, it.title, it.body, it.atEpochMillis, it.tripId) }
+    }
+}
 actual fun localDateTimeToEpochMillis(date: LocalDate, hour: Int, minute: Int): Long {
     val ldt = LocalDateTime(date.year, date.monthNumber, date.dayOfMonth, hour, minute)
     return ldt.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()

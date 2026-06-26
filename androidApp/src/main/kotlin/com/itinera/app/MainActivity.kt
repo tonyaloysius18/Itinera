@@ -1,6 +1,7 @@
 package com.itinera.app
 
 import android.Manifest
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -21,6 +22,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         AndroidApp.init(this)
 
+        intent?.getStringExtra("tripId")?.takeIf { it.isNotBlank() }?.let {
+            PendingDeepLink.tripId = it                       // ⬅ cold start from notification
+        }
+
         // Let shared code trigger the system permission dialog.
         NotificationPermission.requester = {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -30,6 +35,13 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             App()
+        }
+    }
+    override fun onNewIntent(intent: Intent) {                // ⬅ ADD — app already running
+        super.onNewIntent(intent)
+        setIntent(intent)
+        intent.getStringExtra("tripId")?.takeIf { it.isNotBlank() }?.let {
+            PendingDeepLink.tripId = it
         }
     }
 }

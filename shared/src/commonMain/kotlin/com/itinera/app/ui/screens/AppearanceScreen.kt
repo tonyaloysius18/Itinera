@@ -38,11 +38,11 @@ fun AppearanceScreen(
             tonalElevation = 2.dp,
         ) {
             Column {
-                AppearanceRow(Icons.Filled.Brightness6, "System default", "Match your phone", selected == ThemeMode.SYSTEM) { onSelect(ThemeMode.SYSTEM) }
+                AppearanceRow(Icons.Filled.Brightness6, s.systemDefault, s.matchYourPhone, selected == ThemeMode.SYSTEM) { onSelect(ThemeMode.SYSTEM) }
                 HorizontalDivider(Modifier.padding(start = 56.dp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
-                AppearanceRow(Icons.Filled.LightMode, "Light", "Always light", selected == ThemeMode.LIGHT) { onSelect(ThemeMode.LIGHT) }
+                AppearanceRow(Icons.Filled.LightMode, s.light, s.alwaysLight, selected == ThemeMode.LIGHT) { onSelect(ThemeMode.LIGHT) }
                 HorizontalDivider(Modifier.padding(start = 56.dp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
-                AppearanceRow(Icons.Filled.DarkMode, "Dark", "Always dark", selected == ThemeMode.DARK) { onSelect(ThemeMode.DARK) }
+                AppearanceRow(Icons.Filled.DarkMode, s.dark, s.alwaysDark, selected == ThemeMode.DARK) { onSelect(ThemeMode.DARK) }
             }
         }
     }

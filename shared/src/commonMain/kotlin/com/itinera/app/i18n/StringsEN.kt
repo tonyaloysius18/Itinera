@@ -64,6 +64,8 @@ internal val EN: Strings by lazy { Strings().apply {
     systemDefault = "System Default"
     light = "Light"
     dark = "Dark"
+    alwaysLight = "Always Light"
+    alwaysDark = "Always Dark"
     matchYourPhone = "Match Your Phone"
     currency = "Currency"
     convert = "Convert"
@@ -284,5 +286,21 @@ internal val EN: Strings by lazy { Strings().apply {
     leaveTripQ         = "Leave this trip?"
     leaveTripDesc      = "You'll lose access to this trip."
 
+    removeAccount      = "Remove Account"
+    removeAccountConfirm = "Remove this account from this device? You can sign in again anytime."
+
+    allowNotificationsPrompt = "Allow notifications in system settings to receive reminders."
+    customReminder = "Custom reminder"
+    remindBeforeDeparture = "Remind me this long before departure:"
+    hours = "hours"
+    minutes = "minutes"
+    set = "Set"
+    pickAtLeast5 = "Pick at least 5 minutes"
+    hourSingular = "hour"
+    hoursPlural = "hours"
+    minuteSingular = "minute"
+    minutesPlural = "minutes"
+    before = "before"
+    custom = "Custom…"
 } }
 

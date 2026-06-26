@@ -69,4 +69,9 @@ class AuthService {
         )
     }
 
+    fun currentSignInMethod(): String {
+        val providers = Firebase.auth.currentUser?.providerData?.map { it.providerId } ?: emptyList()
+        return if (providers.any { it.contains("google") }) "google" else "password"
+    }
+
 }

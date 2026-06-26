@@ -25,7 +25,7 @@ expect class NotificationScheduler() {
      * Schedule (or replace) a notification with the given id to fire at
      * [atEpochMillis]. If the time is already in the past, nothing is scheduled.
      */
-    fun schedule(id: String, title: String, body: String, atEpochMillis: Long)
+    fun schedule(id: String, title: String, body: String, atEpochMillis: Long, tripId: String = "")
 
     /** Cancel a previously scheduled notification by id. */
     fun cancel(id: String)

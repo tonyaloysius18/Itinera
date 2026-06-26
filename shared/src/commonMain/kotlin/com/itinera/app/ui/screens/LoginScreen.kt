@@ -54,12 +54,13 @@ val isIos = getPlatform().name.startsWith("iOS", ignoreCase = true)
 @Composable
 fun LoginScreen(
     authService: AuthService,
+    prefillEmail: String = "",
     onAuthed: () -> Unit,
     onCreateAccount: () -> Unit,
     onMessage: (String) -> Unit,
 ) {
     val s = LocalStrings.current
-    var email by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf(prefillEmail) }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 

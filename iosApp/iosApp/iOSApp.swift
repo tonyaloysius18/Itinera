@@ -151,11 +151,14 @@ final class NotificationAppDelegate: NSObject, UIApplicationDelegate, UNUserNoti
 
     // Fires when the user TAPS the notification.
     func userNotificationCenter(
-        _ center: UNUserNotificationCenter,
-        didReceive response: UNNotificationResponse,
-        withCompletionHandler completionHandler: @escaping () -> Void
-    ) {
-        // The app foregrounds automatically. (Deep-linking handled in Part 2.)
-        completionHandler()
-    }
+           _ center: UNUserNotificationCenter,
+           didReceive response: UNNotificationResponse,
+           withCompletionHandler completionHandler: @escaping () -> Void
+       ) {
+           let userInfo = response.notification.request.content.userInfo
+           if let tripId = userInfo["tripId"] as? String, !tripId.isEmpty {
+               PendingDeepLink.shared.tripId = tripId
+           }
+           completionHandler()
+       }
 }

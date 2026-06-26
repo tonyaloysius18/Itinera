@@ -20,20 +20,33 @@ import androidx.compose.ui.unit.sp
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.UserProfile
 import com.itinera.app.ui.components.TopBar
+import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
 
 private val AccentRed = Color(0xFFE03131)
 
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun AccountScreen(
     profile: UserProfile,
-    onBack: () -> Unit,
+    accounts: List<com.itinera.app.data.RememberedAccount> = emptyList(),
+    currentUid: String = "",
+    onSwitchAccount: (com.itinera.app.data.RememberedAccount) -> Unit = {},
+    onForgetAccount: (com.itinera.app.data.RememberedAccount) -> Unit = {},
     onAddAccount: () -> Unit,
     onLogOut: () -> Unit,
     onDeleteAccount: () -> Unit,
+    onBack: () -> Unit,          // ⬅ ADD
 ) {
     val s = LocalStrings.current
     val primary = MaterialTheme.colorScheme.primary
     var showDeleteDialog by remember { mutableStateOf(false) }
+
+    var pendingForget by remember { mutableStateOf<com.itinera.app.data.RememberedAccount?>(null) }
 
     Column(Modifier.fillMaxSize()) {
         TopBar(title = s.account, onBack = onBack)
@@ -62,6 +75,59 @@ fun AccountScreen(
             ) {
                 Column {
                     AccountRow(profile = profile, active = true)
+
+                    // Other remembered accounts on this device — tap to switch
+                    accounts.filter { it.uid != currentUid }.forEach { account ->
+                        ThinDivider()
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .combinedClickable(
+                                    onClick = { onSwitchAccount(account) },
+                                    onLongClick = { pendingForget = account },
+                                )
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            // avatar: initial in a circle
+                            Box(
+                                Modifier.size(40.dp).clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.secondaryContainer),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                if (account.photoUrl.isNotBlank()) {
+                                    AsyncImage(
+                                        model = account.photoUrl,
+                                        contentDescription = null,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.matchParentSize(),
+                                    )
+                                } else {
+                                    Text(
+                                        (account.name.firstOrNull() ?: account.email.firstOrNull() ?: '?').uppercase(),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    )
+                                }
+                            }
+                            Spacer(Modifier.width(14.dp))
+                            Column(Modifier.weight(1f)) {
+                                Text(
+                                    account.name.ifBlank { account.email },
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Medium,
+                                )
+                                if (account.email.isNotBlank()) {
+                                    Text(
+                                        account.email,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                    )
+                                }
+                            }
+                        }
+                    }
+
                     ThinDivider()
                     // Add another account
                     Row(
@@ -124,6 +190,20 @@ fun AccountScreen(
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) { Text(s.cancel) }
             },
+        )
+    }
+    if (pendingForget != null) {
+        AlertDialog(
+            onDismissRequest = { pendingForget = null },
+            title = { Text(s.removeAccount) },
+            text = { Text(s.removeAccountConfirm) },
+            confirmButton = {
+                TextButton(onClick = {
+                    onForgetAccount(pendingForget!!)
+                    pendingForget = null
+                }) { Text(s.remove, color = AccentRed) }
+            },
+            dismissButton = { TextButton(onClick = { pendingForget = null }) { Text(s.cancel) } },
         )
     }
 }
