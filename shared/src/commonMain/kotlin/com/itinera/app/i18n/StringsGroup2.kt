@@ -342,6 +342,16 @@ internal val RU: Strings by lazy { EN.copyApply {
     loadingLabel = "Загрузка…"
     noCityMatches = "Нет совпадений. Попробуйте другое написание."
     couldntFindPlace = "Не удалось найти это место. Попробуйте другое написание или ближайший город."
+    translate = "Перевод"
+    translateEnterText = "Введите текст"
+    translating = "Перевод…"
+    translationLabel = "Перевод"
+    translateError = "Не удалось перевести. При первом использовании языка загружается модель — проверьте соединение."
+    history = "История"
+    clear = "Очистить"
+    languageLabel = "Язык"
+    searchLanguage = "Поиск языка"
+    favorite = "Избранное"
 } }
 
 internal val TAM: Strings by lazy { EN.copyApply {
@@ -686,6 +696,16 @@ internal val TAM: Strings by lazy { EN.copyApply {
     loadingLabel = "ஏற்றப்படுகிறது…"
     noCityMatches = "பொருந்தவில்லை. வேறு எழுத்துப்பிழையை முயற்சிக்கவும்."
     couldntFindPlace = "அந்த இடத்தைக் கண்டறிய முடியவில்லை. வேறு எழுத்துப்பிழை அல்லது அருகிலுள்ள நகரத்தை முயற்சிக்கவும்."
+    translate = "மொழிபெயர்ப்பு"
+    translateEnterText = "உரையை உள்ளிடவும்"
+    translating = "மொழிபெயர்க்கிறது…"
+    translationLabel = "மொழிபெயர்ப்பு"
+    translateError = "மொழிபெயர்க்க முடியவில்லை. ஒரு மொழியின் முதல் பயன்பாடு ஒரு மாதிரியைப் பதிவிறக்குகிறது - உங்கள் இணைப்பைச் சரிபார்க்கவும்."
+    history = "வரலாறு"
+    clear = "அழி"
+    languageLabel = "மொழி"
+    searchLanguage = "மொழியைத் தேடு"
+    favorite = "விருப்பமானவை"
 } }
 
 internal val HI: Strings by lazy { EN.copyApply {
@@ -1030,6 +1050,16 @@ internal val HI: Strings by lazy { EN.copyApply {
     loadingLabel = "लोड हो रहा है…"
     noCityMatches = "कोई मिलान नहीं। दूसरी वर्तनी आज़माएं।"
     couldntFindPlace = "वह स्थान नहीं मिल सका। दूसरी वर्तनी या पास के शहर का प्रयास करें।"
+    translate = "अनुवाद"
+    translateEnterText = "टेक्स्ट दर्ज करें"
+    translating = "अनुवाद हो रहा है…"
+    translationLabel = "अनुवाद"
+    translateError = "अनुवाद नहीं किया जा सका। भाषा के पहले उपयोग पर मॉडल डाउनलोड होता है — अपना कनेक्शन जांचें।"
+    history = "इतिहास"
+    clear = "साफ़ करें"
+    languageLabel = "भाषा"
+    searchLanguage = "भाषा खोजें"
+    favorite = "पसंदीदा"
 } }
 
 internal val UKR: Strings by lazy { EN.copyApply {
@@ -1374,6 +1404,16 @@ internal val UKR: Strings by lazy { EN.copyApply {
     loadingLabel = "Завантаження…"
     noCityMatches = "Немає збігів. Спробуйте інше написання."
     couldntFindPlace = "Не вдалося знайти це місце. Спробуйте інше написання або найближче місто."
+    translate = "Переклад"
+    translateEnterText = "Введіть текст"
+    translating = "Переклад…"
+    translationLabel = "Переклад"
+    translateError = "Не вдалося перекласти. Під час першого використання мови завантажується модель — перевірте з'єднання."
+    history = "Історія"
+    clear = "Очистити"
+    languageLabel = "Мова"
+    searchLanguage = "Пошук мови"
+    favorite = "Обране"
 } }
 
 internal val HUN: Strings by lazy { EN.copyApply {
@@ -1718,6 +1758,16 @@ internal val HUN: Strings by lazy { EN.copyApply {
     loadingLabel = "Betöltés…"
     noCityMatches = "Nincs találat. Próbálkozz más írásmóddal."
     couldntFindPlace = "Nem található a hely. Próbálkozz más írásmóddal vagy egy közeli várossal."
+    translate = "Fordítás"
+    translateEnterText = "Szöveg megadása"
+    translating = "Fordítás…"
+    translationLabel = "Fordítás"
+    translateError = "Nem sikerült fordítani. Egy nyelv első használatakor letöltődik egy modell – ellenőrizze a kapcsolatot."
+    history = "Előzmények"
+    clear = "Törlés"
+    languageLabel = "Nyelv"
+    searchLanguage = "Nyelv keresése"
+    favorite = "Kedvenc"
 } }
 
 internal val RO: Strings by lazy { EN.copyApply {
@@ -2061,7 +2111,17 @@ internal val RO: Strings by lazy { EN.copyApply {
     couldntLoadWeather = "Nu s-a putut încărca vremea"
     loadingLabel = "Se încarcă…"
     noCityMatches = "Nicio potrivire. Încearcă altă scriere."
-    couldntFindPlace = "Nu s-a putut găsi locul respectiv. Încearcă altă scriere sau un oraș din apropiere."
+    couldntFindPlace = "Nu s-a putut găsi locul respectiv. Încearcă altă scriere sau un oraş din apropiere."
+    translate = "Traducere"
+    translateEnterText = "Introduceți textul"
+    translating = "Traducere…"
+    translationLabel = "Traducere"
+    translateError = "Nu s-a putut traduce. Prima utilizare a unei limbi descarcă un model — verificați conexiunea."
+    history = "Istoric"
+    clear = "Șterge"
+    languageLabel = "Limbă"
+    searchLanguage = "Căutare limbă"
+    favorite = "Favorit"
 } }
 
 internal val GR: Strings by lazy { EN.copyApply {
@@ -2406,6 +2466,16 @@ internal val GR: Strings by lazy { EN.copyApply {
     loadingLabel = "Φόρτωση…"
     noCityMatches = "Δεν βρέθηκαν αποτελέσματα. Δοκιμάστε άλλη ορθογραφία."
     couldntFindPlace = "Δεν βρέθηκε αυτή η τοποθεσία. Δοκιμάστε άλλη ορθογραφία ή μια κοντινή πόλη."
+    translate = "Μετάφραση"
+    translateEnterText = "Εισαγωγή κειμένου"
+    translating = "Μετάφραση…"
+    translationLabel = "Μετάφραση"
+    translateError = "Αδυναμία μετάφρασης. Η πρώτη χρήση μιας γλώσσας απαιτεί λήψη μοντέλου — ελέγξτε τη σύνδεσή σας."
+    history = "Ιστορικό"
+    clear = "Εκκαθάριση"
+    languageLabel = "Γλώσσα"
+    searchLanguage = "Αναζήτηση γλώσσας"
+    favorite = "Αγαπημένο"
 } }
 
 internal val KA: Strings by lazy { EN.copyApply {
@@ -2750,6 +2820,16 @@ internal val KA: Strings by lazy { EN.copyApply {
     loadingLabel = "იტვირთება…"
     noCityMatches = "შესაბამისობა ვერ მოიძებნა. სცადეთ სხვა დასახელება."
     couldntFindPlace = "ეს ადგილი ვერ მოიძებნა. სცადეთ სხვა დასახელება ან ახლომდებარე ქალაქი."
+    translate = "თარგმანი"
+    translateEnterText = "შეიყვანეთ ტექსტი"
+    translating = "ითარგმნება…"
+    translationLabel = "თარგმანი"
+    translateError = "თარგმნა ვერ მოხერხდა. ენის პირველი გამოყენებისას ხდება მოდელის ჩამოტვირთვა — შეამოწმეთ კავშირი."
+    history = "ისტორია"
+    clear = "გასუფთავება"
+    languageLabel = "ენა"
+    searchLanguage = "ენის ძებნა"
+    favorite = "რჩეული"
 } }
 
 internal val BG: Strings by lazy { EN.copyApply {
@@ -3094,6 +3174,16 @@ internal val BG: Strings by lazy { EN.copyApply {
     loadingLabel = "Зареждане…"
     noCityMatches = "Няма съвпадения. Опитайте друго изписване."
     couldntFindPlace = "Мястото не можа да бъде намерено. Опитайте друго изписване или близък град."
+    translate = "Превод"
+    translateEnterText = "Въведете текст"
+    translating = "Превод…"
+    translationLabel = "Превод"
+    translateError = "Неуспешен превод. Първото използване на език изтегля модел — проверете връзката си."
+    history = "История"
+    clear = "Изчисти"
+    languageLabel = "Език"
+    searchLanguage = "Търсене на език"
+    favorite = "Любими"
 } }
 
 internal val SK: Strings by lazy { EN.copyApply {
@@ -3438,5 +3528,15 @@ internal val SK: Strings by lazy { EN.copyApply {
     loadingLabel = "Načítava sa…"
     noCityMatches = "Žiadne zhody. Skúste iný pravopis."
     couldntFindPlace = "Nepodarilo sa nájsť toto miesto. Skúste iný pravopis alebo blízke mesto."
+    translate = "Preklad"
+    translateEnterText = "Zadajte text"
+    translating = "Prekladá sa…"
+    translationLabel = "Preklad"
+    translateError = "Nepodarilo sa preložiť. Prvé použitie jazyka vyžaduje stiahnutie modelu — skontrolujte pripojenie."
+    history = "História"
+    clear = "Vymazať"
+    languageLabel = "Jazyk"
+    searchLanguage = "Hľadať jazyk"
+    favorite = "Obľúbené"
 } }
 

@@ -450,7 +450,17 @@ class Strings {
     var noCityMatches: String = ""
     var couldntFindPlace: String = ""
 
+    // Translate
     var translate: String = ""
+    var translateEnterText: String = ""
+    var translating: String = ""
+    var translationLabel: String = ""
+    var translateError: String = ""
+    var history: String = ""
+    var clear: String = ""
+    var languageLabel: String = ""
+    var searchLanguage: String = ""
+    var favorite: String = ""
 
     fun copyApply(block: Strings.() -> Unit): Strings {
 
@@ -795,6 +805,15 @@ class Strings {
         c.couldntFindPlace = this.couldntFindPlace
 
         c.translate = this.translate
+        c.translateEnterText = this.translateEnterText
+        c.translating = this.translating
+        c.translationLabel = this.translationLabel
+        c.translateError = this.translateError
+        c.history = this.history
+        c.clear = this.clear
+        c.languageLabel = this.languageLabel
+        c.searchLanguage = this.searchLanguage
+        c.favorite = this.favorite
 
         c.block()
         return c

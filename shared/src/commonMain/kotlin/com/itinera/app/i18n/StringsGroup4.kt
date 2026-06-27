@@ -342,6 +342,16 @@ internal val CZ: Strings by lazy { EN.copyApply {
     loadingLabel = "Načítá se…"
     noCityMatches = "Žádné shody. Zkuste jiný pravopis."
     couldntFindPlace = "Nepodařilo se najít toto místo. Zkuste jiný pravopis nebo blízké město."
+    translate = "Přeložit"
+    translateEnterText = "Zadejte text"
+    translating = "Překládání…"
+    translationLabel = "Překlad"
+    translateError = "Nepodařilo se přeložit. První použití jazyka stáhne model – zkontrolujte připojení."
+    history = "Historie"
+    clear = "Vymazat"
+    languageLabel = "Jazyk"
+    searchLanguage = "Hledat jazyk"
+    favorite = "Oblíbené"
 } }
 
 internal val LV: Strings by lazy { EN.copyApply {
@@ -686,6 +696,16 @@ internal val LV: Strings by lazy { EN.copyApply {
     loadingLabel = "Ielādē…"
     noCityMatches = "Nav sakritību. Mēģiniet citu pareizrakstību."
     couldntFindPlace = "Neizdevās atrast šo vietu. Mēģiniet citu pareizrakstību vai tuvējo pilsētu."
+    translate = "Tulkot"
+    translateEnterText = "Ievadiet tekstu"
+    translating = "Tulko…"
+    translationLabel = "Tulkojums"
+    translateError = "Neizdevās pārtulkot. Pirmajā valodas lietošanas reizē tiek lejupielādēts modelis — pārbaudiet savienojumu."
+    history = "Vēsture"
+    clear = "Notīrīt"
+    languageLabel = "Valoda"
+    searchLanguage = "Meklēt valodu"
+    favorite = "Izlase"
 } }
 
 internal val LT: Strings by lazy { EN.copyApply {
@@ -1030,6 +1050,16 @@ internal val LT: Strings by lazy { EN.copyApply {
     loadingLabel = "Įkeliama…"
     noCityMatches = "Atitikmenų nerasta. Išbandykite kitą rašybą."
     couldntFindPlace = "Nepavyko rasti šios vietos. Išbandykite kitą rašybą arba netoliese esantį miestą."
+    translate = "Versti"
+    translateEnterText = "Įveskite tekstą"
+    translating = "Verčiama…"
+    translationLabel = "Vertimas"
+    translateError = "Nepavyko išversti. Pirmą kartą naudojant kalbą atsisiunčiamas modelis – patikrinkite ryšį."
+    history = "Istorija"
+    clear = "Išvalyti"
+    languageLabel = "Kalba"
+    searchLanguage = "Ieškoti kalbos"
+    favorite = "Parankiniai"
 } }
 
 internal val AR: Strings by lazy { EN.copyApply {
@@ -1374,6 +1404,16 @@ internal val AR: Strings by lazy { EN.copyApply {
     loadingLabel = "جاري التحميل…"
     noCityMatches = "لا توجد نتائج. جرب كتابة أخرى."
     couldntFindPlace = "تعذر العثور على هذا المكان. جرب كتابة أخرى أو مدينة قريبة."
+    translate = "ترجمة"
+    translateEnterText = "أدخل النص"
+    translating = "جاري الترجمة…"
+    translationLabel = "الترجمة"
+    translateError = "تعذر الترجمة. أول استخدام للغة يتطلب تنزيل نموذج — تحقق من اتصالك."
+    history = "السجل"
+    clear = "مسح"
+    languageLabel = "اللغة"
+    searchLanguage = "بحث عن لغة"
+    favorite = "المفضلة"
 } }
 
 internal val TR: Strings by lazy { EN.copyApply {
@@ -1718,6 +1758,16 @@ internal val TR: Strings by lazy { EN.copyApply {
     loadingLabel = "Yükleniyor…"
     noCityMatches = "Eşleşme bulunamadı. Başka bir yazım deneyin."
     couldntFindPlace = "Bu yer bulunamadı. Başka bir yazım veya yakındaki bir şehri deneyin."
+    translate = "Çevir"
+    translateEnterText = "Metin girin"
+    translating = "Çevriliyor…"
+    translationLabel = "Çeviri"
+    translateError = "Çeviri yapılamadı. Bir dilin ilk kullanımı bir model indirir — bağlantınızı kontrol edin."
+    history = "Geçmiş"
+    clear = "Temizle"
+    languageLabel = "Dil"
+    searchLanguage = "Dil ara"
+    favorite = "Favori"
 } }
 
 internal val VI: Strings by lazy { EN.copyApply {
@@ -2062,6 +2112,16 @@ internal val VI: Strings by lazy { EN.copyApply {
     loadingLabel = "Đang tải…"
     noCityMatches = "Không tìm thấy kết quả. Hãy thử cách viết khác."
     couldntFindPlace = "Không thể tìm thấy địa điểm đó. Hãy thử cách viết khác hoặc một thành phố lân cận."
+    translate = "Dịch"
+    translateEnterText = "Nhập văn bản"
+    translating = "Đang dịch…"
+    translationLabel = "Bản dịch"
+    translateError = "Không thể dịch. Lần đầu tiên sử dụng một ngôn ngữ sẽ tải xuống một mô hình — hãy kiểm tra kết nối của bạn."
+    history = "Lịch sử"
+    clear = "Xóa"
+    languageLabel = "Ngôn ngữ"
+    searchLanguage = "Tìm kiếm ngôn ngữ"
+    favorite = "Yêu thích"
 } }
 
 internal val ID: Strings by lazy { EN.copyApply {
@@ -2406,6 +2466,16 @@ internal val ID: Strings by lazy { EN.copyApply {
     loadingLabel = "Memuat…"
     noCityMatches = "Tidak ada yang cocok. Coba ejaan lain."
     couldntFindPlace = "Tidak dapat menemukan tempat itu. Coba ejaan lain atau kota terdekat."
+    translate = "Terjemahkan"
+    translateEnterText = "Masukkan teks"
+    translating = "Menerjemahkan…"
+    translationLabel = "Terjemahan"
+    translateError = "Tidak dapat menerjemahkan. Penggunaan pertama bahasa mengunduh model — periksa koneksi Anda."
+    history = "Riwayat"
+    clear = "Hapus"
+    languageLabel = "Bahasa"
+    searchLanguage = "Cari bahasa"
+    favorite = "Favorit"
 } }
 
 internal val TH: Strings by lazy { EN.copyApply {
@@ -2750,6 +2820,16 @@ internal val TH: Strings by lazy { EN.copyApply {
     loadingLabel = "กำลังโหลด…"
     noCityMatches = "ไม่พบรายการที่ตรงกัน โปรดลองใช้ตัวสะกดอื่น"
     couldntFindPlace = "ไม่พบสถานที่นั้น โปรดลองใช้ตัวสะกดอื่นหรือเมืองใกล้เคียง"
+    translate = "แปลภาษา"
+    translateEnterText = "กรอกข้อความ"
+    translating = "กำลังแปล…"
+    translationLabel = "คำแปล"
+    translateError = "ไม่สามารถแปลได้ การใช้งานภาษาครั้งแรกจะดาวน์โหลดโมเดล — ตรวจสอบการเชื่อมต่อของคุณ"
+    history = "ประวัติ"
+    clear = "ล้าง"
+    languageLabel = "ภาษา"
+    searchLanguage = "ค้นหาภาษา"
+    favorite = "รายการโปรด"
 } }
 
 internal val HE: Strings by lazy { EN.copyApply {
@@ -3094,6 +3174,16 @@ internal val HE: Strings by lazy { EN.copyApply {
     loadingLabel = "טוען…"
     noCityMatches = "אין התאמות. נסה איות אחר."
     couldntFindPlace = "לא נמצא המקום הזה. נסה איות אחר או עיר קרובה."
+    translate = "תרגם"
+    translateEnterText = "הזן טקסט"
+    translating = "מתרגם…"
+    translationLabel = "תרגום"
+    translateError = "לא ניתן היה לתרגם. השימוש הראשון בשפה מוריד מודל — בדוק את החיבור שלך."
+    history = "היסטוריה"
+    clear = "נקה"
+    languageLabel = "שפה"
+    searchLanguage = "חפש שפה"
+    favorite = "מועדף"
 } }
 
 internal val BN: Strings by lazy { EN.copyApply {
@@ -3438,6 +3528,16 @@ internal val BN: Strings by lazy { EN.copyApply {
     loadingLabel = "লোড হচ্ছে…"
     noCityMatches = "কোনো মিল পাওয়া যায়নি। অন্য বানান চেষ্টা করুন।"
     couldntFindPlace = "ওই জায়গাটি খুঁজে পাওয়া যায়নি। অন্য বানান বা পাশের কোনো শহর চেষ্টা করুন।"
+    translate = "অনুবাদ করুন"
+    translateEnterText = "টেক্সট লিখুন"
+    translating = "অনুবাদ হচ্ছে…"
+    translationLabel = "অনুবাদ"
+    translateError = "অনুবাদ করা যায়নি। কোনো ভাষার প্রথম ব্যবহারে একটি মডেল ডাউনলোড হয় — আপনার সংযোগ চেক করুন।"
+    history = "ইতিহাস"
+    clear = "মুছে ফেলুন"
+    languageLabel = "ভাষা"
+    searchLanguage = "ভাষা খুঁজুন"
+    favorite = "প্রিয়"
 } }
 
 internal val TG: Strings by lazy { EN.copyApply {
@@ -3782,6 +3882,16 @@ internal val TG: Strings by lazy { EN.copyApply {
     loadingLabel = "Боргирӣ…"
     noCityMatches = "Мувофиқат пайдо нашуд. Имлои дигарро санҷед."
     couldntFindPlace = "Он ҷой пайдо нашуд. Имлои дигар ё шаҳри наздикро санҷед."
+    translate = "Тарҷума"
+    translateEnterText = "Матнро ворид кунед"
+    translating = "Тарҷума шуда истодааст…"
+    translationLabel = "Тарҷума"
+    translateError = "Тарҷума карда нашуд. Аввалин истифодаи забон моделро боргирӣ мекунад — пайвасти худро тафтиш кунед."
+    history = "Таърих"
+    clear = "Тоза кардан"
+    languageLabel = "Забон"
+    searchLanguage = "Ҷустуҷӯи забон"
+    favorite = "Дӯстдошта"
 } }
 
 internal val SI: Strings by lazy { EN.copyApply {
@@ -4126,5 +4236,15 @@ internal val SI: Strings by lazy { EN.copyApply {
     loadingLabel = "පූරණය වෙමින්…"
     noCityMatches = "ගැලපීම් නැත. වෙනත් අක්ෂර වින්යාසයක් උත්සාහ කරන්න."
     couldntFindPlace = "එම ස්ථානය සොයාගත නොහැකි විය. වෙනත් අක්ෂර වින්යාසයක් හෝ ආසන්න නගරයක් උත්සාහ කරන්න."
+    translate = "පරිවර්තනය කරන්න"
+    translateEnterText = "පෙළ ඇතුළත් කරන්න"
+    translating = "පරිවර්තනය වෙමින්…"
+    translationLabel = "පරිවර්තනය"
+    translateError = "පරිවර්තනය කළ නොහැකි විය. භාෂාවක පළමු භාවිතය ආකෘතියක් බාගත කරයි — ඔබගේ සම්බන්ධතාවය පරීක්ෂා කරන්න."
+    history = "ඉතිහාසය"
+    clear = "මකන්න"
+    languageLabel = "භාෂාව"
+    searchLanguage = "භාෂාව සොයන්න"
+    favorite = "ප්‍රියතම"
 } }
 

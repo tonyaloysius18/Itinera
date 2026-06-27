@@ -39,6 +39,7 @@ import com.itinera.app.data.TranslationEntry
 import com.itinera.app.data.Translator
 import com.itinera.app.data.rememberFileSharer
 import com.itinera.app.data.translateLanguages
+import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.ui.components.TopBar
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -54,6 +55,7 @@ fun TranslateScreen(
     translator: Translator,
     onBack: () -> Unit,
 ) {
+    val s = LocalStrings.current
     val clipboard = LocalClipboardManager.current
     val sharer: FileSharer = rememberFileSharer()
 
@@ -101,7 +103,7 @@ fun TranslateScreen(
         try {
             result = translator.translate(text, sourceLang.code, targetLang.code)
         } catch (e: Exception) {
-            error = "Couldn't translate. The first use of a language downloads a model — check your connection."
+            error = s.translateError
             result = ""
         }
         loading = false
@@ -113,7 +115,7 @@ fun TranslateScreen(
         val text = input.trim()
         val r = result
         if (text.isBlank() || r.isBlank()) return@LaunchedEffect
-        delay(10000)
+        delay(100000)
         TranslateHistoryStore.add(
             TranslationEntry(
                 id = Clock.System.now().toEpochMilliseconds().toString(),
@@ -128,7 +130,7 @@ fun TranslateScreen(
     }
 
     Column(Modifier.fillMaxSize()) {
-        TopBar("Translate", onBack = onBack)
+        TopBar(s.translate, onBack = onBack)
 
         LazyColumn(
             Modifier.fillMaxSize(),
@@ -153,7 +155,7 @@ fun TranslateScreen(
                                 trailing = {
                                     if (input.isNotEmpty()) {
                                         IconButton(onClick = { input = "" }) {
-                                            Icon(Icons.Filled.Close, contentDescription = "Clear")
+                                            Icon(Icons.Filled.Close, contentDescription = s.close)
                                         }
                                     }
                                 },
@@ -169,7 +171,7 @@ fun TranslateScreen(
                                     decorationBox = { inner ->
                                         if (input.isEmpty()) {
                                             Text(
-                                                "Enter text",
+                                                s.translateEnterText,
                                                 style = MaterialTheme.typography.bodyLarge,
                                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                                             )
@@ -192,10 +194,10 @@ fun TranslateScreen(
                                     if (result.isNotBlank()) {
                                         Row {
                                             IconButton(onClick = { clipboard.setText(AnnotatedString(result)) }) {
-                                                Icon(Icons.Filled.ContentCopy, contentDescription = "Copy", modifier = Modifier.size(20.dp))
+                                                Icon(Icons.Filled.ContentCopy, contentDescription = s.copy, modifier = Modifier.size(20.dp))
                                             }
                                             IconButton(onClick = { sharer.shareText(result) }) {
-                                                Icon(Icons.Filled.Share, contentDescription = "Share", modifier = Modifier.size(20.dp))
+                                                Icon(Icons.Filled.Share, contentDescription = s.share, modifier = Modifier.size(20.dp))
                                             }
                                         }
                                     }
@@ -206,7 +208,7 @@ fun TranslateScreen(
                                         loading -> Row(verticalAlignment = Alignment.CenterVertically) {
                                             CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
                                             Spacer(Modifier.width(10.dp))
-                                            Text("Translating…", style = MaterialTheme.typography.bodyMedium,
+                                            Text(s.translating, style = MaterialTheme.typography.bodyMedium,
                                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                                         }
                                         error != null -> Text(error!!, style = MaterialTheme.typography.bodyMedium,
@@ -214,7 +216,7 @@ fun TranslateScreen(
                                         result.isNotBlank() -> SelectionContainer {
                                             Text(result, style = MaterialTheme.typography.bodyLarge)
                                         }
-                                        else -> Text("Translation", style = MaterialTheme.typography.bodyLarge,
+                                        else -> Text(s.translationLabel, style = MaterialTheme.typography.bodyLarge,
                                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
                                     }
                                 }
@@ -255,12 +257,12 @@ fun TranslateScreen(
                         Modifier.fillMaxWidth().padding(top = 24.dp, bottom = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text("History", style = MaterialTheme.typography.titleSmall,
+                        Text(s.history, style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
                         TextButton(onClick = {
                             TranslateHistoryStore.clearNonFavorites()
                             history = TranslateHistoryStore.all()
-                        }) { Text("Clear") }
+                        }) { Text(s.clear) }
                     }
                 }
                 items(history, key = { it.id }) { entry ->
@@ -345,6 +347,7 @@ private fun HistoryRow(
     onToggleFavorite: () -> Unit,
     onDelete: () -> Unit,
 ) {
+    val s = LocalStrings.current
     Surface(
         shape = RoundedCornerShape(14.dp),
         color = MaterialTheme.colorScheme.surface,
@@ -373,13 +376,13 @@ private fun HistoryRow(
             IconButton(onClick = onToggleFavorite) {
                 Icon(
                     if (entry.favorite) Icons.Filled.Star else Icons.Filled.StarBorder,
-                    contentDescription = "Favorite",
+                    contentDescription = s.favorite,
                     tint = if (entry.favorite) Color(0xFFE8B931) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                     modifier = Modifier.size(20.dp),
                 )
             }
             IconButton(onClick = onDelete) {
-                Icon(Icons.Outlined.Delete, contentDescription = "Delete",
+                Icon(Icons.Outlined.Delete, contentDescription = s.delete,
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                     modifier = Modifier.size(18.dp))
             }
@@ -393,6 +396,7 @@ private fun LangPickerDialog(
     onPick: (TranslateLang) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val s = LocalStrings.current
     var query by remember { mutableStateOf("") }
     val filtered = remember(query) {
         if (query.isBlank()) translateLanguages
@@ -401,14 +405,14 @@ private fun LangPickerDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Close") } },
-        title = { Text("Language") },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(s.close) } },
+        title = { Text(s.languageLabel) },
         text = {
             Column {
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
-                    label = { Text("Search language") },
+                    label = { Text(s.searchLanguage) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),

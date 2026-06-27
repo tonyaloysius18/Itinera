@@ -342,5 +342,15 @@ internal val EN: Strings by lazy { Strings().apply {
     loadingLabel = "Loading…"
     noCityMatches = "No matches. Try another spelling."
     couldntFindPlace = "Couldn't find that place. Try another spelling or a nearby city."
+
     translate = "Translate"
+    translateEnterText = "Enter text"
+    translating = "Translating…"
+    translationLabel = "Translation"
+    translateError = "Couldn't translate. The first use of a language downloads a model — check your connection."
+    history = "History"
+    clear = "Clear"
+    languageLabel = "Language"
+    searchLanguage = "Search language"
+    favorite = "Favorite"
 } }

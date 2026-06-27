@@ -342,6 +342,16 @@ internal val FR: Strings by lazy { EN.copyApply {
     loadingLabel = "Chargement…"
     noCityMatches = "Aucun résultat. Essayez une autre orthographe."
     couldntFindPlace = "Lieu introuvable. Essayez une autre orthographe ou une ville proche."
+    translate = "Traduire"
+    translateEnterText = "Entrez le texte"
+    translating = "Traduction…"
+    translationLabel = "Traduction"
+    translateError = "Impossible de traduire. La première utilisation d'une langue télécharge un modèle — vérifiez votre connexion."
+    history = "Historique"
+    clear = "Effacer"
+    languageLabel = "Langue"
+    searchLanguage = "Rechercher une langue"
+    favorite = "Favori"
 } }
 
 internal val ES: Strings by lazy { EN.copyApply {
@@ -686,6 +696,16 @@ internal val ES: Strings by lazy { EN.copyApply {
     loadingLabel = "Cargando…"
     noCityMatches = "Sin coincidencias. Prueba con otra ortografía."
     couldntFindPlace = "No se pudo encontrar ese lugar. Prueba con otra ortografía o una ciudad cercana."
+    translate = "Traducir"
+    translateEnterText = "Ingrese texto"
+    translating = "Traduciendo…"
+    translationLabel = "Traducción"
+    translateError = "No se pudo traducir. El primer uso de un idioma descarga un modelo — verifique su conexión."
+    history = "Historial"
+    clear = "Limpiar"
+    languageLabel = "Idioma"
+    searchLanguage = "Buscar idioma"
+    favorite = "Favorito"
 } }
 
 internal val DE: Strings by lazy { EN.copyApply {
@@ -1030,6 +1050,16 @@ internal val DE: Strings by lazy { EN.copyApply {
     loadingLabel = "Lade…"
     noCityMatches = "Keine Treffer. Versuchen Sie eine andere Schreibweise."
     couldntFindPlace = "Dieser Ort konnte nicht gefunden werden. Versuchen Sie eine andere Schreibweise oder eine Stadt in der Nähe."
+    translate = "Übersetzen"
+    translateEnterText = "Text eingeben"
+    translating = "Übersetzung…"
+    translationLabel = "Übersetzung"
+    translateError = "Übersetzung fehlgeschlagen. Die erste Verwendung einer Sprache lädt ein Modell herunter – prüfen Sie Ihre Verbindung."
+    history = "Verlauf"
+    clear = "Löschen"
+    languageLabel = "Sprache"
+    searchLanguage = "Sprache suchen"
+    favorite = "Favorit"
 } }
 
 internal val IT: Strings by lazy { EN.copyApply {
@@ -1374,6 +1404,16 @@ internal val IT: Strings by lazy { EN.copyApply {
     loadingLabel = "Caricamento…"
     noCityMatches = "Nessuna corrispondenza. Prova un'altra grafia."
     couldntFindPlace = "Impossibile trovare quel luogo. Prova un'altra grafia o una città vicina."
+    translate = "Traduci"
+    translateEnterText = "Inserisci testo"
+    translating = "Traduzione…"
+    translationLabel = "Traduzione"
+    translateError = "Impossibile tradurre. Il primo utilizzo di una lingua scarica un modello: controlla la connessione."
+    history = "Cronologia"
+    clear = "Cancella"
+    languageLabel = "Lingua"
+    searchLanguage = "Cerca lingua"
+    favorite = "Preferito"
 } }
 
 internal val PT: Strings by lazy { EN.copyApply {
@@ -1718,6 +1758,16 @@ internal val PT: Strings by lazy { EN.copyApply {
     loadingLabel = "A carregar…"
     noCityMatches = "Sem correspondências. Tente outra grafia."
     couldntFindPlace = "Não foi possível encontrar esse lugar. Tente outra grafia ou uma cidade próxima."
+    translate = "Traduzir"
+    translateEnterText = "Introduzir texto"
+    translating = "A traduzir…"
+    translationLabel = "Tradução"
+    translateError = "Não foi possível traduzir. A primeira utilização de um idioma transfere um modelo — verifique a sua ligação."
+    history = "Histórico"
+    clear = "Limpar"
+    languageLabel = "Idioma"
+    searchLanguage = "Pesquisar idioma"
+    favorite = "Favorito"
 } }
 
 internal val NL: Strings by lazy { EN.copyApply {
@@ -2062,6 +2112,16 @@ internal val NL: Strings by lazy { EN.copyApply {
     loadingLabel = "Laden…"
     noCityMatches = "Geen resultaten. Probeer een andere spelling."
     couldntFindPlace = "Kon die plaats niet vinden. Probeer een andere spelling of een stad in de buurt."
+    translate = "Vertalen"
+    translateEnterText = "Tekst invoeren"
+    translating = "Vertalen…"
+    translationLabel = "Vertaling"
+    translateError = "Vertalen mislukt. Bij het eerste gebruik van een taal wordt een model gedownload — controleer je verbinding."
+    history = "Geschiedenis"
+    clear = "Wissen"
+    languageLabel = "Taal"
+    searchLanguage = "Taal zoeken"
+    favorite = "Favoriet"
 } }
 
 internal val PL: Strings by lazy { EN.copyApply {
@@ -2406,6 +2466,16 @@ internal val PL: Strings by lazy { EN.copyApply {
     loadingLabel = "Ładowanie…"
     noCityMatches = "Brak dopasowań. Spróbuj innej pisowni."
     couldntFindPlace = "Nie znaleziono tego miejsca. Spróbuj innej pisowni lub pobliskiego miasta."
+    translate = "Tłumacz"
+    translateEnterText = "Wpisz tekst"
+    translating = "Tłumaczenie…"
+    translationLabel = "Tłumaczenie"
+    translateError = "Nie udało się przetłumaczyć. Pierwsze użycie języka wymaga pobrania modelu — sprawdź połączenie."
+    history = "Historia"
+    clear = "Wyczyść"
+    languageLabel = "Język"
+    searchLanguage = "Szukaj języka"
+    favorite = "Ulubione"
 } }
 
 internal val ZH: Strings by lazy { EN.copyApply {
@@ -2750,6 +2820,16 @@ internal val ZH: Strings by lazy { EN.copyApply {
     loadingLabel = "加载中…"
     noCityMatches = "无匹配项。请尝试其他拼写。"
     couldntFindPlace = "找不到该地点。请尝试其他拼写或附近的城市。"
+    translate = "翻译"
+    translateEnterText = "输入文字"
+    translating = "正在翻译…"
+    translationLabel = "翻译"
+    translateError = "无法翻译。首次使用某种语言时会下载模型 — 请检查您的连接。"
+    history = "历史"
+    clear = "清除"
+    languageLabel = "语言"
+    searchLanguage = "搜索语言"
+    favorite = "收藏"
 } }
 
 internal val JP: Strings by lazy { EN.copyApply {
@@ -3094,6 +3174,16 @@ internal val JP: Strings by lazy { EN.copyApply {
     loadingLabel = "読み込み中…"
     noCityMatches = "一致する都市がありません。別の綴りを試してください。"
     couldntFindPlace = "その場所は見つかりませんでした。別の綴りか近くの都市を試してください。"
+    translate = "翻訳"
+    translateEnterText = "テキストを入力"
+    translating = "翻訳中…"
+    translationLabel = "翻訳"
+    translateError = "翻訳できませんでした。言語の初回使用時にはモデルがダウンロードされます。接続を確認してください。"
+    history = "履歴"
+    clear = "消去"
+    languageLabel = "言語"
+    searchLanguage = "言語を検索"
+    favorite = "お気に入り"
 } }
 
 internal val KR: Strings by lazy { EN.copyApply {
@@ -3438,4 +3528,14 @@ internal val KR: Strings by lazy { EN.copyApply {
     loadingLabel = "로드 중…"
     noCityMatches = "일치하는 도시가 없습니다. 다른 철자로 시도해 보세요."
     couldntFindPlace = "해당 장소를 찾을 수 없습니다. 다른 철자나 근처 도시를 시도해 보세요."
+    translate = "번역"
+    translateEnterText = "텍스트 입력"
+    translating = "번역 중…"
+    translationLabel = "번역 결과"
+    translateError = "번역할 수 없습니다. 언어를 처음 사용할 때 모델을 다운로드합니다. 연결을 확인하세요."
+    history = "기록"
+    clear = "삭제"
+    languageLabel = "언어"
+    searchLanguage = "언어 검색"
+    favorite = "즐겨찾기"
 } }
