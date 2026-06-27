@@ -353,9 +353,7 @@ private fun SwipeableTripCard(
     onDelete: () -> Unit,
     modifier: Modifier,
     isPinned: Boolean,
-
-
-    ) {
+) {
     val s = LocalStrings.current
     val density = LocalDensity.current
     val actionWidth = 80.dp
@@ -364,6 +362,7 @@ private fun SwipeableTripCard(
     val panelPx = with(density) { panelWidth.toPx() }
     val scope = rememberCoroutineScope()
     val offsetX = remember { Animatable(0f) }
+    val exitOffsetX = remember { Animatable(0f) }   // slides the WHOLE card (incl. icons) off on archive
 
     val progress = ((-offsetX.value - with(density) { gap.toPx() }) / (panelPx - with(density) { gap.toPx() })).coerceIn(0f, 1f)
 
@@ -371,12 +370,25 @@ private fun SwipeableTripCard(
         if (!isOpen && offsetX.value != 0f) offsetX.animateTo(0f, spring(stiffness = Spring.StiffnessMedium))
     }
 
-    Box(Modifier.fillMaxWidth()) {
+    // Slide the WHOLE card (card + action icons) off the left edge, then run the action.
+    fun animateOutThen(action: () -> Unit) {
+        scope.launch {
+            val screenSlide = with(density) { (panelWidth + 600.dp).toPx() }
+            exitOffsetX.animateTo(-screenSlide, tween(durationMillis = 300))
+            action()
+        }
+    }
+
+    Box(
+        modifier
+            .fillMaxWidth()
+            .offset { IntOffset(exitOffsetX.value.roundToInt(), 0) },
+    ) {
+        // Behind: the action panel, pinned to the right edge
         Row(
             Modifier.matchParentSize().clip(CardShape),
             horizontalArrangement = Arrangement.End,
         ) {
-            
             Column(
                 Modifier
                     .width(panelWidth)
@@ -389,16 +401,17 @@ private fun SwipeableTripCard(
                         ActionButton(Icons.Filled.Edit, s.edit, Color(0xFF5B8A4B), progress, Modifier.weight(1f), onEdit)
                     }
                     Row(Modifier.weight(1f)) {
-                        ActionButton(Icons.Filled.Archive, s.archive, Color(0xFF8A7B3B), progress, Modifier.weight(1f), onArchive)
+                        ActionButton(Icons.Filled.Archive, s.archive, Color(0xFF8A7B3B), progress, Modifier.weight(1f)) { animateOutThen(onArchive) }
                         ActionButton(Icons.Filled.Delete, s.delete, Color(0xFFB23B3B), progress, Modifier.weight(1f), onDelete)
                     }
                 } else {
                     ActionButton(Icons.Filled.PushPin, if (isPinned) s.unpin else s.pin, Color(0xFF4F7CC0), progress, Modifier.weight(1f), onPin)
-                    ActionButton(Icons.Filled.Archive, s.archive, Color(0xFF8A7B3B), progress, Modifier.weight(1f), onArchive)
+                    ActionButton(Icons.Filled.Archive, s.archive, Color(0xFF8A7B3B), progress, Modifier.weight(1f)) { animateOutThen(onArchive) }
                 }
             }
         }
 
+        // Front: the trip card, draggable horizontally
         Box(
             Modifier
                 .offset { IntOffset(offsetX.value.roundToInt(), 0) }

@@ -75,6 +75,8 @@ class TripRepository {
 
     val worldClockStore = WorldClockStore
 
+    val weatherStore = WeatherStore
+
 
     private var tripsListener: Job? = null
 
