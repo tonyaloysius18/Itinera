@@ -79,6 +79,8 @@ class TripRepository {
 
     val translator = Translator()
 
+    val compass = Compass()
+
 
     private var tripsListener: Job? = null
 

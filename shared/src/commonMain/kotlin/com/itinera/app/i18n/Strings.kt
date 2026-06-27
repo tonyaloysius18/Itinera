@@ -462,6 +462,10 @@ class Strings {
     var searchLanguage: String = ""
     var favorite: String = ""
 
+    // Compass
+    var compass: String = ""
+    var compassCalibrate: String = ""
+
     fun copyApply(block: Strings.() -> Unit): Strings {
 
         val c = Strings()
@@ -814,6 +818,8 @@ class Strings {
         c.languageLabel = this.languageLabel
         c.searchLanguage = this.searchLanguage
         c.favorite = this.favorite
+        c.compass = this.compass
+        c.compassCalibrate = this.compassCalibrate
 
         c.block()
         return c

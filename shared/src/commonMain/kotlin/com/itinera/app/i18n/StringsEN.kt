@@ -353,4 +353,7 @@ internal val EN: Strings by lazy { Strings().apply {
     languageLabel = "Language"
     searchLanguage = "Search language"
     favorite = "Favorite"
+
+    compass = "Compass"
+    compassCalibrate = "Move your device in a figure-8 to calibrate the compass."
 } }

@@ -549,6 +549,7 @@ private fun AppContent(
                             onEmergency = { navigator.push(Screen.Emergency) },
                             onWeather = { navigator.push(Screen.Weather) },
                             onTranslate = { navigator.push(Screen.Translate) },
+                            onCompass = { navigator.push(Screen.Compass) },
                             onArchivedTrips = { navigator.push(Screen.ArchivedTrips) },
                             onExportTrips = { navigator.push(Screen.ExportTrips) },
                             onBackupStatus = { navigator.push(Screen.BackupStatus) },
@@ -638,6 +639,11 @@ private fun AppContent(
                         Screen.Emergency -> EmergencyScreen(onBack = { navigator.back() })
 
                         Screen.Translate -> TranslateScreen(translator = repository.translator, onBack = { navigator.back() })
+
+                        Screen.Compass -> CompassScreen(
+                            compass = repository.compass,
+                            onBack = { navigator.back() },
+                        )
 
                         Screen.Weather -> {
                             var cities by remember { mutableStateOf(repository.weatherStore.all()) }

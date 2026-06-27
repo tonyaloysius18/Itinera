@@ -63,6 +63,8 @@ sealed interface Screen {
 
     data object Translate : Screen
 
+    data object Compass : Screen
+
 }
 
 /**

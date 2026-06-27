@@ -352,6 +352,9 @@ internal val SL: Strings by lazy { EN.copyApply {
     languageLabel = "Jezik"
     searchLanguage = "Išči jezik"
     favorite = "Priljubljeno"
+
+    compass = "Kompas"
+    compassCalibrate = "Napravo premikajte v obliki številke 8, da umerite kompas."
 } }
 
 internal val SR: Strings by lazy { EN.copyApply {
@@ -706,6 +709,9 @@ internal val SR: Strings by lazy { EN.copyApply {
     languageLabel = "Jezik"
     searchLanguage = "Traži jezik"
     favorite = "Omiljeno"
+
+    compass = "Kompas"
+    compassCalibrate = "Pomerajte uređaj u obliku cifre 8 da biste kalibrisali kompas."
 } }
 
 internal val SQ: Strings by lazy { EN.copyApply {
@@ -1037,6 +1043,9 @@ internal val SQ: Strings by lazy { EN.copyApply {
     languageLabel = "Gjuha"
     searchLanguage = "Kërko gjuhën"
     favorite = "I preferuar"
+
+    compass = "Busulla"
+    compassCalibrate = "Lëvizni pajisjen tuaj në formë 8-she për të kalibruar busullën."
 } }
 
 internal val MK: Strings by lazy { EN.copyApply {
@@ -1368,6 +1377,9 @@ internal val MK: Strings by lazy { EN.copyApply {
     languageLabel = "Јазик"
     searchLanguage = "Пребарај јазик"
     favorite = "Омилено"
+
+    compass = "Компас"
+    compassCalibrate = "Движете го вашиот уред во форма на бројот 8 за да го калибрирате компасот."
 } }
 
 internal val MO: Strings by lazy { EN.copyApply {
@@ -1703,6 +1715,9 @@ internal val MO: Strings by lazy { EN.copyApply {
     languageLabel = "Limbă"
     searchLanguage = "Căutare limbă"
     favorite = "Favorit"
+
+    compass = "Busolă"
+    compassCalibrate = "Mutați dispozitivul în formă de 8 pentru a calibra busola."
 } }
 
 internal val NO: Strings by lazy { EN.copyApply {
@@ -2034,6 +2049,9 @@ internal val NO: Strings by lazy { EN.copyApply {
     languageLabel = "Språk"
     searchLanguage = "Søk etter språk"
     favorite = "Favoritt"
+
+    compass = "Kompass"
+    compassCalibrate = "Beveg enheten i et åttetall for å kalibrere kompasset."
 } }
 
 internal val FI: Strings by lazy { EN.copyApply {
@@ -2365,6 +2383,9 @@ internal val FI: Strings by lazy { EN.copyApply {
     languageLabel = "Kieli"
     searchLanguage = "Etsi kieli"
     favorite = "Suosikki"
+
+    compass = "Kompassi"
+    compassCalibrate = "Liikuta laitettasi kahdeksikon muotoisella radalla kalibroidaksesi kompassin."
 } }
 
 internal val SV: Strings by lazy { EN.copyApply {
@@ -2696,6 +2717,9 @@ internal val SV: Strings by lazy { EN.copyApply {
     languageLabel = "Språk"
     searchLanguage = "Sök språk"
     favorite = "Favorit"
+
+    compass = "Kompass"
+    compassCalibrate = "Rör din enhet i en åtta för att kalibrera kompassen."
 } }
 
 internal val DA: Strings by lazy { EN.copyApply {
@@ -3027,6 +3051,9 @@ internal val DA: Strings by lazy { EN.copyApply {
     languageLabel = "Sprog"
     searchLanguage = "Søg efter sprog"
     favorite = "Favorit"
+
+    compass = "Kompas"
+    compassCalibrate = "Bevæg din enhed i et 8-tal for at kalibrere kompasset."
 } }
 
 internal val ET: Strings by lazy { EN.copyApply {
@@ -3358,5 +3385,8 @@ internal val ET: Strings by lazy { EN.copyApply {
     languageLabel = "Keel"
     searchLanguage = "Otsi keelt"
     favorite = "Lemmik"
+
+    compass = "Kompass"
+    compassCalibrate = "Kompassi kalibreerimiseks liigutage seadet kaheksakujuliselt."
 } }
 

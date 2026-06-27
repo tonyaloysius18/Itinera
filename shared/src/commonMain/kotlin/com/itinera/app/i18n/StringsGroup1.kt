@@ -352,6 +352,9 @@ internal val FR: Strings by lazy { EN.copyApply {
     languageLabel = "Langue"
     searchLanguage = "Rechercher une langue"
     favorite = "Favori"
+
+    compass = "Boussole"
+    compassCalibrate = "Déplacez votre appareil en formant un 8 pour calibrer la boussole."
 } }
 
 internal val ES: Strings by lazy { EN.copyApply {
@@ -706,6 +709,9 @@ internal val ES: Strings by lazy { EN.copyApply {
     languageLabel = "Idioma"
     searchLanguage = "Buscar idioma"
     favorite = "Favorito"
+
+    compass = "Brújula"
+    compassCalibrate = "Mueva su dispositivo en forma de 8 para calibrar la brújula."
 } }
 
 internal val DE: Strings by lazy { EN.copyApply {
@@ -1060,6 +1066,9 @@ internal val DE: Strings by lazy { EN.copyApply {
     languageLabel = "Sprache"
     searchLanguage = "Sprache suchen"
     favorite = "Favorit"
+
+    compass = "Kompass"
+    compassCalibrate = "Bewegen Sie Ihr Gerät in einer Achterform, um den Kompass zu kalibrieren."
 } }
 
 internal val IT: Strings by lazy { EN.copyApply {
@@ -1414,6 +1423,9 @@ internal val IT: Strings by lazy { EN.copyApply {
     languageLabel = "Lingua"
     searchLanguage = "Cerca lingua"
     favorite = "Preferito"
+
+    compass = "Bussola"
+    compassCalibrate = "Muovi il tuo dispositivo a forma de 8 per calibrare la bussola."
 } }
 
 internal val PT: Strings by lazy { EN.copyApply {
@@ -1768,6 +1780,9 @@ internal val PT: Strings by lazy { EN.copyApply {
     languageLabel = "Idioma"
     searchLanguage = "Pesquisar idioma"
     favorite = "Favorito"
+
+    compass = "Bússola"
+    compassCalibrate = "Mova o seu dispositivo em forma de 8 para calibrar a bússola."
 } }
 
 internal val NL: Strings by lazy { EN.copyApply {
@@ -2122,6 +2137,9 @@ internal val NL: Strings by lazy { EN.copyApply {
     languageLabel = "Taal"
     searchLanguage = "Taal zoeken"
     favorite = "Favoriet"
+
+    compass = "Kompas"
+    compassCalibrate = "Beweeg je toestel in een 8-vorm om het kompas te kalibreren."
 } }
 
 internal val PL: Strings by lazy { EN.copyApply {
@@ -2476,6 +2494,9 @@ internal val PL: Strings by lazy { EN.copyApply {
     languageLabel = "Język"
     searchLanguage = "Szukaj języka"
     favorite = "Ulubione"
+
+    compass = "Kompas"
+    compassCalibrate = "Poruszaj urządzeniem w kształcie ósemki, aby skalibrować kompas."
 } }
 
 internal val ZH: Strings by lazy { EN.copyApply {
@@ -2830,6 +2851,9 @@ internal val ZH: Strings by lazy { EN.copyApply {
     languageLabel = "语言"
     searchLanguage = "搜索语言"
     favorite = "收藏"
+
+    compass = "指南针"
+    compassCalibrate = "以 8 字形移动设备以校准指南针。"
 } }
 
 internal val JP: Strings by lazy { EN.copyApply {
@@ -3184,6 +3208,9 @@ internal val JP: Strings by lazy { EN.copyApply {
     languageLabel = "言語"
     searchLanguage = "言語を検索"
     favorite = "お気に入り"
+
+    compass = "コンパス"
+    compassCalibrate = "コンパスを調整するには、デバイスを 8 の字に動かしてください。"
 } }
 
 internal val KR: Strings by lazy { EN.copyApply {
@@ -3538,4 +3565,7 @@ internal val KR: Strings by lazy { EN.copyApply {
     languageLabel = "언어"
     searchLanguage = "언어 검색"
     favorite = "즐겨찾기"
+
+    compass = "나침반"
+    compassCalibrate = "나침반을 보정하려면 기기를 8자 모양으로 움직이세요."
 } }

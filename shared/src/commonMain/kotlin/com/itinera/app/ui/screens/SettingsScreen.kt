@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
@@ -48,6 +49,7 @@ fun SettingsScreen(
     onEmergency: () -> Unit,
     onWeather: () -> Unit,
     onTranslate: () -> Unit,
+    onCompass: () -> Unit,
     onArchivedTrips: () -> Unit,
     onExportTrips: () -> Unit,
     onBackupStatus: () -> Unit,
@@ -114,6 +116,8 @@ fun SettingsScreen(
                 SettingsRow(Icons.Filled.Translate, s.translate, primary, onClick = onTranslate)
                 ThinDivider()
                 SettingsRow(Icons.Filled.MedicalServices, s.emergency, primary, onClick = onEmergency)
+                ThinDivider()
+                SettingsRow(Icons.Filled.Explore, s.compass, primary, onClick = onCompass)
             }
 
             // Group 3 — trips & data
