@@ -314,6 +314,34 @@ internal val CZ: Strings by lazy { EN.copyApply {
 
     removeAccount = "Odebrat účet"
     removeAccountConfirm = "Odebrat tento účet z tohoto zařízení? Můžete se kdykoli znovu přihlásit."
+
+    worldClock = "Světový čas"
+    localLabel = "Místní"
+    addTimeZone = "Přidat časové pásmo"
+    searchAnyCity = "Hledat libovolné město"
+    addCityForTime = "Přidejte město, abyste viděli jeho místní čas."
+
+    emergency = "Pohotovost"
+    police = "Policie"
+    ambulance = "Sanitka"
+    fire = "Hasiči"
+    selectCountry = "Vybrat zemi"
+    searchCountry = "Hledat zemi"
+    change = "Změnit"
+    emergencyDialerNote = "Klepnutím na číslo se otevře číselník vašeho telefonu – stále budete muset stisknout volat. Čísla jsou poskytována pro pohodlí; vždy si je ověřte lokálně."
+    noEmergencyData = "V evidenci nejsou žádná nouzová čísla pro tuto zemi. Zkuste ji vybrat manuálně a vždy si to ověřte lokálně."
+
+    weather = "Počasí"
+    noCitiesYet = "Zatím žádná města"
+    tapPlusAddCity = "Klepněte na + a přidejte město, abyste viděli jeho počasí."
+    addCity = "Přidat město"
+    searchCity = "Hledat město"
+    getWeather = "Zjistit počasí"
+    nextDays = "Následující dny"
+    couldntLoadWeather = "Nepodařilo se načíst počasí"
+    loadingLabel = "Načítá se…"
+    noCityMatches = "Žádné shody. Zkuste jiný pravopis."
+    couldntFindPlace = "Nepodařilo se najít toto místo. Zkuste jiný pravopis nebo blízké město."
 } }
 
 internal val LV: Strings by lazy { EN.copyApply {
@@ -630,6 +658,34 @@ internal val LV: Strings by lazy { EN.copyApply {
 
     removeAccount = "Noņemt kontu"
     removeAccountConfirm = "Noņemt šo kontu no šīs ierīces? Jūs varēsiet pierakstīties vēlreiz jebkurā laikā."
+
+    worldClock = "Pasaules pulkstenis"
+    localLabel = "Vietējais"
+    addTimeZone = "Pievienot laika zonu"
+    searchAnyCity = "Meklēt jebkuru pilsētu"
+    addCityForTime = "Pievienojiet pilsētu, lai redzētu tās vietējo laiku."
+
+    emergency = "Ārkārtas situācija"
+    police = "Policija"
+    ambulance = "Neatliekamā palīdzība"
+    fire = "Ugunsdzēsēji"
+    selectCountry = "Izvēlēties valsti"
+    searchCountry = "Meklēt valsti"
+    change = "Mainīt"
+    emergencyDialerNote = "Pieskaroties numuram, tiks atvērta tālruņa sastādīšanas programma — jums joprojām būs jānospiež zvana poga. Numuri ir sniegti ērtībai; vienmēr pārbaudiet vietēji."
+    noEmergencyData = "Šai valstij nav reģistrētu ārkārtas tālruņa numuru. Mēģiniet to atlasīt manuāli un vienmēr pārbaudiet vietēji."
+
+    weather = "Laikapstākļi"
+    noCitiesYet = "Vēl nav nevienas pilsētas"
+    tapPlusAddCity = "Pieskarieties +, lai pievienotu pilsētu un redzētu tās laikapstākļus."
+    addCity = "Pievienot pilsētu"
+    searchCity = "Meklēt pilsētu"
+    getWeather = "Uzzināt laikapstākļus"
+    nextDays = "Nākamās dienas"
+    couldntLoadWeather = "Neizdevās ielādēt laikapstākļus"
+    loadingLabel = "Ielādē…"
+    noCityMatches = "Nav sakritību. Mēģiniet citu pareizrakstību."
+    couldntFindPlace = "Neizdevās atrast šo vietu. Mēģiniet citu pareizrakstību vai tuvējo pilsētu."
 } }
 
 internal val LT: Strings by lazy { EN.copyApply {
@@ -946,6 +1002,34 @@ internal val LT: Strings by lazy { EN.copyApply {
 
     removeAccount = "Pašalinti paskyrą"
     removeAccountConfirm = "Pašalinti šią paskyrą iš šio įrenginio? Galėsite vėl prisijungti bet kuriuo metu."
+
+    worldClock = "Pasaulio laikrodis"
+    localLabel = "Vietinis"
+    addTimeZone = "Pridėti laiko juostą"
+    searchAnyCity = "Ieškoti bet kurio miesto"
+    addCityForTime = "Pridėkite miestą, kad pamatytumėte jo vietinį laiką."
+
+    emergency = "Skubi pagalba"
+    police = "Policija"
+    ambulance = "Greitoji pagalba"
+    fire = "Ugniagesiai"
+    selectCountry = "Pasirinkti šalį"
+    searchCountry = "Ieškoti šalies"
+    change = "Pakeisti"
+    emergencyDialerNote = "Bakstelėjus numerį atsidarys telefono rinkiklis – vis tiek turėsite paspausti skambinimo mygtuką. Numeriai pateikiami patogumui; visada patikrinkite vietovėje."
+    noEmergencyData = "Šiai šaliai nėra užregistruotų skubios pagalbos numerių. Pabandykite ją pasirinkti rankiniu būdu ir visada patikrinkite vietovėje."
+
+    weather = "Orai"
+    noCitiesYet = "Dar nėra miestų"
+    tapPlusAddCity = "Bakstelėkite +, kad pridėtumėte miestą ir pamatytumėte jo orus."
+    addCity = "Pridėti miestą"
+    searchCity = "Ieškoti miesto"
+    getWeather = "Gauti orų prognozę"
+    nextDays = "Kitos dienos"
+    couldntLoadWeather = "Nepavyko įkelti orų"
+    loadingLabel = "Įkeliama…"
+    noCityMatches = "Atitikmenų nerasta. Išbandykite kitą rašybą."
+    couldntFindPlace = "Nepavyko rasti šios vietos. Išbandykite kitą rašybą arba netoliese esantį miestą."
 } }
 
 internal val AR: Strings by lazy { EN.copyApply {
@@ -1262,6 +1346,34 @@ internal val AR: Strings by lazy { EN.copyApply {
 
     removeAccount = "إزالة الحساب"
     removeAccountConfirm = "إزالة هذا الحساب من هذا الجهاز؟ يمكنك تسجيل الدخول مرة أخرى في أي وقت."
+
+    worldClock = "الساعة العالمية"
+    localLabel = "المحلي"
+    addTimeZone = "إضافة منطقة زمنية"
+    searchAnyCity = "البحث عن أي مدينة"
+    addCityForTime = "أضف مدينة لرؤية وقتها المحلي."
+
+    emergency = "الطوارئ"
+    police = "الشرطة"
+    ambulance = "الإسعاف"
+    fire = "الإطفاء"
+    selectCountry = "اختر الدولة"
+    searchCountry = "ابحث عن الدولة"
+    change = "تغيير"
+    emergencyDialerNote = "الضغط على الرقم يفتح لوحة الاتصال — ستحتاج للضغط على اتصال. الأرقام متوفرة للتسهيل؛ تأكد منها محلياً دائماً."
+    noEmergencyData = "لا توجد أرقام طوارئ مسجلة لهذه الدولة. حاول اختيارها يدوياً وتأكد دائماً محلياً."
+
+    weather = "الطقس"
+    noCitiesYet = "لا توجد مدن بعد"
+    tapPlusAddCity = "اضغط على + لإضافة مدينة ورؤية طقسها."
+    addCity = "إضافة مدينة"
+    searchCity = "البحث عن مدينة"
+    getWeather = "جلب الطقس"
+    nextDays = "الأيام القادمة"
+    couldntLoadWeather = "تعذر تحميل الطقس"
+    loadingLabel = "جاري التحميل…"
+    noCityMatches = "لا توجد نتائج. جرب كتابة أخرى."
+    couldntFindPlace = "تعذر العثور على هذا المكان. جرب كتابة أخرى أو مدينة قريبة."
 } }
 
 internal val TR: Strings by lazy { EN.copyApply {
@@ -1578,6 +1690,34 @@ internal val TR: Strings by lazy { EN.copyApply {
 
     removeAccount = "Hesabı kaldır"
     removeAccountConfirm = "Bu hesabı bu cihazdan kaldırmak istiyor musunuz? İstediğiniz zaman tekrar giriş yapabilirsiniz."
+
+    worldClock = "Dünya Saati"
+    localLabel = "Yerel"
+    addTimeZone = "Saat dilimi ekle"
+    searchAnyCity = "Şehir ara"
+    addCityForTime = "Yerel saatini görmek için bir şehir ekleyin."
+
+    emergency = "Acil Durum"
+    police = "Polis"
+    ambulance = "Ambulans"
+    fire = "İtfaiye"
+    selectCountry = "Ülke seçin"
+    searchCountry = "Ülke ara"
+    change = "Değiştir"
+    emergencyDialerNote = "Bir numaraya dokunmak telefonunuzun arama ekranını açar; yine de arama tuşuna basmanız gerekecektir. Numaralar kolaylık sağlamak içindir; her zaman yerel olarak doğrulayın."
+    noEmergencyData = "Bu ülke için kayıtlı acil durum numarası bulunamadı. Manuel olarak seçmeyi deneyin ve her zaman yerel olarak doğrulayın."
+
+    weather = "Hava Durumu"
+    noCitiesYet = "Henüz şehir yok"
+    tapPlusAddCity = "Bir şehir eklemek ve hava durumunu görmek için + simgesine dokunun."
+    addCity = "Şehir ekle"
+    searchCity = "Şehir ara"
+    getWeather = "Hava durumunu al"
+    nextDays = "Gelecek günler"
+    couldntLoadWeather = "Hava durumu yüklenemedi"
+    loadingLabel = "Yükleniyor…"
+    noCityMatches = "Eşleşme bulunamadı. Başka bir yazım deneyin."
+    couldntFindPlace = "Bu yer bulunamadı. Başka bir yazım veya yakındaki bir şehri deneyin."
 } }
 
 internal val VI: Strings by lazy { EN.copyApply {
@@ -1894,6 +2034,34 @@ internal val VI: Strings by lazy { EN.copyApply {
 
     removeAccount = "Xóa tài khoản"
     removeAccountConfirm = "Xóa tài khoản này khỏi thiết bị? Bạn có thể đăng nhập lại bất cứ lúc nào."
+
+    worldClock = "Giờ thế giới"
+    localLabel = "Địa phương"
+    addTimeZone = "Thêm múi giờ"
+    searchAnyCity = "Tìm kiếm thành phố"
+    addCityForTime = "Thêm một thành phố để xem giờ địa phương."
+
+    emergency = "Khẩn cấp"
+    police = "Cảnh sát"
+    ambulance = "Cấp cứu"
+    fire = "Cứu hỏa"
+    selectCountry = "Chọn quốc gia"
+    searchCountry = "Tìm quốc gia"
+    change = "Thay đổi"
+    emergencyDialerNote = "Chạm vào một số sẽ mở trình quay số của điện thoại — bạn vẫn cần nhấn gọi. Các số được cung cấp để thuận tiện; luôn xác minh tại địa phương."
+    noEmergencyData = "Không có số khẩn cấp nào được ghi nhận cho quốc gia này. Hãy thử chọn thủ công và luôn xác minh tại địa phương."
+
+    weather = "Thời tiết"
+    noCitiesYet = "Chưa có thành phố nào"
+    tapPlusAddCity = "Nhấn + để thêm thành phố và xem thời tiết."
+    addCity = "Thêm thành phố"
+    searchCity = "Tìm thành phố"
+    getWeather = "Xem thời tiết"
+    nextDays = "Những ngày tới"
+    couldntLoadWeather = "Không thể tải thời tiết"
+    loadingLabel = "Đang tải…"
+    noCityMatches = "Không tìm thấy kết quả. Hãy thử cách viết khác."
+    couldntFindPlace = "Không thể tìm thấy địa điểm đó. Hãy thử cách viết khác hoặc một thành phố lân cận."
 } }
 
 internal val ID: Strings by lazy { EN.copyApply {
@@ -2210,6 +2378,34 @@ internal val ID: Strings by lazy { EN.copyApply {
 
     removeAccount = "Hapus Akun"
     removeAccountConfirm = "Hapus akun ini dari perangkat ini? Anda dapat masuk lagi kapan saja."
+
+    worldClock = "Jam Dunia"
+    localLabel = "Lokal"
+    addTimeZone = "Tambah zona waktu"
+    searchAnyCity = "Cari kota mana pun"
+    addCityForTime = "Tambahkan kota untuk melihat waktu lokalnya."
+
+    emergency = "Darurat"
+    police = "Polisi"
+    ambulance = "Ambulans"
+    fire = "Pemadam Kebakaran"
+    selectCountry = "Pilih negara"
+    searchCountry = "Cari negara"
+    change = "Ubah"
+    emergencyDialerNote = "Mengetuk nomor akan membuka dialer ponsel Anda — Anda masih harus menekan panggil. Nomor disediakan untuk kenyamanan; selalu verifikasi secara lokal."
+    noEmergencyData = "Tidak ada nomor darurat yang terdaftar untuk negara ini. Coba pilih secara manual, dan selalu verifikasi secara lokal."
+
+    weather = "Cuaca"
+    noCitiesYet = "Belum ada kota"
+    tapPlusAddCity = "Ketuk + untuk menambahkan kota dan melihat cuacanya."
+    addCity = "Tambah kota"
+    searchCity = "Cari kota"
+    getWeather = "Dapatkan cuaca"
+    nextDays = "Hari-hari berikutnya"
+    couldntLoadWeather = "Tidak dapat memuat cuaca"
+    loadingLabel = "Memuat…"
+    noCityMatches = "Tidak ada yang cocok. Coba ejaan lain."
+    couldntFindPlace = "Tidak dapat menemukan tempat itu. Coba ejaan lain atau kota terdekat."
 } }
 
 internal val TH: Strings by lazy { EN.copyApply {
@@ -2526,6 +2722,34 @@ internal val TH: Strings by lazy { EN.copyApply {
 
     removeAccount = "ลบบัญชี"
     removeAccountConfirm = "ลบบัญชีนี้ออกจากเครื่องนี้ใช่ไหม? คุณสามารถเข้าสู่ระบบใหม่ได้ทุกเมื่อ"
+
+    worldClock = "นาฬิกาโลก"
+    localLabel = "ท้องถิ่น"
+    addTimeZone = "เพิ่มโซนเวลา"
+    searchAnyCity = "ค้นหาเมืองใดก็ได้"
+    addCityForTime = "เพิ่มเมืองเพื่อดูเวลาท้องถิ่น"
+
+    emergency = "ฉุกเฉิน"
+    police = "ตำรวจ"
+    ambulance = "รถพยาบาล"
+    fire = "ดับเพลิง"
+    selectCountry = "เลือกประเทศ"
+    searchCountry = "ค้นหาประเทศ"
+    change = "เปลี่ยน"
+    emergencyDialerNote = "การแตะที่หมายเลขจะเปิดหน้าโทรออกของโทรศัพท์ — คุณยังคงต้องกดโทรออก หมายเลขต่างๆ มีไว้เพื่อความสะดวก โปรดตรวจสอบในพื้นที่เสมอ"
+    noEmergencyData = "ไม่มีหมายเลขฉุกเฉินในไฟล์สำหรับประเทศนี้ โปรดลองเลือกด้วยตนเอง และตรวจสอบในพื้นที่เสมอ"
+
+    weather = "สภาพอากาศ"
+    noCitiesYet = "ยังไม่มีเมือง"
+    tapPlusAddCity = "แตะ + เพื่อเพิ่มเมืองและดูสภาพอากาศ"
+    addCity = "เพิ่มเมือง"
+    searchCity = "ค้นหาเมือง"
+    getWeather = "รับสภาพอากาศ"
+    nextDays = "วันถัดไป"
+    couldntLoadWeather = "ไม่สามารถโหลดสภาพอากาศได้"
+    loadingLabel = "กำลังโหลด…"
+    noCityMatches = "ไม่พบรายการที่ตรงกัน โปรดลองใช้ตัวสะกดอื่น"
+    couldntFindPlace = "ไม่พบสถานที่นั้น โปรดลองใช้ตัวสะกดอื่นหรือเมืองใกล้เคียง"
 } }
 
 internal val HE: Strings by lazy { EN.copyApply {
@@ -2842,6 +3066,34 @@ internal val HE: Strings by lazy { EN.copyApply {
 
     removeAccount = "הסרת חשבון"
     removeAccountConfirm = "להסיר את החשבון הזה מהמכשיר? תוכל להתחבר שוב בכל עת."
+
+    worldClock = "שעון עולמי"
+    localLabel = "מקומי"
+    addTimeZone = "הוספת אזור זמן"
+    searchAnyCity = "חפש כל עיר"
+    addCityForTime = "הוסף עיר כדי לראות את הזמן המקומי שלה."
+
+    emergency = "חירום"
+    police = "משטרה"
+    ambulance = "אמבולנס"
+    fire = "כיבוי אש"
+    selectCountry = "בחר מדינה"
+    searchCountry = "חפש מדינה"
+    change = "שנה"
+    emergencyDialerNote = "הקשה על מספר פותחת את החייגן של הטלפון — עדיין תצตรך ללחוץ על שיחה. המספרים מסופקים לנוחות; תמיד ודא באופן מקומי."
+    noEmergencyData = "אין מספרי חירום רשומים למדינה זו. נסה לבחור אותה ידנית, ותמיד ודא באופן מקומי."
+
+    weather = "מזג אוויר"
+    noCitiesYet = "אין עדיין ערים"
+    tapPlusAddCity = "הקש על + כדי להוסיף עיר ולראות את מזג האוויר שלה."
+    addCity = "הוסף עיר"
+    searchCity = "חפש עיר"
+    getWeather = "קבל מזג אוויר"
+    nextDays = "הימים הבאים"
+    couldntLoadWeather = "לא ניתן היה לטעון מזג אוויר"
+    loadingLabel = "טוען…"
+    noCityMatches = "אין התאמות. נסה איות אחר."
+    couldntFindPlace = "לא נמצא המקום הזה. נסה איות אחר או עיר קרובה."
 } }
 
 internal val BN: Strings by lazy { EN.copyApply {
@@ -3158,6 +3410,34 @@ internal val BN: Strings by lazy { EN.copyApply {
 
     removeAccount = "অ্যাকাউন্ট বাদ দিন"
     removeAccountConfirm = "এই ডিভাইস থেকে অ্যাকাউন্টটি সরিয়ে ফেলবেন? আপনি যে কোনো সময় আবার লগইন করতে পারবেন।"
+
+    worldClock = "বিশ্ব ঘড়ি"
+    localLabel = "স্থানীয়"
+    addTimeZone = "টাইম জোন যোগ করুন"
+    searchAnyCity = "যেকোনো শহর খুঁজুন"
+    addCityForTime = "স্থানীয় সময় দেখতে একটি শহর যোগ করুন।"
+
+    emergency = "জরুরি অবস্থা"
+    police = "পুলিশ"
+    ambulance = "অ্যাম্বুলেন্স"
+    fire = "ফায়ার সার্ভিস"
+    selectCountry = "দেশ নির্বাচন করুন"
+    searchCountry = "দেশ খুঁজুন"
+    change = "পরিবর্তন করুন"
+    emergencyDialerNote = "একটি নাম্বারে ট্যাপ করলে আপনার ফোনের ডায়ালার খুলে যাবে — আপনাকে তবুও কল বাটনে প্রেস করতে হবে। নম্বরগুলো সুবিধার জন্য দেওয়া হয়েছে; সবসময় স্থানীয়ভাবে যাচাই করুন।"
+    noEmergencyData = "এই দেশের জন্য কোনো জরুরি নম্বর নথিতে নেই। এটি ম্যানুয়ালি নির্বাচন করার চেষ্টা করুন এবং সবসময় স্থানীয়ভাবে যাচাই করুন।"
+
+    weather = "আবহাওয়া"
+    noCitiesYet = "এখনো কোনো শহর নেই"
+    tapPlusAddCity = "একটি শহর যোগ করতে এবং এর আবহাওয়া দেখতে + ট্যাপ করুন।"
+    addCity = "শহর যোগ করুন"
+    searchCity = "শহর খুঁজুন"
+    getWeather = "আবহাওয়া দেখুন"
+    nextDays = "পরবর্তী দিনগুলো"
+    couldntLoadWeather = "আবহাওয়া লোড করা যায়নি"
+    loadingLabel = "লোড হচ্ছে…"
+    noCityMatches = "কোনো মিল পাওয়া যায়নি। অন্য বানান চেষ্টা করুন।"
+    couldntFindPlace = "ওই জায়গাটি খুঁজে পাওয়া যায়নি। অন্য বানান বা পাশের কোনো শহর চেষ্টা করুন।"
 } }
 
 internal val TG: Strings by lazy { EN.copyApply {
@@ -3474,6 +3754,34 @@ internal val TG: Strings by lazy { EN.copyApply {
 
     removeAccount = "Хориҷ кардани ҳисоб"
     removeAccountConfirm = "Ин ҳисобро аз ин дастгоҳ хориҷ кунем? Шумо метавонед дилхоҳ вақт дубора ворид шавед."
+
+    worldClock = "Соати ҷаҳонӣ"
+    localLabel = "Маҳаллӣ"
+    addTimeZone = "Иловаи минтақаи вақт"
+    searchAnyCity = "Ҷустуҷӯи ягон шаҳр"
+    addCityForTime = "Барои дидани вақти маҳаллӣ шаҳреро илова кунед."
+
+    emergency = "Ҳолатҳои фавқулодда"
+    police = "Милитсия"
+    ambulance = "Ёрии таъҷилӣ"
+    fire = "Сӯхторхомӯшкунӣ"
+    selectCountry = "Интихоби кишвар"
+    searchCountry = "Ҷустуҷӯи кишвар"
+    change = "Иваз кардан"
+    emergencyDialerNote = "Пахш кардани рақам равзанаи зангро мекушояд — шумо бояд тугмаи зангро пахш кунед. Рақамҳо барои осонӣ оварда шудаанд; ҳамеша онҳоро дар ҷояш тафтиш кунед."
+    noEmergencyData = "Барои ин кишвар рақамҳои фавқулодда дар сабт нест. Кӯшиш кунед онро дастӣ интихоб кунед ва ҳамеша дар ҷояш тафтиш кунед."
+
+    weather = "Обу ҳаво"
+    noCitiesYet = "Ҳанӯз шаҳре нест"
+    tapPlusAddCity = "Барои илова кардани шаҳр ва дидани обу ҳавои он + пахш кунед."
+    addCity = "Иловаи шаҳр"
+    searchCity = "Ҷустуҷӯи шаҳр"
+    getWeather = "Дидани обу ҳаво"
+    nextDays = "Рӯзҳои оянда"
+    couldntLoadWeather = "Обу ҳаво боргирӣ нашуд"
+    loadingLabel = "Боргирӣ…"
+    noCityMatches = "Мувофиқат пайдо нашуд. Имлои дигарро санҷед."
+    couldntFindPlace = "Он ҷой пайдо нашуд. Имлои дигар ё шаҳри наздикро санҷед."
 } }
 
 internal val SI: Strings by lazy { EN.copyApply {
@@ -3790,5 +4098,33 @@ internal val SI: Strings by lazy { EN.copyApply {
 
     removeAccount = "ගිණුම ඉවත් කරන්න"
     removeAccountConfirm = "මෙම උපාංගයෙන් මෙම ගිණුම ඉවත් කරන්නද? ඔබට ඕනෑම වේලාවක නැවත ඇතුළු විය හැක."
+
+    worldClock = "ලෝක ඔරලෝසුව"
+    localLabel = "දේශීය"
+    addTimeZone = "කලාපීය වේලාවක් එක් කරන්න"
+    searchAnyCity = "ඕනෑම නගරයක් සොයන්න"
+    addCityForTime = "නගරයක දේශීය වේලාව බැලීමට එය එක් කරන්න."
+
+    emergency = "හදිසි අවස්ථා"
+    police = "පොලිසිය"
+    ambulance = "ගිලන් රථ"
+    fire = "ගිනි නිවන හමුදාව"
+    selectCountry = "රට තෝරන්න"
+    searchCountry = "රට සොයන්න"
+    change = "වෙනස් කරන්න"
+    emergencyDialerNote = "අංකයක් එබූ විට ඔබගේ දුරකථනයේ ඇමතුම් ලබාගන්නා ස්ථානය විවෘත වේ — ඔබට තවමත් ඇමතුම් බොත්තම එබීමට සිදුවේ. අංක ලබා දී ඇත්තේ පහසුව සඳහා ය; සැමවිටම දේශීයව තහවුරු කරගන්න."
+    noEmergencyData = "මෙම රට සඳහා හදිසි ඇමතුම් අංක වාර්තා වී නැත. එය අතින් තෝරා ගැනීමට උත්සාහ කරන්න, සැමවිටම දේශීයව තහවුරු කරගන්න."
+
+    weather = "කාලගුණය"
+    noCitiesYet = "තවමත් නගර නැත"
+    tapPlusAddCity = "නගරයක් එක් කිරීමට සහ එහි කාලගුණය බැලීමට + ඔබන්න."
+    addCity = "නගරය එක් කරන්න"
+    searchCity = "නගරය සොයන්න"
+    getWeather = "කාලගුණය ලබාගන්න"
+    nextDays = "ඉදිරි දින"
+    couldntLoadWeather = "කාලගුණය ලබාගත නොහැකි විය"
+    loadingLabel = "පූරණය වෙමින්…"
+    noCityMatches = "ගැලපීම් නැත. වෙනත් අක්ෂර වින්යාසයක් උත්සාහ කරන්න."
+    couldntFindPlace = "එම ස්ථානය සොයාගත නොහැකි විය. වෙනත් අක්ෂර වින්යාසයක් හෝ ආසන්න නගරයක් උත්සාහ කරන්න."
 } }
 

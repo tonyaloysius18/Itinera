@@ -314,6 +314,34 @@ internal val FR: Strings by lazy { EN.copyApply {
     youOweBanner = "Vous devez %s — il est temps de payer."
     youAreOwedBanner = "On vous doit %s."
     allSquareBanner = "Tout est en règle."
+
+    worldClock = "Horloge mondiale"
+    localLabel = "Local"
+    addTimeZone = "Ajouter un fuseau horaire"
+    searchAnyCity = "Rechercher une ville"
+    addCityForTime = "Ajoutez une ville pour voir son heure locale."
+
+    emergency = "Urgences"
+    police = "Police"
+    ambulance = "Ambulance"
+    fire = "Pompiers"
+    selectCountry = "Choisir un pays"
+    searchCountry = "Rechercher un pays"
+    change = "Changer"
+    emergencyDialerNote = "Appuyer sur un numéro ouvre le téléphone — vous devrez confirmer l'appel. Numéros fournis à titre indicatif ; vérifiez toujours localement."
+    noEmergencyData = "Aucun numéro d'urgence enregistré pour ce pays. Essayez de le sélectionner manuellement, et vérifiez toujours localement."
+
+    weather = "Météo"
+    noCitiesYet = "Aucune ville"
+    tapPlusAddCity = "Appuyez sur + pour ajouter une ville et voir sa météo."
+    addCity = "Ajouter une ville"
+    searchCity = "Rechercher une ville"
+    getWeather = "Voir la météo"
+    nextDays = "Jours suivants"
+    couldntLoadWeather = "Impossible de charger la météo"
+    loadingLabel = "Chargement…"
+    noCityMatches = "Aucun résultat. Essayez une autre orthographe."
+    couldntFindPlace = "Lieu introuvable. Essayez une autre orthographe ou une ville proche."
 } }
 
 internal val ES: Strings by lazy { EN.copyApply {
@@ -630,6 +658,34 @@ internal val ES: Strings by lazy { EN.copyApply {
     youOweBanner = "Debes %s — es hora de pagar."
     youAreOwedBanner = "Te deben %s."
     allSquareBanner = "Estás al día."
+
+    worldClock = "Reloj mundial"
+    localLabel = "Local"
+    addTimeZone = "Añadir zona horaria"
+    searchAnyCity = "Buscar cualquier ciudad"
+    addCityForTime = "Añade una ciudad para ver su hora local."
+
+    emergency = "Emergencia"
+    police = "Policía"
+    ambulance = "Ambulancia"
+    fire = "Bomberos"
+    selectCountry = "Seleccionar país"
+    searchCountry = "Buscar país"
+    change = "Cambiar"
+    emergencyDialerNote = "Al tocar un número se abre el marcador de tu teléfono; aún tendrás que pulsar llamar. Los números se proporcionan por conveniencia; verifícalos siempre localmente."
+    noEmergencyData = "No hay números de emergencia registrados para este país. Intenta seleccionarlo manualmente y verifícalo siempre localmente."
+
+    weather = "Clima"
+    noCitiesYet = "Sin ciudades aún"
+    tapPlusAddCity = "Toca + para añadir una ciudad y ver su clima."
+    addCity = "Añadir ciudad"
+    searchCity = "Buscar ciudad"
+    getWeather = "Obtener clima"
+    nextDays = "Próximos días"
+    couldntLoadWeather = "No se pudo cargar el clima"
+    loadingLabel = "Cargando…"
+    noCityMatches = "Sin coincidencias. Prueba con otra ortografía."
+    couldntFindPlace = "No se pudo encontrar ese lugar. Prueba con otra ortografía o una ciudad cercana."
 } }
 
 internal val DE: Strings by lazy { EN.copyApply {
@@ -946,6 +1002,34 @@ internal val DE: Strings by lazy { EN.copyApply {
     youOweBanner = "Du schuldest %s — Zeit zu bezahlen."
     youAreOwedBanner = "Dir werden %s geschuldet."
     allSquareBanner = "Alles ausgeglichen."
+
+    worldClock = "Weltuhr"
+    localLabel = "Lokal"
+    addTimeZone = "Zeitzone hinzufügen"
+    searchAnyCity = "Stadt suchen"
+    addCityForTime = "Füge eine Stadt hinzu, um ihre Ortszeit zu sehen."
+
+    emergency = "Notfall"
+    police = "Polizei"
+    ambulance = "Krankenwagen"
+    fire = "Feuerwehr"
+    selectCountry = "Land auswählen"
+    searchCountry = "Land suchen"
+    change = "Ändern"
+    emergencyDialerNote = "Das Tippen auf eine Nummer öffnet das Tastenfeld Ihres Telefons – Sie müssen immer noch auf Anrufen drücken. Nummern werden nur zur Bequemlichkeit bereitgestellt; immer vor Ort verifizieren."
+    noEmergencyData = "Keine Notrufnummern für dieses Land hinterlegt. Versuchen Sie, es manuell auszuwählen, und verifizieren Sie immer vor Ort."
+
+    weather = "Wetter"
+    noCitiesYet = "Noch keine Städte"
+    tapPlusAddCity = "Tippe auf +, um eine Stadt hinzuzufügen und ihr Wetter zu sehen."
+    addCity = "Stadt hinzufügen"
+    searchCity = "Stadt suchen"
+    getWeather = "Wetter abrufen"
+    nextDays = "Nächste Tage"
+    couldntLoadWeather = "Wetter konnte nicht geladen werden"
+    loadingLabel = "Lade…"
+    noCityMatches = "Keine Treffer. Versuchen Sie eine andere Schreibweise."
+    couldntFindPlace = "Dieser Ort konnte nicht gefunden werden. Versuchen Sie eine andere Schreibweise oder eine Stadt in der Nähe."
 } }
 
 internal val IT: Strings by lazy { EN.copyApply {
@@ -1262,6 +1346,34 @@ internal val IT: Strings by lazy { EN.copyApply {
     youOweBanner = "Devi %s — è ora di pagare."
     youAreOwedBanner = "Ti devono %s."
     allSquareBanner = "Siete pari."
+
+    worldClock = "Orologio mondiale"
+    localLabel = "Locale"
+    addTimeZone = "Aggiungi fuso orario"
+    searchAnyCity = "Cerca qualsiasi città"
+    addCityForTime = "Aggiungi una città per vedere l'ora locale."
+
+    emergency = "Emergenza"
+    police = "Polizia"
+    ambulance = "Ambulanza"
+    fire = "Vigili del Fuoco"
+    selectCountry = "Seleziona paese"
+    searchCountry = "Cerca paese"
+    change = "Cambia"
+    emergencyDialerNote = "Toccando un numero si apre il tastierino del telefono: dovrai comunque premere chiama. I numeri sono forniti per comodità; verifica sempre localmente."
+    noEmergencyData = "Nessun numero di emergenza in archivio per questo paese. Prova a selezionarlo manualmente e verifica sempre localmente."
+
+    weather = "Meteo"
+    noCitiesYet = "Ancora nessuna città"
+    tapPlusAddCity = "Tocca + per aggiungere una città e vedere il meteo."
+    addCity = "Aggiungi città"
+    searchCity = "Cerca città"
+    getWeather = "Ottieni meteo"
+    nextDays = "Prossimi giorni"
+    couldntLoadWeather = "Impossibile caricare il meteo"
+    loadingLabel = "Caricamento…"
+    noCityMatches = "Nessuna corrispondenza. Prova un'altra grafia."
+    couldntFindPlace = "Impossibile trovare quel luogo. Prova un'altra grafia o una città vicina."
 } }
 
 internal val PT: Strings by lazy { EN.copyApply {
@@ -1578,6 +1690,34 @@ internal val PT: Strings by lazy { EN.copyApply {
     youOweBanner = "Você deve %s — hora de pagar."
     youAreOwedBanner = "Devem-te %s."
     allSquareBanner = "Tudo certo."
+
+    worldClock = "Relógio mundial"
+    localLabel = "Local"
+    addTimeZone = "Adicionar fuso horário"
+    searchAnyCity = "Pesquisar qualquer cidade"
+    addCityForTime = "Adicione uma cidade para ver a sua hora local."
+
+    emergency = "Emergência"
+    police = "Polícia"
+    ambulance = "Ambulância"
+    fire = "Bombeiros"
+    selectCountry = "Selecionar país"
+    searchCountry = "Pesquisar país"
+    change = "Alterar"
+    emergencyDialerNote = "Tocar num número abre o marcador do seu telefone — ainda precisará de premir ligar. Os números se fornecidos por conveniência; verifique sempre localmente."
+    noEmergencyData = "Nenhum número de emergência em arquivo para este país. Tente selecionar manualmente e verifique sempre localmente."
+
+    weather = "Meteo"
+    noCitiesYet = "Ainda sem cidades"
+    tapPlusAddCity = "Toque em + para adicionar uma cidade e ver o seu tempo."
+    addCity = "Adicionar cidade"
+    searchCity = "Pesquisar cidade"
+    getWeather = "Obter tempo"
+    nextDays = "Próximos dias"
+    couldntLoadWeather = "Não foi possível carregar o tempo"
+    loadingLabel = "A carregar…"
+    noCityMatches = "Sem correspondências. Tente outra grafia."
+    couldntFindPlace = "Não foi possível encontrar esse lugar. Tente outra grafia ou uma cidade próxima."
 } }
 
 internal val NL: Strings by lazy { EN.copyApply {
@@ -1894,6 +2034,34 @@ internal val NL: Strings by lazy { EN.copyApply {
     youOweBanner = "Je bent %s verschuldigd — tijd om te betalen."
     youAreOwedBanner = "Je krijgt nog %s."
     allSquareBanner = "Alles is vereffend."
+
+    worldClock = "Wereldklok"
+    localLabel = "Lokaal"
+    addTimeZone = "Tijdzone toevoegen"
+    searchAnyCity = "Zoek een stad"
+    addCityForTime = "Voeg een stad toe om de lokale tijd te zien."
+
+    emergency = "Noodgeval"
+    police = "Politie"
+    ambulance = "Ambulance"
+    fire = "Brandweer"
+    selectCountry = "Land selecteren"
+    searchCountry = "Land zoeken"
+    change = "Wijzigen"
+    emergencyDialerNote = "Als u op een nummer tikt, wordt de kiezer van uw telefoon geopend - u moet nog steeds op bellen drukken. Nummers worden voor uw gemak verstrekt; controleer deze altijd lokaal."
+    noEmergencyData = "Geen noodnummers bekend voor dit land. Probeer het handmatig te selecteren en controleer altijd lokaal."
+
+    weather = "Weer"
+    noCitiesYet = "Nog geen steden"
+    tapPlusAddCity = "Tik op + om een stad toe te voegen en het weer te zien."
+    addCity = "Stad toevoegen"
+    searchCity = "Stad zoeken"
+    getWeather = "Weer ophalen"
+    nextDays = "Volgende dagen"
+    couldntLoadWeather = "Kon weer niet laden"
+    loadingLabel = "Laden…"
+    noCityMatches = "Geen resultaten. Probeer een andere spelling."
+    couldntFindPlace = "Kon die plaats niet vinden. Probeer een andere spelling of een stad in de buurt."
 } }
 
 internal val PL: Strings by lazy { EN.copyApply {
@@ -2210,6 +2378,34 @@ internal val PL: Strings by lazy { EN.copyApply {
     youOweBanner = "Wisisz %s — czas zapłacić."
     youAreOwedBanner = "Są Ci winni %s."
     allSquareBanner = "Wszystko uregulowane."
+
+    worldClock = "Zegar światowy"
+    localLabel = "Lokalny"
+    addTimeZone = "Dodaj strefę czasową"
+    searchAnyCity = "Szukaj dowolnego miasta"
+    addCityForTime = "Dodaj miasto, aby zobaczyć jego czas lokalny."
+
+    emergency = "Nagły wypadek"
+    police = "Policja"
+    ambulance = "Pogotowie"
+    fire = "Straż pożarna"
+    selectCountry = "Wybierz kraj"
+    searchCountry = "Szukaj kraju"
+    change = "Zmień"
+    emergencyDialerNote = "Dotknięcie numeru otwiera dialer telefonu — nadal musisz nacisnąć przycisk połączenia. Numery są podane dla wygody; zawsze weryfikuj je lokalnie."
+    noEmergencyData = "Brak numerów alarmowych w bazie dla tego kraju. Spróbuj wybrać go ręcznie i zawsze weryfikuj lokalnie."
+
+    weather = "Pogoda"
+    noCitiesYet = "Brak miast"
+    tapPlusAddCity = "Dotknij +, aby dodać miasto i sprawdzić pogodę."
+    addCity = "Dodaj miasto"
+    searchCity = "Szukaj miasta"
+    getWeather = "Pobierz pogodę"
+    nextDays = "Następne dni"
+    couldntLoadWeather = "Nie udało się załadować pogody"
+    loadingLabel = "Ładowanie…"
+    noCityMatches = "Brak dopasowań. Spróbuj innej pisowni."
+    couldntFindPlace = "Nie znaleziono tego miejsca. Spróbuj innej pisowni lub pobliskiego miasta."
 } }
 
 internal val ZH: Strings by lazy { EN.copyApply {
@@ -2526,6 +2722,34 @@ internal val ZH: Strings by lazy { EN.copyApply {
     youOweBanner = "你欠 %s — 该付钱了。"
     youAreOwedBanner = "你应收回 %s。"
     allSquareBanner = "全部结清。"
+
+    worldClock = "世界时钟"
+    localLabel = "本地"
+    addTimeZone = "添加时区"
+    searchAnyCity = "搜索任何城市"
+    addCityForTime = "添加城市以查看其本地时间。"
+
+    emergency = "紧急情况"
+    police = "警察"
+    ambulance = "救护车"
+    fire = "消防"
+    selectCountry = "选择国家"
+    searchCountry = "搜索国家"
+    change = "更改"
+    emergencyDialerNote = "点击号码将打开您的电话拨号器——您仍需按下通话键。号码仅供参考；请始终在当地核实。"
+    noEmergencyData = "此国家暂无紧急号码。请尝试手动选择， and始终在当地核实。"
+
+    weather = "天气"
+    noCitiesYet = "暂无城市"
+    tapPlusAddCity = "点击 + 添加城市并查看其天气。"
+    addCity = "添加城市"
+    searchCity = "搜索城市"
+    getWeather = "获取天气"
+    nextDays = "未来几天"
+    couldntLoadWeather = "无法加载天气"
+    loadingLabel = "加载中…"
+    noCityMatches = "无匹配项。请尝试其他拼写。"
+    couldntFindPlace = "找不到该地点。请尝试其他拼写或附近的城市。"
 } }
 
 internal val JP: Strings by lazy { EN.copyApply {
@@ -2842,6 +3066,34 @@ internal val JP: Strings by lazy { EN.copyApply {
     youOweBanner = "%s の支払いが残っています — 支払いの時間です。"
     youAreOwedBanner = "%s 受け取り予定です。"
     allSquareBanner = "すべて精算されました。"
+
+    worldClock = "世界時計"
+    localLabel = "ローカル"
+    addTimeZone = "タイムゾーンを追加"
+    searchAnyCity = "都市を検索"
+    addCityForTime = "都市を追加して現地の時間を確認します。"
+
+    emergency = "緊急"
+    police = "警察"
+    ambulance = "救急車"
+    fire = "消防"
+    selectCountry = "国を選択"
+    searchCountry = "国を検索"
+    change = "変更"
+    emergencyDialerNote = "番号をタップすると電話のダイヤラーが開きます。発信ボタンを押す必要があります。番号は便宜上提供されています。常に現地で確認してください。"
+    noEmergencyData = "この国の緊急通報番号は登録されていません。手動で選択し、常に現地で確認してください。"
+
+    weather = "天気"
+    noCitiesYet = "都市がありません"
+    tapPlusAddCity = "+ をタップして都市を追加し、天気を確認します。"
+    addCity = "都市を追加"
+    searchCity = "都市を検索"
+    getWeather = "天気を取得"
+    nextDays = "今後の天気"
+    couldntLoadWeather = "天기를 読み込めませんでした"
+    loadingLabel = "読み込み中…"
+    noCityMatches = "一致する都市がありません。別の綴りを試してください。"
+    couldntFindPlace = "その場所は見つかりませんでした。別の綴りか近くの都市を試してください。"
 } }
 
 internal val KR: Strings by lazy { EN.copyApply {
@@ -3158,5 +3410,32 @@ internal val KR: Strings by lazy { EN.copyApply {
     youOweBanner = "%s 를 갚아야 합니다 — 결제할 시간입니다."
     youAreOwedBanner = "%s 를 받을 예정입니다."
     allSquareBanner = "모두 정산되었습니다."
-} }
 
+    worldClock = "세계 시계"
+    localLabel = "현지"
+    addTimeZone = "시간대 추가"
+    searchAnyCity = "도시 검색"
+    addCityForTime = "도시를 추가하여 현지 시간을 확인하세요."
+
+    emergency = "긴급"
+    police = "경찰"
+    ambulance = "구급차"
+    fire = "소방"
+    selectCountry = "국가 선택"
+    searchCountry = "국가 검색"
+    change = "변경"
+    emergencyDialerNote = "번호를 누르면 전화 다이얼러가 열리며, 통화 버튼을 직접 눌러야 합니다. 번호는 편의를 위해 제공되므로 항상 현지에서 확인하십시오."
+    noEmergencyData = "이 국가에 대한 긴급 번호 정보가 없습니다. 수동으로 선택해 보시고 항상 현지에서 확인하십시오."
+
+    weather = "날씨"
+    noCitiesYet = "도시 없음"
+    tapPlusAddCity = "+를 눌러 도시를 추가하고 날씨를 확인하세요."
+    addCity = "도시 추가"
+    searchCity = "도시 검색"
+    getWeather = "날씨 가져오기"
+    nextDays = "다음 날씨"
+    couldntLoadWeather = "날씨를 불러올 수 없습니다"
+    loadingLabel = "로드 중…"
+    noCityMatches = "일치하는 도시가 없습니다. 다른 철자로 시도해 보세요."
+    couldntFindPlace = "해당 장소를 찾을 수 없습니다. 다른 철자나 근처 도시를 시도해 보세요."
+} }

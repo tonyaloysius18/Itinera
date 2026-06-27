@@ -419,6 +419,37 @@ class Strings {
     var youAreOwedBanner: String = ""
     var allSquareBanner: String = ""
 
+    // World Clock
+    var worldClock: String = ""
+    var localLabel: String = ""
+    var addTimeZone: String = ""
+    var searchAnyCity: String = ""
+    var addCityForTime: String = ""
+
+    // Emergency / SOS
+    var emergency: String = ""
+    var police: String = ""
+    var ambulance: String = ""
+    var fire: String = ""
+    var selectCountry: String = ""
+    var searchCountry: String = ""
+    var change: String = ""
+    var emergencyDialerNote: String = ""
+    var noEmergencyData: String = ""
+
+    // Weather
+    var weather: String = ""
+    var noCitiesYet: String = ""
+    var tapPlusAddCity: String = ""
+    var addCity: String = ""
+    var searchCity: String = ""
+    var getWeather: String = ""
+    var nextDays: String = ""
+    var couldntLoadWeather: String = ""
+    var loadingLabel: String = ""
+    var noCityMatches: String = ""
+    var couldntFindPlace: String = ""
+
     fun copyApply(block: Strings.() -> Unit): Strings {
 
         val c = Strings()
@@ -733,6 +764,34 @@ class Strings {
         c.youAreOwedBanner = this.youAreOwedBanner
         c.allSquareBanner = this.allSquareBanner
 
+        c.worldClock = this.worldClock
+        c.localLabel = this.localLabel
+        c.addTimeZone = this.addTimeZone
+        c.searchAnyCity = this.searchAnyCity
+        c.addCityForTime = this.addCityForTime
+
+        c.emergency = this.emergency
+        c.police = this.police
+        c.ambulance = this.ambulance
+        c.fire = this.fire
+        c.selectCountry = this.selectCountry
+        c.searchCountry = this.searchCountry
+        c.change = this.change
+        c.emergencyDialerNote = this.emergencyDialerNote
+        c.noEmergencyData = this.noEmergencyData
+
+        c.weather = this.weather
+        c.noCitiesYet = this.noCitiesYet
+        c.tapPlusAddCity = this.tapPlusAddCity
+        c.addCity = this.addCity
+        c.searchCity = this.searchCity
+        c.getWeather = this.getWeather
+        c.nextDays = this.nextDays
+        c.couldntLoadWeather = this.couldntLoadWeather
+        c.loadingLabel = this.loadingLabel
+        c.noCityMatches = this.noCityMatches
+        c.couldntFindPlace = this.couldntFindPlace
+
         c.block()
         return c
     }
@@ -746,50 +805,50 @@ class Strings {
  * tables the same way FR/ES/DE/IT/PL are defined above. SYSTEM resolves upstream.
  */
 fun systemLanguage(): Language = when (deviceLanguageCode().lowercase()) {
-        "fr" -> Language.FRENCH
-        "es" -> Language.SPANISH
-        "de" -> Language.GERMAN
-        "it" -> Language.ITALIAN
-        "pt" -> Language.PORTUGUESE
-        "nl" -> Language.DUTCH
-        "pl" -> Language.POLISH
-        "zh" -> Language.CHINESE
-        "ja" -> Language.JAPANESE
-        "ko" -> Language.KOREAN
-        "ru" -> Language.RUSSIAN
-        "ta" -> Language.TAMIL
-        "hi" -> Language.HINDI
-        "uk" -> Language.UKRAINIAN
-        "hu" -> Language.HUNGARIAN
-        "ro" -> Language.ROMANIAN
-        "el" -> Language.GREEK
-        "ka" -> Language.GEORGIAN
-        "bg" -> Language.BULGARIAN
-        "cs" -> Language.CZECH
-        "lv" -> Language.LATVIAN
-        "lt" -> Language.LITHUANIAN
-        "sk" -> Language.SLOVAK
-        "sl" -> Language.SLOVENIAN
-        "sr" -> Language.SERBIAN
-        "sq" -> Language.ALBANIAN
-        "mk" -> Language.MACEDONIAN
-        "no", "nb", "nn" -> Language.NORWEGIAN
-        "fi" -> Language.FINNISH
-        "sv" -> Language.SWEDISH
-        "da" -> Language.DANISH
-        "et" -> Language.ESTONIAN
-        "ar" -> Language.ARABIC
-        "tr" -> Language.TURKISH
-        "vi" -> Language.VIETNAMESE
-        "id", "in" -> Language.INDONESIAN
-        "th" -> Language.THAI
-        "he", "iw" -> Language.HEBREW
-        "bn" -> Language.BENGALI
-        "tg" -> Language.TAJIK
-        "tl", "fil" -> Language.TAGALOG
-        "si" -> Language.SINHALA
-        else -> Language.ENGLISH
-    }
+    "fr" -> Language.FRENCH
+    "es" -> Language.SPANISH
+    "de" -> Language.GERMAN
+    "it" -> Language.ITALIAN
+    "pt" -> Language.PORTUGUESE
+    "nl" -> Language.DUTCH
+    "pl" -> Language.POLISH
+    "zh" -> Language.CHINESE
+    "ja" -> Language.JAPANESE
+    "ko" -> Language.KOREAN
+    "ru" -> Language.RUSSIAN
+    "ta" -> Language.TAMIL
+    "hi" -> Language.HINDI
+    "uk" -> Language.UKRAINIAN
+    "hu" -> Language.HUNGARIAN
+    "ro" -> Language.ROMANIAN
+    "el" -> Language.GREEK
+    "ka" -> Language.GEORGIAN
+    "bg" -> Language.BULGARIAN
+    "cs" -> Language.CZECH
+    "lv" -> Language.LATVIAN
+    "lt" -> Language.LITHUANIAN
+    "sk" -> Language.SLOVAK
+    "sl" -> Language.SLOVENIAN
+    "sr" -> Language.SERBIAN
+    "sq" -> Language.ALBANIAN
+    "mk" -> Language.MACEDONIAN
+    "no", "nb", "nn" -> Language.NORWEGIAN
+    "fi" -> Language.FINNISH
+    "sv" -> Language.SWEDISH
+    "da" -> Language.DANISH
+    "et" -> Language.ESTONIAN
+    "ar" -> Language.ARABIC
+    "tr" -> Language.TURKISH
+    "vi" -> Language.VIETNAMESE
+    "id", "in" -> Language.INDONESIAN
+    "th" -> Language.THAI
+    "he", "iw" -> Language.HEBREW
+    "bn" -> Language.BENGALI
+    "tg" -> Language.TAJIK
+    "tl", "fil" -> Language.TAGALOG
+    "si" -> Language.SINHALA
+    else -> Language.ENGLISH
+}
 
 /**
  * Resolves the active Strings table for a language.

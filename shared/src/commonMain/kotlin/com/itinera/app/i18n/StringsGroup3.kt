@@ -314,6 +314,34 @@ internal val SL: Strings by lazy { EN.copyApply {
     youOweBanner = "Dolguješ %s — čas je za plačilo."
     youAreOwedBanner = "Dolgujejo ti %s."
     allSquareBanner = "Vse je poravnano."
+
+    worldClock = "Svetovna ura"
+    localLabel = "Lokalno"
+    addTimeZone = "Dodaj časovni pas"
+    searchAnyCity = "Išči katero koli mesto"
+    addCityForTime = "Dodajte mesto, da vidite njegov lokalni čas."
+
+    emergency = "Nujni primeri"
+    police = "Policija"
+    ambulance = "Reševalno vozilo"
+    fire = "Gasilci"
+    selectCountry = "Izberite državo"
+    searchCountry = "Išči državo"
+    change = "Spremeni"
+    emergencyDialerNote = "S pritiskom na številko se odpre klicalnik vašega telefona — še vedno boste morali pritisniti tipko za klic. Številke so na voljo za lažjo uporabo; vedno preverite lokalno."
+    noEmergencyData = "V evidenci ni nujnih številk za to državo. Poskusite jo izbrati ročno in vedno preverite lokalno."
+
+    weather = "Vreme"
+    noCitiesYet = "Ni še mest"
+    tapPlusAddCity = "Tapnite +, da dodate mesto in vidite njegovo vreme."
+    addCity = "Dodaj mesto"
+    searchCity = "Išči mesto"
+    getWeather = "Pridobi vreme"
+    nextDays = "Naslednji dnevi"
+    couldntLoadWeather = "Ni mogoče naložiti vremena"
+    loadingLabel = "Nalaganje…"
+    noCityMatches = "Ni zadetkov. Poskusite z drugim črkovanjem."
+    couldntFindPlace = "Tega kraja ni bilo mogoče najti. Poskusite z drugim črkovanjem ali bližnjim mestom."
 } }
 
 internal val SR: Strings by lazy { EN.copyApply {
@@ -630,6 +658,34 @@ internal val SR: Strings by lazy { EN.copyApply {
     youOweBanner = "Duguješ %s — vreme je za plaćanje."
     youAreOwedBanner = "Duguju ti %s."
     allSquareBanner = "Sve je sravnjeno."
+
+    worldClock = "Svetski sat"
+    localLabel = "Lokalno"
+    addTimeZone = "Dodaj vremensku zonu"
+    searchAnyCity = "Pretraži bilo koji grad"
+    addCityForTime = "Dodajte grad da biste videli njegovo lokalno vreme."
+
+    emergency = "Hitne službe"
+    police = "Policija"
+    ambulance = "Hitna pomoć"
+    fire = "Vatrogasci"
+    selectCountry = "Izaberi državu"
+    searchCountry = "Pretraži državu"
+    change = "Promeni"
+    emergencyDialerNote = "Dodirivanje broja otvara birač vašeg telefona — i dalje ćete morati da pritisnete pozovi. Brojevi su dati radi praktičnosti; uvek proverite lokalno."
+    noEmergencyData = "Nema hitnih brojeva u evidenciji za ovu državu. Pokušajte da je izaberete ručno i uvek proverite lokalno."
+
+    weather = "Vreme"
+    noCitiesYet = "Još nema gradova"
+    tapPlusAddCity = "Dodirnite + da dodate grad i vidite njegovo vreme."
+    addCity = "Dodaj grad"
+    searchCity = "Pretraži grad"
+    getWeather = "Preuzmi vreme"
+    nextDays = "Naredni dani"
+    couldntLoadWeather = "Nije moguće učitati vreme"
+    loadingLabel = "Učitavanje…"
+    noCityMatches = "Nema podudaranja. Pokušajte sa drugim pravopisom."
+    couldntFindPlace = "Nije moguće pronaći to mesto. Pokušajte sa drugim pravopisom ili obližnjim gradom."
 } }
 
 internal val SQ: Strings by lazy { EN.copyApply {
@@ -898,6 +954,29 @@ internal val SQ: Strings by lazy { EN.copyApply {
     inviteShareMessage = "Bashkohu në udhëtimin tim në Itinera:"
     copy = "Kopjo"
 
+    createTripOption = "Krijo udhëtim"
+    joinTripOption = "Bashkohu në një udhëtim"
+    enterInviteCode = "Futni kodin e ftesës që organizatori ndau me ju."
+    invalidCode = "Kod i pavlefshëm ose i skaduar"
+    joined = "I bashkuar"
+    join = "Bashkohu"
+
+    members = "Anëtarët"
+    roleOwner = "Pronari"
+    roleEditor = "Redaktori"
+    roleViewer = "Shikuesi"
+    removeMember = "Hiq anëtarin"
+    removeMemberQ = "Të hiqet ky anëtar?"
+    removeMemberDesc = "Ai do të humbasë aksesin në këtë udhëtim."
+    remove = "Hiq"
+
+    leaveTrip = "Largohu nga udhëtimi"
+    leaveTripQ = "Të largoheni nga ky udhëtim?"
+    leaveTripDesc = "Ju do të humbisni aksesin në këtë udhëtim."
+
+    removeAccount = "Fshij llogarinë"
+    removeAccountConfirm = "Të hiqet kjo llogari nga kjo pajisje? Ju mund të identifikoheni përsëri në çdo kohë."
+
     allowNotificationsPrompt = "Lejoni njoftimet në cilësimet e sistemit për të marrë kujtesa."
     customReminder = "Kujtesë e personalizuar"
     remindBeforeDeparture = "Më kujto kaq kohë para nisjes:"
@@ -923,6 +1002,34 @@ internal val SQ: Strings by lazy { EN.copyApply {
     youOweBanner = "Ti i detyrohesh %s — është koha për të paguar."
     youAreOwedBanner = "Të detyrohen %s."
     allSquareBanner = "Jeni barazim."
+
+    worldClock = "Ora Botërore"
+    localLabel = "Lokale"
+    addTimeZone = "Shto zonë kohore"
+    searchAnyCity = "Kërko çdo qytet"
+    addCityForTime = "Shto një qytet për të parë orën e tij lokale."
+
+    emergency = "Urgjenca"
+    police = "Policia"
+    ambulance = "Ambulanca"
+    fire = "Zjarrfikësit"
+    selectCountry = "Zgjidh shtetin"
+    searchCountry = "Kërko shtetin"
+    change = "Ndrysho"
+    emergencyDialerNote = "Prekja e një numri hap thirrësin e telefonit tuaj — ende do t'ju duhet të shtypni thirrjen. Numrat jepen për komoditet; gjithmonë verifikoni lokalisht."
+    noEmergencyData = "Nuk ka numra urgjence në skedar për këtë shtet. Provoni ta zgjidhni manualisht dhe gjithmonë verifikoni lokalisht."
+
+    weather = "Moti"
+    noCitiesYet = "Asnjë qytet ende"
+    tapPlusAddCity = "Prek + për të shtuar një qytet dhe për të parë motin e tij."
+    addCity = "Shto qytet"
+    searchCity = "Kërko qytet"
+    getWeather = "Merr motin"
+    nextDays = "Ditët e ardhshme"
+    couldntLoadWeather = "Nuk u ngarkua dot moti"
+    loadingLabel = "Duke u ngarkuar…"
+    noCityMatches = "Asnjë përputhje. Provoni një tjetër drejtshkrim."
+    couldntFindPlace = "Nuk u gjet dot ai vend. Provoni një tjetër drejtshkrim ose një qytet aty pranë."
 } }
 
 internal val MK: Strings by lazy { EN.copyApply {
@@ -1191,6 +1298,29 @@ internal val MK: Strings by lazy { EN.copyApply {
     inviteShareMessage = "Приклучи се на моето патување на Itinera:"
     copy = "Копирај"
 
+    createTripOption = "Креирај патување"
+    joinTripOption = "Приклучи се на патување"
+    enterInviteCode = "Внесете го кодот за покана што го сподели вашиот домаќин."
+    invalidCode = "Невалиден или истечен код"
+    joined = "Приклучен"
+    join = "Приклучи се"
+
+    members = "Членови"
+    roleOwner = "Сопственик"
+    roleEditor = "Уредник"
+    roleViewer = "Гледач"
+    removeMember = "Отстрани член"
+    removeMemberQ = "Да се отстрани овој член?"
+    removeMemberDesc = "Тој ќе го изгуби пристапот до ова патување."
+    remove = "Отстрани"
+
+    leaveTrip = "Напушти го патувањето"
+    leaveTripQ = "Да го напуштите ова патување?"
+    leaveTripDesc = "Ќе го изгубите пристапот до ова патување."
+
+    removeAccount = "Отстрани сметка"
+    removeAccountConfirm = "Да се отстрани оваа сметка од овој уред? Можете повторно да се најавите во секое време."
+
     allowNotificationsPrompt = "Дозволете известувања во системските поставки за да добивате потсетници."
     customReminder = "Прилагоден потсетник"
     remindBeforeDeparture = "Потсети ме толку време пред тръгнување:"
@@ -1216,6 +1346,34 @@ internal val MK: Strings by lazy { EN.copyApply {
     youOweBanner = "Должиш %s — време е за плаќање."
     youAreOwedBanner = "Ти должат %s."
     allSquareBanner = "Сè е расквитано."
+
+    worldClock = "Светски часовник"
+    localLabel = "Локално"
+    addTimeZone = "Додај временска зона"
+    searchAnyCity = "Пребарај кој било град"
+    addCityForTime = "Додајте град за да го видите неговото локално време."
+
+    emergency = "Итни случаи"
+    police = "Полиција"
+    ambulance = "Брза помош"
+    fire = "Пожарна"
+    selectCountry = "Избери земја"
+    searchCountry = "Пребарај земја"
+    change = "Промени"
+    emergencyDialerNote = "Допирањето на бројот го отвора бирачот на вашиот телефон — сè уште ќе треба да притиснете повикај. Броевите се дадени за погодност; секогаш проверувајте локално."
+    noEmergencyData = "Нема итни броеви во евиденцијата за оваа земја. Обидете се да ја изберете рачно и секогаш проверувајте локално."
+
+    weather = "Време"
+    noCitiesYet = "Сè уште нема градови"
+    tapPlusAddCity = "Допрете + за да додадете град и да го видите неговото време."
+    addCity = "Додај град"
+    searchCity = "Пребарај град"
+    getWeather = "Земи време"
+    nextDays = "Следни денови"
+    couldntLoadWeather = "Не може да се вчита времето"
+    loadingLabel = "Вчитување…"
+    noCityMatches = "Нема совпаѓања. Обидете се со друг правопис."
+    couldntFindPlace = "Не може да се најде тоа место. Обидете се со друг правопис или близок град."
 } }
 
 internal val MO: Strings by lazy { EN.copyApply {
@@ -1488,6 +1646,29 @@ internal val MO: Strings by lazy { EN.copyApply {
     inviteShareMessage = "Alătură-te călătoriei mele pe Itinera:"
     copy = "Copiază"
 
+    createTripOption = "Creează călătorie"
+    joinTripOption = "Alătură-te unei călătorii"
+    enterInviteCode = "Introdu codul de invitație primit de la gazdă."
+    invalidCode = "Cod invalid sau expirat"
+    joined = "Te-ai alăturat"
+    join = "Alătură-te"
+
+    members = "Membri"
+    roleOwner = "Proprietar"
+    roleEditor = "Editor"
+    roleViewer = "Vizualizator"
+    removeMember = "Elimină membrul"
+    removeMemberQ = "Elimini acest membru?"
+    removeMemberDesc = "Va pierde accesul la această călătorie."
+    remove = "Elimină"
+
+    leaveTrip = "Părăsește călătoria"
+    leaveTripQ = "Părăsești această călătorie?"
+    leaveTripDesc = "Vei pierde accesul la această călătorie."
+
+    removeAccount = "Elimină contul"
+    removeAccountConfirm = "Elimini acest cont de pe acest dispozitiv? Te poți reconecta oricând."
+
     allowNotificationsPrompt = "Permiteți notificările în setările sistemului pentru a primi memento-uri."
     customReminder = "Memento personalizat"
     remindBeforeDeparture = "Amintește-mi cu atâta timp înainte de plecare:"
@@ -1513,6 +1694,34 @@ internal val MO: Strings by lazy { EN.copyApply {
     youOweBanner = "Datorezi %s — e timpul să plătești."
     youAreOwedBanner = "Ți se datorează %s."
     allSquareBanner = "Sunteți la zi."
+
+    worldClock = "Ceas pe glob"
+    localLabel = "Local"
+    addTimeZone = "Adaugă fus orar"
+    searchAnyCity = "Caută orice oraș"
+    addCityForTime = "Adaugă un oraș pentru a vedea ora locală."
+
+    emergency = "Urgențe"
+    police = "Poliție"
+    ambulance = "Ambulanță"
+    fire = "Pompieri"
+    selectCountry = "Selectează țara"
+    searchCountry = "Caută țara"
+    change = "Schimbă"
+    emergencyDialerNote = "Atingerea unui număr deschide apelatorul telefonului – va trebui totuși să apeși pe apelare. Numerele sunt furnizate pentru confort; verifică-le întotdeauna local."
+    noEmergencyData = "Nu există numere de urgență înregistrate pentru această țară. Încearcă să o selectezi manual și verifică întotdeauna local."
+
+    weather = "Vremea"
+    noCitiesYet = "Niciun oraș încă"
+    tapPlusAddCity = "Apasă + pentru a adăuga un oraș și a vedea vremea."
+    addCity = "Adaugă oraș"
+    searchCity = "Caută oraș"
+    getWeather = "Află vremea"
+    nextDays = "Zilele următoare"
+    couldntLoadWeather = "Nu s-a putut încărca vremea"
+    loadingLabel = "Se încarcă…"
+    noCityMatches = "Nicio potrivire. Încearcă altă scriere."
+    couldntFindPlace = "Nu s-a putut găsi locul respectiv. Încearcă altă scriere sau un oraș din apropiere."
 } }
 
 internal val NO: Strings by lazy { EN.copyApply {
@@ -1781,6 +1990,29 @@ internal val NO: Strings by lazy { EN.copyApply {
     inviteShareMessage = "Bli med på reisen min på Itinera:"
     copy = "Kopier"
 
+    createTripOption = "Opprett reise"
+    joinTripOption = "Bli med på en reise"
+    enterInviteCode = "Skriv inn invitasjonskoden som verten delte med deg."
+    invalidCode = "Ugyldig eller utløpt kode"
+    joined = "Ble med"
+    join = "Bli med"
+
+    members = "Medlemmer"
+    roleOwner = "Eier"
+    roleEditor = "Redaktør"
+    roleViewer = "Seer"
+    removeMember = "Fjern medlem"
+    removeMemberQ = "Fjerne dette medlemmet?"
+    removeMemberDesc = "De vil miste tilgangen till denne reisen."
+    remove = "Fjern"
+
+    leaveTrip = "Forlat reise"
+    leaveTripQ = "Forlate denne reisen?"
+    leaveTripDesc = "Du vil miste tilgangen til denne reisen."
+
+    removeAccount = "Fjern konto"
+    removeAccountConfirm = "Fjerne denne kontoen fra denne enheten? Du kan logge inn igjen når som helst."
+
     allowNotificationsPrompt = "Tillat varslinger i systeminnstillingene for å motta påminnelser."
     customReminder = "Egendefinert påminnelse"
     remindBeforeDeparture = "Påminn meg så lenge før avreise:"
@@ -1806,6 +2038,34 @@ internal val NO: Strings by lazy { EN.copyApply {
     youOweBanner = "Du skylder %s — på tide å betale."
     youAreOwedBanner = "Du har %s til gode."
     allSquareBanner = "Alt er i orden."
+
+    worldClock = "Verdensklokke"
+    localLabel = "Lokal"
+    addTimeZone = "Legg til tidssone"
+    searchAnyCity = "Søk i alle byer"
+    addCityForTime = "Legg til en by for å se lokal tid."
+
+    emergency = "Nødnummer"
+    police = "Politi"
+    ambulance = "Ambulanse"
+    fire = "Brann"
+    selectCountry = "Velg land"
+    searchCountry = "Søk etter land"
+    change = "Endre"
+    emergencyDialerNote = "Ved å trykke på et nummer åpnes telefonens ringemeny – du må fortsatt trykke på ring. Numrene er oppgitt for enkelhets skyld; sjekk alltid lokalt."
+    noEmergencyData = "Ingen nødnumre er registrert for dette landet. Prøv å velge det manuelt, og sjekk alltid lokalt."
+
+    weather = "Vær"
+    noCitiesYet = "Ingen byer ennå"
+    tapPlusAddCity = "Trykk på + for å legge til en by og se været."
+    addCity = "Legg til by"
+    searchCity = "Søk etter by"
+    getWeather = "Hent vær"
+    nextDays = "Neste dager"
+    couldntLoadWeather = "Kunne ikke laste vær"
+    loadingLabel = "Laster…"
+    noCityMatches = "Ingen treff. Prøv en annen stavemåte."
+    couldntFindPlace = "Fant ikke stedet. Prøv en annen stavemåte eller en by i nærheten."
 } }
 
 internal val FI: Strings by lazy { EN.copyApply {
@@ -2074,6 +2334,29 @@ internal val FI: Strings by lazy { EN.copyApply {
     inviteShareMessage = "Liity matkalleni Itinerassa:"
     copy = "Kopioi"
 
+    createTripOption = "Luo matka"
+    joinTripOption = "Liity matkalle"
+    enterInviteCode = "Syötä kutsukoodi, jonka järjestäjä jakoi kanssasi."
+    invalidCode = "Virheellinen tai vanhentunut koodi"
+    joined = "Liittynyt"
+    join = "Liity"
+
+    members = "Jäsenet"
+    roleOwner = "Omistaja"
+    roleEditor = "Muokkaaja"
+    roleViewer = "Katselija"
+    removeMember = "Poista jäsen"
+    removeMemberQ = "Poistetaanko tämä jäsen?"
+    removeMemberDesc = "Hän menettää pääsyn tälle matkalle."
+    remove = "Poista"
+
+    leaveTrip = "Poistu matkalta"
+    leaveTripQ = "Poistutaanko tältä matkalta?"
+    leaveTripDesc = "Menetät pääsyn tälle matkalle."
+
+    removeAccount = "Poista tili"
+    removeAccountConfirm = "Poistetaanko tämä tili tästä laitteesta? Voit kirjautua takaisin milloin tahansa."
+
     allowNotificationsPrompt = "Salli ilmoitukset järjestelmän asetuksista saadaksesi muistutuksia."
     customReminder = "Mukautettu muistutus"
     remindBeforeDeparture = "Muistuta minua näin paljon ennen lähtöä:"
@@ -2099,6 +2382,34 @@ internal val FI: Strings by lazy { EN.copyApply {
     youOweBanner = "Olet velkaa %s — aika maksaa."
     youAreOwedBanner = "Sinulle ollaan velkaa %s."
     allSquareBanner = "Kaikki tasan."
+
+    worldClock = "Maailmankello"
+    localLabel = "Paikallinen"
+    addTimeZone = "Lisää aikavyöhyke"
+    searchAnyCity = "Etsi mistä tahansa kaupungista"
+    addCityForTime = "Lisää kaupunki nähdäksesi sen paikallisen ajan."
+
+    emergency = "Hätätilanne"
+    police = "Poliisi"
+    ambulance = "Ambulanssi"
+    fire = "Palokunta"
+    selectCountry = "Valitse maa"
+    searchCountry = "Etsi maa"
+    change = "Vaihda"
+    emergencyDialerNote = "Numeron napauttaminen avaa puhelimen valitsimen – sinun on silti painettava soita. Numerot on annettu mukavuuden vuoksi; tarkista ne aina paikallisesti."
+    noEmergencyData = "Tälle maalle ei ole hätänumeroita tiedossa. Yritä valita se manuaalisesti ja tarkista aina paikallisesti."
+
+    weather = "Sää"
+    noCitiesYet = "Ei vielä kaupunkeja"
+    tapPlusAddCity = "Napauta + lisätäksesi kaupungin ja nähdäksesi sen sään."
+    addCity = "Lisää kaupunki"
+    searchCity = "Etsi kaupunki"
+    getWeather = "Hae sää"
+    nextDays = "Seuraavat päivät"
+    couldntLoadWeather = "Säätä ei voitu ladata"
+    loadingLabel = "Ladataan…"
+    noCityMatches = "Ei osumia. Kokeile toista kirjoitusasua."
+    couldntFindPlace = "Paikkaa ei löytynyt. Kokeile toista kirjoitusasua tai lähellä olevaa kaupunkia."
 } }
 
 internal val SV: Strings by lazy { EN.copyApply {
@@ -2367,6 +2678,29 @@ internal val SV: Strings by lazy { EN.copyApply {
     inviteShareMessage = "Gå med i min resa på Itinera:"
     copy = "Kopiera"
 
+    createTripOption = "Skapa resa"
+    joinTripOption = "Gå med i en resa"
+    enterInviteCode = "Ange inbjudningskoden som värden delade med dig."
+    invalidCode = "Ogiltig eller utgången kod"
+    joined = "Gick med"
+    join = "Gå med"
+
+    members = "Medlemmar"
+    roleOwner = "Ägare"
+    roleEditor = "Redaktör"
+    roleViewer = "Tittare"
+    removeMember = "Ta bort medlem"
+    removeMemberQ = "Ta bort den här medlemmen?"
+    removeMemberDesc = "De kommer att förlora åtkomsten till den här resan."
+    remove = "Ta bort"
+
+    leaveTrip = "Lämna resan"
+    leaveTripQ = "Lämna den här resan?"
+    leaveTripDesc = "Du kommer att förlora åtkomsten till den här resan."
+
+    removeAccount = "Ta bort konto"
+    removeAccountConfirm = "Ta bort det här kontot från den här enheten? Du kan logga in igen när som helst."
+
     allowNotificationsPrompt = "Tillåt notiser i systeminställningarna för att få påminnelser."
     customReminder = "Anpassad påminnelse"
     remindBeforeDeparture = "Påminn meg så här långt före avresa:"
@@ -2392,6 +2726,34 @@ internal val SV: Strings by lazy { EN.copyApply {
     youOweBanner = "Du är skyldig %s — dags att betala."
     youAreOwedBanner = "Du har %s att fordra."
     allSquareBanner = "Allt är reglerat."
+
+    worldClock = "Världsklocka"
+    localLabel = "Lokal"
+    addTimeZone = "Lägg till tidszon"
+    searchAnyCity = "Sök valfri stad"
+    addCityForTime = "Lägg till en stad för att se dess lokala tid."
+
+    emergency = "Nödsituation"
+    police = "Polis"
+    ambulance = "Ambulans"
+    fire = "Brandkår"
+    selectCountry = "Välj land"
+    searchCountry = "Sök land"
+    change = "Ändra"
+    emergencyDialerNote = "Om du trycker på ett nummer öppnas telefonens knappsats – du måste fortfarande trycka på ring. Nummer tillhandahålls för bekvämlighet; verifiera alltid lokalt."
+    noEmergencyData = "Inga nödnummer finns registrerade för det här landet. Försök att välja det manuellt och verifiera alltid lokalt."
+
+    weather = "Väder"
+    noCitiesYet = "Inga städer än"
+    tapPlusAddCity = "Tryck på + för att lägga till en stad och se dess väder."
+    addCity = "Lägg till stad"
+    searchCity = "Sök stad"
+    getWeather = "Hämta väder"
+    nextDays = "Kommande dagar"
+    couldntLoadWeather = "Kunde inte ladda väder"
+    loadingLabel = "Laddar…"
+    noCityMatches = "Inga träffar. Prova en annan stavning."
+    couldntFindPlace = "Kunde inte hitta platsen. Prova en annan stavning eller en stad i närheten."
 } }
 
 internal val DA: Strings by lazy { EN.copyApply {
@@ -2660,6 +3022,29 @@ internal val DA: Strings by lazy { EN.copyApply {
     inviteShareMessage = "Deltag i min rejse på Itinera:"
     copy = "Kopier"
 
+    createTripOption = "Opret rejse"
+    joinTripOption = "Deltag i en rejse"
+    enterInviteCode = "Indtast invitationskoden, som din vært delte med dig."
+    invalidCode = "Ugyldig eller udløbet kode"
+    joined = "Deltog"
+    join = "Deltag"
+
+    members = "Medlemmer"
+    roleOwner = "Ejer"
+    roleEditor = "Redaktør"
+    roleViewer = "Seer"
+    removeMember = "Fjern medlem"
+    removeMemberQ = "Fjern dette medlem?"
+    removeMemberDesc = "De vil miste adgang til denne rejse."
+    remove = "Fjern"
+
+    leaveTrip = "Forlad rejse"
+    leaveTripQ = "Forlade denne rejse?"
+    leaveTripDesc = "Du vil miste adgang til denne rejse."
+
+    removeAccount = "Fjern konto"
+    removeAccountConfirm = "Fjern denne konto fra denne enhed? Du kan logge ind igen når som helst."
+
     allowNotificationsPrompt = "Tillat varslinger i systeminnstillingene for å motta påminnelser."
     customReminder = "Egendefinert påminnelse"
     remindBeforeDeparture = "Påminn meg så lenge før avreise:"
@@ -2685,6 +3070,34 @@ internal val DA: Strings by lazy { EN.copyApply {
     youOweBanner = "Du skylder %s — på tide å betale."
     youAreOwedBanner = "Du har %s til gode."
     allSquareBanner = "Alt er i orden."
+
+    worldClock = "Verdensur"
+    localLabel = "Lokal"
+    addTimeZone = "Tilføj tidszone"
+    searchAnyCity = "Søg i enhver by"
+    addCityForTime = "Tilføj en by for at se dens lokale tid."
+
+    emergency = "Nødsituation"
+    police = "Politi"
+    ambulance = "Ambulance"
+    fire = "Brandvæsen"
+    selectCountry = "Vælg land"
+    searchCountry = "Søg efter land"
+    change = "Skift"
+    emergencyDialerNote = "Ved at trykke på et nummer åbnes telefonens opkaldsmenu – du skal stadig trykke på opkald. Numre er angivet for nemheds skyld; tjek altid lokalt."
+    noEmergencyData = "Ingen nødnumre er registreret for dette land. Prøv at vælge det manuelt, og tjek altid lokalt."
+
+    weather = "Vejr"
+    noCitiesYet = "Ingen byer endnu"
+    tapPlusAddCity = "Tryk på + for at tilføje en by og se vejret."
+    addCity = "Tilføj by"
+    searchCity = "Søg efter by"
+    getWeather = "Hent vejr"
+    nextDays = "Kommende dage"
+    couldntLoadWeather = "Kunne ikke indlæse vejr"
+    loadingLabel = "Indlæser…"
+    noCityMatches = "Ingen match. Prøv en anden stavemåde."
+    couldntFindPlace = "Kunne ikke finde stedet. Prøv en anden stavemåde eller en by i nærheten."
 } }
 
 internal val ET: Strings by lazy { EN.copyApply {
@@ -2953,6 +3366,29 @@ internal val ET: Strings by lazy { EN.copyApply {
     inviteShareMessage = "Liitu minu reisiga Itineras:"
     copy = "Kopeeri"
 
+    createTripOption = "Loo reis"
+    joinTripOption = "Liitu reisiga"
+    enterInviteCode = "Sisesta kutsekood, mille võõrustaja Sulle saatis."
+    invalidCode = "Vale või aegunud kood"
+    joined = "Liitunud"
+    join = "Liitu"
+
+    members = "Liikmed"
+    roleOwner = "Omanik"
+    roleEditor = "Toimetaja"
+    roleViewer = "Vaataja"
+    removeMember = "Eemalda liige"
+    removeMemberQ = "Kas eemaldada see liige?"
+    removeMemberDesc = "Ta kaotab ligipääsu sellele reisile."
+    remove = "Eemalda"
+
+    leaveTrip = "Lahku reisilt"
+    leaveTripQ = "Kas lahkuda sellelt reisilt?"
+    leaveTripDesc = "Sa kaotad ligipääsu sellele reisile."
+
+    removeAccount = "Eemalda konto"
+    removeAccountConfirm = "Kas eemaldada see konto sellest seadmest? Saate igal ajal uuesti sisse logida."
+
     allowNotificationsPrompt = "Luba teavitused süsteemi seadetes, et saada meeldetuletusi."
     customReminder = "Kohandatud meeldetuletus"
     remindBeforeDeparture = "Tuleta meelde nii palju aega enne väljumist:"
@@ -2978,5 +3414,33 @@ internal val ET: Strings by lazy { EN.copyApply {
     youOweBanner = "Sa võlgned %s — aeg on maksta."
     youAreOwedBanner = "Sulle võlgetakse %s."
     allSquareBanner = "Kõik on klaar."
+
+    worldClock = "Maailmakell"
+    localLabel = "Kohalik"
+    addTimeZone = "Lisa ajavöönd"
+    searchAnyCity = "Otsi mis tahes linna"
+    addCityForTime = "Lisa linn, et näha selle kohalikku aega."
+
+    emergency = "Hädaabi"
+    police = "Politsei"
+    ambulance = "Kiirabi"
+    fire = "Tuletõrje"
+    selectCountry = "Vali riik"
+    searchCountry = "Otsi riiki"
+    change = "Muuda"
+    emergencyDialerNote = "Numbrile vajutamine avab telefoni helistamismenüü – peate ikkagi vajutama helistamisnuppu. Numbrid on lisatud mugavuse huvides; kontrollige neid alati kohapeal."
+    noEmergencyData = "Selle riigi kohta pole hädaabinumbreid salvestatud. Proovige see käsitsi valida ja kontrollige alati kohapeal."
+
+    weather = "Ilm"
+    noCitiesYet = "Linnu pole veel"
+    tapPlusAddCity = "Vajuta +, et lisada linn ja näha selle ilma."
+    addCity = "Lisa linn"
+    searchCity = "Otsi linna"
+    getWeather = "Hangi ilm"
+    nextDays = "Järgmised päevad"
+    couldntLoadWeather = "Ilmateadet ei saanud laadida"
+    loadingLabel = "Laadimine…"
+    noCityMatches = "Vasteid ei leitud. Proovi teist kirjaviisi."
+    couldntFindPlace = "Seda kohta ei leitud. Proovi teist kirjaviisi või mõnda lähedalasuvat linna."
 } }
 

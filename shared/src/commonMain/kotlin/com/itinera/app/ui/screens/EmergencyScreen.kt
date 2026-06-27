@@ -24,12 +24,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.itinera.app.deviceRegion
 import com.itinera.app.dial
+import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.ui.components.TopBar
 
 private val SosRed = Color(0xFFD32F2F)
 
 @Composable
 fun EmergencyScreen(onBack: () -> Unit) {
+    val s = LocalStrings.current
     // default to the device region if we have data for it, else fall back to a common one
     val defaultCode = remember {
         val region = deviceRegion().uppercase()
@@ -41,7 +43,7 @@ fun EmergencyScreen(onBack: () -> Unit) {
     val info = emergencyNumbers[countryCode]
 
     Column(Modifier.fillMaxSize()) {
-        TopBar("Emergency", onBack = onBack)
+        TopBar(s.emergency, onBack = onBack)
 
         Column(
             Modifier
@@ -62,7 +64,7 @@ fun EmergencyScreen(onBack: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Column(Modifier.weight(1f)) {
-                        Text("Country", style = MaterialTheme.typography.labelMedium,
+                        Text(s.country, style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f))
                         Text(
                             info?.countryName ?: countryCode,
@@ -70,7 +72,7 @@ fun EmergencyScreen(onBack: () -> Unit) {
                             fontWeight = FontWeight.SemiBold,
                         )
                     }
-                    Text("Change", color = MaterialTheme.colorScheme.primary,
+                    Text(s.change, color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.labelLarge)
                 }
             }
@@ -79,7 +81,7 @@ fun EmergencyScreen(onBack: () -> Unit) {
 
             if (info == null) {
                 Text(
-                    "No emergency numbers on file for this country. Try selecting it manually, and always verify locally.",
+                    s.noEmergencyData,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 )
@@ -103,7 +105,7 @@ fun EmergencyScreen(onBack: () -> Unit) {
                             }
                             Spacer(Modifier.width(16.dp))
                             Column(Modifier.weight(1f)) {
-                                Text("Emergency", color = Color.White.copy(alpha = 0.85f),
+                                Text(s.emergency, color = Color.White.copy(alpha = 0.85f),
                                     style = MaterialTheme.typography.labelLarge)
                                 Text(info.general, color = Color.White,
                                     style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
@@ -116,9 +118,9 @@ fun EmergencyScreen(onBack: () -> Unit) {
 
                 // Specific services — show each; if identical to general, still useful to list
                 val services = buildList {
-                    add(Triple("Police", info.police, Icons.Filled.LocalPolice))
-                    add(Triple("Ambulance", info.ambulance, Icons.Filled.LocalHospital))
-                    add(Triple("Fire", info.fire, Icons.Filled.LocalFireDepartment))
+                    add(Triple(s.police, info.police, Icons.Filled.LocalPolice))
+                    add(Triple(s.ambulance, info.ambulance, Icons.Filled.LocalHospital))
+                    add(Triple(s.fire, info.fire, Icons.Filled.LocalFireDepartment))
                 }.filter { it.second.isNotBlank() }
 
                 services.forEach { (label, number, icon) ->
@@ -128,7 +130,7 @@ fun EmergencyScreen(onBack: () -> Unit) {
 
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    "Tapping a number opens your phone's dialer — you'll still need to press call. Numbers are provided for convenience; always verify locally.",
+                    s.emergencyDialerNote,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                 )
@@ -178,6 +180,7 @@ private fun CountryPickerDialog(
     onPick: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val s = LocalStrings.current
     var query by remember { mutableStateOf("") }
     val all = remember {
         emergencyNumbers.entries.map { it.key to it.value.countryName }.sortedBy { it.second }
@@ -190,14 +193,14 @@ private fun CountryPickerDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Close") } },
-        title = { Text("Select country") },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(s.close) } },
+        title = { Text(s.selectCountry) },
         text = {
             Column {
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
-                    label = { Text("Search country") },
+                    label = { Text(s.searchCountry) },
                     singleLine = true,
                     trailingIcon = {
                         if (query.isNotEmpty()) {

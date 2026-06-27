@@ -314,5 +314,32 @@ internal val EN: Strings by lazy { Strings().apply {
     youOweBanner = "You owe %s — time to pay up."
     youAreOwedBanner = "You're owed %s."
     allSquareBanner = "You're all square."
-} }
 
+    worldClock = "World Clock"
+    localLabel = "Local"
+    addTimeZone = "Add time zone"
+    searchAnyCity = "Search any city"
+    addCityForTime = "Add a city to see its local time."
+
+    emergency = "Emergency"
+    police = "Police"
+    ambulance = "Ambulance"
+    fire = "Fire"
+    selectCountry = "Select country"
+    searchCountry = "Search country"
+    change = "Change"
+    emergencyDialerNote = "Tapping a number opens your phone's dialer — you'll still need to press call. Numbers are provided for convenience; always verify locally."
+    noEmergencyData = "No emergency numbers on file for this country. Try selecting it manually, and always verify locally."
+
+    weather = "Weather"
+    noCitiesYet = "No cities yet"
+    tapPlusAddCity = "Tap + to add a city and see its weather."
+    addCity = "Add city"
+    searchCity = "Search city"
+    getWeather = "Get weather"
+    nextDays = "Next days"
+    couldntLoadWeather = "Couldn't load weather"
+    loadingLabel = "Loading…"
+    noCityMatches = "No matches. Try another spelling."
+    couldntFindPlace = "Couldn't find that place. Try another spelling or a nearby city."
+} }

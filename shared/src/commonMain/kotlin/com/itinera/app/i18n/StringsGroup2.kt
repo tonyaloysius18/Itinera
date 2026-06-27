@@ -314,6 +314,34 @@ internal val RU: Strings by lazy { EN.copyApply {
     youOweBanner = "Вы должны %s — пора платить."
     youAreOwedBanner = "Вам должны %s."
     allSquareBanner = "Все в расчете."
+
+    worldClock = "Мировое время"
+    localLabel = "Местное"
+    addTimeZone = "Добавить часовой пояс"
+    searchAnyCity = "Поиск любого города"
+    addCityForTime = "Добавьте город, чтобы увидеть его местное время."
+
+    emergency = "Экстренные службы"
+    police = "Полиция"
+    ambulance = "Скорая помощь"
+    fire = "Пожарная служба"
+    selectCountry = "Выберите страну"
+    searchCountry = "Поиск страны"
+    change = "Изменить"
+    emergencyDialerNote = "При нажатии на номер откроется окно набора номера — вам все равно нужно будет нажать кнопку вызова. Номера предоставлены для удобства; всегда проверяйте их на месте."
+    noEmergencyData = "Для этой страны нет данных об экстренных номерах. Попробуйте выбрать страну вручную и всегда проверяйте номера на месте."
+
+    weather = "Погода"
+    noCitiesYet = "Городов пока нет"
+    tapPlusAddCity = "Нажмите +, чтобы добавить город и увидеть прогноз погоды."
+    addCity = "Добавить город"
+    searchCity = "Поиск города"
+    getWeather = "Узнать погоду"
+    nextDays = "Следующие дни"
+    couldntLoadWeather = "Не удалось загрузить погоду"
+    loadingLabel = "Загрузка…"
+    noCityMatches = "Нет совпадений. Попробуйте другое написание."
+    couldntFindPlace = "Не удалось найти это место. Попробуйте другое написание или ближайший город."
 } }
 
 internal val TAM: Strings by lazy { EN.copyApply {
@@ -630,6 +658,34 @@ internal val TAM: Strings by lazy { EN.copyApply {
     youOweBanner = "நீங்கள் %s தர வேண்டும் — பணம் செலுத்த வேண்டிய நேரம்."
     youAreOwedBanner = "உங்களுக்கு %s வர வேண்டியுள்ளது."
     allSquareBanner = "எல்லாம் சரியாக உள்ளது."
+
+    worldClock = "உலகக் கடிகாரம்"
+    localLabel = "உள்ளூர்"
+    addTimeZone = "நேர மண்டலத்தைச் சேர்"
+    searchAnyCity = "எந்த நகரத்தையும் தேடு"
+    addCityForTime = "உள்ளூர் நேரத்தைப் பார்க்க ஒரு நகரத்தைச் சேர்க்கவும்."
+
+    emergency = "அவசரம்"
+    police = "காவல்துறை"
+    ambulance = "ஆம்புலன்ஸ்"
+    fire = "தீயணைப்பு படை"
+    selectCountry = "நாட்டைத் தேர்ந்தெடு"
+    searchCountry = "நாட்டைத் தேடு"
+    change = "மாற்று"
+    emergencyDialerNote = "எண்ணைத் தட்டினால் உங்கள் ஃபோனின் டயலர் திறக்கும் — நீங்கள் இன்னும் அழைப்பை அழுத்த வேண்டும். எண்கள் வசதிக்காக வழங்கப்படுகின்றன; எப்போதும் உள்ளூரில் சரிபார்க்கவும்."
+    noEmergencyData = "இந்த நாட்டிற்கான அவசர எண்கள் கோப்பில் இல்லை. அதை கைமுறையாக தேர்ந்தெடுக்க முயற்சிக்கவும், எப்போதும் உள்ளூரில் சரிபார்க்கவும்."
+
+    weather = "வானிலை"
+    noCitiesYet = "இன்னும் நகரங்கள் இல்லை"
+    tapPlusAddCity = "ஒரு நகரத்தைச் சேர்த்து அதன் வானிலையைப் பார்க்க + ஐத் தட்டவும்."
+    addCity = "நகரத்தைச் சேர்"
+    searchCity = "நகரத்தைத் தேடு"
+    getWeather = "வானிலையைப் பெறு"
+    nextDays = "அடுத்த நாட்கள்"
+    couldntLoadWeather = "வானிலையை ஏற்ற முடியவில்லை"
+    loadingLabel = "ஏற்றப்படுகிறது…"
+    noCityMatches = "பொருந்தவில்லை. வேறு எழுத்துப்பிழையை முயற்சிக்கவும்."
+    couldntFindPlace = "அந்த இடத்தைக் கண்டறிய முடியவில்லை. வேறு எழுத்துப்பிழை அல்லது அருகிலுள்ள நகரத்தை முயற்சிக்கவும்."
 } }
 
 internal val HI: Strings by lazy { EN.copyApply {
@@ -946,6 +1002,34 @@ internal val HI: Strings by lazy { EN.copyApply {
     youOweBanner = "आपके पास %s बकाया है — भुगतान करने का समय है।"
     youAreOwedBanner = "आपको %s मिलने हैं।"
     allSquareBanner = "सब बराबर है।"
+
+    worldClock = "विश्व घड़ी"
+    localLabel = "स्थानीय"
+    addTimeZone = "समय क्षेत्र जोड़ें"
+    searchAnyCity = "कोई भी शहर खोजें"
+    addCityForTime = "स्थानीय समय देखने के लिए एक शहर जोड़ें।"
+
+    emergency = "आपातकालीन"
+    police = "पुलिस"
+    ambulance = "एम्बुलेंस"
+    fire = "दमकल विभाग"
+    selectCountry = "देश चुनें"
+    searchCountry = "देश खोजें"
+    change = "बदलें"
+    emergencyDialerNote = "नंबर पर टैप करने से आपके फोन का डायलर खुल जाएगा — आपको अभी भी कॉल दबाना होगा। नंबर सुविधा के लिए दिए गए हैं; हमेशा स्थानीय रूप से सत्यापित करें।"
+    noEmergencyData = "इस देश के लिए फाइल पर कोई आपातकालीन नंबर नहीं है। इसे मैन्युअल रूप से चुनने का प्रयास करें, और हमेशा स्थानीय रूप से सत्यापित करें।"
+
+    weather = "मौसम"
+    noCitiesYet = "अभी तक कोई शहर नहीं"
+    tapPlusAddCity = "शहर जोड़ने और उसका मौसम देखने के लिए + टैप करें।"
+    addCity = "शहर जोड़ें"
+    searchCity = "शहर खोजें"
+    getWeather = "मौसम प्राप्त करें"
+    nextDays = "अगले दिन"
+    couldntLoadWeather = "मौसम लोड नहीं हो सका"
+    loadingLabel = "लोड हो रहा है…"
+    noCityMatches = "कोई मिलान नहीं। दूसरी वर्तनी आज़माएं।"
+    couldntFindPlace = "वह स्थान नहीं मिल सका। दूसरी वर्तनी या पास के शहर का प्रयास करें।"
 } }
 
 internal val UKR: Strings by lazy { EN.copyApply {
@@ -1262,6 +1346,34 @@ internal val UKR: Strings by lazy { EN.copyApply {
     youOweBanner = "Ви винні %s — час платити."
     youAreOwedBanner = "Вам винні %s."
     allSquareBanner = "Все розраховано."
+
+    worldClock = "Світовий час"
+    localLabel = "Місцевий"
+    addTimeZone = "Додати часовий пояс"
+    searchAnyCity = "Пошук будь-якого міста"
+    addCityForTime = "Додайте місто, щоб побачити його місцевий час."
+
+    emergency = "Екстрені служби"
+    police = "Поліція"
+    ambulance = "Швидка допомога"
+    fire = "Пожежна служба"
+    selectCountry = "Оберіть країну"
+    searchCountry = "Пошук країни"
+    change = "Змінити"
+    emergencyDialerNote = "Натискання на номер відкриє вікно набору номера — вам все одно потрібно буде натиснути кнопку виклику. Номери надані для зручності; завжди перевіряйте їх на місці."
+    noEmergencyData = "Для цієї країни немає даних про екстрені номери. Спробуйте обрати країну вручну і завжди перевіряйте номери на місці."
+
+    weather = "Погода"
+    noCitiesYet = "Міст поки немає"
+    tapPlusAddCity = "Натисніть +, щоб додати місто і побачити прогноз погоди."
+    addCity = "Додати місто"
+    searchCity = "Пошук міста"
+    getWeather = "Дізнатися погоду"
+    nextDays = "Наступні дні"
+    couldntLoadWeather = "Не вдалося завантажити погоду"
+    loadingLabel = "Завантаження…"
+    noCityMatches = "Немає збігів. Спробуйте інше написання."
+    couldntFindPlace = "Не вдалося знайти це місце. Спробуйте інше написання або найближче місто."
 } }
 
 internal val HUN: Strings by lazy { EN.copyApply {
@@ -1578,6 +1690,34 @@ internal val HUN: Strings by lazy { EN.copyApply {
     youOweBanner = "Tartozol %s összeggel — ideje fizetni."
     youAreOwedBanner = "Neked tartoznak %s összeggel."
     allSquareBanner = "Mindenki egálban van."
+
+    worldClock = "Világóra"
+    localLabel = "Helyi"
+    addTimeZone = "Időzóna hozzáadása"
+    searchAnyCity = "Város keresése"
+    addCityForTime = "Adj hozzá egy várost a helyi idő megtekintéséhez."
+
+    emergency = "Segélyhívó"
+    police = "Rendőrség"
+    ambulance = "Mentők"
+    fire = "Tűzoltók"
+    selectCountry = "Ország kiválasztása"
+    searchCountry = "Ország keresése"
+    change = "Módosítás"
+    emergencyDialerNote = "A szám megérintése megnyitja a telefon tárcsázóját – a híváshoz meg kell nyomnod a hívás gombot. A számok csak tájékoztató jellegűek; mindig ellenőrizd őket helyben."
+    noEmergencyData = "Ehhez az országhoz nincsenek mentett segélyhívó számok. Próbáld meg manuálisan kiválasztani, és mindig ellenőrizd helyben."
+
+    weather = "Időjárás"
+    noCitiesYet = "Nincsenek városok"
+    tapPlusAddCity = "Koppints a + gombra egy város hozzáadásához és az időjárás megtekintéséhez."
+    addCity = "Város hozzáadása"
+    searchCity = "Város keresése"
+    getWeather = "Időjárás lekérése"
+    nextDays = "Következő napok"
+    couldntLoadWeather = "Nem sikerült betölteni az időjárást"
+    loadingLabel = "Betöltés…"
+    noCityMatches = "Nincs találat. Próbálkozz más írásmóddal."
+    couldntFindPlace = "Nem található a hely. Próbálkozz más írásmóddal vagy egy közeli várossal."
 } }
 
 internal val RO: Strings by lazy { EN.copyApply {
@@ -1894,6 +2034,34 @@ internal val RO: Strings by lazy { EN.copyApply {
     youOweBanner = "Datorezi %s — e timpul să plătești."
     youAreOwedBanner = "Ți se datorează %s."
     allSquareBanner = "Sunteți la zi."
+
+    worldClock = "Ceas pe glob"
+    localLabel = "Local"
+    addTimeZone = "Adaugă fus orar"
+    searchAnyCity = "Caută orice oraș"
+    addCityForTime = "Adaugă un oraș pentru a vedea ora locală."
+
+    emergency = "Urgențe"
+    police = "Poliție"
+    ambulance = "Ambulanță"
+    fire = "Pompieri"
+    selectCountry = "Selectează țara"
+    searchCountry = "Caută țara"
+    change = "Schimbă"
+    emergencyDialerNote = "Atingerea unui număr deschide apelatorul telefonului – va trebui totuși să apeși pe apelare. Numerele sunt furnizate pentru confort; verifică-le întotdeauna local."
+    noEmergencyData = "Nu există numere de urgență înregistrate pentru această țară. Încearcă să o selectezi manual și verifică întotdeauna local."
+
+    weather = "Vremea"
+    noCitiesYet = "Niciun oraș încă"
+    tapPlusAddCity = "Apasă + pentru a adăuga un oraș și a vedea vremea."
+    addCity = "Adaugă oraș"
+    searchCity = "Caută oraș"
+    getWeather = "Află vremea"
+    nextDays = "Zilele următoare"
+    couldntLoadWeather = "Nu s-a putut încărca vremea"
+    loadingLabel = "Se încarcă…"
+    noCityMatches = "Nicio potrivire. Încearcă altă scriere."
+    couldntFindPlace = "Nu s-a putut găsi locul respectiv. Încearcă altă scriere sau un oraș din apropiere."
 } }
 
 internal val GR: Strings by lazy { EN.copyApply {
@@ -2210,6 +2378,34 @@ internal val GR: Strings by lazy { EN.copyApply {
     youOweBanner = "Χρωστάτε %s — ώρα να πληρώσετε."
     youAreOwedBanner = "Σας χρωστάνε %s."
     allSquareBanner = "Είστε εντάξει."
+
+    worldClock = "Παγκόσμιο Ρολόι"
+    localLabel = "Τοπικά"
+    addTimeZone = "Προσθήκη ζώνης ώρας"
+    searchAnyCity = "Αναζήτηση οποιασδήποτε πόλης"
+    addCityForTime = "Προσθέστε μια πόλη για να δείτε την τοπική της ώρα."
+
+    emergency = "Έκτακτη Ανάγκη"
+    police = "Αστυνομία"
+    ambulance = "Ασθενοφόρο"
+    fire = "Πυροσβεστική"
+    selectCountry = "Επιλογή χώρας"
+    searchCountry = "Αναζήτηση χώρας"
+    change = "Αλλαγή"
+    emergencyDialerNote = "Πατώντας έναν αριθμό ανοίγει το πληκτρολόγιο κλήσης του τηλεφώνου σας — θα πρέπει ακόμα να πατήσετε κλήση. Οι αριθμοί παρέχονται για ευκολία· να επαληθεύετε πάντα τοπικά."
+    noEmergencyData = "Δεν υπάρχουν αριθμοί έκτακτης ανάγκης για αυτήν τη χώρα. Δοκιμάστε να την επιλέξετε χειροκίνητα και να επαληθεύετε πάντα τοπικά."
+
+    weather = "Καιρός"
+    noCitiesYet = "Δεν υπάρχουν πόλεις ακόμα"
+    tapPlusAddCity = "Πατήστε + για να προσθέσετε μια πόλη και να δείτε τον καιρό της."
+    addCity = "Προσθήκη πόλης"
+    searchCity = "Αναζήτηση πόλης"
+    getWeather = "Λήψη καιρού"
+    nextDays = "Επόμενες ημέρες"
+    couldntLoadWeather = "Αδυναμία φόρτωσης καιρού"
+    loadingLabel = "Φόρτωση…"
+    noCityMatches = "Δεν βρέθηκαν αποτελέσματα. Δοκιμάστε άλλη ορθογραφία."
+    couldntFindPlace = "Δεν βρέθηκε αυτή η τοποθεσία. Δοκιμάστε άλλη ορθογραφία ή μια κοντινή πόλη."
 } }
 
 internal val KA: Strings by lazy { EN.copyApply {
@@ -2526,6 +2722,34 @@ internal val KA: Strings by lazy { EN.copyApply {
     youOweBanner = "შენ გმართებს %s — გადახდის დროა."
     youAreOwedBanner = "შენი მართებთ %s."
     allSquareBanner = "ყველაფერი გასწორებულია."
+
+    worldClock = "მსოფლიო საათი"
+    localLabel = "ადგილობრივი"
+    addTimeZone = "დროის სარტყლის დამატება"
+    searchAnyCity = "მოძებნეთ ნებისმიერი ქალაქი"
+    addCityForTime = "დაამატეთ ქალაქი მისი ადგილობრივი დროის სანახავად."
+
+    emergency = "საგანგებო სიტუაცია"
+    police = "პოლიცია"
+    ambulance = "სასწრაფო დახმარება"
+    fire = "სახანძრო"
+    selectCountry = "აირჩიეთ ქვეყანა"
+    searchCountry = "მოძებნეთ ქვეყანა"
+    change = "შეცვლა"
+    emergencyDialerNote = "ნომერზე დაჭერით გაიხსნება თქვენი ტელეფონის აკრეფის პანელი — თქვენ მაინც მოგიწევთ დარეკვის ღილაკზე დაჭერა. ნომრები მოცემულია მოხერხებულობისთვის; ყოველთვის გადაამოწმეთ ადგილობრივად."
+    noEmergencyData = "ამ ქვეყნისთვის საგანგებო ნომრები არ მოიძებნა. სცადეთ მისი ხელით არჩევა და ყოველთვის გადაამოწმეთ ადგილობრივად."
+
+    weather = "ამინდი"
+    noCitiesYet = "ქალაქები ჯერ არ არის"
+    tapPlusAddCity = "შეეხეთ +-ს ქალაქის დასამატებლად და მისი ამინდის სანახავად."
+    addCity = "ქალაქის დამატება"
+    searchCity = "ქალაქის ძებნა"
+    getWeather = "ამინდის ნახვა"
+    nextDays = "შემდეგი დღეები"
+    couldntLoadWeather = "ამინდის ჩატვირთვა ვერ მოხერხდა"
+    loadingLabel = "იტვირთება…"
+    noCityMatches = "შესაბამისობა ვერ მოიძებნა. სცადეთ სხვა დასახელება."
+    couldntFindPlace = "ეს ადგილი ვერ მოიძებნა. სცადეთ სხვა დასახელება ან ახლომდებარე ქალაქი."
 } }
 
 internal val BG: Strings by lazy { EN.copyApply {
@@ -2842,6 +3066,34 @@ internal val BG: Strings by lazy { EN.copyApply {
     youOweBanner = "Дължите %s — време е за плащане."
     youAreOwedBanner = "Имате да взимате %s."
     allSquareBanner = "Всичко е уредено."
+
+    worldClock = "Световен часовник"
+    localLabel = "Местно"
+    addTimeZone = "Добави часова зона"
+    searchAnyCity = "Търси град"
+    addCityForTime = "Добавете град, за да видите местното му време."
+
+    emergency = "Спешни случаи"
+    police = "Полиция"
+    ambulance = "Бърза помощ"
+    fire = "Пожарна"
+    selectCountry = "Избери държава"
+    searchCountry = "Търси държава"
+    change = "Промени"
+    emergencyDialerNote = "Докосването на номер отваря дайлера на телефона ви – все още ще трябва да натиснете бутона за повикване. Номерата се предоставят за удобство; винаги проверявайте на място."
+    noEmergencyData = "Няма регистрирани спешни номера за тази държава. Опитайте да я изберете ръчно и винаги проверявайте на място."
+
+    weather = "Време"
+    noCitiesYet = "Все още няма градове"
+    tapPlusAddCity = "Докоснете +, за да добавите град и да видите времето му."
+    addCity = "Добави град"
+    searchCity = "Търси град"
+    getWeather = "Виж времето"
+    nextDays = "Следващи дни"
+    couldntLoadWeather = "Времето не можа да се зареди"
+    loadingLabel = "Зареждане…"
+    noCityMatches = "Няма съвпадения. Опитайте друго изписване."
+    couldntFindPlace = "Мястото не можа да бъде намерено. Опитайте друго изписване или близък град."
 } }
 
 internal val SK: Strings by lazy { EN.copyApply {
@@ -3158,5 +3410,33 @@ internal val SK: Strings by lazy { EN.copyApply {
     youOweBanner = "Dlhuješ %s — čas zaplatiť."
     youAreOwedBanner = "Dlžia ti %s."
     allSquareBanner = "Všetko je vyrovnané."
+
+    worldClock = "Svetový čas"
+    localLabel = "Miestny"
+    addTimeZone = "Pridať časové pásmo"
+    searchAnyCity = "Hľadať ľubovoľné mesto"
+    addCityForTime = "Pridajte mesto, aby ste videli jeho miestny čas."
+
+    emergency = "Pohotovosť"
+    police = "Polícia"
+    ambulance = "Sanitka"
+    fire = "Hasiči"
+    selectCountry = "Vybrať krajinu"
+    searchCountry = "Hľadať krajinu"
+    change = "Zmeniť"
+    emergencyDialerNote = "Klepaním na číslo sa otvorí číselník vášho telefónu – stále budete musieť stlačiť volať. Čísla sú poskytované pre pohodlie; vždy si ich overte lokálne."
+    noEmergencyData = "V evidencii nie sú žiadne núdzové čísla pre túto krajinu. Skúste ju vybrať manuálne a vždy si to overte lokálne."
+
+    weather = "Počasie"
+    noCitiesYet = "Zatiaľ žiadne mestá"
+    tapPlusAddCity = "Klepnite na + a pridajte mesto, aby ste videli jeho počasie."
+    addCity = "Pridať mesto"
+    searchCity = "Hľadať mesto"
+    getWeather = "Zistiť počasie"
+    nextDays = "Nasledujúce dni"
+    couldntLoadWeather = "Nepodarilo sa načítať počasie"
+    loadingLabel = "Načítava sa…"
+    noCityMatches = "Žiadne zhody. Skúste iný pravopis."
+    couldntFindPlace = "Nepodarilo sa nájsť toto miesto. Skúste iný pravopis alebo blízke mesto."
 } }
 

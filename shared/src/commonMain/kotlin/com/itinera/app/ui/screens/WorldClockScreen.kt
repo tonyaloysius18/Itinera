@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.itinera.app.data.SavedZone
+import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.ui.components.CardShape
 import com.itinera.app.ui.components.TopBar
 import kotlinx.coroutines.delay
@@ -60,6 +61,7 @@ fun WorldClockScreen(
     onRemoveZone: (SavedZone) -> Unit,
     onBack: () -> Unit,
 ) {
+    val s = LocalStrings.current
     var showPicker by remember { mutableStateOf(false) }
     // which card is currently swiped open (only one at a time)
     var openKey by remember { mutableStateOf<String?>(null) }
@@ -76,7 +78,7 @@ fun WorldClockScreen(
     val homeTz = TimeZone.currentSystemDefault()
 
     Column(Modifier.fillMaxSize()) {
-        TopBar("World Clock", onBack = onBack)
+        TopBar(s.worldClock, onBack = onBack)
 
         LazyColumn(
             Modifier.weight(1f).fillMaxWidth(),
@@ -87,7 +89,7 @@ fun WorldClockScreen(
             item {
                 ClockRow(
                     label = friendlyZone(homeTz.id),
-                    sublabel = "Local",
+                    sublabel = s.localLabel,
                     zoneId = homeTz.id,
                     now = now,
                 )
@@ -96,7 +98,7 @@ fun WorldClockScreen(
             if (zones.isEmpty()) {
                 item {
                     Text(
-                        "Add a city to see its local time.",
+                        s.addCityForTime,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
                         modifier = Modifier.padding(vertical = 8.dp),
@@ -123,7 +125,7 @@ fun WorldClockScreen(
                 ) {
                     Icon(Icons.Filled.Add, null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text("Add time zone")
+                    Text(s.addTimeZone)
                 }
             }
         }
@@ -146,6 +148,7 @@ private fun SwipeableClockCard(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val s = LocalStrings.current
     val density = LocalDensity.current
     val actionWidth = 80.dp
     val gap = 15.dp
@@ -196,7 +199,7 @@ private fun SwipeableClockCard(
                     .padding(start = gap),
             ) {
                 ActionButton(
-                    Icons.Filled.Delete, "Delete", Color(0xFFB23B3B), progress,
+                    Icons.Filled.Delete, s.delete, Color(0xFFB23B3B), progress,
                     Modifier.weight(1f),
                 ) { animateOutAndDelete() }
             }
@@ -348,6 +351,7 @@ private fun ZonePickerDialog(
     onPick: (String, String) -> Unit,   // (label, zoneId)
     onDismiss: () -> Unit,
 ) {
+    val s = LocalStrings.current
     var query by remember { mutableStateOf("") }
 
     data class ZoneResult(val label: String, val zoneId: String)
@@ -375,14 +379,14 @@ private fun ZonePickerDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Close") } },
-        title = { Text("Add time zone") },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(s.close) } },
+        title = { Text(s.addTimeZone) },
         text = {
             Column {
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
-                    label = { Text("Search any city") },
+                    label = { Text(s.searchAnyCity) },
                     singleLine = true,
                     trailingIcon = {
                         if (query.isNotEmpty()) {

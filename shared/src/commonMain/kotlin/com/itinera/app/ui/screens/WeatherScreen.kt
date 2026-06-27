@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.itinera.app.data.DayForecast
 import com.itinera.app.data.GeoPlace
 import com.itinera.app.data.SavedCity
+import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.data.WeatherResult
 import com.itinera.app.data.WeatherService
 import com.itinera.app.data.weatherEmoji
@@ -50,6 +51,7 @@ fun WeatherScreen(
     onRemoveCity: (SavedCity) -> Unit,
     onBack: () -> Unit,
 ) {
+    val s = LocalStrings.current
     val service = remember { WeatherService() }
     var showAdd by remember { mutableStateOf(false) }
     // which card is swiped open (one at a time)
@@ -57,7 +59,7 @@ fun WeatherScreen(
 
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
-            TopBar("Weather", onBack = onBack)
+            TopBar(s.weather, onBack = onBack)
 
             if (cities.isEmpty()) {
                 Column(
@@ -68,13 +70,13 @@ fun WeatherScreen(
                     Text("🌤️", style = MaterialTheme.typography.displayMedium)
                     Spacer(Modifier.height(12.dp))
                     Text(
-                        "No cities yet",
+                        s.noCitiesYet,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Spacer(Modifier.height(6.dp))
                     Text(
-                        "Tap + to add a city and see its weather.",
+                        s.tapPlusAddCity,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
                     )
@@ -102,12 +104,12 @@ fun WeatherScreen(
         FloatingActionButton(
             onClick = { showAdd = true },
             modifier = Modifier
-                .align(Alignment.BottomEnd).offset(x = (-25).dp, y = 60.dp)
-                .padding(end = 20.dp, bottom = 220.dp),
+                .align(Alignment.BottomEnd)
+                .padding(end = 20.dp, bottom = 24.dp),
             containerColor = MaterialTheme.colorScheme.primary,
             shape = CircleShape,
         ) {
-            Icon(Icons.Filled.Add, contentDescription = "Add city")
+            Icon(Icons.Filled.Add, contentDescription = s.addCity)
         }
     }
 
@@ -140,6 +142,7 @@ private fun SwipeableWeatherCard(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val s = LocalStrings.current
     val density = LocalDensity.current
     val actionWidth = 80.dp
     val gap = 15.dp
@@ -191,7 +194,7 @@ private fun SwipeableWeatherCard(
             ) {
                 Column(Modifier.width(panelWidth).fillMaxHeight().padding(start = gap)) {
                     WeatherActionButton(
-                        Icons.Filled.Delete, "Delete", Color(0xFFB23B3B), progress,
+                        Icons.Filled.Delete, s.delete, Color(0xFFB23B3B), progress,
                         Modifier.weight(1f),
                     ) { animateOutThenDelete() }
                 }
@@ -250,9 +253,9 @@ private fun SwipeableWeatherCard(
                         Column(Modifier.weight(1f)) {
                             Text(where, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                             when {
-                                loading -> Text("Loading…", style = MaterialTheme.typography.bodySmall,
+                                loading -> Text(s.loadingLabel, style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f))
-                                failed -> Text("Couldn't load weather", style = MaterialTheme.typography.bodySmall,
+                                failed -> Text(s.couldntLoadWeather, style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.error)
                                 weather != null -> Text(
                                     weatherLabel(weather!!.currentCode),
@@ -352,6 +355,7 @@ private fun AddCityDialog(
     onPick: (GeoPlace) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val s = LocalStrings.current
     val scope = rememberCoroutineScope()
     var query by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
@@ -361,14 +365,14 @@ private fun AddCityDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Close") } },
-        title = { Text("Add city") },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(s.close) } },
+        title = { Text(s.addCity) },
         text = {
             Column {
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
-                    label = { Text("Search city") },
+                    label = { Text(s.searchCity) },
                     singleLine = true,
                     leadingIcon = { Icon(Icons.Filled.Search, null) },
                     trailingIcon = {
@@ -391,8 +395,8 @@ private fun AddCityDialog(
                         }
                     },
                     enabled = query.isNotBlank() && !loading,
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 60.dp),
-                ) { Text("Search") }
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text(s.search) }
 
                 Spacer(Modifier.height(8.dp))
 
@@ -401,7 +405,7 @@ private fun AddCityDialog(
                         CircularProgressIndicator()
                     }
                     searched && results.isEmpty() -> Text(
-                        "No matches. Try another spelling.",
+                        s.noCityMatches,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     )
