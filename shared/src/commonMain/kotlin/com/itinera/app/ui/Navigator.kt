@@ -57,6 +57,10 @@ sealed interface Screen {
 
     data object WorldClock : Screen
 
+    data object Emergency : Screen
+
+    data object Weather : Screen
+
 }
 
 /**

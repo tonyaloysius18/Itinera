@@ -546,6 +546,8 @@ private fun AppContent(
                             onOpenLanguage = { navigator.push(Screen.LanguagePicker) },
                             onNotifications = { navigator.push(Screen.Notifications) },
                             onWorldClock = { navigator.push(Screen.WorldClock) },
+                            onEmergency = { navigator.push(Screen.Emergency) },
+                            onWeather = { navigator.push(Screen.Weather) },
                             onArchivedTrips = { navigator.push(Screen.ArchivedTrips) },
                             onExportTrips = { navigator.push(Screen.ExportTrips) },
                             onBackupStatus = { navigator.push(Screen.BackupStatus) },
@@ -628,6 +630,18 @@ private fun AppContent(
                                     repository.worldClockStore.remove(entry)
                                     zones = repository.worldClockStore.all()
                                 },
+                                onBack = { navigator.back() },
+                            )
+                        }
+
+                        Screen.Emergency -> EmergencyScreen(onBack = { navigator.back() })
+
+                        Screen.Weather -> {
+                            var cities by remember { mutableStateOf(repository.weatherStore.all()) }
+                            WeatherScreen(
+                                cities = cities,
+                                onAddCity = { repository.weatherStore.add(it); cities = repository.weatherStore.all() },
+                                onRemoveCity = { repository.weatherStore.remove(it); cities = repository.weatherStore.all() },
                                 onBack = { navigator.back() },
                             )
                         }

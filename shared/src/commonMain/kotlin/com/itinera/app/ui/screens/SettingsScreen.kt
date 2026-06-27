@@ -18,6 +18,8 @@ import androidx.compose.material.icons.filled.ManageAccounts
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -42,6 +44,8 @@ fun SettingsScreen(
     onOpenLanguage: () -> Unit,
     onNotifications: () -> Unit,
     onWorldClock: () -> Unit,
+    onEmergency: () -> Unit,
+    onWeather: () -> Unit,
     onArchivedTrips: () -> Unit,
     onExportTrips: () -> Unit,
     onBackupStatus: () -> Unit,
@@ -98,7 +102,11 @@ fun SettingsScreen(
                 ThinDivider()
                 SettingsRow(Icons.Filled.Notifications, s.notifications, primary, onClick = onNotifications)
                 ThinDivider()
-                SettingsRow(Icons.Filled.Schedule, "World Clock", primary, onClick = onWorldClock)
+                SettingsRow(Icons.Filled.Schedule, "World Clock", primary, onClick = onWorldClock )
+                ThinDivider()
+                SettingsRow(Icons.Filled.Warning, "Emergency", primary, onClick = onEmergency)
+                ThinDivider()
+                SettingsRow(Icons.Filled.WbSunny, "Weather", primary, onClick = onWeather)
             }
 
             // Group 2 — trips & data
