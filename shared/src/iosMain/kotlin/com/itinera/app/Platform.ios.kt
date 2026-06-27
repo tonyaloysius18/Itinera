@@ -21,6 +21,10 @@ actual fun deviceRegion(): String =
     NSLocale.currentLocale.countryCode ?: ""
 
 actual fun dial(number: String) {
-    val url = NSURL(string = "tel://$number")
-    UIApplication.sharedApplication.openURL(url)
+    // tel: (not tel://) is the correct phone-URL scheme; strip spaces so the URL parses
+    val cleaned = number.filter { !it.isWhitespace() }
+    val url = NSURL(string = "tel:$cleaned") ?: return
+    val app = UIApplication.sharedApplication
+    // modern API (iOS 10+); the bare openURL(url) is deprecated and can silently fail
+    app.openURL(url, options = mapOf<Any?, Any?>(), completionHandler = null)
 }

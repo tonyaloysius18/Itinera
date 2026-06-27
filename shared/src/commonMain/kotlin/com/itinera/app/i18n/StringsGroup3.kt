@@ -954,29 +954,6 @@ internal val SQ: Strings by lazy { EN.copyApply {
     inviteShareMessage = "Bashkohu në udhëtimin tim në Itinera:"
     copy = "Kopjo"
 
-    createTripOption = "Krijo udhëtim"
-    joinTripOption = "Bashkohu në një udhëtim"
-    enterInviteCode = "Futni kodin e ftesës që organizatori ndau me ju."
-    invalidCode = "Kod i pavlefshëm ose i skaduar"
-    joined = "I bashkuar"
-    join = "Bashkohu"
-
-    members = "Anëtarët"
-    roleOwner = "Pronari"
-    roleEditor = "Redaktori"
-    roleViewer = "Shikuesi"
-    removeMember = "Hiq anëtarin"
-    removeMemberQ = "Të hiqet ky anëtar?"
-    removeMemberDesc = "Ai do të humbasë aksesin në këtë udhëtim."
-    remove = "Hiq"
-
-    leaveTrip = "Largohu nga udhëtimi"
-    leaveTripQ = "Të largoheni nga ky udhëtim?"
-    leaveTripDesc = "Ju do të humbisni aksesin në këtë udhëtim."
-
-    removeAccount = "Fshij llogarinë"
-    removeAccountConfirm = "Të hiqet kjo llogari nga kjo pajisje? Ju mund të identifikoheni përsëri në çdo kohë."
-
     allowNotificationsPrompt = "Lejoni njoftimet në cilësimet e sistemit për të marrë kujtesa."
     customReminder = "Kujtesë e personalizuar"
     remindBeforeDeparture = "Më kujto kaq kohë para nisjes:"
@@ -1297,29 +1274,6 @@ internal val MK: Strings by lazy { EN.copyApply {
     inviteCodeHint = "Споделете го овој код. Можат да се приклучат преку „Приклучи се на патување“."
     inviteShareMessage = "Приклучи се на моето патување на Itinera:"
     copy = "Копирај"
-
-    createTripOption = "Креирај патување"
-    joinTripOption = "Приклучи се на патување"
-    enterInviteCode = "Внесете го кодот за покана што го сподели вашиот домаќин."
-    invalidCode = "Невалиден или истечен код"
-    joined = "Приклучен"
-    join = "Приклучи се"
-
-    members = "Членови"
-    roleOwner = "Сопственик"
-    roleEditor = "Уредник"
-    roleViewer = "Гледач"
-    removeMember = "Отстрани член"
-    removeMemberQ = "Да се отстрани овој член?"
-    removeMemberDesc = "Тој ќе го изгуби пристапот до ова патување."
-    remove = "Отстрани"
-
-    leaveTrip = "Напушти го патувањето"
-    leaveTripQ = "Да го напуштите ова патување?"
-    leaveTripDesc = "Ќе го изгубите пристапот до ова патување."
-
-    removeAccount = "Отстрани сметка"
-    removeAccountConfirm = "Да се отстрани оваа сметка од овој уред? Можете повторно да се најавите во секое време."
 
     allowNotificationsPrompt = "Дозволете известувања во системските поставки за да добивате потсетници."
     customReminder = "Прилагоден потсетник"
@@ -1646,29 +1600,6 @@ internal val MO: Strings by lazy { EN.copyApply {
     inviteShareMessage = "Alătură-te călătoriei mele pe Itinera:"
     copy = "Copiază"
 
-    createTripOption = "Creează călătorie"
-    joinTripOption = "Alătură-te unei călătorii"
-    enterInviteCode = "Introdu codul de invitație primit de la gazdă."
-    invalidCode = "Cod invalid sau expirat"
-    joined = "Te-ai alăturat"
-    join = "Alătură-te"
-
-    members = "Membri"
-    roleOwner = "Proprietar"
-    roleEditor = "Editor"
-    roleViewer = "Vizualizator"
-    removeMember = "Elimină membrul"
-    removeMemberQ = "Elimini acest membru?"
-    removeMemberDesc = "Va pierde accesul la această călătorie."
-    remove = "Elimină"
-
-    leaveTrip = "Părăsește călătoria"
-    leaveTripQ = "Părăsești această călătorie?"
-    leaveTripDesc = "Vei pierde accesul la această călătorie."
-
-    removeAccount = "Elimină contul"
-    removeAccountConfirm = "Elimini acest cont de pe acest dispozitiv? Te poți reconecta oricând."
-
     allowNotificationsPrompt = "Permiteți notificările în setările sistemului pentru a primi memento-uri."
     customReminder = "Memento personalizat"
     remindBeforeDeparture = "Amintește-mi cu atâta timp înainte de plecare:"
@@ -1989,29 +1920,6 @@ internal val NO: Strings by lazy { EN.copyApply {
     inviteCodeHint = "Del denne koden. De kan bli med via \"Bli med på en reise\"."
     inviteShareMessage = "Bli med på reisen min på Itinera:"
     copy = "Kopier"
-
-    createTripOption = "Opprett reise"
-    joinTripOption = "Bli med på en reise"
-    enterInviteCode = "Skriv inn invitasjonskoden som verten delte med deg."
-    invalidCode = "Ugyldig eller utløpt kode"
-    joined = "Ble med"
-    join = "Bli med"
-
-    members = "Medlemmer"
-    roleOwner = "Eier"
-    roleEditor = "Redaktør"
-    roleViewer = "Seer"
-    removeMember = "Fjern medlem"
-    removeMemberQ = "Fjerne dette medlemmet?"
-    removeMemberDesc = "De vil miste tilgangen till denne reisen."
-    remove = "Fjern"
-
-    leaveTrip = "Forlat reise"
-    leaveTripQ = "Forlate denne reisen?"
-    leaveTripDesc = "Du vil miste tilgangen til denne reisen."
-
-    removeAccount = "Fjern konto"
-    removeAccountConfirm = "Fjerne denne kontoen fra denne enheten? Du kan logge inn igjen når som helst."
 
     allowNotificationsPrompt = "Tillat varslinger i systeminnstillingene for å motta påminnelser."
     customReminder = "Egendefinert påminnelse"
@@ -2334,29 +2242,6 @@ internal val FI: Strings by lazy { EN.copyApply {
     inviteShareMessage = "Liity matkalleni Itinerassa:"
     copy = "Kopioi"
 
-    createTripOption = "Luo matka"
-    joinTripOption = "Liity matkalle"
-    enterInviteCode = "Syötä kutsukoodi, jonka järjestäjä jakoi kanssasi."
-    invalidCode = "Virheellinen tai vanhentunut koodi"
-    joined = "Liittynyt"
-    join = "Liity"
-
-    members = "Jäsenet"
-    roleOwner = "Omistaja"
-    roleEditor = "Muokkaaja"
-    roleViewer = "Katselija"
-    removeMember = "Poista jäsen"
-    removeMemberQ = "Poistetaanko tämä jäsen?"
-    removeMemberDesc = "Hän menettää pääsyn tälle matkalle."
-    remove = "Poista"
-
-    leaveTrip = "Poistu matkalta"
-    leaveTripQ = "Poistutaanko tältä matkalta?"
-    leaveTripDesc = "Menetät pääsyn tälle matkalle."
-
-    removeAccount = "Poista tili"
-    removeAccountConfirm = "Poistetaanko tämä tili tästä laitteesta? Voit kirjautua takaisin milloin tahansa."
-
     allowNotificationsPrompt = "Salli ilmoitukset järjestelmän asetuksista saadaksesi muistutuksia."
     customReminder = "Mukautettu muistutus"
     remindBeforeDeparture = "Muistuta minua näin paljon ennen lähtöä:"
@@ -2677,29 +2562,6 @@ internal val SV: Strings by lazy { EN.copyApply {
     inviteCodeHint = "Dela denna kod. De kan gå med via \"Gå med i en resa\"."
     inviteShareMessage = "Gå med i min resa på Itinera:"
     copy = "Kopiera"
-
-    createTripOption = "Skapa resa"
-    joinTripOption = "Gå med i en resa"
-    enterInviteCode = "Ange inbjudningskoden som värden delade med dig."
-    invalidCode = "Ogiltig eller utgången kod"
-    joined = "Gick med"
-    join = "Gå med"
-
-    members = "Medlemmar"
-    roleOwner = "Ägare"
-    roleEditor = "Redaktör"
-    roleViewer = "Tittare"
-    removeMember = "Ta bort medlem"
-    removeMemberQ = "Ta bort den här medlemmen?"
-    removeMemberDesc = "De kommer att förlora åtkomsten till den här resan."
-    remove = "Ta bort"
-
-    leaveTrip = "Lämna resan"
-    leaveTripQ = "Lämna den här resan?"
-    leaveTripDesc = "Du kommer att förlora åtkomsten till den här resan."
-
-    removeAccount = "Ta bort konto"
-    removeAccountConfirm = "Ta bort det här kontot från den här enheten? Du kan logga in igen när som helst."
 
     allowNotificationsPrompt = "Tillåt notiser i systeminställningarna för att få påminnelser."
     customReminder = "Anpassad påminnelse"
@@ -3022,29 +2884,6 @@ internal val DA: Strings by lazy { EN.copyApply {
     inviteShareMessage = "Deltag i min rejse på Itinera:"
     copy = "Kopier"
 
-    createTripOption = "Opret rejse"
-    joinTripOption = "Deltag i en rejse"
-    enterInviteCode = "Indtast invitationskoden, som din vært delte med dig."
-    invalidCode = "Ugyldig eller udløbet kode"
-    joined = "Deltog"
-    join = "Deltag"
-
-    members = "Medlemmer"
-    roleOwner = "Ejer"
-    roleEditor = "Redaktør"
-    roleViewer = "Seer"
-    removeMember = "Fjern medlem"
-    removeMemberQ = "Fjern dette medlem?"
-    removeMemberDesc = "De vil miste adgang til denne rejse."
-    remove = "Fjern"
-
-    leaveTrip = "Forlad rejse"
-    leaveTripQ = "Forlade denne rejse?"
-    leaveTripDesc = "Du vil miste adgang til denne rejse."
-
-    removeAccount = "Fjern konto"
-    removeAccountConfirm = "Fjern denne konto fra denne enhed? Du kan logge ind igen når som helst."
-
     allowNotificationsPrompt = "Tillat varslinger i systeminnstillingene for å motta påminnelser."
     customReminder = "Egendefinert påminnelse"
     remindBeforeDeparture = "Påminn meg så lenge før avreise:"
@@ -3365,29 +3204,6 @@ internal val ET: Strings by lazy { EN.copyApply {
     inviteCodeHint = "Jaga seda koodi. Nad saavad liituda menüüst \"Liitu reisiga\"."
     inviteShareMessage = "Liitu minu reisiga Itineras:"
     copy = "Kopeeri"
-
-    createTripOption = "Loo reis"
-    joinTripOption = "Liitu reisiga"
-    enterInviteCode = "Sisesta kutsekood, mille võõrustaja Sulle saatis."
-    invalidCode = "Vale või aegunud kood"
-    joined = "Liitunud"
-    join = "Liitu"
-
-    members = "Liikmed"
-    roleOwner = "Omanik"
-    roleEditor = "Toimetaja"
-    roleViewer = "Vaataja"
-    removeMember = "Eemalda liige"
-    removeMemberQ = "Kas eemaldada see liige?"
-    removeMemberDesc = "Ta kaotab ligipääsu sellele reisile."
-    remove = "Eemalda"
-
-    leaveTrip = "Lahku reisilt"
-    leaveTripQ = "Kas lahkuda sellelt reisilt?"
-    leaveTripDesc = "Sa kaotad ligipääsu sellele reisile."
-
-    removeAccount = "Eemalda konto"
-    removeAccountConfirm = "Kas eemaldada see konto sellest seadmest? Saate igal ajal uuesti sisse logida."
 
     allowNotificationsPrompt = "Luba teavitused süsteemi seadetes, et saada meeldetuletusi."
     customReminder = "Kohandatud meeldetuletus"

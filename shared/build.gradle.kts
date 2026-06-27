@@ -62,6 +62,9 @@ kotlin {
             implementation(libs.googleid)
 
             implementation(libs.androidx.activity.compose.v193)
+
+            implementation(libs.translate)
+
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)

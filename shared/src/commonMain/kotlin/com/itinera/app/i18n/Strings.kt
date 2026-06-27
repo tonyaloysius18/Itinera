@@ -450,6 +450,8 @@ class Strings {
     var noCityMatches: String = ""
     var couldntFindPlace: String = ""
 
+    var translate: String = ""
+
     fun copyApply(block: Strings.() -> Unit): Strings {
 
         val c = Strings()
@@ -791,6 +793,8 @@ class Strings {
         c.loadingLabel = this.loadingLabel
         c.noCityMatches = this.noCityMatches
         c.couldntFindPlace = this.couldntFindPlace
+
+        c.translate = this.translate
 
         c.block()
         return c

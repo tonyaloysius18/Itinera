@@ -10,16 +10,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.ManageAccounts
+import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Translate
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -46,13 +47,13 @@ fun SettingsScreen(
     onWorldClock: () -> Unit,
     onEmergency: () -> Unit,
     onWeather: () -> Unit,
+    onTranslate: () -> Unit,
     onArchivedTrips: () -> Unit,
     onExportTrips: () -> Unit,
     onBackupStatus: () -> Unit,
     onHelp: () -> Unit,
     onAbout: () -> Unit,
-
-    ) {
+) {
     fun String.toTitleCase(): String =
         split(" ").joinToString(" ") { word ->
             word.replaceFirstChar { c ->
@@ -98,18 +99,24 @@ fun SettingsScreen(
                 ThinDivider()
                 SettingsRow(Icons.Filled.DarkMode, s.appearance, primary, onClick = onAppearance)
                 ThinDivider()
-                SettingsRow(Icons.Filled.Translate, s.language, primary, onClick = onOpenLanguage)
+                SettingsRow(Icons.Filled.Language, s.language, primary, onClick = onOpenLanguage)
                 ThinDivider()
                 SettingsRow(Icons.Filled.Notifications, s.notifications, primary, onClick = onNotifications)
-                ThinDivider()
-                SettingsRow(Icons.Filled.Schedule, "World Clock", primary, onClick = onWorldClock )
-                ThinDivider()
-                SettingsRow(Icons.Filled.Warning, "Emergency", primary, onClick = onEmergency)
-                ThinDivider()
-                SettingsRow(Icons.Filled.WbSunny, "Weather", primary, onClick = onWeather)
             }
 
-            // Group 2 — trips & data
+            // Group 2 — Travel Tools
+            Spacer(Modifier.height(16.dp))
+            SettingsCard {
+                SettingsRow(Icons.Filled.Public, s.worldClock, primary, onClick = onWorldClock)
+                ThinDivider()
+                SettingsRow(Icons.Filled.Cloud, s.weather, primary, onClick = onWeather)
+                ThinDivider()
+                SettingsRow(Icons.Filled.Translate, s.translate, primary, onClick = onTranslate)
+                ThinDivider()
+                SettingsRow(Icons.Filled.MedicalServices, s.emergency, primary, onClick = onEmergency)
+            }
+
+            // Group 3 — trips & data
             Spacer(Modifier.height(16.dp))
             SettingsCard {
                 SettingsRow(Icons.Filled.Archive, s.archivedTrips.toTitleCase(), primary, onClick = onArchivedTrips)
@@ -119,7 +126,7 @@ fun SettingsScreen(
                 SettingsRow(Icons.Filled.Backup, s.backupStatus, primary, onClick = onBackupStatus)
             }
 
-            // Group 3 — support
+            // Group 4 — support
             Spacer(Modifier.height(16.dp))
             SettingsCard {
                 SettingsRow(Icons.Filled.HelpOutline, s.help, primary, onClick = onHelp)
@@ -127,8 +134,10 @@ fun SettingsScreen(
                 SettingsRow(Icons.Filled.Info, s.about, primary, onClick = onAbout)
             }
 
+            // Clearance for the floating bottom pill nav bar so the last rows
+            // (Help / About) can scroll up clear of it.
             Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.safeDrawing))
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(110.dp))
         }
     }
 }

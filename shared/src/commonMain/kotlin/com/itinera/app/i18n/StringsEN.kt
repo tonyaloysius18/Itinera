@@ -342,4 +342,5 @@ internal val EN: Strings by lazy { Strings().apply {
     loadingLabel = "Loading…"
     noCityMatches = "No matches. Try another spelling."
     couldntFindPlace = "Couldn't find that place. Try another spelling or a nearby city."
+    translate = "Translate"
 } }

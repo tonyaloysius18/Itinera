@@ -61,6 +61,8 @@ sealed interface Screen {
 
     data object Weather : Screen
 
+    data object Translate : Screen
+
 }
 
 /**

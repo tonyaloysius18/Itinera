@@ -77,6 +77,8 @@ class TripRepository {
 
     val weatherStore = WeatherStore
 
+    val translator = Translator()
+
 
     private var tripsListener: Job? = null
 

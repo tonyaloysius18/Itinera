@@ -548,6 +548,7 @@ private fun AppContent(
                             onWorldClock = { navigator.push(Screen.WorldClock) },
                             onEmergency = { navigator.push(Screen.Emergency) },
                             onWeather = { navigator.push(Screen.Weather) },
+                            onTranslate = { navigator.push(Screen.Translate) },
                             onArchivedTrips = { navigator.push(Screen.ArchivedTrips) },
                             onExportTrips = { navigator.push(Screen.ExportTrips) },
                             onBackupStatus = { navigator.push(Screen.BackupStatus) },
@@ -635,6 +636,8 @@ private fun AppContent(
                         }
 
                         Screen.Emergency -> EmergencyScreen(onBack = { navigator.back() })
+
+                        Screen.Translate -> TranslateScreen(translator = repository.translator, onBack = { navigator.back() })
 
                         Screen.Weather -> {
                             var cities by remember { mutableStateOf(repository.weatherStore.all()) }
