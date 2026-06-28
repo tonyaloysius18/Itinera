@@ -127,12 +127,13 @@ fun TripDetailScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
                     ) {
-                        Icon(
-                            Icons.Filled.Flight,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
-                            modifier = Modifier.size(56.dp),
-                        )
+                        Text("🗺", style = MaterialTheme.typography.displayMedium)
+//                        Icon(
+//                            Icons.Filled.Flight,
+//                            contentDescription = null,
+//                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
+//                            modifier = Modifier.size(56.dp),
+//                        )
                         Spacer(Modifier.height(16.dp))
                         Text(
                             s.noLegsYet,

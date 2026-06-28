@@ -58,16 +58,17 @@ fun ChecklistScreen(
         ) {
             if (items.isEmpty()) {
                 Column(
-                    Modifier.fillMaxWidth(),
+                    Modifier.fillMaxWidth().padding(top = 300.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    Icon(
-                        Icons.Outlined.CheckBoxOutlineBlank,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
-                        modifier = Modifier.size(52.dp),
-                    )
+                    Text("🧳", style = MaterialTheme.typography.displayMedium)
+//                    Icon(
+//                        Icons.Outlined.CheckBoxOutlineBlank,
+//                        contentDescription = null,
+//                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
+//                        modifier = Modifier.size(52.dp),
+//                    )
                     Spacer(Modifier.height(16.dp))
                     Text(
                         s.noChecklistItems,

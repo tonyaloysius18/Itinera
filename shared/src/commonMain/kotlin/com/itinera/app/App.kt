@@ -700,9 +700,9 @@ private fun AppContent(
         // Floating pill nav bar (only on top-level screens).
         if (showBottomBar) {
             val items = listOf(
-                NavItem(Icons.Filled.Flight, s.myTrips, Screen.Home),
-                NavItem(Icons.Filled.CalendarMonth, s.calendar, Screen.Calendar),
                 NavItem(Icons.Filled.CurrencyExchange, s.currencyUnits, Screen.Currency),
+                NavItem(Icons.Filled.CalendarMonth, s.calendar, Screen.Calendar),
+                NavItem(Icons.Filled.Flight, s.myTrips, Screen.Home),
                 NavItem(Icons.AutoMirrored.Filled.ReceiptLong, s.split, Screen.Split),
                 NavItem(Icons.Filled.Settings, s.settings, Screen.Settings),
             )

@@ -135,12 +135,32 @@ fun ExportTripsScreen(
         )
 
         if (trips.isEmpty()) {
-            EmptyState(
-                icon = Icons.Filled.Description,
-                title = s.noTripsToExport,
-                subtitle = s.noTripsToExportSubtitle,
-                modifier = Modifier.weight(1f),
-            )
+
+            Column(
+                Modifier.fillMaxSize().padding(horizontal = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Text("📝", style = MaterialTheme.typography.displayMedium)
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    s.noTripsToExport,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    s.noTripsToExportSubtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                )
+            }
+//            EmptyState(
+//                icon = Icons.Filled.Description,
+//                title = s.noTripsToExport,
+//                subtitle = s.noTripsToExportSubtitle,
+//                modifier = Modifier.weight(1f),
+//            )
             return@Column
         }
 

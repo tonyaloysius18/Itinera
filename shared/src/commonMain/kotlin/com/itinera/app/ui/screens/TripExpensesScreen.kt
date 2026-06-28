@@ -65,7 +65,6 @@ fun TripExpensesScreen(
     onDeletePayment: (String) -> Unit = {},
 ) {
     val s = LocalStrings.current
-    var pendingDelete by remember { mutableStateOf<Expense?>(null) }
     var showCurrencyPicker by remember { mutableStateOf(false) }
     var expandedId by remember { mutableStateOf<String?>(null) }
     var openSwipeId by remember { mutableStateOf<String?>(null) }   // which card is swiped open
@@ -96,18 +95,29 @@ fun TripExpensesScreen(
             )
 
             if (expenses.isEmpty()) {
-                Column(Modifier.fillMaxSize()) {
-                    TotalCard(
-                        total = total,
-                        currencyCode = trip.currencyCode,
-                        onShowCurrencyPicker = { showCurrencyPicker = true },
-                        modifier = Modifier.padding(16.dp)
+                TotalCard(
+                    total = total,
+                    currencyCode = trip.currencyCode,
+                    onShowCurrencyPicker = { showCurrencyPicker = true },
+                    modifier = Modifier.padding(16.dp)
+                )
+                Column(
+                    Modifier.fillMaxSize().padding(horizontal = 32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Text("💶", style = MaterialTheme.typography.displayMedium)
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        s.noExpenses,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
                     )
-                    EmptyState(
-                        icon = Icons.Filled.ReceiptLong,
-                        title = s.noExpenses,
-                        subtitle = s.noExpensesSubtitle,
-                        modifier = Modifier.weight(1f),
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        s.noExpensesSubtitle,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
                     )
                 }
             } else {
@@ -272,7 +282,7 @@ fun TripExpensesScreen(
                             canEdit = canEdit,
                             isSwipeOpen = openSwipeId == exp.id,
                             onSwipeOpenChange = { open -> openSwipeId = if (open) exp.id else null },
-                            onRequestDelete = { pendingDelete = exp },
+                            onDelete = { onDeleteExpense(exp.id); openSwipeId = null },
                             modifier = Modifier.animateItem(),
                         ) {
                             val expanded = expandedId == exp.id
@@ -391,33 +401,19 @@ fun TripExpensesScreen(
             dismissButton = { TextButton(onClick = { showCurrencyPicker = false }) { Text(s.cancel) } },
         )
     }
-
-    pendingDelete?.let { exp ->
-        AlertDialog(
-            onDismissRequest = { pendingDelete = null },
-            title = { Text(s.deleteExpenseQ) },
-            text = { Text(exp.description) },
-            confirmButton = {
-                TextButton(onClick = { onDeleteExpense(exp.id); pendingDelete = null; openSwipeId = null }) {
-                    Text(s.delete, color = Color(0xFFE03131))
-                }
-            },
-            dismissButton = { TextButton(onClick = { pendingDelete = null }) { Text(s.cancel) } },
-        )
-    }
 }
 
 /**
  * Wraps an expense card with swipe-to-reveal-delete (matches the home/weather cards).
- * Tap still goes to the inner content (expand). Swipe reveals a Delete button that
- * calls [onRequestDelete] (which opens the confirm dialog). Gated on [canEdit].
+ * Tap goes to the inner content (expand). Swipe reveals a Delete button; tapping it
+ * slides the card off to the left and then removes it (no confirm dialog). Gated on [canEdit].
  */
 @Composable
 private fun SwipeableExpenseCard(
     canEdit: Boolean,
     isSwipeOpen: Boolean,
     onSwipeOpenChange: (Boolean) -> Unit,
-    onRequestDelete: () -> Unit,
+    onDelete: () -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
@@ -435,6 +431,7 @@ private fun SwipeableExpenseCard(
     val panelPx = with(density) { panelWidth.toPx() }
     val scope = rememberCoroutineScope()
     val offsetX = remember { Animatable(0f) }
+    val exitOffsetX = remember { Animatable(0f) }
 
     val progress = ((-offsetX.value - with(density) { gap.toPx() }) /
             (panelPx - with(density) { gap.toPx() })).coerceIn(0f, 1f)
@@ -443,7 +440,20 @@ private fun SwipeableExpenseCard(
         if (!isSwipeOpen && offsetX.value != 0f) offsetX.animateTo(0f, spring(stiffness = Spring.StiffnessMedium))
     }
 
-    Box(modifier.fillMaxWidth()) {
+    // Slide the whole card off to the left, then remove it (matches Weather).
+    fun animateOutThenDelete() {
+        scope.launch {
+            val slide = with(density) { (panelWidth + 600.dp).toPx() }
+            exitOffsetX.animateTo(-slide, tween(durationMillis = 300))
+            onDelete()
+        }
+    }
+
+    Box(
+        modifier
+            .fillMaxWidth()
+            .offset { IntOffset(exitOffsetX.value.roundToInt(), 0) },
+    ) {
         // Behind: delete action — only present while swiped, so no flash on collapse
         if (offsetX.value != 0f) {
             Row(
@@ -451,7 +461,7 @@ private fun SwipeableExpenseCard(
                 horizontalArrangement = Arrangement.End,
             ) {
                 Column(Modifier.width(panelWidth).fillMaxHeight().padding(start = gap)) {
-                    ExpenseDeleteButton(progress, Modifier.weight(1f)) { onRequestDelete() }
+                    ExpenseDeleteButton(progress, Modifier.weight(1f)) { animateOutThenDelete() }
                 }
             }
         }

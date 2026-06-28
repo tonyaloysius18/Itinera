@@ -77,57 +77,71 @@ fun WorldClockScreen(
 
     val homeTz = TimeZone.currentSystemDefault()
 
-    Column(Modifier.fillMaxSize()) {
-        TopBar(s.worldClock, onBack = onBack)
+    Box(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize()) {
+            TopBar(s.worldClock, onBack = onBack)
 
-        LazyColumn(
-            Modifier.weight(1f).fillMaxWidth(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            // Home / local zone, pinned at top — not swipeable (not removable)
-            item {
-                ClockRow(
-                    label = friendlyZone(homeTz.id),
-                    sublabel = s.localLabel,
-                    zoneId = homeTz.id,
-                    now = now,
-                )
-            }
-
-            if (zones.isEmpty()) {
+            LazyColumn(
+                Modifier.weight(1f).fillMaxWidth(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                // Home / local zone, pinned at top — not swipeable (not removable)
                 item {
-                    Text(
-                        s.addCityForTime,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-                        modifier = Modifier.padding(vertical = 8.dp),
-                    )
-                }
-            } else {
-                items(zones, key = { keyOf(it) }) { entry ->
-                    val k = keyOf(entry)
-                    SwipeableClockCard(
-                        entry = entry,
+                    ClockRow(
+                        label = friendlyZone(homeTz.id),
+                        sublabel = s.localLabel,
+                        zoneId = homeTz.id,
                         now = now,
-                        isOpen = openKey == k,
-                        onOpenChange = { open -> openKey = if (open) k else null },
-                        onDelete = { onRemoveZone(entry); openKey = null },
-                        modifier = Modifier.animateItem(),
                     )
                 }
-            }
 
-            item {
-                OutlinedButton(
-                    onClick = { showPicker = true },
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Icon(Icons.Filled.Add, null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(8.dp))
-                    Text(s.addTimeZone)
+                if (zones.isEmpty()) {
+                    item {
+                        Column(
+                            Modifier.fillMaxWidth().padding(top = 200.dp, start = 32.dp, end = 32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Text("🕐", style = MaterialTheme.typography.displayMedium)
+                            Spacer(Modifier.height(12.dp))
+                            Text(
+                                s.noCitiesYet,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                s.addCityForTime,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                            )
+                        }
+                    }
+                } else {
+                    items(zones, key = { keyOf(it) }) { entry ->
+                        val k = keyOf(entry)
+                        SwipeableClockCard(
+                            entry = entry,
+                            now = now,
+                            isOpen = openKey == k,
+                            onOpenChange = { open -> openKey = if (open) k else null },
+                            onDelete = { onRemoveZone(entry); openKey = null },
+                            modifier = Modifier.animateItem(),
+                        )
+                    }
                 }
             }
+        }
+
+        FloatingActionButton(
+            onClick = { showPicker = true },
+            modifier = Modifier
+                .align(Alignment.BottomEnd).offset(x = (-25).dp, y = (-120).dp)
+                .padding(end = 20.dp, bottom = 24.dp),
+            containerColor = MaterialTheme.colorScheme.primary,
+            shape = CircleShape,
+        ) {
+            Icon(Icons.Filled.Add, contentDescription = s.addTimeZone)
         }
     }
 
@@ -156,9 +170,7 @@ private fun SwipeableClockCard(
     val panelPx = with(density) { panelWidth.toPx() }
     val scope = rememberCoroutineScope()
     val offsetX = remember { Animatable(0f) }
-
-    // exit animation: 1f normally, animates to 0f to collapse the card before removal
-    val exitScale = remember { Animatable(1f) }
+    val exitOffsetX = remember { Animatable(0f) }
 
     val progress = ((-offsetX.value - with(density) { gap.toPx() }) /
             (panelPx - with(density) { gap.toPx() })).coerceIn(0f, 1f)
@@ -167,12 +179,11 @@ private fun SwipeableClockCard(
         if (!isOpen && offsetX.value != 0f) offsetX.animateTo(0f, spring(stiffness = Spring.StiffnessMedium))
     }
 
-    // Smoothly slide the card off to the left and collapse its height, then remove.
-    fun animateOutAndDelete() {
+    // Slide the whole card off to the left, then remove it (matches Weather).
+    fun animateOutThenDelete() {
         scope.launch {
-            val targetX = -with(density) { (panelWidth + 400.dp).toPx() }
-            launch { offsetX.animateTo(targetX, tween(durationMillis = 260)) }
-            exitScale.animateTo(0f, tween(durationMillis = 260))
+            val slide = with(density) { (panelWidth + 600.dp).toPx() }
+            exitOffsetX.animateTo(-slide, tween(durationMillis = 300))
             onDelete()
         }
     }
@@ -180,28 +191,25 @@ private fun SwipeableClockCard(
     Box(
         modifier
             .fillMaxWidth()
-            .graphicsLayer {
-                // collapse vertically as it exits (scaleY) while keeping it pinned to top
-                scaleY = exitScale.value
-                alpha = exitScale.value
-                transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 0f)
-            },
+            .offset { IntOffset(exitOffsetX.value.roundToInt(), 0) },
     ) {
-        // Behind: the delete action
-        Row(
-            Modifier.matchParentSize().clip(CardShape),
-            horizontalArrangement = Arrangement.End,
-        ) {
-            Column(
-                Modifier
-                    .width(panelWidth)
-                    .fillMaxHeight()
-                    .padding(start = gap),
+        // Behind: the delete action — only present while swiped, so no flash on collapse
+        if (offsetX.value != 0f) {
+            Row(
+                Modifier.matchParentSize().clip(CardShape),
+                horizontalArrangement = Arrangement.End,
             ) {
-                ActionButton(
-                    Icons.Filled.Delete, s.delete, Color(0xFFB23B3B), progress,
-                    Modifier.weight(1f),
-                ) { animateOutAndDelete() }
+                Column(
+                    Modifier
+                        .width(panelWidth)
+                        .fillMaxHeight()
+                        .padding(start = gap),
+                ) {
+                    ActionButton(
+                        Icons.Filled.Delete, s.delete, Color(0xFFB23B3B), progress,
+                        Modifier.weight(1f),
+                    ) { animateOutThenDelete() }
+                }
             }
         }
 

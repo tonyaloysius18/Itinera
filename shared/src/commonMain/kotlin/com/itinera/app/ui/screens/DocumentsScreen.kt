@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.itinera.app.data.PickedFile
@@ -31,7 +32,6 @@ import com.itinera.app.model.DocItem
 import com.itinera.app.model.Leg
 import com.itinera.app.model.Trip
 import com.itinera.app.ui.components.CardShape
-import com.itinera.app.ui.components.EmptyState
 import com.itinera.app.ui.components.PlaneLoader
 import com.itinera.app.ui.components.TopBar
 import kotlinx.coroutines.launch
@@ -124,12 +124,25 @@ fun DocumentsScreen(
                 }
 
                 documents.isEmpty() -> {
-                    EmptyState(
-                        icon = Icons.AutoMirrored.Filled.InsertDriveFile,
-                        title = s.noDocuments,
-                        subtitle = s.noDocumentsSubtitle,
-                        modifier = Modifier.weight(1f),
-                    )
+                    Column(
+                        Modifier.fillMaxSize().padding(horizontal = 32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Text("📄", style = MaterialTheme.typography.displayMedium)
+                        Spacer(Modifier.height(12.dp))
+                        Text(
+                            s.noDocuments,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            s.noDocumentsSubtitle,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                        )
+                    }
                 }
 
                 else -> {

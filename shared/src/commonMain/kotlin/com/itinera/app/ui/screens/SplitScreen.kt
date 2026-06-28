@@ -40,12 +40,32 @@ fun SplitScreen(
         TopBar(s.split.toTitleCase())
 
         if (trips.isEmpty()) {
-            EmptyState(
-                icon = Icons.Filled.ReceiptLong,
-                title = s.noTripsToSplit,
-                subtitle = s.noTripsToSplitSubtitle,
-                modifier = Modifier.weight(1f),
-            )
+            Column(
+                Modifier.fillMaxSize().padding(horizontal = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Text("🧾", style = MaterialTheme.typography.displayMedium)
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    s.noTripsToSplit,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    s.noTripsToSplitSubtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                )
+            }
+
+//            EmptyState(
+//                icon = Icons.Filled.ReceiptLong,
+//                title = s.noTripsToSplit,
+//                subtitle = s.noTripsToSplitSubtitle,
+//                modifier = Modifier.weight(1f),
+//            )
         } else {
             LazyColumn(
                 modifier = Modifier.weight(1f).fillMaxWidth(),

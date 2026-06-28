@@ -53,7 +53,6 @@ import com.itinera.app.model.TripAccent
 import com.itinera.app.model.isOwnedBy
 import com.itinera.app.model.label
 import com.itinera.app.ui.components.CardShape
-import com.itinera.app.ui.components.EmptyState
 import com.itinera.app.ui.components.PlaneLoader
 import com.itinera.app.ui.components.TopBar
 import kotlinx.coroutines.launch
@@ -133,18 +132,60 @@ fun TripsHomeScreen(
                         PlaneLoader(size = 130.dp)
                     }
                 }
-                trips.isEmpty() -> EmptyState(
-                    icon = Icons.Filled.Luggage,
-                    title = s.noTripsYet,
-                    subtitle = s.noTripsSubtitle,
-                    modifier = Modifier.weight(1f),
-                )
-                visibleTrips.isEmpty() -> EmptyState(
-                    icon = Icons.Filled.Search,
-                    title = s.noResults,
-                    subtitle = s.noResultsSubtitle,
-                    modifier = Modifier.weight(1f),
-                )
+                trips.isEmpty() ->
+                    Column(
+                        Modifier.fillMaxSize().padding(horizontal = 32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Text("✈️", style = MaterialTheme.typography.displayMedium)
+                        Spacer(Modifier.height(12.dp))
+                        Text(
+                            s.noTripsYet,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            s.noTripsSubtitle,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                        )
+                    }
+
+//                    EmptyState(
+//                    icon = Icons.Filled.Luggage,
+//                    title = s.noTripsYet,
+//                    subtitle = s.noTripsSubtitle,
+//                    modifier = Modifier.weight(1f),
+//                )
+                visibleTrips.isEmpty() ->
+                        Column(
+                            Modifier.fillMaxSize().padding(horizontal = 32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                        ) {
+                            Text("🔎", style = MaterialTheme.typography.displayMedium)
+                            Spacer(Modifier.height(12.dp))
+                            Text(
+                                s.noResults,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                s.noResultsSubtitle,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                            )
+                        }
+
+//                    EmptyState(
+//                    icon = Icons.Filled.Search,
+//                    title = s.noResults,
+//                    subtitle = s.noResultsSubtitle,
+//                    modifier = Modifier.weight(1f),
+//                )
                 else -> LazyColumn(
                     state = listState,
                     modifier = Modifier.weight(1f).padding(horizontal = 12.dp),

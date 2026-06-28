@@ -2,11 +2,17 @@ package com.itinera.app.ui.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -23,9 +29,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
@@ -43,6 +52,7 @@ import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.ui.components.TopBar
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -70,6 +80,7 @@ fun TranslateScreen(
     var pickingTarget by remember { mutableStateOf(false) }
 
     var history by remember { mutableStateOf(TranslateHistoryStore.all()) }
+    var openHistoryId by remember { mutableStateOf<String?>(null) }   // which history card is swiped open
 
     // ── Swap animation (mirrors the currency screen) ──
     val density = LocalDensity.current
@@ -115,7 +126,7 @@ fun TranslateScreen(
         val text = input.trim()
         val r = result
         if (text.isBlank() || r.isBlank()) return@LaunchedEffect
-        delay(10000)
+        delay(2000)
         TranslateHistoryStore.add(
             TranslationEntry(
                 id = Clock.System.now().toEpochMilliseconds().toString(),
@@ -266,22 +277,28 @@ fun TranslateScreen(
                     }
                 }
                 items(history, key = { it.id }) { entry ->
-                    HistoryRow(
-                        entry = entry,
-                        onTap = {
-                            sourceLang = translateLanguages.first { it.code == entry.sourceLang }
-                            targetLang = translateLanguages.first { it.code == entry.targetLang }
-                            input = entry.sourceText
-                        },
-                        onToggleFavorite = {
-                            TranslateHistoryStore.toggleFavorite(entry.id)
-                            history = TranslateHistoryStore.all()
-                        },
+                    SwipeableHistoryCard(
+                        isSwipeOpen = openHistoryId == entry.id,
+                        onSwipeOpenChange = { open -> openHistoryId = if (open) entry.id else null },
                         onDelete = {
                             TranslateHistoryStore.remove(entry.id)
                             history = TranslateHistoryStore.all()
+                            openHistoryId = null
                         },
-                    )
+                    ) {
+                        HistoryRow(
+                            entry = entry,
+                            onTap = {
+                                sourceLang = translateLanguages.first { it.code == entry.sourceLang }
+                                targetLang = translateLanguages.first { it.code == entry.targetLang }
+                                input = entry.sourceText
+                            },
+                            onToggleFavorite = {
+                                TranslateHistoryStore.toggleFavorite(entry.id)
+                                history = TranslateHistoryStore.all()
+                            },
+                        )
+                    }
                     Spacer(Modifier.height(8.dp))
                 }
             }
@@ -345,7 +362,6 @@ private fun HistoryRow(
     entry: TranslationEntry,
     onTap: () -> Unit,
     onToggleFavorite: () -> Unit,
-    onDelete: () -> Unit,
 ) {
     val s = LocalStrings.current
     Surface(
@@ -381,11 +397,108 @@ private fun HistoryRow(
                     modifier = Modifier.size(20.dp),
                 )
             }
-            IconButton(onClick = onDelete) {
-                Icon(Icons.Outlined.Delete, contentDescription = s.delete,
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                    modifier = Modifier.size(18.dp))
+        }
+    }
+}
+
+/**
+ * Wraps a history row with swipe-to-reveal-delete + slide-out animation,
+ * matching the Weather / World Clock / expense cards. Tap (reload) and the
+ * favorite star stay on the row itself.
+ */
+@Composable
+private fun SwipeableHistoryCard(
+    isSwipeOpen: Boolean,
+    onSwipeOpenChange: (Boolean) -> Unit,
+    onDelete: () -> Unit,
+    content: @Composable () -> Unit,
+) {
+    val s = LocalStrings.current
+    val density = LocalDensity.current
+    val actionWidth = 80.dp
+    val gap = 15.dp
+    val panelWidth = actionWidth + gap
+    val panelPx = with(density) { panelWidth.toPx() }
+    val scope = rememberCoroutineScope()
+    val offsetX = remember { Animatable(0f) }
+    val exitOffsetX = remember { Animatable(0f) }
+
+    val progress = ((-offsetX.value - with(density) { gap.toPx() }) /
+            (panelPx - with(density) { gap.toPx() })).coerceIn(0f, 1f)
+
+    LaunchedEffect(isSwipeOpen) {
+        if (!isSwipeOpen && offsetX.value != 0f) offsetX.animateTo(0f, spring(stiffness = Spring.StiffnessMedium))
+    }
+
+    fun animateOutThenDelete() {
+        scope.launch {
+            val slide = with(density) { (panelWidth + 600.dp).toPx() }
+            exitOffsetX.animateTo(-slide, tween(durationMillis = 300))
+            onDelete()
+        }
+    }
+
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .offset { IntOffset(exitOffsetX.value.roundToInt(), 0) },
+    ) {
+        if (offsetX.value != 0f) {
+            Row(
+                Modifier.matchParentSize().clip(RoundedCornerShape(14.dp)),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                Column(Modifier.width(panelWidth).fillMaxHeight().padding(start = gap)) {
+                    Column(
+                        Modifier.fillMaxHeight().clickable(
+                            onClick = { animateOutThenDelete() },
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                        ),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Box(
+                            Modifier.size(52.dp)
+                                .graphicsLayer { scaleX = progress; scaleY = progress; alpha = progress }
+                                .clip(CircleShape)
+                                .background(Color(0xFFB23B3B)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(Icons.Outlined.Delete, contentDescription = s.delete, tint = Color.White, modifier = Modifier.size(20.dp))
+                        }
+                        Spacer(Modifier.height(5.dp))
+                        Text(s.delete, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f), style = MaterialTheme.typography.labelSmall)
+                    }
+                }
             }
+        }
+
+        Box(
+            Modifier
+                .offset { IntOffset(offsetX.value.roundToInt(), 0) }
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures(
+                        onHorizontalDrag = { _, dragAmount ->
+                            scope.launch {
+                                offsetX.snapTo((offsetX.value + dragAmount).coerceIn(-panelPx, 0f))
+                            }
+                        },
+                        onDragEnd = {
+                            scope.launch {
+                                if (offsetX.value < -panelPx / 2) {
+                                    offsetX.animateTo(-panelPx, spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow))
+                                    onSwipeOpenChange(true)
+                                } else {
+                                    offsetX.animateTo(0f, spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium))
+                                    onSwipeOpenChange(false)
+                                }
+                            }
+                        },
+                    )
+                },
+        ) {
+            content()
         }
     }
 }

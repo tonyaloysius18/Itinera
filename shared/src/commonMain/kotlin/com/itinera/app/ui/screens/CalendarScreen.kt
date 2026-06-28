@@ -17,7 +17,6 @@ import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.Trip
 import com.itinera.app.model.label
 import com.itinera.app.ui.components.CardShape
-import com.itinera.app.ui.components.EmptyState
 import com.itinera.app.ui.components.TopBar
 
 /**
@@ -37,12 +36,25 @@ fun CalendarScreen(
     Column(Modifier.fillMaxSize()) {
         TopBar(s.calendar)
             if (trips.none { it.legs.isNotEmpty() }) {
-                EmptyState(
-                    icon = Icons.Filled.CalendarMonth,
-                    title = s.noResults,
-                    subtitle = s.noResultsSubtitle,
-                    modifier = Modifier.weight(1f),
-                )
+                Column(
+                    Modifier.fillMaxSize().padding(horizontal = 32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Text("🗓️", style = MaterialTheme.typography.displayMedium)
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        s.noResults,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        s.noResultsSubtitle,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                    )
+                }
             } else {
         Column(Modifier.weight(1f).padding(horizontal = 16.dp)) {
             trips.forEach { trip ->

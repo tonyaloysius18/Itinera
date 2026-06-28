@@ -40,12 +40,13 @@ fun ArchivedTripsScreen(
         if (trips.isEmpty()) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        Icons.Filled.Archive,
-                        contentDescription = null,
-                        modifier = Modifier.size(48.dp),
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
-                    )
+                    Text("📥", style = MaterialTheme.typography.displayMedium)
+//                    Icon(
+//                        Icons.Filled.Archive,
+//                        contentDescription = null,
+//                        modifier = Modifier.size(48.dp),
+//                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+//                    )
                     Spacer(Modifier.height(12.dp))
                     Text(
                         s.noArchivedTrips,

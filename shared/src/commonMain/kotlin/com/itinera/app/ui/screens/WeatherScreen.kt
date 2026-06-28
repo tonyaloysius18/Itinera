@@ -104,7 +104,7 @@ fun WeatherScreen(
         FloatingActionButton(
             onClick = { showAdd = true },
             modifier = Modifier
-                .align(Alignment.BottomEnd)
+                .align(Alignment.BottomEnd).offset(x = (-25).dp, y = (-90).dp)
                 .padding(end = 20.dp, bottom = 24.dp),
             containerColor = MaterialTheme.colorScheme.primary,
             shape = CircleShape,
@@ -395,7 +395,7 @@ private fun AddCityDialog(
                         }
                     },
                     enabled = query.isNotBlank() && !loading,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp),
                 ) { Text(s.search) }
 
                 Spacer(Modifier.height(8.dp))
