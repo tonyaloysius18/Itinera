@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -27,6 +28,7 @@ import com.itinera.app.data.rememberFilePicker
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.i18n.Strings
 import com.itinera.app.model.DocItem
+import com.itinera.app.model.Leg
 import com.itinera.app.model.Trip
 import com.itinera.app.ui.components.CardShape
 import com.itinera.app.ui.components.EmptyState
@@ -71,7 +73,7 @@ fun DocumentsScreen(
     isLoading: Boolean = false,               // ⬅ ADDED
     onBack: () -> Unit,
     onOpenDoc: (String) -> Unit,
-    onUpload: suspend (PickedFile, title: String, category: String) -> Boolean,
+    onUpload: suspend (PickedFile, title: String, category: String, legId: String) -> Boolean,
     onMessage: (String) -> Unit,
     onDeleteDocument: (String) -> Unit,
     canEdit: Boolean = true,
@@ -191,15 +193,16 @@ fun DocumentsScreen(
     if (showDialog && pickedFile != null) {
         AddDocumentDialog(
             file = pickedFile!!,
+            legs = trip.legs,
             onDismiss = { showDialog = false; pickedFile = null },
-            onConfirm = { title, category ->
-                val file = pickedFile!!
+            onConfirm = { title, category, legId ->
+                val f = pickedFile!!
                 showDialog = false
+                pickedFile = null
                 scope.launch {
                     uploading = true
-                    val ok = onUpload(file, title, category)
+                    val ok = onUpload(f, title, category, legId)
                     uploading = false
-                    pickedFile = null
                     if (!ok) onMessage(s.uploadFailed)
                 }
             },
@@ -225,13 +228,20 @@ fun DocumentsScreen(
 @Composable
 private fun AddDocumentDialog(
     file: PickedFile,
+    legs: List<Leg>,
     onDismiss: () -> Unit,
-    onConfirm: (title: String, category: String) -> Unit,
+    onConfirm: (title: String, category: String, legId: String) -> Unit,
 ) {
     val s = LocalStrings.current
-    var title by remember { mutableStateOf(nameWithoutExtension(file.fileName)) }   // default to file name
+    var title by remember { mutableStateOf(nameWithoutExtension(file.fileName)) }
     var category by remember { mutableStateOf(CAT_OTHER) }
     var menuOpen by remember { mutableStateOf(false) }
+
+    // Leg attachment (optional). "" = not attached to any leg.
+    var legId by remember { mutableStateOf("") }
+    var legMenuOpen by remember { mutableStateOf(false) }
+    fun legLabel(id: String): String =
+        legs.firstOrNull { it.id == id }?.let { "${it.fromCity} → ${it.toCity}" } ?: s.attachToNone
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -239,7 +249,6 @@ private fun AddDocumentDialog(
         shape = RoundedCornerShape(16.dp),
         text = {
             Column {
-                // show the picked file name
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(docIcon(file.mimeType), null, tint = docColor(file.mimeType), modifier = Modifier.size(20.dp))
                     Spacer(Modifier.width(8.dp))
@@ -261,6 +270,7 @@ private fun AddDocumentDialog(
                 )
                 Spacer(Modifier.height(12.dp))
 
+                // Category dropdown
                 ExposedDropdownMenuBox(
                     expanded = menuOpen,
                     onExpandedChange = { menuOpen = it },
@@ -288,11 +298,48 @@ private fun AddDocumentDialog(
                         }
                     }
                 }
+
+                // Attach-to-leg dropdown (only shown if the trip has legs)
+                if (legs.isNotEmpty()) {
+                    Spacer(Modifier.height(12.dp))
+                    ExposedDropdownMenuBox(
+                        expanded = legMenuOpen,
+                        onExpandedChange = { legMenuOpen = it },
+                    ) {
+                        OutlinedTextField(
+                            value = legLabel(legId),
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text(s.attachToLeg) },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = legMenuOpen) },
+                            modifier = Modifier.menuAnchor().fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                        )
+                        ExposedDropdownMenu(
+                            expanded = legMenuOpen,
+                            onDismissRequest = { legMenuOpen = false },
+                            modifier = Modifier.background(MaterialTheme.colorScheme.surface),
+                            shape = RoundedCornerShape(12.dp),
+                        ) {
+                            // "None" option
+                            DropdownMenuItem(
+                                text = { Text(s.attachToNone) },
+                                onClick = { legId = ""; legMenuOpen = false },
+                            )
+                            legs.forEach { leg ->
+                                DropdownMenuItem(
+                                    text = { Text("${leg.fromCity} → ${leg.toCity}") },
+                                    onClick = { legId = leg.id; legMenuOpen = false },
+                                )
+                            }
+                        }
+                    }
+                }
             }
         },
         confirmButton = {
             TextButton(
-                onClick = { if (title.isNotBlank()) onConfirm(title.trim(), category) },
+                onClick = { if (title.isNotBlank()) onConfirm(title.trim(), category, legId) },
                 enabled = title.isNotBlank(),
             ) { Text(s.add) }
         },

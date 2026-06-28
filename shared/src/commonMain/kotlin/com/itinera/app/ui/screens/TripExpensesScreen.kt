@@ -1,10 +1,15 @@
 package com.itinera.app.ui.screens
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.outlined.Delete
@@ -20,8 +26,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.Expense
@@ -33,13 +44,14 @@ import com.itinera.app.model.isOwnedBy
 import com.itinera.app.ui.components.CardShape
 import com.itinera.app.ui.components.EmptyState
 import com.itinera.app.ui.components.TopBar
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TripExpensesScreen(
     trip: Trip,
     expenses: List<Expense>,
-    payments: List<com.itinera.app.model.Payment> = emptyList(),   // ⬅ ADD
+    payments: List<com.itinera.app.model.Payment> = emptyList(),
     onBack: () -> Unit,
     isLoading: Boolean = false,
     onAddExpense: () -> Unit,
@@ -49,13 +61,14 @@ fun TripExpensesScreen(
     canEdit: Boolean = true,
     currentUid: String = "",
     onSetSettled: (Boolean) -> Unit = {},
-    onMarkPaid: (String, String, Double) -> Unit = { _, _, _ -> },  // ⬅ ADD (from, to, amount)
-    onDeletePayment: (String) -> Unit = {},                          // ⬅ ADD
+    onMarkPaid: (String, String, Double) -> Unit = { _, _, _ -> },
+    onDeletePayment: (String) -> Unit = {},
 ) {
     val s = LocalStrings.current
     var pendingDelete by remember { mutableStateOf<Expense?>(null) }
     var showCurrencyPicker by remember { mutableStateOf(false) }
     var expandedId by remember { mutableStateOf<String?>(null) }
+    var openSwipeId by remember { mutableStateOf<String?>(null) }   // which card is swiped open
 
     fun nameOf(id: String): String =
         trip.travellers.firstOrNull { it.id == id }?.firstName ?: "?"
@@ -69,7 +82,6 @@ fun TripExpensesScreen(
     // ---- settle-up state ----
     val isOwner = trip.isOwnedBy(currentUid)
     val isSettled = trip.settledAt > 0L
-    // the traveller linked to the current member (via reconciliation: traveller.userId == uid)
     val myTravellerId = trip.travellers.firstOrNull { it.userId == currentUid }?.id
     val iOwe = if (myTravellerId == null) 0.0
     else settlements.filter { it.fromTravellerId == myTravellerId }.sumOf { it.amount }
@@ -84,7 +96,6 @@ fun TripExpensesScreen(
             )
 
             if (expenses.isEmpty()) {
-                // In empty state, we still want to show the currency card at the top
                 Column(Modifier.fillMaxSize()) {
                     TotalCard(
                         total = total,
@@ -105,7 +116,6 @@ fun TripExpensesScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    // ---- Settled banner (non-owners, when the owner has settled) ----
                     if (isSettled && !isOwner) {
                         item {
                             val settledByName = trip.memberInfo[trip.settledBy]?.name?.takeIf { it.isNotBlank() }
@@ -120,7 +130,6 @@ fun TripExpensesScreen(
                         }
                     }
 
-                    // ---- Total ----
                     item {
                         TotalCard(
                             total = total,
@@ -129,13 +138,12 @@ fun TripExpensesScreen(
                         )
                     }
 
-                    // ---- Settle up (minimised) ----
                     item {
                         Surface(shape = CardShape, color = MaterialTheme.colorScheme.surfaceVariant) {
                             Column(Modifier.fillMaxWidth().padding(16.dp)) {
                                 Text(s.settleUp, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
                                 Text(s.settleUpHint, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f))
-                                Spacer(Modifier.height(10.dp))
+                                Spacer(Modifier.height(8.dp))
                                 if (settlements.isEmpty()) {
                                     Text(s.allSettled, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
                                 } else {
@@ -143,7 +151,7 @@ fun TripExpensesScreen(
                                         val iAmDebtor = trip.travellers
                                             .firstOrNull { it.id == st.fromTravellerId }?.userId == currentUid
                                         Row(
-                                            Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                                            Modifier.fillMaxWidth().padding(vertical = 2.dp),
                                             verticalAlignment = Alignment.CenterVertically,
                                         ) {
                                             Text(
@@ -168,26 +176,27 @@ fun TripExpensesScreen(
                                     }
                                 }
 
-                                // Owner-only settle / un-settle control
                                 if (isOwner) {
-                                    Spacer(Modifier.height(14.dp))
-                                    if (isSettled) {
-                                        OutlinedButton(
-                                            onClick = { onSetSettled(false) },
-                                            modifier = Modifier.fillMaxWidth(),
-                                        ) { Text(s.unsettleTrip) }
-                                    } else {
-                                        Button(
-                                            onClick = { onSetSettled(true) },
-                                            modifier = Modifier.fillMaxWidth(),
-                                            enabled = settlements.isNotEmpty(),
-                                        ) { Text(s.settleUpTrip) }
+                                    Spacer(Modifier.height(4.dp))
+                                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                                        if (isSettled) {
+                                            OutlinedButton(
+                                                onClick = { onSetSettled(false) },
+                                                contentPadding = PaddingValues(horizontal = 60.dp, vertical = 6.dp),
+                                            ) { Text(s.unsettleTrip) }
+                                        } else {
+                                            Button(
+                                                onClick = { onSetSettled(true) },
+                                                contentPadding = PaddingValues(horizontal = 60.dp, vertical = 6.dp),
+                                                enabled = settlements.isNotEmpty(),
+                                            ) { Text(s.settleUpTrip) }
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                    // ---- Payments history ----
+
                     if (payments.isNotEmpty()) {
                         item {
                             Surface(shape = CardShape, color = MaterialTheme.colorScheme.surfaceVariant) {
@@ -216,7 +225,6 @@ fun TripExpensesScreen(
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 fontWeight = FontWeight.Medium,
                                             )
-                                            // only the person who recorded it can undo it
                                             if (iMadeIt) {
                                                 IconButton(onClick = { onDeletePayment(p.id) }) {
                                                     Icon(
@@ -234,7 +242,6 @@ fun TripExpensesScreen(
                         }
                     }
 
-                    // ---- Who owes whom (pairwise) ----
                     if (pairwise.isNotEmpty()) {
                         item {
                             Surface(shape = CardShape, color = MaterialTheme.colorScheme.surfaceVariant) {
@@ -259,70 +266,74 @@ fun TripExpensesScreen(
                         )
                     }
 
-                    // ---- Expense rows (tap to expand split detail) ----
+                    // ---- Expense rows (swipe to delete, tap to expand) ----
                     items(expenses.sortedByDescending { it.createdAt }, key = { it.id }) { exp ->
-                        val expanded = expandedId == exp.id
-                        Surface(
-                            modifier = Modifier.fillMaxWidth().animateContentSize(),
-                            shape = CardShape,
-                            color = MaterialTheme.colorScheme.surface,
-                            border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
+                        SwipeableExpenseCard(
+                            canEdit = canEdit,
+                            isSwipeOpen = openSwipeId == exp.id,
+                            onSwipeOpenChange = { open -> openSwipeId = if (open) exp.id else null },
+                            onRequestDelete = { pendingDelete = exp },
+                            modifier = Modifier.animateItem(),
                         ) {
-                            Column {
-                                Row(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .combinedClickable(
-                                            onClick = { expandedId = if (expanded) null else exp.id },
-                                            onLongClick = { if (canEdit) pendingDelete = exp },
-                                        )
-                                        .padding(14.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    Column(Modifier.weight(1f)) {
-                                        Text(exp.description, style = MaterialTheme.typography.bodyLarge)
-                                        Spacer(Modifier.height(2.dp))
+                            val expanded = expandedId == exp.id
+                            Surface(
+                                modifier = Modifier.fillMaxWidth().animateContentSize(),
+                                shape = CardShape,
+                                color = MaterialTheme.colorScheme.surface,
+                                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
+                            ) {
+                                Column {
+                                    Row(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .clickable { expandedId = if (expanded) null else exp.id }
+                                            .padding(14.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Column(Modifier.weight(1f)) {
+                                            Text(exp.description, style = MaterialTheme.typography.bodyLarge)
+                                            Spacer(Modifier.height(2.dp))
+                                            Text(
+                                                "${s.paidBy} ${nameOf(exp.paidByTravellerId)}",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                            )
+                                        }
                                         Text(
-                                            "${s.paidBy} ${nameOf(exp.paidByTravellerId)}",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                            formatMoney(exp.amount, trip.currencyCode),
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.SemiBold,
                                         )
                                     }
-                                    Text(
-                                        formatMoney(exp.amount, trip.currencyCode),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.SemiBold,
-                                    )
-                                }
 
-                                if (expanded) {
-                                    HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
-                                    Column(Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = 10.dp, bottom = 12.dp)) {
-                                        Text(s.splitLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                                        Spacer(Modifier.height(6.dp))
-                                        // each non-payer owes the payer their share
-                                        exp.shares
-                                            .filter { it.travellerId != exp.paidByTravellerId && it.amount > 0.0 }
-                                            .forEach { share ->
-                                                Row(Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
-                                                    Text(
-                                                        "${nameOf(share.travellerId)} ${s.owes} ${nameOf(exp.paidByTravellerId)}",
-                                                        style = MaterialTheme.typography.bodyMedium,
-                                                        modifier = Modifier.weight(1f),
-                                                    )
-                                                    Text(
-                                                        formatMoney(share.amount, trip.currencyCode),
-                                                        style = MaterialTheme.typography.bodyMedium,
-                                                        fontWeight = FontWeight.Medium,
-                                                    )
+                                    if (expanded) {
+                                        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
+                                        Column(Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = 10.dp, bottom = 12.dp)) {
+                                            Text(s.splitLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                                            Spacer(Modifier.height(6.dp))
+                                            exp.shares
+                                                .filter { it.travellerId != exp.paidByTravellerId && it.amount > 0.0 }
+                                                .forEach { share ->
+                                                    Row(Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
+                                                        Text(
+                                                            "${nameOf(share.travellerId)} ${s.owes} ${nameOf(exp.paidByTravellerId)}",
+                                                            style = MaterialTheme.typography.bodyMedium,
+                                                            modifier = Modifier.weight(1f),
+                                                        )
+                                                        Text(
+                                                            formatMoney(share.amount, trip.currencyCode),
+                                                            style = MaterialTheme.typography.bodyMedium,
+                                                            fontWeight = FontWeight.Medium,
+                                                        )
+                                                    }
                                                 }
-                                            }
-                                        Spacer(Modifier.height(6.dp))
-                                        if (canEdit) {
-                                            TextButton(onClick = { onEditExpense(exp.id) }, contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)) {
-                                                Icon(Icons.Filled.Edit, null, modifier = Modifier.size(16.dp))
-                                                Spacer(Modifier.width(6.dp))
-                                                Text(s.edit)
+                                            Spacer(Modifier.height(6.dp))
+                                            if (canEdit) {
+                                                TextButton(onClick = { onEditExpense(exp.id) }, contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)) {
+                                                    Icon(Icons.Filled.Edit, null, modifier = Modifier.size(16.dp))
+                                                    Spacer(Modifier.width(6.dp))
+                                                    Text(s.edit)
+                                                }
                                             }
                                         }
                                     }
@@ -337,7 +348,6 @@ fun TripExpensesScreen(
         }
 
         if (canEdit) {
-
             FloatingActionButton(
                 onClick = onAddExpense,
                 modifier = Modifier
@@ -346,11 +356,10 @@ fun TripExpensesScreen(
                 containerColor = MaterialTheme.colorScheme.primary,
                 shape = CircleShape,
             ) {
-                Icon(Icons.Filled.Add, contentDescription = null)            //text = { Text(s.addExpense) },
+                Icon(Icons.Filled.Add, contentDescription = null)
             }
         }
     }
-
 
     if (showCurrencyPicker) {
         AlertDialog(
@@ -389,12 +398,117 @@ fun TripExpensesScreen(
             title = { Text(s.deleteExpenseQ) },
             text = { Text(exp.description) },
             confirmButton = {
-                TextButton(onClick = { onDeleteExpense(exp.id); pendingDelete = null }) {
+                TextButton(onClick = { onDeleteExpense(exp.id); pendingDelete = null; openSwipeId = null }) {
                     Text(s.delete, color = Color(0xFFE03131))
                 }
             },
             dismissButton = { TextButton(onClick = { pendingDelete = null }) { Text(s.cancel) } },
         )
+    }
+}
+
+/**
+ * Wraps an expense card with swipe-to-reveal-delete (matches the home/weather cards).
+ * Tap still goes to the inner content (expand). Swipe reveals a Delete button that
+ * calls [onRequestDelete] (which opens the confirm dialog). Gated on [canEdit].
+ */
+@Composable
+private fun SwipeableExpenseCard(
+    canEdit: Boolean,
+    isSwipeOpen: Boolean,
+    onSwipeOpenChange: (Boolean) -> Unit,
+    onRequestDelete: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    if (!canEdit) {
+        // Viewers: no swipe, just the card.
+        Box(modifier.fillMaxWidth()) { content() }
+        return
+    }
+
+    val s = LocalStrings.current
+    val density = LocalDensity.current
+    val actionWidth = 80.dp
+    val gap = 15.dp
+    val panelWidth = actionWidth + gap
+    val panelPx = with(density) { panelWidth.toPx() }
+    val scope = rememberCoroutineScope()
+    val offsetX = remember { Animatable(0f) }
+
+    val progress = ((-offsetX.value - with(density) { gap.toPx() }) /
+            (panelPx - with(density) { gap.toPx() })).coerceIn(0f, 1f)
+
+    LaunchedEffect(isSwipeOpen) {
+        if (!isSwipeOpen && offsetX.value != 0f) offsetX.animateTo(0f, spring(stiffness = Spring.StiffnessMedium))
+    }
+
+    Box(modifier.fillMaxWidth()) {
+        // Behind: delete action — only present while swiped, so no flash on collapse
+        if (offsetX.value != 0f) {
+            Row(
+                Modifier.matchParentSize().clip(CardShape),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                Column(Modifier.width(panelWidth).fillMaxHeight().padding(start = gap)) {
+                    ExpenseDeleteButton(progress, Modifier.weight(1f)) { onRequestDelete() }
+                }
+            }
+        }
+
+        // Front: the expense card, draggable
+        Box(
+            Modifier
+                .offset { IntOffset(offsetX.value.roundToInt(), 0) }
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures(
+                        onHorizontalDrag = { _, dragAmount ->
+                            scope.launch {
+                                offsetX.snapTo((offsetX.value + dragAmount).coerceIn(-panelPx, 0f))
+                            }
+                        },
+                        onDragEnd = {
+                            scope.launch {
+                                if (offsetX.value < -panelPx / 2) {
+                                    offsetX.animateTo(-panelPx, spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow))
+                                    onSwipeOpenChange(true)
+                                } else {
+                                    offsetX.animateTo(0f, spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium))
+                                    onSwipeOpenChange(false)
+                                }
+                            }
+                        },
+                    )
+                },
+        ) {
+            content()
+        }
+    }
+}
+
+@Composable
+private fun ExpenseDeleteButton(progress: Float, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    val s = LocalStrings.current
+    Column(
+        modifier.fillMaxHeight().clickable(
+            onClick = onClick,
+            indication = null,
+            interactionSource = remember { MutableInteractionSource() },
+        ),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Box(
+            Modifier.size(52.dp)
+                .graphicsLayer { scaleX = progress; scaleY = progress; alpha = progress }
+                .clip(CircleShape)
+                .background(Color(0xFFB23B3B)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(Icons.Filled.Delete, contentDescription = s.delete, tint = Color.White, modifier = Modifier.size(20.dp))
+        }
+        Spacer(Modifier.height(5.dp))
+        Text(s.delete, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f), style = MaterialTheme.typography.labelSmall)
     }
 }
 

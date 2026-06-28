@@ -115,7 +115,7 @@ fun TranslateScreen(
         val text = input.trim()
         val r = result
         if (text.isBlank() || r.isBlank()) return@LaunchedEffect
-        delay(100000)
+        delay(10000)
         TranslateHistoryStore.add(
             TranslationEntry(
                 id = Clock.System.now().toEpochMilliseconds().toString(),

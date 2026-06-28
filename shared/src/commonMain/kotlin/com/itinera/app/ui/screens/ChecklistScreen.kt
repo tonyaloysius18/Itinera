@@ -2,7 +2,9 @@ package com.itinera.app.ui.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckBox
@@ -38,7 +40,6 @@ fun ChecklistScreen(
     // existing groups in this checklist, used to offer them in the dialog
     val existingGroups = items.map { it.group }.distinct()
 
-
     Column(Modifier.fillMaxSize()) {
         TopBar(s.beforeYouGo, onBack = onBack)
         Column(Modifier.padding(horizontal = 16.dp)) {
@@ -50,10 +51,14 @@ fun ChecklistScreen(
             Progress(if (items.isEmpty()) 0f else doneCount.toFloat() / items.size)
         }
         Spacer(Modifier.height(16.dp))
-        Column(Modifier.weight(1f).padding(horizontal = 16.dp)) {
+        Column(
+            Modifier.weight(1f)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp)
+        ) {
             if (items.isEmpty()) {
                 Column(
-                    Modifier.fillMaxSize(),
+                    Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
@@ -79,40 +84,36 @@ fun ChecklistScreen(
                     )
                 }
             } else {
-                items.forEach { item ->
-                    Row(
-                        Modifier.fillMaxWidth().padding(vertical = 1.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Row(
-                            Modifier.weight(1f).clickable { onToggle(item.id) }.padding(vertical = 7.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            if (item.done) {
-                                Icon(Icons.Filled.CheckBox, null, tint = Color(0xFF1D9E75))
-                            } else {
-                                Icon(Icons.Outlined.CheckBoxOutlineBlank, null, tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
-                            }
-                            Spacer(Modifier.width(10.dp))
-                            Text(
-                                item.text,
-                                style = MaterialTheme.typography.bodyLarge,
-                                textDecoration = if (item.done) TextDecoration.LineThrough else null,
-                                color = if (item.done) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurface,
-                            )
-                        }
-                        IconButton(onClick = { onDelete(item.id) }) {
-                            Icon(
-                                Icons.Outlined.Delete,
-                                contentDescription = s.delete,
-                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                                modifier = Modifier.size(20.dp),
-                            )
-                        }
+                // canonical order so sections always appear in the same sequence
+                val groupOrder = listOf(
+                    s.documents, s.bookings, s.packing,
+                    s.transport, s.money, s.gadget, s.other
+                )
+                val grouped = items
+                    .groupBy { it.group }
+                    .toList()
+                    .sortedBy { (group, _) ->
+                        groupOrder.indexOf(group).let { if (it == -1) Int.MAX_VALUE else it }
+                    }
+
+                grouped.forEach { (group, groupItems) ->
+                    Text(
+                        group,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 14.dp, bottom = 2.dp),
+                    )
+                    groupItems.forEach { item ->
+                        ChecklistRow(
+                            item = item,
+                            onToggle = onToggle,
+                            onDelete = onDelete,
+                            deleteLabel = s.delete,
+                        )
                     }
                 }
+            }
         }
-    }
         Box(
             modifier = Modifier.fillMaxWidth().padding(16.dp).padding(bottom = 60.dp),
             contentAlignment = Alignment.Center
@@ -130,7 +131,7 @@ fun ChecklistScreen(
         }
     }
 
-    if (showAddDialog) {                                             // ⬅ the dialog
+    if (showAddDialog) {
         AddChecklistItemDialog(
             existingGroups = existingGroups,
             onDismiss = { showAddDialog = false },
@@ -142,7 +143,48 @@ fun ChecklistScreen(
     }
 }
 
-// ---- Add-item dialog ----                                         // ⬅ new composable
+// ---- Single checklist row ----
+@Composable
+private fun ChecklistRow(
+    item: ChecklistItem,
+    onToggle: (String) -> Unit,
+    onDelete: (String) -> Unit,
+    deleteLabel: String,
+) {
+    Row(
+        Modifier.fillMaxWidth().padding(vertical = 1.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Row(
+            Modifier.weight(1f).clickable { onToggle(item.id) }.padding(vertical = 7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (item.done) {
+                Icon(Icons.Filled.CheckBox, null, tint = Color(0xFF1D9E75))
+            } else {
+                Icon(Icons.Outlined.CheckBoxOutlineBlank, null, tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
+            }
+            Spacer(Modifier.width(10.dp))
+            Text(
+                item.text,
+                style = MaterialTheme.typography.bodyLarge,
+                textDecoration = if (item.done) TextDecoration.LineThrough else null,
+                color = if (item.done) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                else MaterialTheme.colorScheme.onSurface,
+            )
+        }
+        IconButton(onClick = { onDelete(item.id) }) {
+            Icon(
+                Icons.Outlined.Delete,
+                contentDescription = deleteLabel,
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                modifier = Modifier.size(20.dp),
+            )
+        }
+    }
+}
+
+// ---- Add-item dialog ----
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun AddChecklistItemDialog(
@@ -221,7 +263,7 @@ private fun AddChecklistItemDialog(
                         ).fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                     )
-                    ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                    ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }, shape = RoundedCornerShape(12.dp)) {
                         groupOptions.forEach { g ->
                             DropdownMenuItem(
                                 text = { Text(g) },
@@ -236,7 +278,6 @@ private fun AddChecklistItemDialog(
     )
 }
 
-// keyword auto-suggest → returns a group name that exists in options, else "Other"
 // keyword auto-suggest → returns one of the provided localized labels, else the "other" label
 private fun suggestGroup(
     text: String,

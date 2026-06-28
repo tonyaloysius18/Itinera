@@ -416,6 +416,7 @@ class TripRepository {
         title: String,
         category: String,
         file: PickedFile,
+        legId: String = "",
     ): Boolean {
         return try {
             val url = uploadFileToStorage(uploadClient, file.bytes, file.fileName, file.mimeType)
@@ -424,6 +425,7 @@ class TripRepository {
                 tripId = tripId,
                 title = title,
                 category = category,
+                legId = legId,
                 fileName = file.fileName,
                 fileUrl = url,
                 mimeType = file.mimeType,

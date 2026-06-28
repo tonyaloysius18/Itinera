@@ -356,4 +356,8 @@ internal val EN: Strings by lazy { Strings().apply {
 
     compass = "Compass"
     compassCalibrate = "Move your device in a figure-8 to calibrate the compass."
+
+    attachToLeg = "Attach to leg"
+    attachToNone = "None (whole trip)"
+    viewTicket = "View ticket"
 } }

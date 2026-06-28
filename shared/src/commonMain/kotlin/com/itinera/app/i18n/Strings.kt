@@ -466,6 +466,11 @@ class Strings {
     var compass: String = ""
     var compassCalibrate: String = ""
 
+    // Leg ↔ document link
+    var attachToLeg: String = ""
+    var attachToNone: String = ""
+    var viewTicket: String = ""
+
     fun copyApply(block: Strings.() -> Unit): Strings {
 
         val c = Strings()
@@ -820,6 +825,9 @@ class Strings {
         c.favorite = this.favorite
         c.compass = this.compass
         c.compassCalibrate = this.compassCalibrate
+        c.attachToLeg = this.attachToLeg
+        c.attachToNone = this.attachToNone
+        c.viewTicket = this.viewTicket
 
         c.block()
         return c

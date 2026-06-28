@@ -1,69 +1,55 @@
 package com.itinera.app
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Flight
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import com.itinera.app.data.TripRepository
-import com.itinera.app.i18n.Language
-import com.itinera.app.i18n.LocalStrings
-import com.itinera.app.i18n.stringsFor
-import com.itinera.app.ui.Navigator
-import com.itinera.app.ui.Screen
-import com.itinera.app.ui.rememberNavigator
-import com.itinera.app.ui.screens.*
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.material.icons.filled.CurrencyExchange
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.core.*
+import androidx.compose.animation.*
+import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.material.icons.filled.ReceiptLong
-import com.itinera.app.data.imageQueryForTrip
-import com.itinera.app.ui.theme.ThemeMode
-import kotlin.math.abs
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
-import kotlinx.coroutines.launch
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
+import com.itinera.app.data.TripRepository
+import com.itinera.app.data.imageQueryForTrip
+import com.itinera.app.i18n.Language
+import com.itinera.app.i18n.LocalStrings
+import com.itinera.app.i18n.stringsFor
 import com.itinera.app.i18n.systemLanguage
 import com.itinera.app.model.canEdit
+import com.itinera.app.ui.Navigator
+import com.itinera.app.ui.Screen
 import com.itinera.app.ui.components.PlaneLoader
+import com.itinera.app.ui.rememberNavigator
+import com.itinera.app.ui.components.*
+import com.itinera.app.ui.screens.*
+import com.itinera.app.ui.theme.ThemeMode
+import kotlin.math.abs
 import kotlinx.coroutines.delay
-
+import kotlinx.coroutines.launch
 
 /**
  * App root. Owns the global state and routes the current screen.
@@ -101,7 +87,6 @@ fun App() {
         }
         authChecked = true
     }
-
 
     val activeStrings = stringsFor(if (language == Language.SYSTEM) systemLanguage() else language)
 
@@ -209,7 +194,6 @@ private fun AppContent(
 
     val showBottomBar = current in topLevel
 
-    // ===== ROOT BOX: everything overlays here, so the pill shows on every screen incl. Login =====
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -219,7 +203,6 @@ private fun AppContent(
             .background(MaterialTheme.colorScheme.background)
             .nestedScroll(nestedScrollConnection),
     ) {
-        // Login and LanguagePicker render full-screen (no Surface padding, no nav bar).
         when (current) {
             Screen.Login -> LoginScreen(
                 authService = repository.authService,
@@ -231,9 +214,8 @@ private fun AppContent(
                             try {
                                 val existing = repository.profileService.loadProfile(uid)
                                 if (existing != null) {
-                                    repository.updateProfile(existing)          // returning user
+                                    repository.updateProfile(existing)
                                 } else {
-                                    // new Google user → build profile from Google account
                                     val googleProfile = repository.authService.currentUserProfile()
                                     if (googleProfile != null) {
                                         repository.updateProfile(googleProfile)
@@ -242,7 +224,6 @@ private fun AppContent(
                                 }
                             } catch (e: Exception) { }
 
-                            // record this account for the switcher (after profile is set, both paths)
                             repository.accountStore.remember(
                                 com.itinera.app.data.RememberedAccount(
                                     uid = uid,
@@ -260,7 +241,6 @@ private fun AppContent(
                         }
                         navigator.resetTo(Screen.Home)
                         prefillEmail = ""
-
                     }
                 },
                 onCreateAccount = { navigator.push(Screen.CreateAccount) },
@@ -286,15 +266,13 @@ private fun AppContent(
                             onBack = { navigator.back() },
                             onMessage = { pillMessage = it },
                             onCreate = { profile ->
-                                repository.updateProfile(profile)            // in-memory (immediate UI)
-                                scope.launch {                               // persist to Firestore
+                                repository.updateProfile(profile)
+                                scope.launch {
                                     val uid = repository.authService.currentUid
                                     if (uid != null) {
                                         try {
                                             repository.profileService.saveProfile(uid, profile)
-                                        } catch (e: Exception) {
-                                            // non-fatal
-                                        }
+                                        } catch (e: Exception) {}
                                     }
                                 }
                                 navigator.resetTo(Screen.Login)
@@ -321,9 +299,8 @@ private fun AppContent(
                             onArchiveTrip = { repository.toggleArchive(it) },
                             onDeleteTrip = { repository.deleteTrip(it) },
                             currentUid = repository.authService.currentUid ?: "",
-                            onOpenMembers = { navigator.push(Screen.Members(it)) },   // ⬅ CHANGED from onCreateInvite
+                            onOpenMembers = { navigator.push(Screen.Members(it)) },
                             onJoinByCode = { repository.joinTripByCode(it) },
-
                         )
 
                         Screen.Currency -> CurrencyScreen(
@@ -350,6 +327,8 @@ private fun AppContent(
                                 onDeleteActivity = { repository.deleteActivity(it) },
                                 canEdit = trip.canEdit(repository.authService.currentUid ?: ""),
                                 onMembers = { navigator.push(Screen.Members(screen.tripId)) },
+                                documents = repository.documents.filter { it.tripId == screen.tripId },
+                                onOpenDoc = { docId -> navigator.push(Screen.DocViewer(docId)) },
                             )
                         }
 
@@ -404,7 +383,7 @@ private fun AppContent(
                             else {
                                 LaunchedEffect(screen.tripId) {
                                     repository.ensureOwnerTraveller(screen.tripId)
-                                    repository.reconcileMembersToTravellers(screen.tripId)   // ⬅ ADD
+                                    repository.reconcileMembersToTravellers(screen.tripId)
                                 }
                                 TravellersScreen(
                                     travellers = trip.travellers,
@@ -448,8 +427,8 @@ private fun AppContent(
                                 onOpenDoc = { navigator.push(Screen.DocViewer(it)) },
                                 onDeleteDocument = { repository.deleteDocument(it) },
                                 onMessage = { pillMessage = it },
-                                onUpload = { file, title, category ->
-                                    repository.addDocumentWithFile(screen.tripId, title, category, file)
+                                onUpload = { file, title, category, legId ->
+                                    repository.addDocumentWithFile(screen.tripId, title, category, file, legId)
                                 },
                                 canEdit = trip.canEdit(repository.authService.currentUid ?: "")
                             )
@@ -475,7 +454,6 @@ private fun AppContent(
                                 onToggle = { repository.toggleChecklistItem(it) },
                                 onAdd = { text, group -> repository.addChecklistItem(screen.tripId, text, group) },
                                 onDelete = { repository.deleteChecklistItem(it) },
-
                             )
                         }
 
@@ -493,12 +471,12 @@ private fun AppContent(
                             else {
                                 LaunchedEffect(screen.tripId) {
                                     repository.ensureOwnerTraveller(screen.tripId)
-                                    repository.reconcileMembersToTravellers(screen.tripId)   // ⬅ ADD
+                                    repository.reconcileMembersToTravellers(screen.tripId)
                                 }
                                 TripExpensesScreen(
                                     trip = trip,
                                     expenses = repository.expensesForTrip(screen.tripId),
-                                    payments = repository.paymentsForTrip(screen.tripId),          // ⬅ ADD
+                                    payments = repository.paymentsForTrip(screen.tripId),
                                     isLoading = !repository.expensesSyncedOnce,
                                     onBack = { navigator.back() },
                                     onAddExpense = { navigator.push(Screen.AddExpense(screen.tripId)) },
@@ -508,10 +486,10 @@ private fun AppContent(
                                     canEdit = trip.canEdit(repository.authService.currentUid ?: ""),
                                     currentUid = repository.authService.currentUid ?: "",
                                     onSetSettled = { repository.setTripSettled(screen.tripId, it) },
-                                    onMarkPaid = { from, to, amount ->                              // ⬅ ADD
+                                    onMarkPaid = { from, to, amount ->
                                         repository.addPayment(screen.tripId, from, to, amount)
                                     },
-                                    onDeletePayment = { repository.deletePayment(it) },             // ⬅ ADD
+                                    onDeletePayment = { repository.deletePayment(it) },
                                 )
                             }
                         }
@@ -569,9 +547,9 @@ private fun AppContent(
                                     navigator.resetTo(Screen.Login)
                                 }
                             },
-                            onForgetAccount = { account ->                       // ⬅ ADD
+                            onForgetAccount = { account ->
                                 repository.accountStore.forget(account.uid)
-                                navigator.resetTo(Screen.Account)                // refresh the screen
+                                navigator.resetTo(Screen.Account)
                             },
                             onAddAccount = {
                                 repository.clearLocal()
@@ -586,9 +564,9 @@ private fun AppContent(
                                     val uid = repository.authService.currentUid
                                     try {
                                         if (uid != null) {
-                                            repository.profileService.deleteProfile(uid)   // Firestore FIRST (while authed)
+                                            repository.profileService.deleteProfile(uid)
                                         }
-                                        repository.authService.deleteAccount()             // then Auth account
+                                        repository.authService.deleteAccount()
                                         navigator.resetTo(Screen.Login)
                                         pillMessage = s.accountDeleted
                                     } catch (e: Exception) {
@@ -598,8 +576,6 @@ private fun AppContent(
                             },
                             onBack = { navigator.back() },
                         )
-
-
 
                         Screen.Notifications -> NotificationsScreen(
                             offsetMinutes = repository.profile.reminderOffsetMinutes,
@@ -614,8 +590,8 @@ private fun AppContent(
                                 }
                             },
                             onRequestPermission = {
-                                NotificationPermission.request()                       // Android system dialog
-                                scope.launch { repository.notificationScheduler.requestPermission() }  // iOS path
+                                NotificationPermission.request()
+                                scope.launch { repository.notificationScheduler.requestPermission() }
                             },
                             onBack = { navigator.back() },
                         )
@@ -716,8 +692,6 @@ private fun AppContent(
                                 pillMessageTop = s.changesSaved
                             },
                         )
-
-                        else -> {}
                     }
                 }
             }
@@ -729,7 +703,7 @@ private fun AppContent(
                 NavItem(Icons.Filled.Flight, s.myTrips, Screen.Home),
                 NavItem(Icons.Filled.CalendarMonth, s.calendar, Screen.Calendar),
                 NavItem(Icons.Filled.CurrencyExchange, s.currencyUnits, Screen.Currency),
-                NavItem(Icons.Filled.ReceiptLong, s.split, Screen.Split),
+                NavItem(Icons.AutoMirrored.Filled.ReceiptLong, s.split, Screen.Split),
                 NavItem(Icons.Filled.Settings, s.settings, Screen.Settings),
             )
             Box(
@@ -737,27 +711,26 @@ private fun AppContent(
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
-                    .padding(horizontal = 24.dp)
-                    .padding(top = 6.dp)
+                    .padding(horizontal = 12.dp)
+                    .padding(bottom = 16.dp)
                     .graphicsLayer {
                         scaleX = animatedScale
                         scaleY = animatedScale
-                        transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 1f)
-                        alpha = 1f
+                        transformOrigin = TransformOrigin(0.5f, 1f)
                     },
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.BottomCenter,
             ) {
                 SlidingPillBar(current = current, items = items) { navigator.resetTo(it) }
             }
         }
 
-        // Message pill overlay — last child, so it floats above everything on every screen.
+        // Message pill overlay
         MessagePill(
             message = pillMessage,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
-                .padding(bottom = 60.dp),
+                .padding(bottom = 96.dp),
         )
 
         MessagePill(
@@ -765,7 +738,7 @@ private fun AppContent(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
-                .padding(bottom = 120.dp),
+                .padding(bottom = 156.dp),
         )
     }
 }
@@ -811,73 +784,176 @@ private fun SlidingPillBar(
 ) {
     val count = items.size
     val selectedIndex = items.indexOfFirst { it.screen == current }.coerceAtLeast(0)
-    val onSurface = MaterialTheme.colorScheme.onSurface
+
+    val barBackgroundColor = MaterialTheme.colorScheme.surfaceVariant
+    val gapColor = MaterialTheme.colorScheme.background
+
+    // 🎨 DYNAMIC LUMINANCE CHECK: Determines whether the current layout context is light or dark
+    // by checking the red color channel component value of your surfaceVariant theme configuration.
+    val isLightModeColor = barBackgroundColor.red > 0.5f
+
+    // 🎯 FIX: Explicitly forces the circle color to mirror the main background surface variant
+    // when running in light mode, ensuring perfect color uniformity.
+    val activeCircleColor = if (isLightModeColor) barBackgroundColor else Color(0xFF3D3C3A)
+
+    // 🎯 FIX: Sets the selected icon color to match the clean unselected tone, avoiding any blue tints.
+    val selectedIconColor = if (isLightModeColor) Color(0xFF5A5957) else Color(0xFFDBDBDB)
+    val unselectedIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
 
     val targetBias = if (count <= 1) 0f else -1f + 2f * selectedIndex / (count - 1)
     val bias by animateFloatAsState(
         targetValue = targetBias,
-        animationSpec = spring(dampingRatio = 0.75f, stiffness = 400f),
+        animationSpec = spring(dampingRatio = 0.78f, stiffness = 350f),
         label = "pillSlide",
     )
-
     val step = if (count <= 1) 2f else 2f / (count - 1)
 
-    // ===== Whole-bar hop on screen change =====
     val barPulse = remember { Animatable(1f) }
     LaunchedEffect(current) {
         barPulse.snapTo(1f)
-        barPulse.animateTo(1.05f, animationSpec = tween(durationMillis = 100))   // subtle swell
+        barPulse.animateTo(1.02f, animationSpec = tween(durationMillis = 80))
         barPulse.animateTo(
             targetValue = 1f,
-            animationSpec = spring(dampingRatio = 0.6f, stiffness = 400f),       // gentler settle
+            animationSpec = spring(dampingRatio = 0.65f, stiffness = 400f),
         )
     }
 
-    Surface(
-        modifier = Modifier.graphicsLayer {
-            scaleX = barPulse.value
-            scaleY = barPulse.value
-        },   // ⬅ the bounce
-        shape = RoundedCornerShape(32.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        tonalElevation = 6.dp,
-        shadowElevation = 2.dp,
-    ) {
-        Box(Modifier.padding(8.dp)) {
+    val animatedIndexFloat = (bias + 1f) / 2f * (count - 1)
+    val sidePaddingPx = with(LocalDensity.current) { 32.dp.toPx() }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(1f / count)
-                    .height(48.dp)
-                    .align(BiasAlignment(horizontalBias = bias, verticalBias = 0f))
-                    .padding(horizontal = 4.dp)
-                    .clip(CircleShape)
-                    .background(onSurface.copy(alpha = 0.12f))
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .height(96.dp)
+            .graphicsLayer {
+                scaleX = barPulse.value
+                scaleY = barPulse.value
+            },
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(96.dp)
+        ) {
+            val width = size.width
+            val height = size.height
+            val cornerRadius = 28.dp.toPx()
+
+            val barHeightPx = 56.dp.toPx()
+            val barTopY = height - barHeightPx
+
+            val centerX = sidePaddingPx + (width - 2 * sidePaddingPx) * (animatedIndexFloat + 0.5f) / count
+
+            val dipWidth = 52.dp.toPx()
+            val dipDepth = 40.dp.toPx()
+
+            val bubbleRadius = 24.dp.toPx()
+            val bubbleCenterY = barTopY + 8.dp.toPx()
+
+            // Base Pill Path Geometry
+            val path = Path().apply {
+                val dipStart = centerX - dipWidth
+                val dipEnd = centerX + dipWidth
+
+                // Start bottom-left
+                moveTo(0f, height - cornerRadius)
+                quadraticTo(0f, height, cornerRadius, height)
+                lineTo(width - cornerRadius, height)
+                quadraticTo(width, height, width, height - cornerRadius)
+
+                // Right Edge
+                lineTo(width, barTopY + cornerRadius)
+                if (dipEnd < width - cornerRadius) {
+                    quadraticTo(width, barTopY, width - cornerRadius, barTopY)
+                    lineTo(dipEnd, barTopY)
+                } else {
+                    lineTo(width, barTopY)
+                    lineTo(dipEnd, barTopY)
+                }
+
+                // The Dip (Right to Left)
+                cubicTo(
+                    x1 = dipEnd - (dipWidth * 0.42f), y1 = barTopY,
+                    x2 = centerX + (dipWidth * 0.52f), y2 = barTopY + dipDepth,
+                    x3 = centerX, y3 = barTopY + dipDepth
+                )
+                cubicTo(
+                    x1 = centerX - (dipWidth * 0.52f), y1 = barTopY + dipDepth,
+                    x2 = dipStart + (dipWidth * 0.42f), y2 = barTopY,
+                    x3 = dipStart, y3 = barTopY
+                )
+
+                // Left Edge
+                if (dipStart > cornerRadius) {
+                    lineTo(cornerRadius, barTopY)
+                    quadraticTo(0f, barTopY, 0f, barTopY + cornerRadius)
+                } else {
+                    lineTo(0f, barTopY)
+                    lineTo(0f, barTopY + cornerRadius)
+                }
+                close()
+            }
+
+            // Combined Shadow Path
+            val shadowPath = Path().apply {
+                addPath(path)
+                addOval(Rect(centerX - bubbleRadius - 6.dp.toPx(), bubbleCenterY - bubbleRadius - 6.dp.toPx(), centerX + bubbleRadius + 6.dp.toPx(), bubbleCenterY + bubbleRadius + 6.dp.toPx()))
+            }
+
+            // Native Drop Shadow Layer
+            drawPillShadow(
+                path = shadowPath,
+                radius = 14.dp.toPx(),
+                dy = 4.dp.toPx(),
+                isLightMode = isLightModeColor
             )
 
-            Row(Modifier.fillMaxWidth()) {
-                items.forEachIndexed { index, item ->
-                    val itemBias = if (count <= 1) 0f else -1f + 2f * index / (count - 1)
-                    val selectedness = (1f - abs(bias - itemBias) / step).coerceIn(0f, 1f)
-                    val tint = lerp(onSurface.copy(alpha = 0.55f), onSurface, selectedness)
+            // Draw Base Pill Fill
+            drawPath(path = path, color = barBackgroundColor)
 
-                    Box(
+            // Draw Core Active Bubble Circle Surface
+            drawCircle(
+                color = activeCircleColor,
+                radius = bubbleRadius,
+                center = Offset(centerX, bubbleCenterY)
+            )
+        }
+
+        // Icons Row Layout
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp)
+                .height(56.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            items.forEachIndexed { index, item ->
+                val itemBias = if (count <= 1) 0f else -1f + 2f * index / (count - 1)
+                val selectedness = (1f - abs(bias - itemBias) / step).coerceIn(0f, 1f)
+                val tint = lerp(unselectedIconColor, selectedIconColor, selectedness)
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                        ) { onSelect(item.screen) },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    val verticalOffset = with(LocalDensity.current) { (-20.dp * selectedness).toPx() }
+
+                    Icon(
+                        imageVector = item.icon,
+                        contentDescription = item.label,
+                        tint = tint,
                         modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                            ) { onSelect(item.screen) },
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            item.icon,
-                            contentDescription = item.label,
-                            tint = tint,
-                            modifier = Modifier.size(24.dp),
-                        )
-                    }
+                            .graphicsLayer { translationY = verticalOffset }
+                            .size(24.dp),
+                    )
                 }
             }
         }
@@ -886,7 +962,6 @@ private fun SlidingPillBar(
 
 @Composable
 private fun MessagePill(message: String?, modifier: Modifier = Modifier) {
-    // Hold the last non-null text so it stays visible during the fade-out animation.
     var lastMessage by remember { mutableStateOf("") }
     if (message != null) lastMessage = message
 
@@ -915,12 +990,11 @@ private fun MessagePill(message: String?, modifier: Modifier = Modifier) {
 private fun nowMillisApp(): Long =
     kotlin.time.Clock.System.now().toEpochMilliseconds()
 
-/** Human "time ago" label for the last sync, using localized strings. */
 private fun syncLabel(lastSyncedAt: Long?, s: com.itinera.app.i18n.Strings): String {
     if (lastSyncedAt == null) return s.never
     val diff = nowMillisApp() - lastSyncedAt
     val mins = diff / 60_000
-    val hours = diff / 3_600_000
+    val hours = diff / 3_360_000
     val days = diff / 86_400_000
     return when {
         diff < 60_000 -> s.justNow
