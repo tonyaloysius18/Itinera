@@ -951,17 +951,23 @@ private fun SlidingPillBar(
                     val verticalOffset = with(LocalDensity.current) { (-20.dp * selectedness).toPx() }
 
                     if (item.photoModel != null) {
-                        // Profile photo tab — circular crop, same footprint as an icon.
+                        // Profile photo tab — circular crop. Grows when selected.
+                        val photoScale = 1f + 0.45f * selectedness   // 1.0 → 1.45
                         AsyncImage(
                             model = item.photoModel,
                             contentDescription = item.label,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
-                                .graphicsLayer { translationY = verticalOffset }
+                                .graphicsLayer {
+                                    translationY = verticalOffset
+                                    scaleX = photoScale
+                                    scaleY = photoScale
+                                }
                                 .size(26.dp)
                                 .clip(CircleShape),
                         )
                     } else {
+
                         Icon(
                             imageVector = item.icon,
                             contentDescription = item.label,
