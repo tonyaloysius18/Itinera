@@ -28,11 +28,13 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.itinera.app.data.TripRepository
 import com.itinera.app.data.imageQueryForTrip
 import com.itinera.app.i18n.Language
@@ -120,6 +122,7 @@ private data class NavItem(
     val icon: ImageVector,
     val label: String,
     val screen: Screen,
+    val photoModel: Any? = null,   // if set, the tab shows this image instead of the icon
 )
 
 @Composable
@@ -699,12 +702,13 @@ private fun AppContent(
 
         // Floating pill nav bar (only on top-level screens).
         if (showBottomBar) {
+            val profilePhoto = repository.profile.photoUrl.takeIf { it.isNotBlank() }
             val items = listOf(
                 NavItem(Icons.Filled.CurrencyExchange, s.currencyUnits, Screen.Currency),
                 NavItem(Icons.Filled.CalendarMonth, s.calendar, Screen.Calendar),
                 NavItem(Icons.Filled.Flight, s.myTrips, Screen.Home),
                 NavItem(Icons.AutoMirrored.Filled.ReceiptLong, s.split, Screen.Split),
-                NavItem(Icons.Filled.Settings, s.settings, Screen.Settings),
+                NavItem(Icons.Filled.Settings, s.settings, Screen.Settings, photoModel = profilePhoto),
             )
             Box(
                 modifier = Modifier
@@ -946,14 +950,27 @@ private fun SlidingPillBar(
                 ) {
                     val verticalOffset = with(LocalDensity.current) { (-20.dp * selectedness).toPx() }
 
-                    Icon(
-                        imageVector = item.icon,
-                        contentDescription = item.label,
-                        tint = tint,
-                        modifier = Modifier
-                            .graphicsLayer { translationY = verticalOffset }
-                            .size(24.dp),
-                    )
+                    if (item.photoModel != null) {
+                        // Profile photo tab — circular crop, same footprint as an icon.
+                        AsyncImage(
+                            model = item.photoModel,
+                            contentDescription = item.label,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .graphicsLayer { translationY = verticalOffset }
+                                .size(26.dp)
+                                .clip(CircleShape),
+                        )
+                    } else {
+                        Icon(
+                            imageVector = item.icon,
+                            contentDescription = item.label,
+                            tint = tint,
+                            modifier = Modifier
+                                .graphicsLayer { translationY = verticalOffset }
+                                .size(24.dp),
+                        )
+                    }
                 }
             }
         }

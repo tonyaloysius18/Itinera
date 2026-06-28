@@ -51,37 +51,7 @@ import com.preat.peekaboo.ui.camera.PeekabooCamera          // ⬅ from peekaboo
 import kotlinx.coroutines.launch
 
 
-/**
- * ─────────────────────────────────────────────────────────────────────
- * WHAT CHANGED vs. the previous version
- * ─────────────────────────────────────────────────────────────────────
- * • Removed `onChangePhoto` parameter — photo picking is now fully
- *   handled inside this screen.
- * • Added `onUploadPhoto` lambda — call site in App.kt passes the
- *   Firebase Storage upload so this screen stays storage-agnostic.
- * • Replaced `ProfileAvatar + Surface(edit)` header with
- *   `ProfilePhotoPicker` which shows the existing URL OR newly
- *   picked bytes.
- * • Added gallery / camera bottom sheet (peekaboo).
- * • Added full-screen `CropScreen` overlay (custom Compose crop).
- * • `ProfilePhotoPicker` now accepts both `photoBytes` and `photoUrl`
- *   so Coil can display either a ByteArray or a remote URL.
- *
- * STRINGS TO ADD to your i18n file:
- *   choosePhoto        → "Choose Photo"
- *   uploadFromGallery  → "Upload from Gallery"
- *   takePhoto          → "Take a Photo"
- *   removePhoto        → "Remove Photo"
- *   moveAndScale       → "Move and scale to adjust"
- *   usePhoto           → "Use Photo"
- *
- * MODEL CHANGE REQUIRED:
- *   Add `val photoUrl: String = ""` to UserProfile so the URL
- *   round-trips through Firestore.
- *
- * APP.KT CHANGE REQUIRED (see comment at bottom of file).
- * ─────────────────────────────────────────────────────────────────────
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileScreen(
