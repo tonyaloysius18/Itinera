@@ -50,6 +50,7 @@ import androidx.compose.material.icons.filled.Mail
 import androidx.compose.ui.graphics.ImageBitmap
 import org.jetbrains.compose.resources.decodeToImageBitmap
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.sp
 import com.itinera.app.model.DocItem
 import com.itinera.app.resources.Res
@@ -413,7 +414,8 @@ fun TripDetailScreen(
                                 s.souvenir, //"Your Souvenir !",                                 // ⬅ replaces "Postcard"
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold,
-                                fontFamily = souvenirFont
+                                fontFamily = souvenirFont,
+                                fontStyle = FontStyle.Italic
                             )
                         }
                     }

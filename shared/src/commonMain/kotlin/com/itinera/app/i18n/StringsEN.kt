@@ -361,6 +361,6 @@ internal val EN: Strings by lazy { Strings().apply {
     attachToNone = "None (whole trip)"
     viewTicket = "View ticket"
 
-    tripCompleted = "Trip completed !"
+    tripCompleted = "Trip Completed !"
     souvenir = "Your Souvenir!"
 } }
