@@ -471,6 +471,10 @@ class Strings {
     var attachToNone: String = ""
     var viewTicket: String = ""
 
+    var tripCompleted: String = ""
+
+    var souvenir: String = ""
+
     fun copyApply(block: Strings.() -> Unit): Strings {
 
         val c = Strings()
@@ -829,6 +833,8 @@ class Strings {
         c.attachToNone = this.attachToNone
         c.viewTicket = this.viewTicket
 
+        c.tripCompleted = this.tripCompleted
+        c.souvenir = this.souvenir
         c.block()
         return c
     }

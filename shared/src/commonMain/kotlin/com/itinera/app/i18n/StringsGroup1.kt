@@ -355,6 +355,8 @@ internal val FR: Strings by lazy { EN.copyApply {
 
     compass = "Boussole"
     compassCalibrate = "Déplacez votre appareil en formant un 8 pour calibrer la boussole."
+    tripCompleted = "Voyage terminé !"
+    souvenir = "Votre Souvenir !"
 } }
 
 internal val ES: Strings by lazy { EN.copyApply {
@@ -712,6 +714,8 @@ internal val ES: Strings by lazy { EN.copyApply {
 
     compass = "Brújula"
     compassCalibrate = "Mueva su dispositivo en forma de 8 para calibrar la brújula."
+    tripCompleted = "¡Viaje completado!"
+    souvenir = "¡Tu recuerdo!"
 } }
 
 internal val DE: Strings by lazy { EN.copyApply {
@@ -1069,6 +1073,8 @@ internal val DE: Strings by lazy { EN.copyApply {
 
     compass = "Kompass"
     compassCalibrate = "Bewegen Sie Ihr Gerät in einer Achterform, um den Kompass zu kalibrieren."
+    tripCompleted = "Reise abgeschlossen!"
+    souvenir = "Dein Souvenir!"
 } }
 
 internal val IT: Strings by lazy { EN.copyApply {
@@ -1426,6 +1432,8 @@ internal val IT: Strings by lazy { EN.copyApply {
 
     compass = "Bussola"
     compassCalibrate = "Muovi il tuo dispositivo a forma de 8 per calibrare la bussola."
+    tripCompleted = "Viaggio completato!"
+    souvenir = "Il tuo ricordo!"
 } }
 
 internal val PT: Strings by lazy { EN.copyApply {
@@ -1783,6 +1791,8 @@ internal val PT: Strings by lazy { EN.copyApply {
 
     compass = "Bússola"
     compassCalibrate = "Mova o seu dispositivo em forma de 8 para calibrar a bússola."
+    tripCompleted = "Viagem concluída!"
+    souvenir = "Sua lembrança!"
 } }
 
 internal val NL: Strings by lazy { EN.copyApply {
@@ -2140,6 +2150,8 @@ internal val NL: Strings by lazy { EN.copyApply {
 
     compass = "Kompas"
     compassCalibrate = "Beweeg je toestel in een 8-vorm om het kompas te kalibreren."
+    tripCompleted = "Reis voltooid!"
+    souvenir = "Je souvenir!"
 } }
 
 internal val PL: Strings by lazy { EN.copyApply {
@@ -2497,6 +2509,8 @@ internal val PL: Strings by lazy { EN.copyApply {
 
     compass = "Kompas"
     compassCalibrate = "Poruszaj urządzeniem w kształcie ósemki, aby skalibrować kompas."
+    tripCompleted = "Podróż zakończona!"
+    souvenir = "Twoja pamiątka!"
 } }
 
 internal val ZH: Strings by lazy { EN.copyApply {
@@ -2854,6 +2868,8 @@ internal val ZH: Strings by lazy { EN.copyApply {
 
     compass = "指南针"
     compassCalibrate = "以 8 字形移动设备以校准指南针。"
+    tripCompleted = "旅程已完成！"
+    souvenir = "你的纪念品！"
 } }
 
 internal val JP: Strings by lazy { EN.copyApply {
@@ -3211,6 +3227,8 @@ internal val JP: Strings by lazy { EN.copyApply {
 
     compass = "コンパス"
     compassCalibrate = "コンパスを調整するには、デバイスを 8 の字に動かしてください。"
+    tripCompleted = "旅は完了しました！"
+    souvenir = "私の纪念品！"
 } }
 
 internal val KR: Strings by lazy { EN.copyApply {
@@ -3568,4 +3586,5 @@ internal val KR: Strings by lazy { EN.copyApply {
 
     compass = "나침반"
     compassCalibrate = "나침반을 보정하려면 기기를 8자 모양으로 움직이세요."
+
 } }

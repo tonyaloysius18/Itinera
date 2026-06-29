@@ -1,15 +1,20 @@
 package com.itinera.app.ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Flight
@@ -21,22 +26,38 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import coil3.compose.AsyncImage
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.Activity
 import com.itinera.app.model.Trip
 import com.itinera.app.model.label
+import com.itinera.app.ui.components.PostcardFront
 import com.itinera.app.ui.components.Progress
 import com.itinera.app.ui.components.TopBar
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.ConfirmationNumber
+import androidx.compose.material.icons.filled.Mail
+import androidx.compose.ui.graphics.ImageBitmap
+import org.jetbrains.compose.resources.decodeToImageBitmap
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.sp
 import com.itinera.app.model.DocItem
+import com.itinera.app.resources.Res
+import com.itinera.app.resources.*
+import com.itinera.app.ui.components.ImageCropScreen
+import com.preat.peekaboo.image.picker.SelectionMode
+import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
+import org.jetbrains.compose.resources.Font
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -64,21 +85,57 @@ fun TripDetailScreen(
     val s = LocalStrings.current
     val done = trip.legs.count { it.completed }
 
+    // ── Postcard photo slots (decoded bitmaps) + crop pipeline state ──
+    var heartImage by remember { mutableStateOf<ImageBitmap?>(null) }   // ⬅ CHANGED: ImageBitmap?
+    var rectImage  by remember { mutableStateOf<ImageBitmap?>(null) }   // ⬅ CHANGED: ImageBitmap?
+    var pendingBytes by remember { mutableStateOf<ByteArray?>(null) }   // awaiting crop
+    var pendingSlot  by remember { mutableStateOf<String?>(null) }      // "heart" or "rect"
+    var isPickingImage by remember { mutableStateOf(false) }            // hides postcard while native picker is up
+
+    // ── ONE scope + ONE picker per slot (the duplicate block is removed) ──
+    val scope = rememberCoroutineScope()
+    val heartPicker = rememberImagePickerLauncher(
+        selectionMode = SelectionMode.Single,
+        scope = scope,
+        onResult = {
+            it.firstOrNull()?.let { b -> pendingBytes = b; pendingSlot = "heart" }
+            isPickingImage = false
+        },
+    )
+    val rectPicker = rememberImagePickerLauncher(
+        selectionMode = SelectionMode.Single,
+        scope = scope,
+        onResult = {
+            it.firstOrNull()?.let { b -> pendingBytes = b; pendingSlot = "rect" }
+            isPickingImage = false
+        },
+    )
+
     var pendingDeleteLegId by remember { mutableStateOf<String?>(null) }
     var pendingDeleteActivityId by remember { mutableStateOf<String?>(null) }
 
     var showAddChooser by remember { mutableStateOf(false) }
+    var showPostcard by remember { mutableStateOf(false) }
 
-    // all distinct dates in the trip, earliest first → these define the day numbers
+    val totalItems = trip.legs.size + activities.size
+    val allComplete = totalItems > 0 &&
+            trip.legs.all { it.completed } && activities.all { it.completed }
+
+    var wasComplete by remember { mutableStateOf(allComplete) }
+    LaunchedEffect(allComplete) {
+        if (allComplete && !wasComplete) showPostcard = true
+        wasComplete = allComplete
+    }
+
     val allDates = (trip.legs.map { it.date } + activities.map { it.date })
         .distinct()
         .sorted()
 
-    // group each list by date
     val legsByDate = trip.legs.groupBy { it.date }
     val actsByDate = activities.groupBy { it.date }
 
-    // the "next up" leg = first incomplete one, in date+time order
+    val displayFont = FontFamily(Font(Res.font.arizonia_regular))
+    val souvenirFont = FontFamily(Font(Res.font.caudex_bold))
     val nextLegId = trip.legs.sortedWith(compareBy({ it.date }, { it.timeLabel }))
         .firstOrNull { !it.completed }?.id
 
@@ -112,9 +169,7 @@ fun TripDetailScreen(
         }
         Spacer(Modifier.height(14.dp))
 
-        // ⬅ Box wraps the scrollable list + the floating buttons
         Box(Modifier.weight(1f).fillMaxWidth()) {
-
             Column(
                 Modifier
                     .fillMaxSize()
@@ -128,12 +183,6 @@ fun TripDetailScreen(
                         verticalArrangement = Arrangement.Center,
                     ) {
                         Text("🗺", style = MaterialTheme.typography.displayMedium)
-//                        Icon(
-//                            Icons.Filled.Flight,
-//                            contentDescription = null,
-//                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
-//                            modifier = Modifier.size(56.dp),
-//                        )
                         Spacer(Modifier.height(16.dp))
                         Text(
                             s.noLegsYet,
@@ -160,7 +209,6 @@ fun TripDetailScreen(
                             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
                         )
 
-                        // ---- Legs for this day ----
                         legsByDate[date].orEmpty().forEach { leg ->
                             val isNext = leg.id == nextLegId
                             var showMenu by remember { mutableStateOf(false) }
@@ -213,7 +261,6 @@ fun TripDetailScreen(
                                     }
                                 }
 
-                                // ---- Ticket / document shortcut for this leg ----
                                 val legDocs = documents.filter { it.legId == leg.id }
                                 if (legDocs.isNotEmpty()) {
                                     var showLegDocs by remember(leg.id) { mutableStateOf(false) }
@@ -280,7 +327,6 @@ fun TripDetailScreen(
                             }
                         }
 
-                        // ---- Places for this day ----
                         actsByDate[date].orEmpty().forEach { act ->
                             var showMenu by remember { mutableStateOf(false) }
 
@@ -347,11 +393,34 @@ fun TripDetailScreen(
                         }
                     }
                 }
-                // ⬅ clearance so the last rows scroll above the floating buttons
+
+                if (allComplete) {                       // ⬅ only once the trip is complete (postcard has shown)
+                    Spacer(Modifier.height(28.dp))
+                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Box(
+                                Modifier
+                                    .size(64.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.Gray.copy(alpha = 0.18f))   // grey transparent circle
+                                    .clickable { showPostcard = true },
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text("💌", fontSize = 30.sp)                       // emoji instead of the Mail icon
+                            }
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                s.souvenir, //"Your Souvenir !",                                 // ⬅ replaces "Postcard"
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                fontFamily = souvenirFont
+                            )
+                        }
+                    }
+                }
                 Spacer(Modifier.height(96.dp))
             }
 
-            // ⬅ floating buttons pinned to the bottom of the Box
             Row(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -364,23 +433,23 @@ fun TripDetailScreen(
                     onClick = onChecklist,
                     modifier = Modifier.padding(bottom = 60.dp).height(50.dp),
                     contentPadding = PaddingValues(horizontal = 25.dp, vertical = 8.dp),
-                    shape = androidx.compose.foundation.shape.CircleShape,
+                    shape = CircleShape,
                 ) {
                     Text(s.beforeYouGo, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
                 }
-                if (canEdit) {                                          // ⬅ wrap starts
+                if (canEdit) {
                     Spacer(Modifier.width(30.dp))
                     Button(
                         onClick = { showAddChooser = true },
                         modifier = Modifier.padding(bottom = 60.dp).height(50.dp),
                         contentPadding = PaddingValues(horizontal = 25.dp, vertical = 8.dp),
-                        shape = androidx.compose.foundation.shape.CircleShape,
+                        shape = CircleShape,
                     ) {
                         Icon(Icons.Filled.Add, null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
                         Text(s.add, style = MaterialTheme.typography.bodyMedium)
                     }
-                }                                                       // ⬅ wrap ends
+                }
             }
         }
     }
@@ -438,5 +507,96 @@ fun TripDetailScreen(
             },
             dismissButton = { TextButton(onClick = { pendingDeleteActivityId = null }) { Text(s.cancel) } },
         )
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // POSTCARD DIALOG  —  the crop screen is an OVERLAY INSIDE this same
+    // dialog (NOT a second Dialog), which is what fixes the iOS freeze.
+    // Hidden while the native picker is up (isPickingImage).
+    // ═══════════════════════════════════════════════════════════════════
+    if (showPostcard && !isPickingImage) {
+        Dialog(
+            onDismissRequest = { showPostcard = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+        ) {
+            Box(Modifier.fillMaxSize()) {
+
+                // --- postcard content ---
+                Box(Modifier.fillMaxSize().padding(20.dp), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            s.tripCompleted,  //"Trip complete !",
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = displayFont,
+                            fontSize = 40.sp,
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        PostcardFront(
+                            paper = Res.drawable.postcard_paper,
+                            halftone = Res.drawable.postcard_halftone,
+                            map = Res.drawable.postcard_map,
+                            heartFrame = Res.drawable.postcard_heart_frame,
+                            rectFrame = Res.drawable.postcard_rect_frame,
+                            heartMask = Res.drawable.heart_fill,
+                            rectMask = Res.drawable.rect_fill,
+                            title = Res.drawable.postcard_title,
+                            plane = Res.drawable.postcard_plane,
+                            country = trip.title.trim().substringBefore(" "),
+                            onPickHeart = {
+                                isPickingImage = true
+                                heartPicker.launch()
+                            },
+                            onPickRect = {
+                                isPickingImage = true
+                                rectPicker.launch()
+                            },
+                            modifier = Modifier.clip(RoundedCornerShape(12.dp)),
+                            heartPhoto = heartImage?.let { bmp -> {
+                                Image(bmp, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                            } },
+                            rectPhoto = rectImage?.let { bmp -> {
+                                Image(bmp, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                            } },
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        IconButton(
+                            onClick = { showPostcard = false },
+                            modifier = Modifier.background(Color(0xFF333333).copy(alpha = 0.5f), CircleShape),
+                        ) {
+                            Icon(Icons.Default.Close, contentDescription = s.close, tint = Color.White)
+                        }
+                    }
+                }
+
+                // --- CROP OVERLAY (same dialog) ---
+                if (pendingBytes != null) {
+                    ImageCropScreen(
+                        imageBytes = pendingBytes!!,
+                        aspectRatio = if (pendingSlot == "rect") 0.75f else 0.78f,
+                        onConfirm = { cropped ->
+                            try {
+                                if (cropped.isNotEmpty()) {
+                                    val bitmap = cropped.decodeToImageBitmap()
+                                    if (pendingSlot == "heart") heartImage = bitmap else rectImage = bitmap
+                                } else {
+                                    println("CROP ERROR: empty byte array from native cropper")
+                                }
+                            } catch (t: Throwable) {
+                                println("CROP DECODE FAILED: ${t.message}")
+                            } finally {
+                                pendingBytes = null
+                                pendingSlot = null
+                            }
+                        },
+                        onDismiss = {
+                            pendingBytes = null
+                            pendingSlot = null
+                        },
+                    )
+                }
+            }
+        }
     }
 }

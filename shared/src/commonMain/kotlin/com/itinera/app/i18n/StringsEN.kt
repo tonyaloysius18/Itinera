@@ -360,4 +360,7 @@ internal val EN: Strings by lazy { Strings().apply {
     attachToLeg = "Attach to leg"
     attachToNone = "None (whole trip)"
     viewTicket = "View ticket"
+
+    tripCompleted = "Trip completed !"
+    souvenir = "Your Souvenir!"
 } }

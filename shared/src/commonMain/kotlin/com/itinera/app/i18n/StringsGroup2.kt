@@ -355,6 +355,7 @@ internal val RU: Strings by lazy { EN.copyApply {
 
     compass = "Компас"
     compassCalibrate = "Двигайте устройство по траектории цифры 8, чтобы откалибровать компас."
+
 } }
 
 internal val TAM: Strings by lazy { EN.copyApply {

@@ -31,3 +31,4 @@ actual fun cropToCircle(bytes: ByteArray, size: Int): ByteArray {
     output.compress(Bitmap.CompressFormat.PNG, 100, stream)
     return stream.toByteArray()
 }
+
