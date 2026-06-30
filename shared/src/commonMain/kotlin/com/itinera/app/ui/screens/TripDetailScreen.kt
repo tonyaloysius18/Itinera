@@ -1,6 +1,7 @@
 package com.itinera.app.ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -42,7 +43,6 @@ import coil3.compose.AsyncImage
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.Activity
 import com.itinera.app.model.Trip
-import com.itinera.app.model.fullName
 import com.itinera.app.model.label
 import com.itinera.app.ui.components.PostcardFront
 import com.itinera.app.ui.components.Progress
@@ -51,16 +51,20 @@ import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.ConfirmationNumber
-import androidx.compose.material.icons.filled.Mail
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.sp
+import com.itinera.app.data.rememberFileSharer
+import com.itinera.app.data.toPngBytes
 import com.itinera.app.model.DocItem
 import com.itinera.app.model.Traveller
 import com.itinera.app.resources.Res
 import com.itinera.app.resources.*
 import com.itinera.app.ui.components.ImageCropScreen
 import com.itinera.app.ui.components.PostcardBack
+import com.itinera.app.ui.components.rememberPostcardExporter
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import com.preat.peekaboo.ui.camera.PeekabooCamera
@@ -79,6 +83,7 @@ fun TripDetailScreen(
     onTravellers: () -> Unit,
     onUploadPostcardPhoto: (suspend (slot: String, bytes: ByteArray) -> String)? = null,
     onRemovePostcardPhoto: ((slot: String) -> Unit)? = null,
+    onLoadImageBytes: (suspend (url: String) -> ByteArray?)? = null,
     onDocuments: () -> Unit,
     onOpenDoc: (String) -> Unit = {},
     onAddLeg: () -> Unit,
@@ -102,11 +107,11 @@ fun TripDetailScreen(
     var backTopUrl    by remember { mutableStateOf(trip.backTopUrl) }
     var backBottomUrl by remember { mutableStateOf(trip.backBottomUrl) }
 
-    // keep local slot state in sync with the trip as Firestore delivers/updates it   // ⬅ CHANGED
-    LaunchedEffect(trip.frontHeartUrl) { heartUrl      = trip.frontHeartUrl }          // ⬅ CHANGED
-    LaunchedEffect(trip.frontRectUrl)  { rectUrl       = trip.frontRectUrl }           // ⬅ CHANGED
-    LaunchedEffect(trip.backTopUrl)    { backTopUrl    = trip.backTopUrl }             // ⬅ CHANGED
-    LaunchedEffect(trip.backBottomUrl) { backBottomUrl = trip.backBottomUrl }
+//    // keep local slot state in sync with the trip as Firestore delivers/updates it   // ⬅ CHANGED
+//    LaunchedEffect(trip.frontHeartUrl) { heartUrl      = trip.frontHeartUrl }          // ⬅ CHANGED
+//    LaunchedEffect(trip.frontRectUrl)  { rectUrl       = trip.frontRectUrl }           // ⬅ CHANGED
+//    LaunchedEffect(trip.backTopUrl)    { backTopUrl    = trip.backTopUrl }             // ⬅ CHANGED
+//    LaunchedEffect(trip.backBottomUrl) { backBottomUrl = trip.backBottomUrl }
 
     // ── Crop / pick pipeline state ──
     var pendingBytes by remember { mutableStateOf<ByteArray?>(null) }
@@ -151,6 +156,21 @@ fun TripDetailScreen(
 
     val legsByDate = trip.legs.groupBy { it.date }
     val actsByDate = activities.groupBy { it.date }
+
+    val exporter = rememberPostcardExporter(
+        country = trip.title.trim().substringBefore(" "),
+        dateRange = if (allDates.isNotEmpty())
+            "${allDates.first().label()} – ${allDates.last().label()}" else "",
+        travellers = travellers.map { it.firstName.substringBefore(" ") },
+        heartUrl = heartUrl, rectUrl = rectUrl,
+        backTopUrl = backTopUrl, backBottomUrl = backBottomUrl,
+        loadBytes = { url -> onLoadImageBytes?.invoke(url) },
+    )
+
+    val fileSharer = rememberFileSharer()
+
+    var exporting by remember { mutableStateOf(false) }              // ⬅ add
+
 
     val displayFont = FontFamily(Font(Res.font.arizonia_regular))
     val souvenirFont = FontFamily(Font(Res.font.caudex_bold))
@@ -614,13 +634,39 @@ fun TripDetailScreen(
                                 if (i == 0) Spacer(Modifier.width(6.dp))
                             }
                         }
-
                         Spacer(Modifier.height(16.dp))
-                        IconButton(
-                            onClick = { showPostcard = false },
-                            modifier = Modifier.background(Color(0xFF333333).copy(alpha = 0.5f), CircleShape),
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Icon(Icons.Default.Close, contentDescription = s.close, tint = Color.White)
+                            IconButton(
+                                enabled = !exporting,
+                                onClick = {
+                                    scope.launch {
+                                        exporting = true
+                                        try {
+                                            val png = exporter().toPngBytes()
+                                            fileSharer.share(png, "postcard.png", "image/png")
+                                        } catch (t: Throwable) {
+                                            println("POSTCARD EXPORT FAILED: ${t.message}")
+                                        } finally {
+                                            exporting = false
+                                        }
+                                    }
+                                },
+                                modifier = Modifier.background(Color(0xFF333333).copy(alpha = 0.5f), CircleShape),
+                            ) {
+                                if (exporting)
+                                    CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = Color.White)
+                                else
+                                    Icon(Icons.Filled.Share, contentDescription = "Share", tint = Color.White)
+                            }
+                            IconButton(
+                                onClick = { showPostcard = false },
+                                modifier = Modifier.background(Color(0xFF333333).copy(alpha = 0.5f), CircleShape),
+                            ) {
+                                Icon(Icons.Default.Close, contentDescription = s.close, tint = Color.White)
+                            }
                         }
                     }
                 }

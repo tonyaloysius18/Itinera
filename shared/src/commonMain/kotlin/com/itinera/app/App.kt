@@ -322,6 +322,7 @@ private fun AppContent(
                                 onTravellers = { navigator.push(Screen.Travellers(screen.tripId)) },
                                 onUploadPostcardPhoto = { slot, bytes -> repository.uploadPostcardPhoto(screen.tripId, slot, bytes) },
                                 onRemovePostcardPhoto = { slot -> repository.removePostcardPhoto(screen.tripId, slot) },
+                                onLoadImageBytes = { url -> repository.loadBytes(url) },
                                 onDocuments = { navigator.push(Screen.TripDocuments(screen.tripId)) },
                                 onAddLeg = { navigator.push(Screen.AddLeg(screen.tripId)) },
                                 onAddPlace = { navigator.push(Screen.AddPlace(screen.tripId)) },
