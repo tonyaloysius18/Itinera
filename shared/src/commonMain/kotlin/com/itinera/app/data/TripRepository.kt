@@ -382,6 +382,37 @@ class TripRepository {
         return uploadBytesToStorage(uploadClient, bytes)
     }
 
+    /** Uploads a cropped postcard photo to Cloudinary and saves its URL on the trip slot. */
+    suspend fun uploadPostcardPhoto(tripId: String, slot: String, bytes: ByteArray): String {
+        val url = uploadBytesToStorage(uploadClient, bytes)   // uploadClient is private — fine here
+        val idx = trips.indexOfFirst { it.id == tripId }
+        if (idx >= 0) {
+            trips[idx] = when (slot) {
+                "heart"      -> trips[idx].copy(frontHeartUrl = url)
+                "rect"       -> trips[idx].copy(frontRectUrl  = url)
+                "backTop"    -> trips[idx].copy(backTopUrl    = url)
+                "backBottom" -> trips[idx].copy(backBottomUrl = url)
+                else         -> trips[idx]
+            }
+            persist(trips[idx])   // writes to Firestore, same as your other updates
+        }
+        return url
+    }
+
+    fun removePostcardPhoto(tripId: String, slot: String) {
+        val idx = trips.indexOfFirst { it.id == tripId }
+        if (idx >= 0) {
+            trips[idx] = when (slot) {
+                "heart"      -> trips[idx].copy(frontHeartUrl = "")
+                "rect"       -> trips[idx].copy(frontRectUrl  = "")
+                "backTop"    -> trips[idx].copy(backTopUrl    = "")
+                "backBottom" -> trips[idx].copy(backBottomUrl = "")
+                else         -> trips[idx]
+            }
+            persist(trips[idx])
+        }
+    }
+
     fun clearLocal() {
         stopSync()
         trips.clear()

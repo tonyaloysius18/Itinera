@@ -65,6 +65,10 @@ data class Trip(
     val memberInfo: Map<String, MemberInfo> = emptyMap(),
     val settledAt: Long = 0L,        // 0 = not settled; epoch millis when owner settled
     val settledBy: String = "",
+    val frontHeartUrl: String = "",
+    val frontRectUrl:  String = "",
+    val backTopUrl:    String = "",
+    val backBottomUrl: String = "",
 )
 
 @Serializable

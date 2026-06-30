@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.itinera.app.data.TripRepository
 import com.itinera.app.data.imageQueryForTrip
+import com.itinera.app.data.uploadBytesToStorage
 import com.itinera.app.i18n.Language
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.i18n.stringsFor
@@ -316,8 +317,11 @@ private fun AppContent(
                             else TripDetailScreen(
                                 trip = trip,
                                 activities = repository.activitiesForTrip(screen.tripId),
+                                travellers = trip.travellers,
                                 onBack = { navigator.back() },
                                 onTravellers = { navigator.push(Screen.Travellers(screen.tripId)) },
+                                onUploadPostcardPhoto = { slot, bytes -> repository.uploadPostcardPhoto(screen.tripId, slot, bytes) },
+                                onRemovePostcardPhoto = { slot -> repository.removePostcardPhoto(screen.tripId, slot) },
                                 onDocuments = { navigator.push(Screen.TripDocuments(screen.tripId)) },
                                 onAddLeg = { navigator.push(Screen.AddLeg(screen.tripId)) },
                                 onAddPlace = { navigator.push(Screen.AddPlace(screen.tripId)) },

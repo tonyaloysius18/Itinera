@@ -1,5 +1,6 @@
 package com.itinera.app.ui.components
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -15,10 +16,13 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.isUnspecified
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
@@ -31,9 +35,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * Pan/zoom crop. The photo moves behind a fixed window; on confirm we compute which
- * fraction of the source image sits inside the window and pass that to the native
- * cropToRect (thread-safe renderer). Honors the user's framing; no capture API.
+ * Pan/zoom crop. Shows the full image fitted to the screen, with a dimmed overlay
+ * and a transparent "hole" showing the crop window. This allows the user to see
+ * the full context of their photo while choosing the crop.
  */
 @Composable
 fun ImageCropScreen(
@@ -49,35 +53,62 @@ fun ImageCropScreen(
     var scale by remember { mutableStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
     var winSize by remember { mutableStateOf(IntSize.Zero) }
+    var parentSize by remember { mutableStateOf(IntSize.Zero) }
     var processing by remember { mutableStateOf(false) }
 
+    // Helper to calculate geometry based on current image and screen/window sizes
+    fun getMath(): CropMath? {
+        val img = painter.intrinsicSize
+        if (img.isUnspecified || winSize.width <= 0 || parentSize.width <= 0) return null
+        val iw = img.width; val ih = img.height
+        val pw = parentSize.width.toFloat(); val ph = parentSize.height.toFloat()
+        val winW = winSize.width.toFloat(); val winH = winSize.height.toFloat()
+
+        // ContentScale.Fit on the full screen
+        val fitScale = minOf(pw / iw, ph / ih)
+        // Scale required to COVER the crop window
+        val minScale = maxOf(winW / (iw * fitScale), winH / (ih * fitScale))
+
+        return CropMath(iw, ih, pw, ph, winW, winH, fitScale, minScale)
+    }
+
     val transformableState = rememberTransformableState { zoom, pan, _ ->
-        scale = (scale * zoom).coerceIn(1f, 6f)
-        val maxX = winSize.width * (scale - 1f) / 2f
-        val maxY = winSize.height * (scale - 1f) / 2f
+        val m = getMath() ?: return@rememberTransformableState
+        scale = (scale * zoom).coerceIn(m.minScale, 8f)
+
+        val dispW = m.iw * m.fitScale * scale
+        val dispH = m.ih * m.fitScale * scale
+        val maxX = maxOf(0f, (dispW - m.winW) / 2f)
+        val maxY = maxOf(0f, (dispH - m.winH) / 2f)
+
         offset = Offset(
             (offset.x + pan.x).coerceIn(-maxX, maxX),
             (offset.y + pan.y).coerceIn(-maxY, maxY),
         )
     }
 
+    // Initialize scale to "Fill" the crop window as soon as we have sizes
+    LaunchedEffect(painter.intrinsicSize, winSize, parentSize) {
+        val m = getMath() ?: return@LaunchedEffect
+        if (scale == 1f) scale = m.minScale
+    }
+
     fun confirm() {
-        val img = painter.intrinsicSize
-        val winW = winSize.width.toFloat()
-        val winH = winSize.height.toFloat()
-        if (img.isUnspecified || img.width <= 0f || img.height <= 0f || winW <= 0f) return
+        val m = getMath() ?: return
+        val cx = m.pw / 2f; val cy = m.ph / 2f
+        val scl = m.fitScale * scale
 
-        val iw = img.width; val ih = img.height
-        val cover = maxOf(winW / iw, winH / ih)
-        val dispW = iw * cover; val dispH = ih * cover
-        val cx = winW / 2f; val cy = winH / 2f
-        fun srcX(gx: Float) = ((cx + (gx - cx - offset.x) / scale) - (winW - dispW) / 2f) / cover
-        fun srcY(gy: Float) = ((cy + (gy - cy - offset.y) / scale) - (winH - dispH) / 2f) / cover
+        // Map global screen coordinates to source image coordinates
+        fun srcX(gx: Float) = (m.iw / 2f) + (gx - cx - offset.x) / scl
+        fun srcY(gy: Float) = (m.ih / 2f) + (gy - cy - offset.y) / scl
 
-        val nL = (srcX(0f) / iw).coerceIn(0f, 1f)
-        val nT = (srcY(0f) / ih).coerceIn(0f, 1f)
-        val nR = (srcX(winW) / iw).coerceIn(0f, 1f)
-        val nB = (srcY(winH) / ih).coerceIn(0f, 1f)
+        val cropL = cx - m.winW / 2f
+        val cropT = cy - m.winH / 2f
+
+        val nL = (srcX(cropL) / m.iw).coerceIn(0f, 1f)
+        val nT = (srcY(cropT) / m.ih).coerceIn(0f, 1f)
+        val nR = (srcX(cropL + m.winW) / m.iw).coerceIn(0f, 1f)
+        val nB = (srcY(cropT + m.winH) / m.ih).coerceIn(0f, 1f)
 
         val outW = 1080
         val outH = (outW / aspectRatio).toInt()
@@ -85,46 +116,72 @@ fun ImageCropScreen(
 
         scope.launch {
             try {
-                // Must stay on Main so UIKit graphics can render perfectly without freezing
                 val bytes = withContext(Dispatchers.Main) {
                     cropToRect(imageBytes, nL, nT, nR, nB, outW, outH)
                 }
                 onConfirm(bytes)
             } catch (e: Exception) {
                 processing = false
-                println("CROP FAILED: ${e.message}")
             }
         }
     }
 
-    Box(Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .onSizeChanged { parentSize = it },
+        contentAlignment = Alignment.Center
+    ) {
+        // 1. The Image (Fitting the screen, so context is visible)
+        Image(
+            painter = painter,
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
+            modifier = Modifier
+                .fillMaxSize()
+                .transformable(transformableState)
+                .graphicsLayer(
+                    scaleX = scale, scaleY = scale,
+                    translationX = offset.x, translationY = offset.y,
+                ),
+        )
+
+        // 2. Dimmed Overlay with a hole for the crop window
+        Canvas(
+            Modifier
+                .fillMaxSize()
+                .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+        ) {
+            val winW = winSize.width.toFloat()
+            val winH = winSize.height.toFloat()
+            if (winW <= 0) return@Canvas
+
+            // Darken everything
+            drawRect(Color.Black.copy(alpha = 0.55f))
+
+            // Clear the hole
+            val left = (size.width - winW) / 2f
+            val top = (size.height - winH) / 2f
+            drawRoundRect(
+                color = Color.Transparent,
+                topLeft = Offset(left, top),
+                size = Size(winW, winH),
+                cornerRadius = CornerRadius(12.dp.toPx()),
+                blendMode = BlendMode.Clear
+            )
+        }
+
+        // 3. The Crop Window (just the visible border)
         Box(
             Modifier
                 .fillMaxWidth(0.86f)
                 .aspectRatio(aspectRatio)
                 .onSizeChanged { winSize = it }
-                .clip(RoundedCornerShape(12.dp))
-                .transformable(transformableState),
-        ) {
-            Image(
-                painter = painter,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .graphicsLayer(
-                        scaleX = scale, scaleY = scale,
-                        translationX = offset.x, translationY = offset.y,
-                    ),
-            )
-        }
-        Box(
-            Modifier
-                .fillMaxWidth(0.86f)
-                .aspectRatio(aspectRatio)
-                .border(1.5.dp, Color.White.copy(alpha = 0.7f), RoundedCornerShape(12.dp)),
+                .border(1.5.dp, Color.White.copy(alpha = 0.8f), RoundedCornerShape(12.dp)),
         )
 
+        // Title text
         Text(
             s.cropAndScale,
             color = Color.White.copy(alpha = 0.65f),
@@ -132,6 +189,7 @@ fun ImageCropScreen(
             modifier = Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = 16.dp),
         )
 
+        // Bottom Controls
         Row(
             Modifier
                 .align(Alignment.BottomCenter)
@@ -152,3 +210,11 @@ fun ImageCropScreen(
         }
     }
 }
+
+private data class CropMath(
+    val iw: Float, val ih: Float,
+    val pw: Float, val ph: Float,
+    val winW: Float, val winH: Float,
+    val fitScale: Float,
+    val minScale: Float
+)
