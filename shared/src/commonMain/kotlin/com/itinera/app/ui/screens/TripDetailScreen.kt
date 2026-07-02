@@ -51,11 +51,13 @@ import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.ConfirmationNumber
+import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.sp
+import com.itinera.app.data.extractBarcode
 import com.itinera.app.data.rememberFileSharer
 import com.itinera.app.data.toPngBytes
 import com.itinera.app.model.DocItem
@@ -64,6 +66,7 @@ import com.itinera.app.resources.Res
 import com.itinera.app.resources.*
 import com.itinera.app.ui.components.ImageCropScreen
 import com.itinera.app.ui.components.PostcardBack
+import com.itinera.app.ui.components.TicketBarcodeDialog
 import com.itinera.app.ui.components.rememberPostcardExporter
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
@@ -121,6 +124,8 @@ fun TripDetailScreen(
     var activeSlotForSheet by remember { mutableStateOf<String?>(null) } // if non-null, show the sheet for this slot
     var showCamera   by remember { mutableStateOf(false) }
 
+
+
     val scope = rememberCoroutineScope()
     val picker = rememberImagePickerLauncher(
         selectionMode = SelectionMode.Single,
@@ -139,6 +144,13 @@ fun TripDetailScreen(
 
     var showAddChooser by remember { mutableStateOf(false) }
     var showPostcard by remember { mutableStateOf(false) }
+
+    // ── ticket barcode viewer ──
+    var barcodeResult  by remember { mutableStateOf<com.itinera.app.data.BarcodeExtraction?>(null) }
+    var barcodeDocId   by remember { mutableStateOf("") }
+    var barcodeTitle   by remember { mutableStateOf("") }
+    var barcodeLoading by remember { mutableStateOf(false) }
+    val barcodeCache = remember { mutableStateMapOf<String, com.itinera.app.data.BarcodeExtraction?>() }
 
     val totalItems = trip.legs.size + activities.size
     val allComplete = totalItems > 0 &&
@@ -299,22 +311,47 @@ fun TripDetailScreen(
                                     }
                                 }
 
+                                fun openTicket(doc: DocItem, title: String) {
+                                    scope.launch {
+                                        barcodeLoading = true
+                                        try {
+                                            val cached = if (barcodeCache.containsKey(doc.id)) barcodeCache[doc.id] else {
+                                                val bytes = onLoadImageBytes?.invoke(doc.fileUrl)
+                                                val r = bytes?.let { com.itinera.app.data.extractBarcode(it, doc.mimeType) }
+                                                barcodeCache[doc.id] = r
+                                                r
+                                            }
+                                            if (cached != null) {
+                                                barcodeResult = cached; barcodeDocId = doc.id; barcodeTitle = title
+                                            } else {
+                                                onOpenDoc(doc.id)                 // fallback: no code found → full file
+                                            }
+                                        } finally {
+                                            barcodeLoading = false
+                                        }
+                                    }
+                                }
+
                                 val legDocs = documents.filter { it.legId == leg.id }
                                 if (legDocs.isNotEmpty()) {
                                     var showLegDocs by remember(leg.id) { mutableStateOf(false) }
                                     IconButton(
                                         onClick = {
-                                            if (legDocs.size == 1) onOpenDoc(legDocs.first().id)
+                                            if (legDocs.size == 1) openTicket(legDocs.first(), "${leg.fromCity} → ${leg.toCity}")
                                             else showLegDocs = true
                                         },
+                                        enabled = !barcodeLoading,
                                         modifier = Modifier.size(34.dp).align(Alignment.CenterEnd),
                                     ) {
-                                        Icon(
-                                            Icons.Filled.ConfirmationNumber,
-                                            contentDescription = s.viewTicket,
-                                            tint = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.size(20.dp),
-                                        )
+                                        if (barcodeLoading)
+                                            CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                                        else
+                                            Icon(
+                                                Icons.Filled.QrCode2,
+                                                contentDescription = s.viewTicket,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(20.dp),
+                                            )
                                     }
                                     if (showLegDocs) {
                                         AlertDialog(
@@ -326,7 +363,7 @@ fun TripDetailScreen(
                                                     legDocs.forEach { d ->
                                                         Row(
                                                             Modifier.fillMaxWidth()
-                                                                .clickable { showLegDocs = false; onOpenDoc(d.id) }
+                                                                .clickable { showLegDocs = false; openTicket(d, d.title) }
                                                                 .padding(vertical = 12.dp),
                                                             verticalAlignment = Alignment.CenterVertically,
                                                         ) {
@@ -431,6 +468,7 @@ fun TripDetailScreen(
                         }
                     }
                 }
+
 
                 if (allComplete) {                       // only once the trip is complete (postcard has shown)
                     Spacer(Modifier.height(28.dp))
@@ -547,6 +585,16 @@ fun TripDetailScreen(
             dismissButton = { TextButton(onClick = { pendingDeleteActivityId = null }) { Text(s.cancel) } },
         )
     }
+
+    barcodeResult?.let { result ->
+        TicketBarcodeDialog(
+            title = barcodeTitle,
+            extraction = result,
+            onOpenFullTicket = { onOpenDoc(barcodeDocId) },
+            onDismiss = { barcodeResult = null },
+        )
+    }
+
 
     // ═══════════════════════════════════════════════════════════════════
     // POSTCARD DIALOG — all extra UI (crop, camera, source sheet) are

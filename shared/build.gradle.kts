@@ -64,6 +64,8 @@ kotlin {
             implementation(libs.androidx.activity.compose.v193)
 
             implementation(libs.translate)
+            implementation(libs.barcode.scanning)
+
 
         }
         commonMain.dependencies {
