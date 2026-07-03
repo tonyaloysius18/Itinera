@@ -46,8 +46,7 @@ import kotlin.math.roundToInt
 
 private const val CARD_W = 1748f
 private const val CARD_H = 1240f
-
-private const val CARD_GAP = 70f
+private const val CARD_GAP = 70f   // transparent space between the two faces in the saved image
 
 // ── front constants (mirror PostcardFront.kt) ──
 private val F_HEART = SlotR(0.046f, 0.381f, 0.477f, 0.612f)
@@ -69,7 +68,7 @@ private const val B_LINE_W = 0.360f
 private const val B_LINE_ROT = 0f
 private const val B_LINE_MAX_FONT = 0.062f
 private const val B_BLOCK_X = 0.052f
-private const val B_BLOCK_Y = 0.340f
+private const val B_BLOCK_Y = 0.285f
 private const val B_BLOCK_W = 0.370f
 
 private data class SlotR(val x: Float, val y: Float, val w: Float, val h: Float)
@@ -87,6 +86,10 @@ private val INK_SOFT = Color(0xFF333333)
 fun rememberPostcardExporter(
     country: String,
     dateRange: String,
+    countriesCount: Int = 0,
+    distanceKm: Int = 0,
+    daysCount: Int = 0,
+    expensesLabel: String = "",
     travellers: List<String>,
     heartUrl: String,
     rectUrl: String,
@@ -123,7 +126,7 @@ fun rememberPostcardExporter(
     val backTitleFont = FontFamily(Font(Res.font.caudex_bold))
     val backBodyFont  = FontFamily(Font(Res.font.eagle_lake))
 
-    return remember(country, dateRange, travellers, heartUrl, rectUrl, backTopUrl, backBottomUrl) {
+    return remember(country, dateRange, countriesCount, distanceKm, daysCount, expensesLabel, travellers, heartUrl, rectUrl, backTopUrl, backBottomUrl) {
         suspend {
             val heart  = loadImg(heartUrl, loadBytes)
             val rect   = loadImg(rectUrl, loadBytes)
@@ -133,7 +136,7 @@ fun rememberPostcardExporter(
             renderSheet(
                 paper, halftone, map, heartFrame, rectFrame, heartMask, rectMask, title, plane, heart, rect,
                 pbMap, pbFrameTop, pbFrameBot, pbMaskTop, pbMaskBot, pbStamp, pbPlane, pbEnvelope, pbTitle, top, bottom,
-                country, dateRange, travellers,
+                country, dateRange, countriesCount, distanceKm, daysCount, expensesLabel, travellers,
                 frontFromFont, backTitleFont, backBodyFont, measurer,
             )
         }
@@ -152,7 +155,9 @@ private fun renderSheet(
     bMap: ImageBitmap, bFrameTop: ImageBitmap, bFrameBot: ImageBitmap, bMaskTop: ImageBitmap, bMaskBot: ImageBitmap,
     bStamp: ImageBitmap, bPlane: ImageBitmap, bEnvelope: ImageBitmap, bTitle: ImageBitmap,
     bTopPhoto: ImageBitmap?, bBottomPhoto: ImageBitmap?,
-    country: String, dateRange: String, travellers: List<String>,
+    country: String, dateRange: String,
+    countriesCount: Int, distanceKm: Int, daysCount: Int, expensesLabel: String,
+    travellers: List<String>,
     frontFromFont: FontFamily, backTitleFont: FontFamily, backBodyFont: FontFamily,
     measurer: TextMeasurer,
 ): ImageBitmap {
@@ -187,7 +192,10 @@ private fun renderSheet(
             B_LINE_W * CARD_W, (B_LINE_BASELINE - B_LINE_TOP) * CARD_H,
             B_LINE_MAX_FONT * CARD_W, B_LINE_ROT,
         )
-        backBlock(measurer, by, backTitleFont, backBodyFont, dateRange, travellers)
+        backBlock(
+            measurer, by, backTitleFont, backBodyFont,
+            dateRange, countriesCount, distanceKm, daysCount, expensesLabel, travellers,
+        )
     }
     return image
 }
@@ -249,13 +257,14 @@ private fun DrawScope.fromLine(
 
 private fun DrawScope.backBlock(
     measurer: TextMeasurer, originY: Float, titleFont: FontFamily, bodyFont: FontFamily,
-    dateRange: String, travellers: List<String>,
+    dateRange: String, countriesCount: Int, distanceKm: Int, daysCount: Int, expensesLabel: String,
+    travellers: List<String>,
 ) {
     val w = CARD_W; val h = CARD_H
     val blockX = B_BLOCK_X * w
     val blockW = B_BLOCK_W * w
-    val labelPx = 0.034f * w
-    val valuePx = 0.022f * w
+    val labelPx = 0.026f * w        // mirrors live labelSize
+    val valuePx = 0.018f * w        // mirrors live valueSize
     val dividerPx = 0.0022f * w
     var cy = originY + B_BLOCK_Y * h
 
@@ -269,27 +278,53 @@ private fun DrawScope.backBlock(
         drawText(lr, topLeft = Offset(blockX, cy))
         return lr.size.height.toFloat()
     }
+
+    // shrink-to-fit single line — mirrors the live TextAutoSize stats line
+    fun fitText(t: String, font: FontFamily, maxPx: Float, color: Color): Float {
+        var px = maxPx
+        var lr = measurer.measure(t, TextStyle(color = color, fontFamily = font, fontSize = px.sp), maxLines = 1)
+        while (px > 7f && lr.size.width > blockW) {
+            px -= 0.5f
+            lr = measurer.measure(t, TextStyle(color = color, fontFamily = font, fontSize = px.sp), maxLines = 1)
+        }
+        drawText(lr, topLeft = Offset(blockX, cy))
+        return lr.size.height.toFloat()
+    }
+
     fun divider() {
         drawLine(INK, Offset(blockX, cy), Offset(blockX + blockW, cy), strokeWidth = dividerPx)
         cy += dividerPx
     }
 
+    // Date
     cy += text("Date:", titleFont, labelPx, INK)
-    cy += 0.012f * h
+    cy += 0.004f * h
     cy += text(dateRange, bodyFont, valuePx, INK_SOFT)
     divider()
-    cy += 0.03f * h
+    cy += 0.009f * h
+
+    // Trip Stats — single auto-shrunk line
+    cy += text("Trip Stats:", titleFont, labelPx, INK)
+    cy += 0.004f * h
+    val statsLine =
+        "$countriesCount countries · ${if (distanceKm > 0) "$distanceKm km" else "– km"} · $daysCount days · $expensesLabel"
+    cy += fitText(statsLine, bodyFont, valuePx, INK_SOFT)
+    divider()
+    cy += 0.009f * h
+
+    // Travellers — one line when short, two when long (threshold matches live card)
     cy += text("Travellers:", titleFont, labelPx, INK)
-    cy += 0.012f * h
-
-    val half = (travellers.size + 1) / 2
-    val line1 = travellers.take(half).joinToString(", ")
-    val line2 = travellers.drop(half).joinToString(", ")
-
-    cy += text(line1, bodyFont, valuePx, INK_SOFT)
-    divider()
-    cy += 0.035f * h
-    cy += text(line2, bodyFont, valuePx, INK_SOFT)
-    divider()
-    divider()
+    cy += 0.004f * h
+    val joined = travellers.joinToString(", ")
+    if (joined.length <= 32) {
+        cy += text(joined, bodyFont, valuePx, INK_SOFT)
+        divider()
+    } else {
+        val half = (travellers.size + 1) / 2
+        cy += text(travellers.take(half).joinToString(", "), bodyFont, valuePx, INK_SOFT)
+        divider()
+        cy += 0.008f * h
+        cy += text(travellers.drop(half).joinToString(", "), bodyFont, valuePx, INK_SOFT)
+        divider()
+    }
 }

@@ -16,7 +16,8 @@ import kotlinx.serialization.json.Json
  */
 
 @Serializable
-data class GeoPoint(val lat: Double, val lng: Double)
+data class GeoPoint(val lat: Double, val lng: Double, val country: String = "")
+
 
 @Serializable
 private data class GeocoderResult(
@@ -43,7 +44,7 @@ suspend fun geocodeCity(client: HttpClient, cityName: String): GeoPoint? {
         val parsed = geoJson.decodeFromString(GeocoderResponse.serializer(), body)
         parsed.results.firstOrNull()
             ?.takeIf { it.latitude != 0.0 || it.longitude != 0.0 }
-            ?.let { GeoPoint(it.latitude, it.longitude) }
+            ?.let { GeoPoint(it.latitude, it.longitude, it.country) }
     } catch (e: Exception) {
         println("ITINERA: GEOCODE FAILED for '$name' — ${e.message}")
         null

@@ -55,13 +55,10 @@ private const val PB_LINE_W        = 0.360f
 private const val PB_LINE_ROT      = 0f
 private const val PB_LINE_MAX_FONT = 0.062f
 
-// Live writing block (Date + Travellers) on the left
+// Live writing block (Date + Trip Stats + Travellers) on the left
 private const val PB_BLOCK_X = 0.052f
-private const val PB_BLOCK_Y = 0.340f
-
+private const val PB_BLOCK_Y = 0.285f
 private const val PB_BLOCK_W = 0.370f
-
-// Set to your Canva font for an exact match with the baked title:
 
 @Composable
 fun PostcardBack(
@@ -76,8 +73,12 @@ fun PostcardBack(
     envelope: DrawableResource,
     title: DrawableResource,
     country: String,
-    dateRange: String,                 // ⬅ NEW: e.g. "12 Jul – 19 Jul"
-    travellers: List<String>,          // ⬅ NEW: one name per line
+    dateRange: String,
+    countriesCount: Int = 0,
+    distanceKm: Int = 0,
+    daysCount: Int = 0,
+    expensesLabel: String = "",
+    travellers: List<String>,
     onPickTop: () -> Unit,
     onPickBottom: () -> Unit,
     modifier: Modifier = Modifier,
@@ -89,8 +90,6 @@ fun PostcardBack(
 
     val PostcardBackTitle = FontFamily(Font(Res.font.caudex_bold))
     val PostcardBack = FontFamily(Font(Res.font.eagle_lake))
-
-
 
     BoxWithConstraints(modifier.fillMaxWidth().aspectRatio(PB_RATIO)) {
         val mw = maxWidth
@@ -129,9 +128,9 @@ fun PostcardBack(
             )
         }
 
-        // ── Live writing block: Date + Travellers (To/From removed) ──
-        val labelSize = (mw.value * 0.034f).sp
-        val valueSize = (mw.value * 0.022f).sp
+        // ── Live writing block: Date + Trip Stats + Travellers (compact, ONE column) ──
+        val labelSize = (mw.value * 0.026f).sp
+        val valueSize = (mw.value * 0.018f).sp
         Column(
             Modifier
                 .offset(x = mw * PB_BLOCK_X, y = mh * PB_BLOCK_Y)
@@ -139,34 +138,50 @@ fun PostcardBack(
         ) {
             // Date
             Text("Date:", fontFamily = PostcardBackTitle, fontSize = labelSize, color = Color(0xFF111111))
-            Spacer(Modifier.height(mh * 0.012f))
-            Text(
-                dateRange,
-                fontFamily = PostcardBack, fontSize = valueSize, color = Color(0xFF333333),
-                maxLines = 1, overflow = TextOverflow.Ellipsis,
+            Spacer(Modifier.height(mh * 0.004f))
+            Text(dateRange, fontFamily = PostcardBack, fontSize = valueSize, color = Color(0xFF333333),
+                maxLines = 1, overflow = TextOverflow.Ellipsis)
+            HorizontalDivider(color = Color(0xFF111111), thickness = 1.dp)
+
+            Spacer(Modifier.height(mh * 0.009f))
+
+            // Trip Stats — single auto-sized line (shrinks to fit, never truncates)
+            Text("Trip Stats:", fontFamily = PostcardBackTitle, fontSize = labelSize, color = Color(0xFF111111))
+            Spacer(Modifier.height(mh * 0.004f))
+            BasicText(
+                text = "$countriesCount countries · ${if (distanceKm > 0) "$distanceKm km" else "– km"} · $daysCount days · $expensesLabel ",
+                style = TextStyle(color = Color(0xFF333333), fontFamily = PostcardBack),
+                maxLines = 1,
+                autoSize = TextAutoSize.StepBased(
+                    minFontSize = 7.sp,
+                    maxFontSize = valueSize,
+                    stepSize = 0.5.sp,
+                ),
             )
             HorizontalDivider(color = Color(0xFF111111), thickness = 1.dp)
 
-            Spacer(Modifier.height(mh * 0.03f))
+            Spacer(Modifier.height(mh * 0.009f))
 
-            // Travellers
+            // Travellers — one line when short, two when long
             Text("Travellers:", fontFamily = PostcardBackTitle, fontSize = labelSize, color = Color(0xFF111111))
-            Spacer(Modifier.height(mh * 0.012f))
-            // Travelers — split into two underlined rows
-            val half = (travellers.size + 1) / 2
-            val line1 = travellers.take(half).joinToString(", ")
-            val line2 = travellers.drop(half).joinToString(", ")
-
-            Text(line1, fontFamily = PostcardBack, fontSize = valueSize, color = Color(0xFF333333),
-                maxLines = 1, overflow = TextOverflow.Ellipsis)
-            HorizontalDivider(color = Color(0xFF111111), thickness = 1.dp)
-
-            Spacer(Modifier.height(mh * 0.035f))           // gap between the two lines
-
-            Text(line2, fontFamily = PostcardBack, fontSize = valueSize, color = Color(0xFF333333),
-                maxLines = 1, overflow = TextOverflow.Ellipsis)
-            HorizontalDivider(color = Color(0xFF111111), thickness = 1.dp)
-            HorizontalDivider(color = Color(0xFF111111), thickness = 1.dp)
+            Spacer(Modifier.height(mh * 0.004f))
+            val joined = travellers.joinToString(", ")
+            if (joined.length <= 32) {
+                Text(joined, fontFamily = PostcardBack, fontSize = valueSize, color = Color(0xFF333333),
+                    maxLines = 1, overflow = TextOverflow.Ellipsis)
+                HorizontalDivider(color = Color(0xFF111111), thickness = 1.dp)
+            } else {
+                val half = (travellers.size + 1) / 2
+                Text(travellers.take(half).joinToString(", "),
+                    fontFamily = PostcardBack, fontSize = valueSize, color = Color(0xFF333333),
+                    maxLines = 1, overflow = TextOverflow.Ellipsis)
+                HorizontalDivider(color = Color(0xFF111111), thickness = 1.dp)
+                Spacer(Modifier.height(mh * 0.008f))
+                Text(travellers.drop(half).joinToString(", "),
+                    fontFamily = PostcardBack, fontSize = valueSize, color = Color(0xFF333333),
+                    maxLines = 1, overflow = TextOverflow.Ellipsis)
+                HorizontalDivider(color = Color(0xFF111111), thickness = 1.dp)
+            }
         }
     }
 }

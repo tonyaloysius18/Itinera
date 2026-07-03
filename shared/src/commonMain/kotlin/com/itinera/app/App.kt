@@ -336,6 +336,7 @@ private fun AppContent(
                                 canEdit = trip.canEdit(repository.authService.currentUid ?: ""),
                                 onMembers = { navigator.push(Screen.Members(screen.tripId)) },
                                 onMap = { navigator.push(Screen.TripMap(screen.tripId)) },
+                                expensesTotal = repository.expensesForTrip(screen.tripId).sumOf { it.amount },
                                 documents = repository.documents.filter { it.tripId == screen.tripId },
                                 onOpenDoc = { docId -> navigator.push(Screen.DocViewer(docId)) },
                             )

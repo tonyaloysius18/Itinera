@@ -976,6 +976,7 @@ class TripRepository {
                 if (l.id != legId) l else l.copy(
                     fromLat = from?.lat ?: l.fromLat, fromLng = from?.lng ?: l.fromLng,
                     toLat = to?.lat ?: l.toLat,       toLng = to?.lng ?: l.toLng,
+                    country = l.country.ifBlank { to?.country ?: "" },
                 )
             })
             persist(trips[i])
@@ -986,7 +987,7 @@ class TripRepository {
     fun backfillLegCoordinates(tripId: String) {
         val trip = tripById(tripId) ?: return
         trip.legs
-            .filter { (it.fromLat == 0.0 && it.fromLng == 0.0) || (it.toLat == 0.0 && it.toLng == 0.0) }
+            .filter { (it.fromLat == 0.0 && it.fromLng == 0.0) || (it.toLat == 0.0 && it.toLng == 0.0) || it.country.isBlank() }
             .forEach { geocodeLegAsync(tripId, it.id) }
     }
 }

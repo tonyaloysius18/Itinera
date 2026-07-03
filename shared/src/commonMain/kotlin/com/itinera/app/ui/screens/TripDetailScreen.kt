@@ -58,6 +58,8 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.sp
+import com.itinera.app.data.countriesCovered
+import com.itinera.app.data.distanceTravelledKm
 import com.itinera.app.data.extractBarcode
 import com.itinera.app.data.rememberFileSharer
 import com.itinera.app.data.toPngBytes
@@ -73,7 +75,9 @@ import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import com.preat.peekaboo.ui.camera.PeekabooCamera
 import kotlinx.coroutines.launch
+import kotlinx.datetime.daysUntil
 import org.jetbrains.compose.resources.Font
+import kotlin.math.roundToInt
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -82,6 +86,7 @@ fun TripDetailScreen(
     trip: Trip,
     activities: List<Activity>,
     travellers: List<Traveller> = emptyList(),
+    expensesTotal: Double = 0.0,
     documents: List<DocItem> = emptyList(),
     onBack: () -> Unit,
     onTravellers: () -> Unit,
@@ -171,10 +176,27 @@ fun TripDetailScreen(
     val legsByDate = trip.legs.groupBy { it.date }
     val actsByDate = activities.groupBy { it.date }
 
+    val daysCount = if (allDates.isEmpty()) 0
+    else allDates.first().daysUntil(allDates.last()) + 1
+    val currencySymbol = when (trip.currencyCode.uppercase()) {
+        "EUR" -> "€"
+        "USD" -> "$"
+        "GBP" -> "£"
+        "INR" -> "₹"
+        "JPY" -> "¥"
+        "CHF" -> "CHF"
+        "SEK", "NOK", "DKK" -> "kr"
+        else -> trip.currencyCode      // unknown codes stay as-is
+    }
+    val expensesLabel = "${expensesTotal.roundToInt()} $currencySymbol"
     val exporter = rememberPostcardExporter(
         country = trip.title.trim().substringBefore(" "),
         dateRange = if (allDates.isNotEmpty())
             "${allDates.first().label()} – ${allDates.last().label()}" else "",
+        countriesCount = trip.countriesCovered(),        // ⬅ ADD
+        distanceKm = trip.distanceTravelledKm(),         // ⬅ ADD
+        daysCount = daysCount,                           // ⬅ ADD
+        expensesLabel = expensesLabel,                   // ⬅ ADD
         travellers = travellers.map { it.firstName.substringBefore(" ") },
         heartUrl = heartUrl, rectUrl = rectUrl,
         backTopUrl = backTopUrl, backBottomUrl = backBottomUrl,
@@ -672,6 +694,10 @@ fun TripDetailScreen(
                                     country = trip.title.trim().substringBefore(" "),
                                     dateRange = if (allDates.isNotEmpty())
                                         "${allDates.first().label()} – ${allDates.last().label()}" else "",
+                                    countriesCount = trip.countriesCovered(),        // ⬅ ADD
+                                    distanceKm = trip.distanceTravelledKm(),         // ⬅ ADD
+                                    daysCount = daysCount,                           // ⬅ ADD
+                                    expensesLabel = expensesLabel,
                                     travellers = travellers.map { it.firstName.substringBefore(" ") },
                                     onPickTop    = { activeSlotForSheet = "backTop" },
                                     onPickBottom = { activeSlotForSheet = "backBottom" },
