@@ -1,7 +1,6 @@
 package com.itinera.app.ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -50,26 +49,26 @@ import com.itinera.app.ui.components.TopBar
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.sp
 import com.itinera.app.data.countriesCovered
 import com.itinera.app.data.distanceTravelledKm
-import com.itinera.app.data.extractBarcode
+import com.itinera.app.data.extractAllBarcodes
 import com.itinera.app.data.rememberFileSharer
 import com.itinera.app.data.toPngBytes
 import com.itinera.app.model.DocItem
+import com.itinera.app.model.Leg
 import com.itinera.app.model.Traveller
 import com.itinera.app.resources.Res
 import com.itinera.app.resources.*
 import com.itinera.app.ui.components.ImageCropScreen
 import com.itinera.app.ui.components.PostcardBack
-import com.itinera.app.ui.components.TicketBarcodeDialog
+import com.itinera.app.ui.components.TicketWalletDialog
+import com.itinera.app.ui.components.WalletTicket
 import com.itinera.app.ui.components.rememberPostcardExporter
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
@@ -131,8 +130,6 @@ fun TripDetailScreen(
     var activeSlotForSheet by remember { mutableStateOf<String?>(null) } // if non-null, show the sheet for this slot
     var showCamera   by remember { mutableStateOf(false) }
 
-
-
     val scope = rememberCoroutineScope()
     val picker = rememberImagePickerLauncher(
         selectionMode = SelectionMode.Single,
@@ -152,12 +149,34 @@ fun TripDetailScreen(
     var showAddChooser by remember { mutableStateOf(false) }
     var showPostcard by remember { mutableStateOf(false) }
 
-    // ── ticket barcode viewer ──
-    var barcodeResult  by remember { mutableStateOf<com.itinera.app.data.BarcodeExtraction?>(null) }
-    var barcodeDocId   by remember { mutableStateOf("") }
-    var barcodeTitle   by remember { mutableStateOf("") }
+    // ── ticket wallet viewer ──
+    var walletTickets by remember { mutableStateOf<List<WalletTicket>>(emptyList()) }
+    var walletLeg by remember { mutableStateOf<Leg?>(null) }
     var barcodeLoading by remember { mutableStateOf(false) }
-    val barcodeCache = remember { mutableStateMapOf<String, com.itinera.app.data.BarcodeExtraction?>() }
+    val legTicketCache = remember { mutableStateMapOf<String, List<WalletTicket>>() }
+
+    fun openLegTickets(leg: Leg, legDocs: List<DocItem>) {
+        if (legDocs.isEmpty()) return
+        scope.launch {
+            barcodeLoading = true
+            try {
+                val tickets = legTicketCache.getOrPut(leg.id) {
+                    legDocs.flatMap { d ->
+                        val bytes = onLoadImageBytes?.invoke(d.fileUrl)
+                        val codes = bytes?.let { extractAllBarcodes(it, d.mimeType) }.orEmpty()
+                        codes.map { WalletTicket(it, d.id, d.title) }
+                    }
+                }
+                if (tickets.isNotEmpty()) {
+                    walletTickets = tickets; walletLeg = leg
+                } else {
+                    onOpenDoc(legDocs.first().id)   // no codes anywhere → open the file
+                }
+            } finally {
+                barcodeLoading = false
+            }
+        }
+    }
 
     val totalItems = trip.legs.size + activities.size
     val allComplete = totalItems > 0 &&
@@ -189,14 +208,15 @@ fun TripDetailScreen(
         else -> trip.currencyCode      // unknown codes stay as-is
     }
     val expensesLabel = "${expensesTotal.roundToInt()} $currencySymbol"
+
     val exporter = rememberPostcardExporter(
         country = trip.title.trim().substringBefore(" "),
         dateRange = if (allDates.isNotEmpty())
             "${allDates.first().label()} – ${allDates.last().label()}" else "",
-        countriesCount = trip.countriesCovered(),        // ⬅ ADD
-        distanceKm = trip.distanceTravelledKm(),         // ⬅ ADD
-        daysCount = daysCount,                           // ⬅ ADD
-        expensesLabel = expensesLabel,                   // ⬅ ADD
+        countriesCount = trip.countriesCovered(),
+        distanceKm = trip.distanceTravelledKm(),
+        daysCount = daysCount,
+        expensesLabel = expensesLabel,
         travellers = travellers.map { it.firstName.substringBefore(" ") },
         heartUrl = heartUrl, rectUrl = rectUrl,
         backTopUrl = backTopUrl, backBottomUrl = backBottomUrl,
@@ -205,8 +225,7 @@ fun TripDetailScreen(
 
     val fileSharer = rememberFileSharer()
 
-    var exporting by remember { mutableStateOf(false) }              // ⬅ add
-
+    var exporting by remember { mutableStateOf(false) }
 
     val displayFont = FontFamily(Font(Res.font.arizonia_regular))
     val souvenirFont = FontFamily(Font(Res.font.caudex_bold))
@@ -240,11 +259,11 @@ fun TripDetailScreen(
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Progress(
                     fraction = if (trip.legs.isEmpty()) 0f else done.toFloat() / trip.legs.size,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
                 Spacer(Modifier.width(12.dp))
                 IconButton(onClick = onMap) {
@@ -252,7 +271,6 @@ fun TripDetailScreen(
                 }
             }
         }
-        //Spacer(Modifier.height(14.dp))
 
         Box(Modifier.weight(1f).fillMaxWidth()) {
             Column(
@@ -346,35 +364,10 @@ fun TripDetailScreen(
                                     }
                                 }
 
-                                fun openTicket(doc: DocItem, title: String) {
-                                    scope.launch {
-                                        barcodeLoading = true
-                                        try {
-                                            val cached = if (barcodeCache.containsKey(doc.id)) barcodeCache[doc.id] else {
-                                                val bytes = onLoadImageBytes?.invoke(doc.fileUrl)
-                                                val r = bytes?.let { com.itinera.app.data.extractBarcode(it, doc.mimeType) }
-                                                barcodeCache[doc.id] = r
-                                                r
-                                            }
-                                            if (cached != null) {
-                                                barcodeResult = cached; barcodeDocId = doc.id; barcodeTitle = title
-                                            } else {
-                                                onOpenDoc(doc.id)                 // fallback: no code found → full file
-                                            }
-                                        } finally {
-                                            barcodeLoading = false
-                                        }
-                                    }
-                                }
-
                                 val legDocs = documents.filter { it.legId == leg.id }
                                 if (legDocs.isNotEmpty()) {
-                                    var showLegDocs by remember(leg.id) { mutableStateOf(false) }
                                     IconButton(
-                                        onClick = {
-                                            if (legDocs.size == 1) openTicket(legDocs.first(), "${leg.fromCity} → ${leg.toCity}")
-                                            else showLegDocs = true
-                                        },
+                                        onClick = { openLegTickets(leg, legDocs) },
                                         enabled = !barcodeLoading,
                                         modifier = Modifier.size(34.dp).align(Alignment.CenterEnd),
                                     ) {
@@ -388,55 +381,29 @@ fun TripDetailScreen(
                                                 modifier = Modifier.size(20.dp),
                                             )
                                     }
-                                    if (showLegDocs) {
-                                        AlertDialog(
-                                            onDismissRequest = { showLegDocs = false },
-                                            title = { Text("${leg.fromCity} → ${leg.toCity}") },
-                                            shape = RoundedCornerShape(16.dp),
-                                            text = {
-                                                Column {
-                                                    legDocs.forEach { d ->
-                                                        Row(
-                                                            Modifier.fillMaxWidth()
-                                                                .clickable { showLegDocs = false; openTicket(d, d.title) }
-                                                                .padding(vertical = 12.dp),
-                                                            verticalAlignment = Alignment.CenterVertically,
-                                                        ) {
-                                                            Icon(Icons.AutoMirrored.Filled.InsertDriveFile, null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
-                                                            Spacer(Modifier.width(10.dp))
-                                                            Text(d.title, style = MaterialTheme.typography.bodyLarge)
-                                                        }
-                                                    }
-                                                }
-                                            },
-                                            confirmButton = {},
-                                            dismissButton = { TextButton(onClick = { showLegDocs = false }) { Text(s.close) } },
+                                }
+
+                                MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(14.dp))) {
+                                    DropdownMenu(
+                                        expanded = showMenu,
+                                        onDismissRequest = { showMenu = false },
+                                        offset = DpOffset(x = 16.dp, y = 0.dp),
+                                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    ) {
+                                        DropdownMenuItem(
+                                            text = { Text(s.edit) },
+                                            leadingIcon = { Icon(Icons.Filled.Edit, null) },
+                                            onClick = { showMenu = false; onEditLeg(leg.id) },
+                                        )
+                                        DropdownMenuItem(
+                                            text = { Text(s.delete, color = Color(0xFFE03131)) },
+                                            leadingIcon = { Icon(Icons.Filled.Delete, null, tint = Color(0xFFE03131)) },
+                                            onClick = { showMenu = false; pendingDeleteLegId = leg.id },
                                         )
                                     }
                                 }
-
-
-                            MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(14.dp))) {
-                                DropdownMenu(
-                                    expanded = showMenu,
-                                    onDismissRequest = { showMenu = false },
-                                    offset = DpOffset(x = 260.dp, y = 0.dp),
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                ) {
-                                    DropdownMenuItem(
-                                        text = { Text(s.edit) },
-                                        leadingIcon = { Icon(Icons.Filled.Edit, null) },
-                                        onClick = { showMenu = false; onEditLeg(leg.id) },
-                                    )
-                                    DropdownMenuItem(
-                                        text = { Text(s.delete, color = Color(0xFFE03131)) },
-                                        leadingIcon = { Icon(Icons.Filled.Delete, null, tint = Color(0xFFE03131)) },
-                                        onClick = { showMenu = false; pendingDeleteLegId = leg.id },
-                                    )
-                                }
                             }
                         }
-                    }
 
                         actsByDate[date].orEmpty().forEach { act ->
                             var showMenu by remember { mutableStateOf(false) }
@@ -485,7 +452,7 @@ fun TripDetailScreen(
                                     DropdownMenu(
                                         expanded = showMenu,
                                         onDismissRequest = { showMenu = false },
-                                        offset = DpOffset(x = 280.dp, y = 0.dp),
+                                        offset = DpOffset(x = 16.dp, y = 0.dp),
                                         containerColor = MaterialTheme.colorScheme.surfaceVariant,
                                     ) {
                                         DropdownMenuItem(
@@ -504,7 +471,6 @@ fun TripDetailScreen(
                         }
                     }
                 }
-
 
                 if (allComplete) {                       // only once the trip is complete (postcard has shown)
                     Spacer(Modifier.height(28.dp))
@@ -622,15 +588,21 @@ fun TripDetailScreen(
         )
     }
 
-    barcodeResult?.let { result ->
-        TicketBarcodeDialog(
-            title = barcodeTitle,
-            extraction = result,
-            onOpenFullTicket = { onOpenDoc(barcodeDocId) },
-            onDismiss = { barcodeResult = null },
-        )
+    // ── ticket wallet (swipeable codes for the tapped leg) ──
+    walletLeg?.let { leg ->
+        if (walletTickets.isNotEmpty()) {
+            TicketWalletDialog(
+                legRoute = "${leg.fromCity} → ${leg.toCity}",
+                legDateLabel = leg.date.label(),
+                legTime = leg.timeLabel,
+                operator = leg.operator,
+                transport = leg.transport,
+                tickets = walletTickets,
+                onOpenFullTicket = { docId -> onOpenDoc(docId) },
+                onDismiss = { walletTickets = emptyList(); walletLeg = null },
+            )
+        }
     }
-
 
     // ═══════════════════════════════════════════════════════════════════
     // POSTCARD DIALOG — all extra UI (crop, camera, source sheet) are
@@ -694,9 +666,9 @@ fun TripDetailScreen(
                                     country = trip.title.trim().substringBefore(" "),
                                     dateRange = if (allDates.isNotEmpty())
                                         "${allDates.first().label()} – ${allDates.last().label()}" else "",
-                                    countriesCount = trip.countriesCovered(),        // ⬅ ADD
-                                    distanceKm = trip.distanceTravelledKm(),         // ⬅ ADD
-                                    daysCount = daysCount,                           // ⬅ ADD
+                                    countriesCount = trip.countriesCovered(),
+                                    distanceKm = trip.distanceTravelledKm(),
+                                    daysCount = daysCount,
                                     expensesLabel = expensesLabel,
                                     travellers = travellers.map { it.firstName.substringBefore(" ") },
                                     onPickTop    = { activeSlotForSheet = "backTop" },

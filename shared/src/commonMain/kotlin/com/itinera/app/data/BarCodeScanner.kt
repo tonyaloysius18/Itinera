@@ -46,16 +46,27 @@ expect suspend fun detectBarcodesInImage(image: ImageBitmap): List<DetectedBarco
  * barcode is found — caller should then fall back to opening the full file.
  */
 @OptIn(ExperimentalResourceApi::class)
-suspend fun extractBarcode(bytes: ByteArray, mimeType: String): BarcodeExtraction? {
+suspend fun extractBarcode(bytes: ByteArray, mimeType: String): BarcodeExtraction? =
+    extractAllBarcodes(bytes, mimeType).firstOrNull()
+
+/**
+ * Like [extractBarcode] but returns EVERY code found in the file (e.g. one PDF
+ * holding boarding passes for several passengers), largest first, deduplicated
+ * by decoded value. Empty list = nothing decodable.
+ */
+@OptIn(ExperimentalResourceApi::class)
+suspend fun extractAllBarcodes(bytes: ByteArray, mimeType: String): List<BarcodeExtraction> {
     val isPdf = mimeType.contains("pdf", ignoreCase = true)
     val page: ImageBitmap = if (isPdf) {
-        renderPdfFirstPage(bytes) ?: return null
+        renderPdfFirstPage(bytes) ?: return emptyList()
     } else {
-        runCatching { bytes.decodeToImageBitmap() }.getOrNull() ?: return null
+        runCatching { bytes.decodeToImageBitmap() }.getOrNull() ?: return emptyList()
     }
     val codes = runCatching { detectBarcodesInImage(page) }.getOrElse { emptyList() }
-    val best = codes.maxByOrNull { it.area } ?: return null
-    return BarcodeExtraction(cropTo(page, best), best.rawValue)
+    return codes
+        .sortedByDescending { it.area }
+        .distinctBy { it.rawValue.ifBlank { "${it.left},${it.top},${it.right},${it.bottom}" } }
+        .map { BarcodeExtraction(cropTo(page, it), it.rawValue) }
 }
 
 /** Crops [src] to the barcode box plus a thin quiet zone, returns a new bitmap. */
