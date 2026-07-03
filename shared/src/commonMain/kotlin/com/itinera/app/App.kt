@@ -335,6 +335,7 @@ private fun AppContent(
                                 onDeleteActivity = { repository.deleteActivity(it) },
                                 canEdit = trip.canEdit(repository.authService.currentUid ?: ""),
                                 onMembers = { navigator.push(Screen.Members(screen.tripId)) },
+                                onMap = { navigator.push(Screen.TripMap(screen.tripId)) },
                                 documents = repository.documents.filter { it.tripId == screen.tripId },
                                 onOpenDoc = { docId -> navigator.push(Screen.DocViewer(docId)) },
                             )
@@ -517,6 +518,16 @@ private fun AppContent(
                                     },
                                 )
                             }
+                        }
+
+                        is Screen.TripMap -> {
+                            val trip = repository.tripById(screen.tripId)
+                            if (trip == null) navigator.back()
+                            else TripMapScreen(
+                                trip = trip,
+                                onBack = { navigator.back() },
+                                onBackfill = { repository.backfillLegCoordinates(screen.tripId) },
+                            )
                         }
 
                         Screen.Calendar -> CalendarScreen(

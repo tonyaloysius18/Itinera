@@ -103,7 +103,6 @@ class TripRepository {
         private set
 
 
-
     @OptIn(kotlin.time.ExperimentalTime::class)
     private fun nowMillis(): Long =
         kotlin.time.Clock.System.now().toEpochMilliseconds()
@@ -282,6 +281,7 @@ class TripRepository {
         trips[index] = trip.copy(legs = trip.legs + leg)
         persist(trips[index])
         scheduleLegReminder(trips[index], leg)
+        geocodeLegAsync(tripId, leg.id)
     }
 
     fun updateLeg(tripId: String, leg: Leg) {
@@ -291,6 +291,7 @@ class TripRepository {
         trips[index] = trip.copy(legs = trip.legs.map { if (it.id == leg.id) leg else it })
         persist(trips[index])
         scheduleLegReminder(trips[index], leg)
+        geocodeLegAsync(tripId, leg.id)
     }
 
     fun deleteLeg(tripId: String, legId: String) {
@@ -947,5 +948,45 @@ class TripRepository {
         val updated = trip.copy(members = newMembers, memberIds = newIds, memberInfo = newInfo)
         trips[idx] = updated
         persist(updated)
+    }
+
+    // ===== geocoding (for the trip map) =====
+    private val geocodeCache = mutableMapOf<String, GeoPoint?>()
+
+    private suspend fun geocode(city: String): GeoPoint? {
+        val key = city.trim().lowercase()
+        if (key.isBlank()) return null
+        return geocodeCache.getOrPut(key) { geocodeCity(uploadClient, city) }
+    }
+
+    /** Fills any missing lat/lng on one leg in the background, then persists. */
+    private fun geocodeLegAsync(tripId: String, legId: String) {
+        ioScope.launch {
+            val idx = trips.indexOfFirst { it.id == tripId }
+            if (idx < 0) return@launch
+            val leg = trips[idx].legs.firstOrNull { it.id == legId } ?: return@launch
+
+            val from = if (leg.fromLat == 0.0 && leg.fromLng == 0.0) geocode(leg.fromCity) else null
+            val to   = if (leg.toLat == 0.0 && leg.toLng == 0.0) geocode(leg.toCity) else null
+            if (from == null && to == null) return@launch
+
+            val i = trips.indexOfFirst { it.id == tripId }          // re-find (list may have moved)
+            if (i < 0) return@launch
+            trips[i] = trips[i].copy(legs = trips[i].legs.map { l ->
+                if (l.id != legId) l else l.copy(
+                    fromLat = from?.lat ?: l.fromLat, fromLng = from?.lng ?: l.fromLng,
+                    toLat = to?.lat ?: l.toLat,       toLng = to?.lng ?: l.toLng,
+                )
+            })
+            persist(trips[i])
+        }
+    }
+
+    /** One-shot backfill for legs saved before coordinates existed. Call when the map opens. */
+    fun backfillLegCoordinates(tripId: String) {
+        val trip = tripById(tripId) ?: return
+        trip.legs
+            .filter { (it.fromLat == 0.0 && it.fromLng == 0.0) || (it.toLat == 0.0 && it.toLng == 0.0) }
+            .forEach { geocodeLegAsync(tripId, it.id) }
     }
 }

@@ -51,6 +51,7 @@ import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.ConfirmationNumber
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.ui.graphics.ImageBitmap
@@ -100,6 +101,7 @@ fun TripDetailScreen(
     onDeleteActivity: (String) -> Unit,
     canEdit: Boolean = true,
     onMembers: () -> Unit,
+    onMap: () -> Unit,
 ) {
     val s = LocalStrings.current
     val done = trip.legs.count { it.completed }
@@ -208,16 +210,27 @@ fun TripDetailScreen(
             },
         )
         Spacer(Modifier.height(8.dp))
-        Column(Modifier.padding(horizontal = 16.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
             Text(
                 "$done ${s.legsTravelled}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             )
-            Spacer(Modifier.height(6.dp))
-            Progress(if (trip.legs.isEmpty()) 0f else done.toFloat() / trip.legs.size)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Progress(
+                    fraction = if (trip.legs.isEmpty()) 0f else done.toFloat() / trip.legs.size,
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(Modifier.width(12.dp))
+                IconButton(onClick = onMap) {
+                    Icon(Icons.Filled.Map, contentDescription = "Map", tint = MaterialTheme.colorScheme.primary)
+                }
+            }
         }
-        Spacer(Modifier.height(14.dp))
+        //Spacer(Modifier.height(14.dp))
 
         Box(Modifier.weight(1f).fillMaxWidth()) {
             Column(
@@ -379,13 +392,13 @@ fun TripDetailScreen(
                                         )
                                     }
                                 }
-                            }
+
 
                             MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(14.dp))) {
                                 DropdownMenu(
                                     expanded = showMenu,
                                     onDismissRequest = { showMenu = false },
-                                    offset = DpOffset(x = 280.dp, y = 0.dp),
+                                    offset = DpOffset(x = 260.dp, y = 0.dp),
                                     containerColor = MaterialTheme.colorScheme.surfaceVariant,
                                 ) {
                                     DropdownMenuItem(
@@ -401,6 +414,7 @@ fun TripDetailScreen(
                                 }
                             }
                         }
+                    }
 
                         actsByDate[date].orEmpty().forEach { act ->
                             var showMenu by remember { mutableStateOf(false) }

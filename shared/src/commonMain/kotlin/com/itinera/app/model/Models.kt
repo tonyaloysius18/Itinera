@@ -43,6 +43,10 @@ data class Leg(
     val bookingRef: String? = null,
     val completed: Boolean = false,
     val addedToCalendar: Boolean = false,
+    val fromLat: Double = 0.0,          // ⬅ ADD — geocoded once at save time
+    val fromLng: Double = 0.0,          // ⬅ ADD
+    val toLat: Double = 0.0,            // ⬅ ADD
+    val toLng: Double = 0.0,            // ⬅ ADD
 )
 
 /** A trip groups together an ordered list of legs and its documents/checklist. */

@@ -65,6 +65,9 @@ kotlin {
 
             implementation(libs.translate)
             implementation(libs.barcode.scanning)
+            implementation(libs.maps.compose)
+            implementation(libs.play.services.maps)
+            implementation(libs.osmdroid.android)
 
 
         }
