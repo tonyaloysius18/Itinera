@@ -439,6 +439,19 @@ class TripRepository {
         if (doc != null) ioScope.launch { runCatching { docService.deleteDocument(doc.tripId, docId) } }
     }
 
+    fun updateDocument(docId: String, title: String, category: String, legId: String) {
+        val i = documents.indexOfFirst { it.id == docId }
+        if (i < 0) return
+        val updated = documents[i].copy(
+            title = title.trim(),
+            category = category,
+            legId = legId,
+            memberIds = memberIdsForTrip(documents[i].tripId),
+        )
+        documents[i] = updated
+        ioScope.launch { runCatching { docService.saveDocument(updated) } }
+    }
+
     /** No longer needed for live sync (collection-group flow handles it); kept as a no-op
      *  so the Backup "Sync Now" call site still compiles. */
     suspend fun loadDocuments(uid: String) { /* handled by live collection-group sync */ }

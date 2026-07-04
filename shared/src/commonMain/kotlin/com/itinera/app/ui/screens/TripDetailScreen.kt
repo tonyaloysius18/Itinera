@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import com.itinera.app.data.countriesCovered
 import com.itinera.app.data.distanceTravelledKm
 import com.itinera.app.data.extractAllBarcodes
+import com.itinera.app.data.primaryCountry
 import com.itinera.app.data.rememberFileSharer
 import com.itinera.app.data.toPngBytes
 import com.itinera.app.model.DocItem
@@ -73,6 +74,7 @@ import com.itinera.app.ui.components.rememberPostcardExporter
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import com.preat.peekaboo.ui.camera.PeekabooCamera
+import com.itinera.app.parseHourMinute
 import kotlinx.coroutines.launch
 import kotlinx.datetime.daysUntil
 import org.jetbrains.compose.resources.Font
@@ -116,11 +118,11 @@ fun TripDetailScreen(
     var backTopUrl    by remember { mutableStateOf(trip.backTopUrl) }
     var backBottomUrl by remember { mutableStateOf(trip.backBottomUrl) }
 
-//    // keep local slot state in sync with the trip as Firestore delivers/updates it   // ⬅ CHANGED
-//    LaunchedEffect(trip.frontHeartUrl) { heartUrl      = trip.frontHeartUrl }          // ⬅ CHANGED
-//    LaunchedEffect(trip.frontRectUrl)  { rectUrl       = trip.frontRectUrl }           // ⬅ CHANGED
-//    LaunchedEffect(trip.backTopUrl)    { backTopUrl    = trip.backTopUrl }             // ⬅ CHANGED
-//    LaunchedEffect(trip.backBottomUrl) { backBottomUrl = trip.backBottomUrl }
+    // keep local slot state in sync with the trip as Firestore delivers/updates it
+    LaunchedEffect(trip.frontHeartUrl) { heartUrl      = trip.frontHeartUrl }
+    LaunchedEffect(trip.frontRectUrl)  { rectUrl       = trip.frontRectUrl }
+    LaunchedEffect(trip.backTopUrl)    { backTopUrl    = trip.backTopUrl }
+    LaunchedEffect(trip.backBottomUrl) { backBottomUrl = trip.backBottomUrl }
 
     // ── Crop / pick pipeline state ──
     var pendingBytes by remember { mutableStateOf<ByteArray?>(null) }
@@ -192,8 +194,12 @@ fun TripDetailScreen(
         .distinct()
         .sorted()
 
-    val legsByDate = trip.legs.groupBy { it.date }
-    val actsByDate = activities.groupBy { it.date }
+    val legsByDate = trip.legs
+        .sortedWith(compareBy({ it.date }, { parseHourMinute(it.timeLabel).first }, { parseHourMinute(it.timeLabel).second }))
+        .groupBy { it.date }
+    val actsByDate = activities
+        .sortedWith(compareBy({ it.date }, { parseHourMinute(it.time).first }, { parseHourMinute(it.time).second }))
+        .groupBy { it.date }
 
     val daysCount = if (allDates.isEmpty()) 0
     else allDates.first().daysUntil(allDates.last()) + 1
@@ -208,6 +214,8 @@ fun TripDetailScreen(
         else -> trip.currencyCode      // unknown codes stay as-is
     }
     val expensesLabel = "${expensesTotal.roundToInt()} $currencySymbol"
+
+    val postcardCountry = trip.primaryCountry().ifBlank { trip.title.trim().substringBefore(" ") }
 
     val exporter = rememberPostcardExporter(
         country = trip.title.trim().substringBefore(" "),
@@ -350,16 +358,49 @@ fun TripDetailScreen(
                                         Row(verticalAlignment = Alignment.CenterVertically) {
                                             Icon(transportIcon(leg.transport), null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                                             Spacer(Modifier.width(6.dp))
+                                            val timeDisplay = buildString {
+                                                append(leg.timeLabel)
+                                                if (leg.timeLabel.isNotBlank() && leg.endTimeLabel.isNotBlank()) {
+                                                    val (h1, m1) = parseHourMinute(leg.timeLabel)
+                                                    val (h2, m2) = parseHourMinute(leg.endTimeLabel)
+                                                    var diff = (h2 * 60 + m2) - (h1 * 60 + m1)
+                                                    if (diff < 0) diff += 24 * 60 // crosses midnight
+                                                    val h = diff / 60
+                                                    val m = diff % 60
+                                                    val duration = if (h > 0) "${h}h${m}m" else "${m}m"
+                                                    append(" - $duration - ")
+                                                    append(leg.endTimeLabel)
+                                                } else if (leg.endTimeLabel.isNotBlank()) {
+                                                    append(" - ")
+                                                    append(leg.endTimeLabel)
+                                                }
+                                            }
                                             val tail = if (isNext) {
-                                                if (leg.timeLabel.isNotBlank()) "${leg.timeLabel} · ${s.nextUp}" else s.nextUp
+                                                if (timeDisplay.isNotBlank()) "$timeDisplay · ${s.nextUp}" else s.nextUp
                                             } else {
-                                                leg.timeLabel
+                                                timeDisplay
                                             }
                                             Text(
                                                 tail,
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = if (isNext) Color(0xFFBA7517) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                             )
+
+                                            if (leg.travellerIds.isNotEmpty()) {
+                                                Spacer(Modifier.width(8.dp))
+                                                Icon(
+                                                    Icons.Filled.People,
+                                                    null,
+                                                    modifier = Modifier.size(14.dp),
+                                                    tint = if (isNext) Color(0xFFBA7517) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                                )
+                                                Spacer(Modifier.width(4.dp))
+                                                Text(
+                                                    "${leg.travellerIds.size}",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = if (isNext) Color(0xFFBA7517) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -387,7 +428,7 @@ fun TripDetailScreen(
                                     DropdownMenu(
                                         expanded = showMenu,
                                         onDismissRequest = { showMenu = false },
-                                        offset = DpOffset(x = 16.dp, y = 0.dp),
+                                        offset = DpOffset(x = 250.dp, y = 0.dp),
                                         containerColor = MaterialTheme.colorScheme.surfaceVariant,
                                     ) {
                                         DropdownMenuItem(
@@ -640,7 +681,8 @@ fun TripDetailScreen(
                                     rectMask = Res.drawable.rect_fill,
                                     title = Res.drawable.postcard_title,
                                     plane = Res.drawable.postcard_plane,
-                                    country = trip.title.trim().substringBefore(" "),
+                                    country = postcardCountry,
+                                    //country = trip.title.trim().substringBefore(" "),
                                     onPickHeart = { activeSlotForSheet = "heart" },
                                     onPickRect  = { activeSlotForSheet = "rect" },
                                     modifier = Modifier.clip(RoundedCornerShape(12.dp)),
@@ -663,7 +705,8 @@ fun TripDetailScreen(
                                     plane = Res.drawable.pb_plane,
                                     envelope = Res.drawable.pb_envelope,
                                     title = Res.drawable.pb_title,
-                                    country = trip.title.trim().substringBefore(" "),
+                                    country = postcardCountry,
+                                    //country = trip.title.trim().substringBefore(" "),
                                     dateRange = if (allDates.isNotEmpty())
                                         "${allDates.first().label()} – ${allDates.last().label()}" else "",
                                     countriesCount = trip.countriesCovered(),

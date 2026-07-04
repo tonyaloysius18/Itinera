@@ -364,6 +364,7 @@ private fun AppContent(
                         }
 
                         is Screen.AddLeg -> AddLegScreen(
+                            travellers = repository.tripById(screen.tripId)?.travellers ?: emptyList(),
                             onClose = { navigator.back() },
                             onSave = { leg -> repository.addLeg(screen.tripId, leg); navigator.back() },
                         )
@@ -374,6 +375,7 @@ private fun AppContent(
                             if (leg == null) navigator.back()
                             else AddLegScreen(
                                 existing = leg,
+                                travellers = trip.travellers,
                                 onClose = { navigator.back() },
                                 onSave = { updated -> repository.updateLeg(screen.tripId, updated); navigator.back() },
                                 onDelete = { repository.deleteLeg(screen.tripId, screen.legId); navigator.back() },
@@ -436,6 +438,9 @@ private fun AppContent(
                                 onBack = { navigator.back() },
                                 onOpenDoc = { navigator.push(Screen.DocViewer(it)) },
                                 onDeleteDocument = { repository.deleteDocument(it) },
+                                onUpdateDocument = { docId, title, category, legId ->
+                                    repository.updateDocument(docId, title, category, legId)
+                                },
                                 onMessage = { pillMessage = it },
                                 onUpload = { file, title, category, legId ->
                                     repository.addDocumentWithFile(screen.tripId, title, category, file, legId)

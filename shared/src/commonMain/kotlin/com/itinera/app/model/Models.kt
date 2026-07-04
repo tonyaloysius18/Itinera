@@ -47,6 +47,7 @@ data class Leg(
     val fromLng: Double = 0.0,          // ⬅ ADD
     val toLat: Double = 0.0,            // ⬅ ADD
     val toLng: Double = 0.0,            // ⬅ ADD
+    val travellerIds: List<String> = emptyList(),
 )
 
 /** A trip groups together an ordered list of legs and its documents/checklist. */

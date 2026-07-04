@@ -32,10 +32,16 @@ import kotlinx.datetime.LocalTime
 import com.itinera.app.model.label
 import kotlin.time.Instant
 
+import androidx.compose.material.icons.filled.People
+import com.itinera.app.model.Traveller
+
+import androidx.compose.material.icons.filled.SelectAll
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddLegScreen(
     existing: Leg? = null,
+    travellers: List<Traveller> = emptyList(),
     onClose: () -> Unit,
     onSave: (Leg) -> Unit,
     onDelete: (() -> Unit)? = null,
@@ -49,11 +55,13 @@ fun AddLegScreen(
     var operator by remember { mutableStateOf(existing?.operator ?: "") }
     var country by remember { mutableStateOf(existing?.country ?: "") }            // ⬅ ADD
     var transport by remember { mutableStateOf(existing?.transport ?: TransportType.TRAIN) }
+    var selectedTravellerIds by remember { mutableStateOf(existing?.travellerIds?.toSet() ?: travellers.map { it.id }.toSet()) }
 
     var showDatePicker by remember { mutableStateOf(false) }
     var showStartTimePicker by remember { mutableStateOf(false) }
     var showEndTimePicker by remember { mutableStateOf(false) }
     var showCountryPicker by remember { mutableStateOf(false) }                    // ⬅ ADD
+    var showTravellerPicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
 
     val textFieldShape = RoundedCornerShape(12.dp)
@@ -193,6 +201,24 @@ fun AddLegScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = textFieldShape,
             )
+
+            // Travellers (multi-select dropdown/dialog)
+            OutlinedTextField(
+                value = if (selectedTravellerIds.isEmpty()) "" else "${selectedTravellerIds.size} ${s.travellersCount}",
+                onValueChange = {},
+                readOnly = true,
+                enabled = false,
+                label = { Text(s.selectTravellers) },
+                trailingIcon = { Icon(Icons.Filled.People, contentDescription = null) },
+                shape = textFieldShape,
+                modifier = Modifier.fillMaxWidth().clickable { showTravellerPicker = true },
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                ),
+            )
         }
 
         // Calendar dialog
@@ -305,6 +331,58 @@ fun AddLegScreen(
             )
         }
 
+        if (showTravellerPicker) {
+            val allSelected = selectedTravellerIds.size == travellers.size
+            AlertDialog(
+                onDismissRequest = { showTravellerPicker = false },
+                confirmButton = {
+                    TextButton(onClick = { showTravellerPicker = false }) { Text(s.ok) }
+                },
+                title = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(s.selectTravellers)
+                        IconButton(onClick = {
+                            selectedTravellerIds = if (allSelected) emptySet() else travellers.map { it.id }.toSet()
+                        }) {
+                            Icon(
+                                Icons.Filled.SelectAll,
+                                contentDescription = s.selectAll
+                            )
+                        }
+                    }
+                },
+                shape = RoundedCornerShape(16.dp),
+                text = {
+                    LazyColumn(Modifier.heightIn(max = 300.dp)) {
+                        items(travellers) { t ->
+                            val isSelected = t.id in selectedTravellerIds
+                            Row(
+                                Modifier.fillMaxWidth()
+                                    .clickable {
+                                        selectedTravellerIds = if (isSelected) selectedTravellerIds - t.id else selectedTravellerIds + t.id
+                                    }
+                                    .padding(vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Checkbox(
+                                    checked = isSelected,
+                                    onCheckedChange = {
+                                        selectedTravellerIds = if (it) selectedTravellerIds + t.id else selectedTravellerIds - t.id
+                                    }
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text("${t.firstName} ${t.surname}".trim())
+                            }
+                        }
+                    }
+                }
+            )
+        }
+
         // Save
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(top = 16.dp, bottom = 60.dp),
@@ -326,6 +404,7 @@ fun AddLegScreen(
                             operator = operator.trim(),
                             country = country.trim(),                    // ⬅ ADD
                             bookingRef = null,
+                            travellerIds = selectedTravellerIds.toList(),
                         )
                     )
                 },

@@ -3,7 +3,9 @@ package com.itinera.app.ui.screens
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -12,7 +14,10 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.*
@@ -23,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.itinera.app.data.PickedFile
 import com.itinera.app.data.rememberFilePicker
@@ -34,7 +40,11 @@ import com.itinera.app.model.Trip
 import com.itinera.app.ui.components.CardShape
 import com.itinera.app.ui.components.PlaneLoader
 import com.itinera.app.ui.components.TopBar
+import com.preat.peekaboo.image.picker.SelectionMode
+import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import kotlinx.coroutines.launch
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 private const val CAT_TRANSPORT = "TRANSPORT"
 private const val CAT_ACCOMMODATION = "ACCOMMODATION"
@@ -65,6 +75,10 @@ private fun docColor(mimeType: String): Color = when {
 private fun nameWithoutExtension(fileName: String): String =
     fileName.substringBeforeLast('.', fileName)
 
+@OptIn(ExperimentalTime::class)
+private fun nowMillisDocs(): Long =
+    Clock.System.now().toEpochMilliseconds()
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DocumentsScreen(
@@ -76,6 +90,7 @@ fun DocumentsScreen(
     onUpload: suspend (PickedFile, title: String, category: String, legId: String) -> Boolean,
     onMessage: (String) -> Unit,
     onDeleteDocument: (String) -> Unit,
+    onUpdateDocument: (String, String, String, String) -> Unit,
     canEdit: Boolean = true,
 ) {
     val s = LocalStrings.current
@@ -86,6 +101,19 @@ fun DocumentsScreen(
     var showDialog by remember { mutableStateOf(false) }
     var uploading by remember { mutableStateOf(false) }
     var pendingDeleteId by remember { mutableStateOf<String?>(null) }
+    var showChoiceMenu by remember { mutableStateOf(false) }
+    var editingDoc by remember { mutableStateOf<DocItem?>(null) }
+
+    val imagePicker = rememberImagePickerLauncher(
+        selectionMode = SelectionMode.Single,
+        scope = scope,
+        onResult = { bytes ->
+            bytes.firstOrNull()?.let { b ->
+                pickedFile = PickedFile(b, "image_${nowMillisDocs()}.jpg", "image/jpeg")
+                showDialog = true
+            }
+        }
+    )
 
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
@@ -96,15 +124,7 @@ fun DocumentsScreen(
                     if (canEdit) {
                         IconButton(
                             enabled = !uploading,
-                            onClick = {
-                                scope.launch {
-                                    val file = filePicker.pickFile()
-                                    if (file != null) {
-                                        pickedFile = file
-                                        showDialog = true
-                                    }
-                                }
-                            },
+                            onClick = { showChoiceMenu = true },
                         ) {
                             Icon(
                                 Icons.Filled.Upload,
@@ -154,30 +174,120 @@ fun DocumentsScreen(
                         contentPadding = PaddingValues(vertical = 12.dp),
                     ) {
                         items(documents, key = { it.id }) { doc ->
-                            Surface(
-                                modifier = Modifier.combinedClickable(
-                                    onClick = { onOpenDoc(doc.id) },
-                                    onLongClick = { if (canEdit) pendingDeleteId = doc.id },
-                                ),
-                                shape = CardShape,
-                                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
-                            ) {
-                                Column(
-                                    Modifier.fillMaxWidth().padding(vertical = 16.dp, horizontal = 10.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
+                            var showMenu by remember { mutableStateOf(false) }
+
+                            Box {
+                                Surface(
+                                    modifier = Modifier.combinedClickable(
+                                        onClick = { onOpenDoc(doc.id) },
+                                        onLongClick = { if (canEdit) showMenu = true },
+                                    ),
+                                    shape = CardShape,
+                                    border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
                                 ) {
-                                    Icon(docIcon(doc.mimeType), null, tint = docColor(doc.mimeType), modifier = Modifier.size(34.dp))
-                                    Spacer(Modifier.height(9.dp))
-                                    Text(doc.title, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
-                                    Text(
-                                        categoryLabel(doc.category, s),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                        textAlign = TextAlign.Center,
-                                    )
+                                    Column(
+                                        Modifier.fillMaxWidth().padding(vertical = 16.dp, horizontal = 10.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                    ) {
+                                        Icon(docIcon(doc.mimeType), null, tint = docColor(doc.mimeType), modifier = Modifier.size(34.dp))
+                                        Spacer(Modifier.height(9.dp))
+                                        Text(doc.title, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
+                                        Text(
+                                            categoryLabel(doc.category, s),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                            textAlign = TextAlign.Center,
+                                        )
+                                    }
+                                }
+
+                                MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(14.dp))) {
+                                    DropdownMenu(
+                                        expanded = showMenu,
+                                        onDismissRequest = { showMenu = false },
+                                        offset = DpOffset(x = 40.dp, y = (-40).dp),
+                                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    ) {
+                                        DropdownMenuItem(
+                                            text = { Text(s.edit) },
+                                            leadingIcon = { Icon(Icons.Filled.Edit, null) },
+                                            onClick = {
+                                                showMenu = false
+                                                editingDoc = doc
+                                            },
+                                        )
+                                        DropdownMenuItem(
+                                            text = { Text(s.delete, color = Color(0xFFE03131)) },
+                                            leadingIcon = { Icon(Icons.Filled.Delete, null, tint = Color(0xFFE03131)) },
+                                            onClick = {
+                                                showMenu = false
+                                                pendingDeleteId = doc.id
+                                            },
+                                        )
+                                    }
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+
+        // Choice menu overlay
+        if (showChoiceMenu) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.45f))
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                    ) { showChoiceMenu = false },
+                contentAlignment = Alignment.BottomCenter,
+            ) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+                    modifier = Modifier.fillMaxWidth().clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                    ) {},
+                ) {
+                    Column(
+                        Modifier
+                            .padding(horizontal = 16.dp)
+                            .padding(bottom = 24.dp)
+                            .navigationBarsPadding(),
+                    ) {
+                        Text(
+                            s.addDocument,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(vertical = 12.dp),
+                        )
+                        HorizontalDivider()
+                        ListItem(
+                            headlineContent = { Text(s.uploadFromGallery) },
+                            leadingContent = { Icon(Icons.Filled.PhotoLibrary, contentDescription = null) },
+                            modifier = Modifier.clickable {
+                                showChoiceMenu = false
+                                imagePicker.launch()
+                            },
+                        )
+                        ListItem(
+                            headlineContent = { Text(s.uploadFromFiles) },
+                            leadingContent = { Icon(Icons.AutoMirrored.Filled.InsertDriveFile, contentDescription = null) },
+                            modifier = Modifier.clickable {
+                                showChoiceMenu = false
+                                scope.launch {
+                                    val file = filePicker.pickFile()
+                                    if (file != null) {
+                                        pickedFile = file
+                                        showDialog = true
+                                    }
+                                }
+                            },
+                        )
                     }
                 }
             }
@@ -204,6 +314,14 @@ fun DocumentsScreen(
     }
 
     if (showDialog && pickedFile != null) {
+
+        fun String.toTitleCase(): String =
+            split(" ").joinToString(" ") { word ->
+                word.replaceFirstChar { c ->
+                    if (c.isLowerCase()) c.titlecase() else c.toString()
+                }
+            }
+
         AddDocumentDialog(
             file = pickedFile!!,
             legs = trip.legs,
@@ -214,7 +332,7 @@ fun DocumentsScreen(
                 pickedFile = null
                 scope.launch {
                     uploading = true
-                    val ok = onUpload(f, title, category, legId)
+                    val ok = onUpload(f, title.toTitleCase(), category, legId)
                     uploading = false
                     if (!ok) onMessage(s.uploadFailed)
                 }
@@ -233,6 +351,19 @@ fun DocumentsScreen(
                 }
             },
             dismissButton = { TextButton(onClick = { pendingDeleteId = null }) { Text(s.cancel) } },
+        )
+    }
+
+    if (editingDoc != null) {
+        EditDocumentDialog(
+            doc = editingDoc!!,
+            legs = trip.legs,
+            onDismiss = { editingDoc = null },
+            onConfirm = { title, category, legId ->
+                val docId = editingDoc?.id ?: return@EditDocumentDialog
+                editingDoc = null
+                onUpdateDocument(docId, title, category, legId)
+            }
         )
     }
 }
@@ -256,6 +387,13 @@ private fun AddDocumentDialog(
     fun legLabel(id: String): String =
         legs.firstOrNull { it.id == id }?.let { "${it.fromCity} → ${it.toCity}" } ?: s.attachToNone
 
+    fun String.toTitleCase(): String =
+        split(" ").joinToString(" ") { word ->
+            word.replaceFirstChar { c ->
+                if (c.isLowerCase()) c.titlecase() else c.toString()
+            }
+        }
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(s.addDocument) },
@@ -275,7 +413,7 @@ private fun AddDocumentDialog(
 
                 OutlinedTextField(
                     value = title,
-                    onValueChange = { title = it },
+                    onValueChange = { title = it.toTitleCase() },
                     label = { Text(s.title) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
@@ -355,6 +493,121 @@ private fun AddDocumentDialog(
                 onClick = { if (title.isNotBlank()) onConfirm(title.trim(), category, legId) },
                 enabled = title.isNotBlank(),
             ) { Text(s.add) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(s.cancel) } },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EditDocumentDialog(
+    doc: DocItem,
+    legs: List<Leg>,
+    onDismiss: () -> Unit,
+    onConfirm: (title: String, category: String, legId: String) -> Unit,
+) {
+    val s = LocalStrings.current
+    var title by remember { mutableStateOf(doc.title) }
+    var category by remember { mutableStateOf(doc.category) }
+    var menuOpen by remember { mutableStateOf(false) }
+
+    var legId by remember { mutableStateOf(doc.legId) }
+    var legMenuOpen by remember { mutableStateOf(false) }
+    fun legLabel(id: String): String =
+        legs.firstOrNull { it.id == id }?.let { "${it.fromCity} → ${it.toCity}" } ?: s.attachToNone
+
+    fun String.toTitleCase(): String =
+        split(" ").joinToString(" ") { word ->
+            word.replaceFirstChar { c ->
+                if (c.isLowerCase()) c.titlecase() else c.toString()
+            }
+        }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(s.edit) },
+        shape = RoundedCornerShape(16.dp),
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it.toTitleCase() },
+                    label = { Text(s.title) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                )
+                Spacer(Modifier.height(12.dp))
+
+                ExposedDropdownMenuBox(
+                    expanded = menuOpen,
+                    onExpandedChange = { menuOpen = it },
+                ) {
+                    OutlinedTextField(
+                        value = categoryLabel(category, s),
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text(s.category) },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = menuOpen) },
+                        modifier = Modifier.menuAnchor().fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                    )
+                    ExposedDropdownMenu(
+                        expanded = menuOpen,
+                        onDismissRequest = { menuOpen = false },
+                        modifier = Modifier.background(MaterialTheme.colorScheme.surface),
+                        shape = RoundedCornerShape(12.dp),
+                    ) {
+                        ALL_CATEGORIES.forEach { value ->
+                            DropdownMenuItem(
+                                text = { Text(categoryLabel(value, s)) },
+                                onClick = { category = value; menuOpen = false },
+                            )
+                        }
+                    }
+                }
+
+                if (legs.isNotEmpty()) {
+                    Spacer(Modifier.height(12.dp))
+                    ExposedDropdownMenuBox(
+                        expanded = legMenuOpen,
+                        onExpandedChange = { legMenuOpen = it },
+                    ) {
+                        OutlinedTextField(
+                            value = legLabel(legId),
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text(s.attachToLeg) },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = legMenuOpen) },
+                            modifier = Modifier.menuAnchor().fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                        )
+                        ExposedDropdownMenu(
+                            expanded = legMenuOpen,
+                            onDismissRequest = { legMenuOpen = false },
+                            modifier = Modifier.background(MaterialTheme.colorScheme.surface),
+                            shape = RoundedCornerShape(12.dp),
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(s.attachToNone) },
+                                onClick = { legId = ""; legMenuOpen = false },
+                            )
+                            legs.forEach { leg ->
+                                DropdownMenuItem(
+                                    text = { Text("${leg.fromCity} → ${leg.toCity}") },
+                                    onClick = { legId = leg.id; legMenuOpen = false },
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { if (title.isNotBlank()) onConfirm(title.trim(), category, legId) },
+                enabled = title.isNotBlank(),
+            ) { Text(s.save) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(s.cancel) } },
     )

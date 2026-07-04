@@ -18,6 +18,16 @@ fun haversineKm(lat1: Double, lng1: Double, lat2: Double, lng2: Double): Double 
 }
 private const val PI_180 = kotlin.math.PI / 180.0
 
+/** The trip's dominant country (most legs), for the postcard "From {country}" line. */
+fun Trip.primaryCountry(): String {
+    val countries = legs
+        .sortedWith(compareBy({ it.date }, { it.timeLabel }))
+        .mapNotNull { it.country.trim().ifBlank { null } }
+    if (countries.isEmpty()) return ""
+    val weighted = if (countries.size > 1) countries.dropLast(1) else countries
+    return weighted.groupingBy { it }.eachCount().maxByOrNull { it.value }?.key ?: ""
+}
+
 /** Distinct countries across the trip's legs (blank = not yet geocoded, skipped). */
 fun Trip.countriesCovered(): Int =
     legs.map { it.country.trim().lowercase() }.filter { it.isNotBlank() }.distinct().size
@@ -27,3 +37,4 @@ fun Trip.distanceTravelledKm(): Int =
     legs.filter { (it.fromLat != 0.0 || it.fromLng != 0.0) && (it.toLat != 0.0 || it.toLng != 0.0) }
         .sumOf { haversineKm(it.fromLat, it.fromLng, it.toLat, it.toLng) }
         .roundToInt()
+

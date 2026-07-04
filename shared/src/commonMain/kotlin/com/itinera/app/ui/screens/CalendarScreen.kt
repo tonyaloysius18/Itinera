@@ -16,8 +16,12 @@ import com.itinera.app.data.toCalendarEvent
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.Trip
 import com.itinera.app.model.label
+import com.itinera.app.parseHourMinute
 import com.itinera.app.ui.components.CardShape
 import com.itinera.app.ui.components.TopBar
+
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 /**
  * Calendar derives its events from existing legs — no separate data. A full month
@@ -32,6 +36,7 @@ fun CalendarScreen(
 ) {
     val s = LocalStrings.current
     val calendar = rememberCalendarHelper()
+    val scrollState = rememberScrollState()
 
     Column(Modifier.fillMaxSize()) {
         TopBar(s.calendar)
@@ -56,7 +61,12 @@ fun CalendarScreen(
                     )
                 }
             } else {
-        Column(Modifier.weight(1f).padding(horizontal = 16.dp)) {
+        Column(
+            Modifier
+                .weight(1f)
+                .padding(horizontal = 16.dp)
+                .verticalScroll(scrollState)
+        ) {
             trips.forEach { trip ->
                 Text(
                     trip.title,
@@ -64,7 +74,9 @@ fun CalendarScreen(
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(vertical = 8.dp),
                 )
-                trip.legs.forEach { leg ->
+                trip.legs
+                    .sortedWith(compareBy({ it.date }, { parseHourMinute(it.timeLabel).first }, { parseHourMinute(it.timeLabel).second }))
+                    .forEach { leg ->
                     Surface(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                         shape = CardShape,

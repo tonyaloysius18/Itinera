@@ -200,6 +200,7 @@ class Strings {
 
     var choosePhoto: String = ""
     var uploadFromGallery: String = ""
+    var uploadFromFiles: String = ""
     var takePhoto: String = ""
     var removePhoto: String = ""
     var cropAndScale: String = ""
@@ -363,6 +364,9 @@ class Strings {
     var noLegsSubtitle: String =""
     var noChecklistItems: String =""
     var noChecklistSubtitle: String = ""
+
+    var selectTravellers: String = ""
+    var travellersCount: String = ""
 
     var inviteToTrip: String = ""
     var inviteFailed: String = ""
@@ -606,6 +610,7 @@ class Strings {
         c.somewhereToVisit = this.somewhereToVisit
         c.choosePhoto = this.choosePhoto
         c.uploadFromGallery = this.uploadFromGallery
+        c.uploadFromFiles = this.uploadFromFiles
         c.takePhoto = this.takePhoto
         c.removePhoto = this.removePhoto
         c.cropAndScale = this.cropAndScale
