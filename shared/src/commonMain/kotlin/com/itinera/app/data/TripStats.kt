@@ -34,7 +34,11 @@ fun Trip.countriesCovered(): Int =
 
 /** Total km across legs whose both endpoints are geocoded. */
 fun Trip.distanceTravelledKm(): Int =
-    legs.filter { (it.fromLat != 0.0 || it.fromLng != 0.0) && (it.toLat != 0.0 || it.toLng != 0.0) }
-        .sumOf { haversineKm(it.fromLat, it.fromLng, it.toLat, it.toLng) }
-        .roundToInt()
-
+    legs.sumOf { leg ->
+        val pts = buildList {
+            if (leg.fromLat != 0.0 || leg.fromLng != 0.0) add(leg.fromLat to leg.fromLng)
+            leg.stops.forEach { if (it.lat != 0.0 || it.lng != 0.0) add(it.lat to it.lng) }
+            if (leg.toLat != 0.0 || leg.toLng != 0.0) add(leg.toLat to leg.toLng)
+        }
+        pts.zipWithNext().sumOf { (a, b) -> haversineKm(a.first, a.second, b.first, b.second) }
+    }.roundToInt()

@@ -438,12 +438,12 @@ private fun AppContent(
                                 onBack = { navigator.back() },
                                 onOpenDoc = { navigator.push(Screen.DocViewer(it)) },
                                 onDeleteDocument = { repository.deleteDocument(it) },
-                                onUpdateDocument = { docId, title, category, legId ->
-                                    repository.updateDocument(docId, title, category, legId)
+                                onUpdateDocument = { docId, title, category, legId, segmentIndex ->
+                                    repository.updateDocument(docId, title, category, legId, segmentIndex)
                                 },
                                 onMessage = { pillMessage = it },
-                                onUpload = { file, title, category, legId ->
-                                    repository.addDocumentWithFile(screen.tripId, title, category, file, legId)
+                                onUpload = { file, title, category, legId, segmentindex ->
+                                    repository.addDocumentWithFile(screen.tripId, title, category, file, legId, segmentindex)
                                 },
                                 canEdit = trip.canEdit(repository.authService.currentUid ?: "")
                             )

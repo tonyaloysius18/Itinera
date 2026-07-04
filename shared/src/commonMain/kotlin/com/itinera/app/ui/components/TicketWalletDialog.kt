@@ -44,6 +44,8 @@ data class WalletTicket(
     val extraction: BarcodeExtraction,
     val docId: String,
     val docTitle: String = "",
+    val routeOverride: String = "",
+    val timeOverride: String = "",
 )
 
 /**
@@ -170,7 +172,7 @@ private fun WalletCard(
 
             // route
             Text(
-                legRoute,
+                ticket.routeOverride.ifBlank { legRoute },
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF111111),
@@ -179,7 +181,8 @@ private fun WalletCard(
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                listOf(legDateLabel, legTime).filter { it.isNotBlank() }.joinToString(" · "),
+                listOf(legDateLabel, ticket.timeOverride.ifBlank { legTime })   // ⬅ CHANGED
+                    .filter { it.isNotBlank() }.joinToString(" · "),
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color(0xFF6B7280),
             )

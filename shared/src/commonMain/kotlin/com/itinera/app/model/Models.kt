@@ -48,6 +48,7 @@ data class Leg(
     val toLat: Double = 0.0,            // ⬅ ADD
     val toLng: Double = 0.0,            // ⬅ ADD
     val travellerIds: List<String> = emptyList(),
+    val stops: List<LegStop> = emptyList(),
 )
 
 /** A trip groups together an ordered list of legs and its documents/checklist. */
@@ -114,6 +115,7 @@ data class DocItem(
     val type: DocType = DocType.IMAGE, // legacy
     val attachedToLabel: String = "",  // legacy
     val memberIds: List<String> = emptyList(),
+    val segmentIndex: Int = -1,
 
     )
 
@@ -140,6 +142,16 @@ data class Traveller(
     val colorIndex: Int = 0,
     val isOwner: Boolean = false,
     val userId: String = "",
+)
+
+@Serializable
+data class LegStop(
+    val city: String = "",
+    val arrivalTime: String = "",     // ⬅ ADD
+    val departureTime: String = "",   // ⬅ ADD
+    val lat: Double = 0.0,
+    val lng: Double = 0.0,
+    val country: String = "",
 )
 
 val Traveller.fullName: String

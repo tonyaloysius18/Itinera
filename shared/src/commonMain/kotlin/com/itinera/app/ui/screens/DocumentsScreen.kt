@@ -37,6 +37,7 @@ import com.itinera.app.i18n.Strings
 import com.itinera.app.model.DocItem
 import com.itinera.app.model.Leg
 import com.itinera.app.model.Trip
+import com.itinera.app.parseHourMinute
 import com.itinera.app.ui.components.CardShape
 import com.itinera.app.ui.components.PlaneLoader
 import com.itinera.app.ui.components.TopBar
@@ -72,6 +73,13 @@ private fun docColor(mimeType: String): Color = when {
     else -> Color(0xFF7A7A7A)
 }
 
+/** Sub-leg options for a leg with stops: index to "CityA → CityB" (whole journey = -1). */
+private fun segmentOptions(leg: Leg): List<Pair<Int, String>> {
+    if (leg.stops.isEmpty()) return emptyList()
+    val cities = listOf(leg.fromCity) + leg.stops.map { it.city } + listOf(leg.toCity)
+    return (0 until cities.size - 1).map { i -> i to "${cities[i]} → ${cities[i + 1]}" }
+}
+
 private fun nameWithoutExtension(fileName: String): String =
     fileName.substringBeforeLast('.', fileName)
 
@@ -87,10 +95,10 @@ fun DocumentsScreen(
     isLoading: Boolean = false,               // ⬅ ADDED
     onBack: () -> Unit,
     onOpenDoc: (String) -> Unit,
-    onUpload: suspend (PickedFile, title: String, category: String, legId: String) -> Boolean,
+    onUpload: suspend (PickedFile, title: String, category: String, legId: String, segmentIndex: Int) -> Boolean,
     onMessage: (String) -> Unit,
     onDeleteDocument: (String) -> Unit,
-    onUpdateDocument: (String, String, String, String) -> Unit,
+    onUpdateDocument: (String, String, String, String, Int) -> Unit,
     canEdit: Boolean = true,
 ) {
     val s = LocalStrings.current
@@ -326,13 +334,13 @@ fun DocumentsScreen(
             file = pickedFile!!,
             legs = trip.legs,
             onDismiss = { showDialog = false; pickedFile = null },
-            onConfirm = { title, category, legId ->
+            onConfirm = { title, category, legId, segmentIndex ->
                 val f = pickedFile!!
                 showDialog = false
                 pickedFile = null
                 scope.launch {
                     uploading = true
-                    val ok = onUpload(f, title.toTitleCase(), category, legId)
+                    val ok = onUpload(f, title.toTitleCase(), category, legId, segmentIndex)
                     uploading = false
                     if (!ok) onMessage(s.uploadFailed)
                 }
@@ -359,10 +367,10 @@ fun DocumentsScreen(
             doc = editingDoc!!,
             legs = trip.legs,
             onDismiss = { editingDoc = null },
-            onConfirm = { title, category, legId ->
+            onConfirm = { title, category, legId, segmentIndex ->
                 val docId = editingDoc?.id ?: return@EditDocumentDialog
                 editingDoc = null
-                onUpdateDocument(docId, title, category, legId)
+                onUpdateDocument(docId, title, category, legId, segmentIndex)
             }
         )
     }
@@ -374,7 +382,7 @@ private fun AddDocumentDialog(
     file: PickedFile,
     legs: List<Leg>,
     onDismiss: () -> Unit,
-    onConfirm: (title: String, category: String, legId: String) -> Unit,
+    onConfirm: (title: String, category: String, legId: String, segmentIndex: Int) -> Unit,
 ) {
     val s = LocalStrings.current
     var title by remember { mutableStateOf(nameWithoutExtension(file.fileName)) }
@@ -384,6 +392,8 @@ private fun AddDocumentDialog(
     // Leg attachment (optional). "" = not attached to any leg.
     var legId by remember { mutableStateOf("") }
     var legMenuOpen by remember { mutableStateOf(false) }
+    var segmentIndex by remember { mutableStateOf(-1) }
+    var segMenuOpen by remember { mutableStateOf(false) }
     fun legLabel(id: String): String =
         legs.firstOrNull { it.id == id }?.let { "${it.fromCity} → ${it.toCity}" } ?: s.attachToNone
 
@@ -475,12 +485,51 @@ private fun AddDocumentDialog(
                             // "None" option
                             DropdownMenuItem(
                                 text = { Text(s.attachToNone) },
-                                onClick = { legId = ""; legMenuOpen = false },
+                                onClick = { legId = ""; segmentIndex = -1; legMenuOpen = false },
                             )
-                            legs.forEach { leg ->
+                            legs.sortedWith(compareBy({ it.date }, { parseHourMinute(it.timeLabel).first }, { parseHourMinute(it.timeLabel).second }))
+                                .forEach { leg ->
                                 DropdownMenuItem(
                                     text = { Text("${leg.fromCity} → ${leg.toCity}") },
-                                    onClick = { legId = leg.id; legMenuOpen = false },
+                                    onClick = { legId = leg.id; segmentIndex = -1; legMenuOpen = false },
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Segment picker — only when the chosen leg has layover stops
+                val segLeg = legs.firstOrNull { it.id == legId }
+                val segOptions = segLeg?.let { segmentOptions(it) } ?: emptyList()
+                if (segOptions.isNotEmpty()) {
+                    Spacer(Modifier.height(12.dp))
+                    ExposedDropdownMenuBox(
+                        expanded = segMenuOpen,
+                        onExpandedChange = { segMenuOpen = it },
+                    ) {
+                        OutlinedTextField(
+                            value = segOptions.firstOrNull { it.first == segmentIndex }?.second ?: "Whole journey",
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Segment") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = segMenuOpen) },
+                            modifier = Modifier.menuAnchor().fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                        )
+                        ExposedDropdownMenu(
+                            expanded = segMenuOpen,
+                            onDismissRequest = { segMenuOpen = false },
+                            modifier = Modifier.background(MaterialTheme.colorScheme.surface),
+                            shape = RoundedCornerShape(12.dp),
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Whole journey") },
+                                onClick = { segmentIndex = -1; segMenuOpen = false },
+                            )
+                            segOptions.forEach { (i, label) ->
+                                DropdownMenuItem(
+                                    text = { Text(label) },
+                                    onClick = { segmentIndex = i; segMenuOpen = false },
                                 )
                             }
                         }
@@ -490,7 +539,7 @@ private fun AddDocumentDialog(
         },
         confirmButton = {
             TextButton(
-                onClick = { if (title.isNotBlank()) onConfirm(title.trim(), category, legId) },
+                onClick = { if (title.isNotBlank()) onConfirm(title.trim(), category, legId, segmentIndex) },
                 enabled = title.isNotBlank(),
             ) { Text(s.add) }
         },
@@ -504,7 +553,7 @@ private fun EditDocumentDialog(
     doc: DocItem,
     legs: List<Leg>,
     onDismiss: () -> Unit,
-    onConfirm: (title: String, category: String, legId: String) -> Unit,
+    onConfirm: (title: String, category: String, legId: String, segmentIndex: Int) -> Unit,
 ) {
     val s = LocalStrings.current
     var title by remember { mutableStateOf(doc.title) }
@@ -513,6 +562,8 @@ private fun EditDocumentDialog(
 
     var legId by remember { mutableStateOf(doc.legId) }
     var legMenuOpen by remember { mutableStateOf(false) }
+    var segmentIndex by remember { mutableStateOf(doc.segmentIndex) }
+    var segMenuOpen by remember { mutableStateOf(false) }
     fun legLabel(id: String): String =
         legs.firstOrNull { it.id == id }?.let { "${it.fromCity} → ${it.toCity}" } ?: s.attachToNone
 
@@ -590,12 +641,51 @@ private fun EditDocumentDialog(
                         ) {
                             DropdownMenuItem(
                                 text = { Text(s.attachToNone) },
-                                onClick = { legId = ""; legMenuOpen = false },
+                                onClick = { legId = ""; segmentIndex = -1; legMenuOpen = false },
                             )
-                            legs.forEach { leg ->
+                            legs.sortedWith(compareBy({ it.date }, { parseHourMinute(it.timeLabel).first }, { parseHourMinute(it.timeLabel).second }))
+                                .forEach { leg ->
                                 DropdownMenuItem(
                                     text = { Text("${leg.fromCity} → ${leg.toCity}") },
-                                    onClick = { legId = leg.id; legMenuOpen = false },
+                                    onClick = { legId = leg.id; segmentIndex = -1; legMenuOpen = false },
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Segment picker — only when the chosen leg has layover stops
+                val segLeg = legs.firstOrNull { it.id == legId }
+                val segOptions = segLeg?.let { segmentOptions(it) } ?: emptyList()
+                if (segOptions.isNotEmpty()) {
+                    Spacer(Modifier.height(12.dp))
+                    ExposedDropdownMenuBox(
+                        expanded = segMenuOpen,
+                        onExpandedChange = { segMenuOpen = it },
+                    ) {
+                        OutlinedTextField(
+                            value = segOptions.firstOrNull { it.first == segmentIndex }?.second ?: "Whole journey",
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Segment") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = segMenuOpen) },
+                            modifier = Modifier.menuAnchor().fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                        )
+                        ExposedDropdownMenu(
+                            expanded = segMenuOpen,
+                            onDismissRequest = { segMenuOpen = false },
+                            modifier = Modifier.background(MaterialTheme.colorScheme.surface),
+                            shape = RoundedCornerShape(12.dp),
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Whole journey") },
+                                onClick = { segmentIndex = -1; segMenuOpen = false },
+                            )
+                            segOptions.forEach { (i, label) ->
+                                DropdownMenuItem(
+                                    text = { Text(label) },
+                                    onClick = { segmentIndex = i; segMenuOpen = false },
                                 )
                             }
                         }
@@ -605,7 +695,7 @@ private fun EditDocumentDialog(
         },
         confirmButton = {
             TextButton(
-                onClick = { if (title.isNotBlank()) onConfirm(title.trim(), category, legId) },
+                onClick = { if (title.isNotBlank()) onConfirm(title.trim(), category, legId, segmentIndex) },
                 enabled = title.isNotBlank(),
             ) { Text(s.save) }
         },

@@ -439,7 +439,7 @@ class TripRepository {
         if (doc != null) ioScope.launch { runCatching { docService.deleteDocument(doc.tripId, docId) } }
     }
 
-    fun updateDocument(docId: String, title: String, category: String, legId: String) {
+    fun updateDocument(docId: String, title: String, category: String, legId: String, segmentIndex: Int = -1) {
         val i = documents.indexOfFirst { it.id == docId }
         if (i < 0) return
         val updated = documents[i].copy(
@@ -447,6 +447,7 @@ class TripRepository {
             category = category,
             legId = legId,
             memberIds = memberIdsForTrip(documents[i].tripId),
+            segmentIndex = segmentIndex,
         )
         documents[i] = updated
         ioScope.launch { runCatching { docService.saveDocument(updated) } }
@@ -462,6 +463,7 @@ class TripRepository {
         category: String,
         file: PickedFile,
         legId: String = "",
+        segmentIndex: Int = -1
     ): Boolean {
         return try {
             val url = uploadFileToStorage(uploadClient, file.bytes, file.fileName, file.mimeType)
@@ -475,6 +477,7 @@ class TripRepository {
                 fileUrl = url,
                 mimeType = file.mimeType,
                 memberIds = memberIdsForTrip(tripId),
+                segmentIndex = segmentIndex,
             )
             documents.add(doc)
             docService.saveDocument(doc)
@@ -981,15 +984,26 @@ class TripRepository {
 
             val from = if (leg.fromLat == 0.0 && leg.fromLng == 0.0) geocode(leg.fromCity) else null
             val to   = if (leg.toLat == 0.0 && leg.toLng == 0.0) geocode(leg.toCity) else null
-            if (from == null && to == null) return@launch
 
-            val i = trips.indexOfFirst { it.id == tripId }          // re-find (list may have moved)
+            // geocode any stop that's missing coordinates                          // ⬅ ADD
+            val stopsNeedWork = leg.stops.any { it.lat == 0.0 && it.lng == 0.0 }     // ⬅ ADD
+            val newStops = if (stopsNeedWork) leg.stops.map { stop ->                // ⬅ ADD
+                if (stop.lat != 0.0 || stop.lng != 0.0) stop                         // ⬅ ADD
+                else geocode(stop.city)?.let {                                       // ⬅ ADD
+                    stop.copy(lat = it.lat, lng = it.lng, country = stop.country.ifBlank { it.country })
+                } ?: stop                                                            // ⬅ ADD
+            } else leg.stops                                                         // ⬅ ADD
+
+            if (from == null && to == null && !stopsNeedWork) return@launch          // ⬅ CHANGED
+
+            val i = trips.indexOfFirst { it.id == tripId }
             if (i < 0) return@launch
             trips[i] = trips[i].copy(legs = trips[i].legs.map { l ->
                 if (l.id != legId) l else l.copy(
                     fromLat = from?.lat ?: l.fromLat, fromLng = from?.lng ?: l.fromLng,
                     toLat = to?.lat ?: l.toLat,       toLng = to?.lng ?: l.toLng,
                     country = l.country.ifBlank { to?.country ?: "" },
+                    stops = newStops,                                                // ⬅ ADD
                 )
             })
             persist(trips[i])
@@ -1000,7 +1014,12 @@ class TripRepository {
     fun backfillLegCoordinates(tripId: String) {
         val trip = tripById(tripId) ?: return
         trip.legs
-            .filter { (it.fromLat == 0.0 && it.fromLng == 0.0) || (it.toLat == 0.0 && it.toLng == 0.0) || it.country.isBlank() }
+            .filter {
+                (it.fromLat == 0.0 && it.fromLng == 0.0) ||
+                        (it.toLat == 0.0 && it.toLng == 0.0) ||
+                        it.country.isBlank() ||
+                        it.stops.any { s -> s.lat == 0.0 && s.lng == 0.0 }        // ⬅ ADD
+            }
             .forEach { geocodeLegAsync(tripId, it.id) }
     }
 }

@@ -46,9 +46,14 @@ fun TripMapScreen(
     }
 
     val routes = remember(trip.legs) {
-        trip.legs
-            .filter { hasCoords(it.fromLat, it.fromLng) && hasCoords(it.toLat, it.toLng) }
-            .map { MapRoute(it.fromLat, it.fromLng, it.toLat, it.toLng) }
+        trip.legs.flatMap { leg ->
+            val points = buildList {
+                if (hasCoords(leg.fromLat, leg.fromLng)) add(leg.fromLat to leg.fromLng)
+                leg.stops.forEach { if (hasCoords(it.lat, it.lng)) add(it.lat to it.lng) }
+                if (hasCoords(leg.toLat, leg.toLng)) add(leg.toLat to leg.toLng)
+            }
+            points.zipWithNext().map { (a, b) -> MapRoute(a.first, a.second, b.first, b.second) }
+        }
     }
 
     Column(Modifier.fillMaxSize()) {

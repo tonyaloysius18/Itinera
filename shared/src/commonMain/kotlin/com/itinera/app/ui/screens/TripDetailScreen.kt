@@ -20,6 +20,8 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Flight
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.PhotoLibrary
@@ -166,7 +168,18 @@ fun TripDetailScreen(
                     legDocs.flatMap { d ->
                         val bytes = onLoadImageBytes?.invoke(d.fileUrl)
                         val codes = bytes?.let { extractAllBarcodes(it, d.mimeType) }.orEmpty()
-                        codes.map { WalletTicket(it, d.id, d.title) }
+
+                        // derive this doc's segment route/times if it's bound to one   // ⬅ ADD
+                        val cities = listOf(leg.fromCity) + leg.stops.map { it.city } + listOf(leg.toCity)
+                        val depTimes = listOf(leg.timeLabel) + leg.stops.map { it.departureTime }
+                        val arrTimes = leg.stops.map { it.arrivalTime } + listOf(leg.endTimeLabel)
+                        val si = d.segmentIndex
+                        val (route, time) = if (si in 0..leg.stops.size) {
+                            "${cities[si]} → ${cities[si + 1]}" to
+                                    listOf(depTimes[si], arrTimes[si]).filter { it.isNotBlank() }.joinToString(" - ")
+                        } else "" to ""
+
+                        codes.map { WalletTicket(it, d.id, d.title, routeOverride = route, timeOverride = time) }
                     }
                 }
                 if (tickets.isNotEmpty()) {
@@ -215,10 +228,11 @@ fun TripDetailScreen(
     }
     val expensesLabel = "${expensesTotal.roundToInt()} $currencySymbol"
 
+    // dominant destination country from geocoded legs; title-derived guess as fallback
     val postcardCountry = trip.primaryCountry().ifBlank { trip.title.trim().substringBefore(" ") }
 
     val exporter = rememberPostcardExporter(
-        country = trip.title.trim().substringBefore(" "),
+        country = postcardCountry,
         dateRange = if (allDates.isNotEmpty())
             "${allDates.first().label()} – ${allDates.last().label()}" else "",
         countriesCount = trip.countriesCovered(),
@@ -237,7 +251,8 @@ fun TripDetailScreen(
 
     val displayFont = FontFamily(Font(Res.font.arizonia_regular))
     val souvenirFont = FontFamily(Font(Res.font.caudex_bold))
-    val nextLegId = trip.legs.sortedWith(compareBy({ it.date }, { it.timeLabel }))
+    val nextLegId = trip.legs
+        .sortedWith(compareBy({ it.date }, { parseHourMinute(it.timeLabel).first }, { parseHourMinute(it.timeLabel).second }))
         .firstOrNull { !it.completed }?.id
 
     Column(Modifier.fillMaxSize()) {
@@ -323,6 +338,7 @@ fun TripDetailScreen(
                         legsByDate[date].orEmpty().forEach { leg ->
                             val isNext = leg.id == nextLegId
                             var showMenu by remember { mutableStateOf(false) }
+                            var stopsExpanded by remember(leg.id) { mutableStateOf(false) }
 
                             Box {
                                 Row(
@@ -400,6 +416,63 @@ fun TripDetailScreen(
                                                     style = MaterialTheme.typography.bodySmall,
                                                     color = if (isNext) Color(0xFFBA7517) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                                 )
+                                            }
+                                        }
+
+                                        if (leg.stops.isNotEmpty()) {
+                                            Spacer(Modifier.height(2.dp))
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier.clickable(
+                                                    interactionSource = remember { MutableInteractionSource() },
+                                                    indication = null,
+                                                ) { stopsExpanded = !stopsExpanded },
+                                            ) {
+                                                Text(
+                                                    "via ${leg.stops.size} " + if (leg.stops.size == 1) "stop" else "stops",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                                )
+                                                Icon(
+                                                    if (stopsExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                                    modifier = Modifier.size(18.dp),
+                                                )
+                                            }
+                                            if (stopsExpanded) {
+                                                // derive sub-legs: from → stop1 → … → to, with times
+                                                val segments = buildList {
+                                                    var prevCity = leg.fromCity
+                                                    var prevDep = leg.timeLabel
+                                                    leg.stops.forEach { stop ->
+                                                        add(LegSegment(prevCity, prevDep, stop.city, stop.arrivalTime))
+                                                        prevCity = stop.city
+                                                        prevDep = stop.departureTime
+                                                    }
+                                                    add(LegSegment(prevCity, prevDep, leg.toCity, leg.endTimeLabel))
+                                                }
+                                                segments.forEach { seg ->
+                                                    Row(
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        modifier = Modifier.padding(start = 8.dp, top = 2.dp),
+                                                    ) {
+                                                        Icon(
+                                                            Icons.Outlined.Circle, null,
+                                                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
+                                                            modifier = Modifier.size(8.dp),
+                                                        )
+                                                        Spacer(Modifier.width(8.dp))
+                                                        val times = listOf(seg.depTime, seg.arrTime)
+                                                            .filter { it.isNotBlank() }.joinToString(" - ")
+                                                        Text(
+                                                            "${seg.fromCity} → ${seg.toCity}" +
+                                                                    if (times.isBlank()) "" else "  ·  $times",
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                                        )
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -682,7 +755,6 @@ fun TripDetailScreen(
                                     title = Res.drawable.postcard_title,
                                     plane = Res.drawable.postcard_plane,
                                     country = postcardCountry,
-                                    //country = trip.title.trim().substringBefore(" "),
                                     onPickHeart = { activeSlotForSheet = "heart" },
                                     onPickRect  = { activeSlotForSheet = "rect" },
                                     modifier = Modifier.clip(RoundedCornerShape(12.dp)),
@@ -706,7 +778,6 @@ fun TripDetailScreen(
                                     envelope = Res.drawable.pb_envelope,
                                     title = Res.drawable.pb_title,
                                     country = postcardCountry,
-                                    //country = trip.title.trim().substringBefore(" "),
                                     dateRange = if (allDates.isNotEmpty())
                                         "${allDates.first().label()} – ${allDates.last().label()}" else "",
                                     countriesCount = trip.countriesCovered(),
@@ -929,3 +1000,11 @@ fun TripDetailScreen(
         }
     }
 }
+
+/** A derived sub-leg between consecutive points of a leg with stops. */
+private data class LegSegment(
+    val fromCity: String,
+    val depTime: String,
+    val toCity: String,
+    val arrTime: String,
+)
