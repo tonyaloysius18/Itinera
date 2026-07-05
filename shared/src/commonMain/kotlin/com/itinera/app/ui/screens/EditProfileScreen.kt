@@ -14,7 +14,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
@@ -47,7 +46,6 @@ import com.itinera.app.ui.components.PlaneLoader
 import com.itinera.app.ui.components.cropToCircle
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
-import com.preat.peekaboo.ui.camera.PeekabooCamera          // ⬅ from peekaboo-ui module
 import kotlinx.coroutines.launch
 
 
@@ -80,7 +78,6 @@ fun EditProfileScreen(
     var photoBytes    by remember { mutableStateOf<ByteArray?>(null) }  // confirmed crop result
     var pendingBytes  by remember { mutableStateOf<ByteArray?>(null) }  // waiting for crop
     var showSourceSheet by remember { mutableStateOf(false) }
-    var showCamera    by remember { mutableStateOf(false) }
     var showCrop      by remember { mutableStateOf(false) }
 
     // ── UI state ─────────────────────────────────────────────────────
@@ -348,17 +345,6 @@ fun EditProfileScreen(
                         },
                     )
 
-                    ListItem(
-                        headlineContent = { Text(s.takePhoto) },
-                        leadingContent = {
-                            Icon(Icons.Filled.CameraAlt, contentDescription = null)
-                        },
-                        modifier = Modifier.clickable {
-                            showSourceSheet = false
-                            showCamera = true
-                        },
-                    )
-
                     // Remove option — only shown if there's already a photo
                     if (photoBytes != null || profile.photoUrl.isNotBlank()) {
                         ListItem(
@@ -383,50 +369,6 @@ fun EditProfileScreen(
                     }
                 }
             }
-        }
-
-        // ═══════════════════════════════════════════════════════════
-        // CAMERA OVERLAY (peekaboo-ui)
-        // ═══════════════════════════════════════════════════════════
-        if (showCamera) {
-            PeekabooCamera(
-                modifier = Modifier.fillMaxSize(),
-                captureIcon = { onClick ->
-                    IconButton(
-                        onClick = onClick,
-                        modifier = Modifier
-                            .padding(bottom = 32.dp)
-                            .size(64.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary),
-                    ) {
-                        Icon(
-                            Icons.Filled.CameraAlt,
-                            contentDescription = s.capture,
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(32.dp),
-                        )
-                    }
-                },
-                onCapture = { bytes ->
-                    if (bytes != null) {
-                        pendingBytes = bytes
-                        showCrop = true
-                    }
-                    showCamera = false
-                },
-                permissionDeniedContent = {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            "Camera permission denied",
-                            color = Color.White,
-                        )
-                    }
-                },
-            )
         }
 
         // ═══════════════════════════════════════════════════════════
@@ -623,40 +565,3 @@ private fun CropScreen(
         }
     }
 }
-
-
-/*
- * ─────────────────────────────────────────────────────────────────────
- * APP.KT — update the EditProfile case to add onUploadPhoto:
- *
- *   Screen.EditProfile -> EditProfileScreen(
- *       profile        = repository.profile,
- *       authService    = repository.authService,
- *       profileService = repository.profileService,
- *       onBack         = { navigator.back() },
- *       onUploadPhoto  = { bytes ->             // ⬅ ADD
- *           val uid = repository.authService.currentUid ?: return@EditProfileScreen ""
- *           repository.uploadProfilePhoto(uid, bytes)
- *       },
- *       onSave = { updated ->
- *           repository.updateProfile(updated)
- *           navigator.back()
- *           pillMessageTop = s.changesSaved
- *       },
- *   )
- *
- * REPOSITORY — add this function to TripRepository or a StorageService:
- *
- *   suspend fun uploadProfilePhoto(uid: String, bytes: ByteArray): String {
- *       val ref = Firebase.storage.reference.child("profile_photos/$uid.jpg")
- *       ref.putBytes(bytes)
- *       return ref.getDownloadUrl()
- *   }
- *
- * USER PROFILE MODEL — add photoUrl field:
- *   data class UserProfile(
- *       ...existing fields...
- *       val photoUrl: String = "",   // ⬅ ADD
- *   )
- * ─────────────────────────────────────────────────────────────────────
- */

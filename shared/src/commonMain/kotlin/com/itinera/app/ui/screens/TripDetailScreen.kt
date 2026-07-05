@@ -15,7 +15,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
@@ -75,7 +74,6 @@ import com.itinera.app.ui.components.WalletTicket
 import com.itinera.app.ui.components.rememberPostcardExporter
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
-import com.preat.peekaboo.ui.camera.PeekabooCamera
 import com.itinera.app.parseHourMinute
 import kotlinx.coroutines.launch
 import kotlinx.datetime.daysUntil
@@ -132,7 +130,6 @@ fun TripDetailScreen(
     var pickTarget   by remember { mutableStateOf<String?>(null) }   // slot the gallery picker fills
     var isPickingImage by remember { mutableStateOf(false) }
     var activeSlotForSheet by remember { mutableStateOf<String?>(null) } // if non-null, show the sheet for this slot
-    var showCamera   by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     val picker = rememberImagePickerLauncher(
@@ -255,397 +252,401 @@ fun TripDetailScreen(
         .sortedWith(compareBy({ it.date }, { parseHourMinute(it.timeLabel).first }, { parseHourMinute(it.timeLabel).second }))
         .firstOrNull { !it.completed }?.id
 
-    Column(Modifier.fillMaxSize()) {
-        TopBar(
-            trip.title,
-            onBack = onBack,
-            trailing = {
-                Row {
-                    IconButton(onClick = onTravellers) {
-                        Icon(Icons.Filled.People, contentDescription = s.travellers, tint = MaterialTheme.colorScheme.primary)
+    Box(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize()) {
+            TopBar(
+                trip.title,
+                onBack = onBack,
+                trailing = {
+                    Row {
+                        IconButton(onClick = onTravellers) {
+                            Icon(Icons.Filled.People, contentDescription = s.travellers, tint = MaterialTheme.colorScheme.primary)
+                        }
+                        IconButton(onClick = onDocuments) {
+                            Icon(Icons.AutoMirrored.Filled.InsertDriveFile, contentDescription = s.documents, tint = MaterialTheme.colorScheme.primary)
+                        }
+                        IconButton(onClick = onMembers) {
+                            Icon(Icons.Filled.Groups, contentDescription = s.members, tint = MaterialTheme.colorScheme.primary)
+                        }
                     }
-                    IconButton(onClick = onDocuments) {
-                        Icon(Icons.AutoMirrored.Filled.InsertDriveFile, contentDescription = s.documents, tint = MaterialTheme.colorScheme.primary)
-                    }
-                    IconButton(onClick = onMembers) {
-                        Icon(Icons.Filled.Groups, contentDescription = s.members, tint = MaterialTheme.colorScheme.primary)
-                    }
-                }
-            },
-        )
-        Spacer(Modifier.height(8.dp))
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-            Text(
-                "$done ${s.legsTravelled}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                },
             )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Progress(
-                    fraction = if (trip.legs.isEmpty()) 0f else done.toFloat() / trip.legs.size,
-                    modifier = Modifier.weight(1f),
+            Spacer(Modifier.height(8.dp))
+            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                Text(
+                    "$done ${s.legsTravelled}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 )
-                Spacer(Modifier.width(12.dp))
-                IconButton(onClick = onMap) {
-                    Icon(Icons.Filled.Map, contentDescription = "Map", tint = MaterialTheme.colorScheme.primary)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Progress(
+                        fraction = if (trip.legs.isEmpty()) 0f else done.toFloat() / trip.legs.size,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    IconButton(onClick = onMap) {
+                        Icon(Icons.Filled.Map, contentDescription = "Map", tint = MaterialTheme.colorScheme.primary)
+                    }
                 }
             }
-        }
 
-        Box(Modifier.weight(1f).fillMaxWidth()) {
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp),
-            ) {
-                if (allDates.isEmpty()) {
-                    Column(
-                        Modifier.fillMaxWidth().padding(top = 300.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                    ) {
-                        Text("🗺", style = MaterialTheme.typography.displayMedium)
-                        Spacer(Modifier.height(16.dp))
-                        Text(
-                            s.noLegsYet,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                        )
-                        Spacer(Modifier.height(6.dp))
-                        Text(
-                            s.noLegsSubtitle,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 32.dp),
-                        )
-                    }
-                } else {
-                    allDates.forEachIndexed { index, date ->
-                        val dayNumber = index + 1
-                        Text(
-                            "${s.day} $dayNumber · ${date.label()}",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
-                        )
+            Box(Modifier.weight(1f).fillMaxWidth()) {
+                Column(
+                    Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp),
+                ) {
+                    if (allDates.isEmpty()) {
+                        Column(
+                            Modifier.fillMaxWidth().padding(top = 300.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                        ) {
+                            Text("🗺", style = MaterialTheme.typography.displayMedium)
+                            Spacer(Modifier.height(16.dp))
+                            Text(
+                                s.noLegsYet,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                            )
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                s.noLegsSubtitle,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(horizontal = 32.dp),
+                            )
+                        }
+                    } else {
+                        allDates.forEachIndexed { index, date ->
+                            val dayNumber = index + 1
+                            Text(
+                                "${s.day} $dayNumber · ${date.label()}",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+                            )
 
-                        legsByDate[date].orEmpty().forEach { leg ->
-                            val isNext = leg.id == nextLegId
-                            var showMenu by remember { mutableStateOf(false) }
-                            var stopsExpanded by remember(leg.id) { mutableStateOf(false) }
+                            legsByDate[date].orEmpty().forEach { leg ->
+                                val isNext = leg.id == nextLegId
+                                var showMenu by remember { mutableStateOf(false) }
+                                var stopsExpanded by remember(leg.id) { mutableStateOf(false) }
 
-                            Box {
-                                Row(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .combinedClickable(
-                                            onClick = { if (canEdit) onToggleLeg(leg.id) },
-                                            onLongClick = { if (canEdit) showMenu = true },
-                                        )
-                                        .padding(vertical = 8.dp),
-                                    verticalAlignment = Alignment.Top,
-                                ) {
-                                    if (leg.completed) {
-                                        Icon(Icons.Filled.CheckCircle, null, tint = Color(0xFF1D9E75), modifier = Modifier.size(20.dp))
-                                    } else {
-                                        Icon(
-                                            Icons.Outlined.Circle, null,
-                                            tint = if (isNext) Color(0xFFBA7517) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                                            modifier = Modifier.size(20.dp),
-                                        )
-                                    }
-                                    Spacer(Modifier.width(12.dp))
-                                    Column {
-                                        val operatorSuffix = if (leg.operator.isNotBlank()) " (${leg.operator})" else ""
-                                        Text(
-                                            "${leg.fromCity} → ${leg.toCity}$operatorSuffix",
-                                            style = MaterialTheme.typography.bodyLarge,
-                                            fontWeight = if (isNext) FontWeight.Medium else FontWeight.Normal,
-                                            textDecoration = if (leg.completed) TextDecoration.LineThrough else null,
-                                            color = if (leg.completed) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurface,
-                                        )
-                                        Spacer(Modifier.height(2.dp))
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Icon(transportIcon(leg.transport), null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                                            Spacer(Modifier.width(6.dp))
-                                            val timeDisplay = buildString {
-                                                append(leg.timeLabel)
-                                                if (leg.timeLabel.isNotBlank() && leg.endTimeLabel.isNotBlank()) {
-                                                    val (h1, m1) = parseHourMinute(leg.timeLabel)
-                                                    val (h2, m2) = parseHourMinute(leg.endTimeLabel)
-                                                    var diff = (h2 * 60 + m2) - (h1 * 60 + m1)
-                                                    if (diff < 0) diff += 24 * 60 // crosses midnight
-                                                    val h = diff / 60
-                                                    val m = diff % 60
-                                                    val duration = if (h > 0) "${h}h${m}m" else "${m}m"
-                                                    append(" - $duration - ")
-                                                    append(leg.endTimeLabel)
-                                                } else if (leg.endTimeLabel.isNotBlank()) {
-                                                    append(" - ")
-                                                    append(leg.endTimeLabel)
-                                                }
-                                            }
-                                            val tail = if (isNext) {
-                                                if (timeDisplay.isNotBlank()) "$timeDisplay · ${s.nextUp}" else s.nextUp
-                                            } else {
-                                                timeDisplay
-                                            }
-                                            Text(
-                                                tail,
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = if (isNext) Color(0xFFBA7517) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                Box {
+                                    Row(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .combinedClickable(
+                                                onClick = { if (canEdit) onToggleLeg(leg.id) },
+                                                onLongClick = { if (canEdit) showMenu = true },
                                             )
-
-                                            if (leg.travellerIds.isNotEmpty()) {
-                                                Spacer(Modifier.width(8.dp))
-                                                Icon(
-                                                    Icons.Filled.People,
-                                                    null,
-                                                    modifier = Modifier.size(14.dp),
-                                                    tint = if (isNext) Color(0xFFBA7517) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                                )
-                                                Spacer(Modifier.width(4.dp))
-                                                Text(
-                                                    "${leg.travellerIds.size}",
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = if (isNext) Color(0xFFBA7517) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                                )
-                                            }
-                                        }
-
-                                        if (leg.stops.isNotEmpty()) {
-                                            Spacer(Modifier.height(2.dp))
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                modifier = Modifier.clickable(
-                                                    interactionSource = remember { MutableInteractionSource() },
-                                                    indication = null,
-                                                ) { stopsExpanded = !stopsExpanded },
-                                            ) {
-                                                Text(
-                                                    "via ${leg.stops.size} " + if (leg.stops.size == 1) "stop" else "stops",
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                                                )
-                                                Icon(
-                                                    if (stopsExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                                                    contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                                                    modifier = Modifier.size(18.dp),
-                                                )
-                                            }
-                                            if (stopsExpanded) {
-                                                // derive sub-legs: from → stop1 → … → to, with times
-                                                val segments = buildList {
-                                                    var prevCity = leg.fromCity
-                                                    var prevDep = leg.timeLabel
-                                                    leg.stops.forEach { stop ->
-                                                        add(LegSegment(prevCity, prevDep, stop.city, stop.arrivalTime))
-                                                        prevCity = stop.city
-                                                        prevDep = stop.departureTime
-                                                    }
-                                                    add(LegSegment(prevCity, prevDep, leg.toCity, leg.endTimeLabel))
-                                                }
-                                                segments.forEach { seg ->
-                                                    Row(
-                                                        verticalAlignment = Alignment.CenterVertically,
-                                                        modifier = Modifier.padding(start = 8.dp, top = 2.dp),
-                                                    ) {
-                                                        Icon(
-                                                            Icons.Outlined.Circle, null,
-                                                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
-                                                            modifier = Modifier.size(8.dp),
-                                                        )
-                                                        Spacer(Modifier.width(8.dp))
-                                                        val times = listOf(seg.depTime, seg.arrTime)
-                                                            .filter { it.isNotBlank() }.joinToString(" - ")
-                                                        Text(
-                                                            "${seg.fromCity} → ${seg.toCity}" +
-                                                                    if (times.isBlank()) "" else "  ·  $times",
-                                                            style = MaterialTheme.typography.bodySmall,
-                                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-
-                                val legDocs = documents.filter { it.legId == leg.id }
-                                if (legDocs.isNotEmpty()) {
-                                    IconButton(
-                                        onClick = { openLegTickets(leg, legDocs) },
-                                        enabled = !barcodeLoading,
-                                        modifier = Modifier.size(34.dp).align(Alignment.CenterEnd),
+                                            .padding(vertical = 8.dp),
+                                        verticalAlignment = Alignment.Top,
                                     ) {
-                                        if (barcodeLoading)
-                                            CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                                        else
+                                        if (leg.completed) {
+                                            Icon(Icons.Filled.CheckCircle, null, tint = Color(0xFF1D9E75), modifier = Modifier.size(20.dp))
+                                        } else {
                                             Icon(
-                                                Icons.Filled.QrCode2,
-                                                contentDescription = s.viewTicket,
-                                                tint = MaterialTheme.colorScheme.primary,
+                                                Icons.Outlined.Circle, null,
+                                                tint = if (isNext) Color(0xFFBA7517) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                                                 modifier = Modifier.size(20.dp),
                                             )
-                                    }
-                                }
-
-                                MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(14.dp))) {
-                                    DropdownMenu(
-                                        expanded = showMenu,
-                                        onDismissRequest = { showMenu = false },
-                                        offset = DpOffset(x = 250.dp, y = 0.dp),
-                                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    ) {
-                                        DropdownMenuItem(
-                                            text = { Text(s.edit) },
-                                            leadingIcon = { Icon(Icons.Filled.Edit, null) },
-                                            onClick = { showMenu = false; onEditLeg(leg.id) },
-                                        )
-                                        DropdownMenuItem(
-                                            text = { Text(s.delete, color = Color(0xFFE03131)) },
-                                            leadingIcon = { Icon(Icons.Filled.Delete, null, tint = Color(0xFFE03131)) },
-                                            onClick = { showMenu = false; pendingDeleteLegId = leg.id },
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        actsByDate[date].orEmpty().forEach { act ->
-                            var showMenu by remember { mutableStateOf(false) }
-
-                            Box {
-                                Row(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .combinedClickable(
-                                            onClick = { if (canEdit) onToggleActivity(act.id) },
-                                            onLongClick = { if (canEdit) showMenu = true },
-                                        )
-                                        .padding(vertical = 8.dp),
-                                    verticalAlignment = Alignment.Top,
-                                ) {
-                                    if (act.completed) {
-                                        Icon(Icons.Filled.CheckCircle, null, tint = Color(0xFF1D9E75), modifier = Modifier.size(20.dp))
-                                    } else {
-                                        Icon(Icons.Filled.Place, null, tint = Color(0xFF378ADD), modifier = Modifier.size(20.dp))
-                                    }
-                                    Spacer(Modifier.width(12.dp))
-                                    Column {
-                                        Text(
-                                            act.title,
-                                            style = MaterialTheme.typography.bodyLarge,
-                                            textDecoration = if (act.completed) TextDecoration.LineThrough else null,
-                                            color = if (act.completed) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurface,
-                                        )
-                                        val tail = listOf(act.time, act.location).filter { it.isNotBlank() }.joinToString(" · ")
-                                        if (tail.isNotBlank()) {
+                                        }
+                                        Spacer(Modifier.width(12.dp))
+                                        Column {
+                                            val operatorSuffix = if (leg.operator.isNotBlank()) " (${leg.operator})" else ""
+                                            Text(
+                                                "${leg.fromCity} → ${leg.toCity}$operatorSuffix",
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                fontWeight = if (isNext) FontWeight.Medium else FontWeight.Normal,
+                                                textDecoration = if (leg.completed) TextDecoration.LineThrough else null,
+                                                color = if (leg.completed) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurface,
+                                            )
                                             Spacer(Modifier.height(2.dp))
                                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                                Icon(Icons.Filled.Schedule, null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                                                Icon(transportIcon(leg.transport), null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                                                 Spacer(Modifier.width(6.dp))
+                                                val timeDisplay = buildString {
+                                                    append(leg.timeLabel)
+                                                    if (leg.timeLabel.isNotBlank() && leg.endTimeLabel.isNotBlank()) {
+                                                        val (h1, m1) = parseHourMinute(leg.timeLabel)
+                                                        val (h2, m2) = parseHourMinute(leg.endTimeLabel)
+                                                        var diff = (h2 * 60 + m2) - (h1 * 60 + m1)
+                                                        if (diff < 0) diff += 24 * 60 // crosses midnight
+                                                        val h = diff / 60
+                                                        val m = diff % 60
+                                                        val duration = if (h > 0) "${h}h${m}m" else "${m}m"
+                                                        append(" - $duration - ")
+                                                        append(leg.endTimeLabel)
+                                                    } else if (leg.endTimeLabel.isNotBlank()) {
+                                                        append(" - ")
+                                                        append(leg.endTimeLabel)
+                                                    }
+                                                }
+                                                val tail = if (isNext) {
+                                                    if (timeDisplay.isNotBlank()) "$timeDisplay · ${s.nextUp}" else s.nextUp
+                                                } else {
+                                                    timeDisplay
+                                                }
                                                 Text(
                                                     tail,
                                                     style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                                    color = if (isNext) Color(0xFFBA7517) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                                 )
+
+                                                if (leg.travellerIds.isNotEmpty()) {
+                                                    Spacer(Modifier.width(8.dp))
+                                                    Icon(
+                                                        Icons.Filled.People,
+                                                        null,
+                                                        modifier = Modifier.size(14.dp),
+                                                        tint = if (isNext) Color(0xFFBA7517) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                                    )
+                                                    Spacer(Modifier.width(4.dp))
+                                                    Text(
+                                                        "${leg.travellerIds.size}",
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = if (isNext) Color(0xFFBA7517) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                                    )
+                                                }
+                                            }
+
+                                            if (leg.stops.isNotEmpty()) {
+                                                Spacer(Modifier.height(2.dp))
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    modifier = Modifier.clickable(
+                                                        interactionSource = remember { MutableInteractionSource() },
+                                                        indication = null,
+                                                    ) { stopsExpanded = !stopsExpanded },
+                                                ) {
+                                                    Text(
+                                                        "via ${leg.stops.size} " + if (leg.stops.size == 1) "stop" else "stops",
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                                    )
+                                                    Icon(
+                                                        if (stopsExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                                                        contentDescription = null,
+                                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                                        modifier = Modifier.size(18.dp),
+                                                    )
+                                                }
+                                                if (stopsExpanded) {
+                                                    // derive sub-legs: from → stop1 → … → to, with times
+                                                    val segments = buildList {
+                                                        var prevCity = leg.fromCity
+                                                        var prevDep = leg.timeLabel
+                                                        leg.stops.forEach { stop ->
+                                                            add(LegSegment(prevCity, prevDep, stop.city, stop.arrivalTime))
+                                                            prevCity = stop.city
+                                                            prevDep = stop.departureTime
+                                                        }
+                                                        add(LegSegment(prevCity, prevDep, leg.toCity, leg.endTimeLabel))
+                                                    }
+                                                    segments.forEach { seg ->
+                                                        Row(
+                                                            verticalAlignment = Alignment.CenterVertically,
+                                                            modifier = Modifier.padding(start = 8.dp, top = 2.dp),
+                                                        ) {
+                                                            Icon(
+                                                                Icons.Outlined.Circle, null,
+                                                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
+                                                                modifier = Modifier.size(8.dp),
+                                                            )
+                                                            Spacer(Modifier.width(8.dp))
+                                                            val times = listOf(seg.depTime, seg.arrTime)
+                                                                .filter { it.isNotBlank() }.joinToString(" - ")
+                                                            Text(
+                                                                "${seg.fromCity} → ${seg.toCity}" +
+                                                                        if (times.isBlank()) "" else "  ·  $times",
+                                                                style = MaterialTheme.typography.bodySmall,
+                                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                                            )
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
                                     }
-                                }
 
-                                MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(14.dp))) {
-                                    DropdownMenu(
-                                        expanded = showMenu,
-                                        onDismissRequest = { showMenu = false },
-                                        offset = DpOffset(x = 16.dp, y = 0.dp),
-                                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    val legDocs = documents.filter { it.legId == leg.id }
+                                    if (legDocs.isNotEmpty()) {
+                                        IconButton(
+                                            onClick = { openLegTickets(leg, legDocs) },
+                                            enabled = !barcodeLoading,
+                                            modifier = Modifier.size(34.dp).align(Alignment.CenterEnd),
+                                        ) {
+                                            if (barcodeLoading)
+                                                CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                                            else
+                                                Icon(
+                                                    Icons.Filled.QrCode2,
+                                                    contentDescription = s.viewTicket,
+                                                    tint = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier.size(20.dp),
+                                                )
+                                        }
+                                    }
+
+                                    MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(14.dp))) {
+                                        DropdownMenu(
+                                            expanded = showMenu,
+                                            onDismissRequest = { showMenu = false },
+                                            offset = DpOffset(x = 250.dp, y = 0.dp),
+                                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        ) {
+                                            DropdownMenuItem(
+                                                text = { Text(s.edit) },
+                                                leadingIcon = { Icon(Icons.Filled.Edit, null) },
+                                                onClick = { showMenu = false; onEditLeg(leg.id) },
+                                            )
+                                            DropdownMenuItem(
+                                                text = { Text(s.delete, color = Color(0xFFE03131)) },
+                                                leadingIcon = { Icon(Icons.Filled.Delete, null, tint = Color(0xFFE03131)) },
+                                                onClick = { showMenu = false; pendingDeleteLegId = leg.id },
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            actsByDate[date].orEmpty().forEach { act ->
+                                var showMenu by remember { mutableStateOf(false) }
+
+                                Box {
+                                    Row(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .combinedClickable(
+                                                onClick = { if (canEdit) onToggleActivity(act.id) },
+                                                onLongClick = { if (canEdit) showMenu = true },
+                                            )
+                                            .padding(vertical = 8.dp),
+                                        verticalAlignment = Alignment.Top,
                                     ) {
-                                        DropdownMenuItem(
-                                            text = { Text(s.edit) },
-                                            leadingIcon = { Icon(Icons.Filled.Edit, null) },
-                                            onClick = { showMenu = false; onEditActivity(act.id) },
-                                        )
-                                        DropdownMenuItem(
-                                            text = { Text(s.delete, color = Color(0xFFE03131)) },
-                                            leadingIcon = { Icon(Icons.Filled.Delete, null, tint = Color(0xFFE03131)) },
-                                            onClick = { showMenu = false; pendingDeleteActivityId = act.id },
-                                        )
+                                        if (act.completed) {
+                                            Icon(Icons.Filled.CheckCircle, null, tint = Color(0xFF1D9E75), modifier = Modifier.size(20.dp))
+                                        } else {
+                                            Icon(Icons.Filled.Place, null, tint = Color(0xFF378ADD), modifier = Modifier.size(20.dp))
+                                        }
+                                        Spacer(Modifier.width(12.dp))
+                                        Column {
+                                            Text(
+                                                act.title,
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                textDecoration = if (act.completed) TextDecoration.LineThrough else null,
+                                                color = if (act.completed) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurface,
+                                            )
+                                            val tail = listOf(act.time, act.location).filter { it.isNotBlank() }.joinToString(" · ")
+                                            if (tail.isNotBlank()) {
+                                                Spacer(Modifier.height(2.dp))
+                                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                                    Icon(Icons.Filled.Schedule, null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                                                    Spacer(Modifier.width(6.dp))
+                                                    Text(
+                                                        tail,
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(14.dp))) {
+                                        DropdownMenu(
+                                            expanded = showMenu,
+                                            onDismissRequest = { showMenu = false },
+                                            offset = DpOffset(x = 16.dp, y = 0.dp),
+                                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        ) {
+                                            DropdownMenuItem(
+                                                text = { Text(s.edit) },
+                                                leadingIcon = { Icon(Icons.Filled.Edit, null) },
+                                                onClick = { showMenu = false; onEditActivity(act.id) },
+                                            )
+                                            DropdownMenuItem(
+                                                text = { Text(s.delete, color = Color(0xFFE03131)) },
+                                                leadingIcon = { Icon(Icons.Filled.Delete, null, tint = Color(0xFFE03131)) },
+                                                onClick = { showMenu = false; pendingDeleteActivityId = act.id },
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                }
 
-                if (allComplete) {                       // only once the trip is complete (postcard has shown)
-                    Spacer(Modifier.height(28.dp))
-                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Box(
-                                Modifier
-                                    .size(64.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.Gray.copy(alpha = 0.18f))
-                                    .clickable { showPostcard = true },
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Text("💌", fontSize = 30.sp)
+                    if (allComplete) {                       // only once the trip is complete (postcard has shown)
+                        Spacer(Modifier.height(28.dp))
+                        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Box(
+                                    Modifier
+                                        .size(64.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.Gray.copy(alpha = 0.18f))
+                                        .clickable { showPostcard = true },
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Text("💌", fontSize = 30.sp)
+                                }
+                                Spacer(Modifier.height(6.dp))
+                                Text(
+                                    s.souvenir,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontFamily = souvenirFont,
+                                    fontStyle = FontStyle.Italic,
+                                )
                             }
-                            Spacer(Modifier.height(6.dp))
-                            Text(
-                                s.souvenir,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                fontFamily = souvenirFont,
-                                fontStyle = FontStyle.Italic,
-                            )
                         }
                     }
+                    Spacer(Modifier.height(96.dp))
                 }
-                Spacer(Modifier.height(96.dp))
-            }
 
-            Row(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 12.dp, bottom = 24.dp),
-                horizontalArrangement = Arrangement.Center,
-            ) {
-                Button(
-                    onClick = onChecklist,
-                    modifier = Modifier.padding(bottom = 60.dp).height(50.dp),
-                    contentPadding = PaddingValues(horizontal = 25.dp, vertical = 8.dp),
-                    shape = CircleShape,
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 12.dp, bottom = 24.dp),
+                    horizontalArrangement = Arrangement.Center,
                 ) {
-                    Text(s.beforeYouGo, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
-                }
-                if (canEdit) {
-                    Spacer(Modifier.width(30.dp))
                     Button(
-                        onClick = { showAddChooser = true },
+                        onClick = onChecklist,
                         modifier = Modifier.padding(bottom = 60.dp).height(50.dp),
                         contentPadding = PaddingValues(horizontal = 25.dp, vertical = 8.dp),
                         shape = CircleShape,
                     ) {
-                        Icon(Icons.Filled.Add, null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(6.dp))
-                        Text(s.add, style = MaterialTheme.typography.bodyMedium)
+                        Text(s.beforeYouGo, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
+                    }
+                    if (canEdit) {
+                        Spacer(Modifier.width(30.dp))
+                        Button(
+                            onClick = { showAddChooser = true },
+                            modifier = Modifier.padding(bottom = 60.dp).height(50.dp),
+                            contentPadding = PaddingValues(horizontal = 25.dp, vertical = 8.dp),
+                            shape = CircleShape,
+                        ) {
+                            Icon(Icons.Filled.Add, null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text(s.add, style = MaterialTheme.typography.bodyMedium)
+                        }
                     }
                 }
             }
         }
+
     }
+
 
     if (showAddChooser) {
         AlertDialog(
@@ -879,39 +880,6 @@ fun TripDetailScreen(
                     )
                 }
 
-                // ── camera overlay (peekaboo-ui) ──
-                if (showCamera) {
-                    PeekabooCamera(
-                        modifier = Modifier.fillMaxSize(),
-                        captureIcon = { onClick ->
-                            IconButton(
-                                onClick = onClick,
-                                modifier = Modifier
-                                    .padding(bottom = 32.dp)
-                                    .size(64.dp)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primary),
-                            ) {
-                                Icon(
-                                    Icons.Filled.CameraAlt,
-                                    contentDescription = s.capture,
-                                    tint = MaterialTheme.colorScheme.onPrimary,
-                                    modifier = Modifier.size(32.dp),
-                                )
-                            }
-                        },
-                        onCapture = { bytes ->
-                            if (bytes != null) { pendingBytes = bytes; pendingSlot = activeSlotForSheet }
-                            showCamera = false
-                        },
-                        permissionDeniedContent = {
-                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Text("Camera permission denied", color = Color.White)
-                            }
-                        },
-                    )
-                }
-
                 // ── photo source sheet (gallery / take photo / remove) ──
                 val slot = activeSlotForSheet
                 if (slot != null) {
@@ -964,14 +932,6 @@ fun TripDetailScreen(
                                         activeSlotForSheet = null
                                         isPickingImage = true
                                         picker.launch()
-                                    },
-                                )
-                                ListItem(
-                                    headlineContent = { Text(s.takePhoto) },
-                                    leadingContent = { Icon(Icons.Filled.CameraAlt, contentDescription = null) },
-                                    modifier = Modifier.clickable {
-                                        activeSlotForSheet = null
-                                        showCamera = true
                                     },
                                 )
                                 if (hasPhoto) {
