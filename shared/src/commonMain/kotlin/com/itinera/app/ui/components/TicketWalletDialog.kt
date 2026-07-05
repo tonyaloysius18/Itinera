@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.DirectionsBoat
 import androidx.compose.material.icons.filled.DirectionsBus
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Flight
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Train
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -38,22 +39,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.itinera.app.data.BarcodeExtraction
 import com.itinera.app.model.TransportType
+import com.itinera.app.model.WalletTicket
 
-/** One scannable code plus the document it came from. */
-data class WalletTicket(
-    val extraction: BarcodeExtraction,
-    val docId: String,
-    val docTitle: String = "",
-    val routeOverride: String = "",
-    val timeOverride: String = "",
-)
 
-/**
- * Wallet-style ticket viewer: a white rounded card on a dark scrim (Apple-Wallet
- * feel) showing the leg's route, transport + operator, date · time, and the real
- * scannable code. Multiple codes (several passengers / several ticket files on
- * the leg) swipe as pages with dots. Screen stays at max brightness while open.
- */
 @Composable
 fun TicketWalletDialog(
     legRoute: String,          // e.g. "Toulouse → Paris"
@@ -64,7 +52,8 @@ fun TicketWalletDialog(
     tickets: List<WalletTicket>,
     onOpenFullTicket: (docId: String) -> Unit,
     onDismiss: () -> Unit,
-) {
+
+    ) {
     if (tickets.isEmpty()) return
     val pagerState = rememberPagerState(pageCount = { tickets.size })
     val multiDoc = tickets.map { it.docId }.distinct().size > 1
@@ -186,6 +175,16 @@ private fun WalletCard(
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color(0xFF6B7280),
             )
+
+            if (ticket.travellerName.isNotBlank()) {
+                Spacer(Modifier.height(6.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Filled.Person, null, tint = Color(0xFF6B7280), modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text(ticket.travellerName, style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium, color = Color(0xFF37474F))
+                }
+            }
 
             Spacer(Modifier.height(16.dp))
             HorizontalDivider(color = Color(0xFFE5E7EB))

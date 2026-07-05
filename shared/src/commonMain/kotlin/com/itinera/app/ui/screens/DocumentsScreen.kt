@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Image
@@ -36,6 +37,7 @@ import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.i18n.Strings
 import com.itinera.app.model.DocItem
 import com.itinera.app.model.Leg
+import com.itinera.app.model.Traveller
 import com.itinera.app.model.Trip
 import com.itinera.app.parseHourMinute
 import com.itinera.app.ui.components.CardShape
@@ -95,10 +97,10 @@ fun DocumentsScreen(
     isLoading: Boolean = false,               // ⬅ ADDED
     onBack: () -> Unit,
     onOpenDoc: (String) -> Unit,
-    onUpload: suspend (PickedFile, title: String, category: String, legId: String, segmentIndex: Int) -> Boolean,
+    onUpload: suspend (PickedFile, title: String, category: String, legId: String, segmentIndex: Int, travellerId: String) -> Boolean,
     onMessage: (String) -> Unit,
     onDeleteDocument: (String) -> Unit,
-    onUpdateDocument: (String, String, String, String, Int) -> Unit,
+    onUpdateDocument: (String, String, String, String, Int, String) -> Unit,
     canEdit: Boolean = true,
 ) {
     val s = LocalStrings.current
@@ -200,6 +202,16 @@ fun DocumentsScreen(
                                         Icon(docIcon(doc.mimeType), null, tint = docColor(doc.mimeType), modifier = Modifier.size(34.dp))
                                         Spacer(Modifier.height(9.dp))
                                         Text(doc.title, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
+                                        val travellerName = remember(doc.traveller, doc.travellerId, trip.travellers) {
+                                            if (doc.traveller.isNotBlank()) {
+                                                doc.traveller
+                                            } else {
+                                                trip.travellers.find { it.id == doc.travellerId }?.let { "${it.firstName} ${it.surname}".trim() } ?: ""
+                                            }
+                                        }
+                                        if (travellerName.isNotBlank()) {
+                                            Text(travellerName, style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                                        }
                                         Text(
                                             categoryLabel(doc.category, s),
                                             style = MaterialTheme.typography.labelSmall,
@@ -333,14 +345,15 @@ fun DocumentsScreen(
         AddDocumentDialog(
             file = pickedFile!!,
             legs = trip.legs,
+            travellers = trip.travellers,
             onDismiss = { showDialog = false; pickedFile = null },
-            onConfirm = { title, category, legId, segmentIndex ->
+            onConfirm = { title, category, legId, segmentIndex, travellerId ->
                 val f = pickedFile!!
                 showDialog = false
                 pickedFile = null
                 scope.launch {
                     uploading = true
-                    val ok = onUpload(f, title.toTitleCase(), category, legId, segmentIndex)
+                    val ok = onUpload(f, title.toTitleCase(), category, legId, segmentIndex, travellerId)
                     uploading = false
                     if (!ok) onMessage(s.uploadFailed)
                 }
@@ -366,11 +379,12 @@ fun DocumentsScreen(
         EditDocumentDialog(
             doc = editingDoc!!,
             legs = trip.legs,
+            travellers = trip.travellers,
             onDismiss = { editingDoc = null },
-            onConfirm = { title, category, legId, segmentIndex ->
+            onConfirm = { title, category, legId, segmentIndex, travellerId ->
                 val docId = editingDoc?.id ?: return@EditDocumentDialog
                 editingDoc = null
-                onUpdateDocument(docId, title, category, legId, segmentIndex)
+                onUpdateDocument(docId, title, category, legId, segmentIndex, travellerId)
             }
         )
     }
@@ -381,8 +395,9 @@ fun DocumentsScreen(
 private fun AddDocumentDialog(
     file: PickedFile,
     legs: List<Leg>,
+    travellers: List<Traveller>,
     onDismiss: () -> Unit,
-    onConfirm: (title: String, category: String, legId: String, segmentIndex: Int) -> Unit,
+    onConfirm: (title: String, category: String, legId: String, segmentIndex: Int, travellerId: String) -> Unit,
 ) {
     val s = LocalStrings.current
     var title by remember { mutableStateOf(nameWithoutExtension(file.fileName)) }
@@ -394,6 +409,8 @@ private fun AddDocumentDialog(
     var legMenuOpen by remember { mutableStateOf(false) }
     var segmentIndex by remember { mutableStateOf(-1) }
     var segMenuOpen by remember { mutableStateOf(false) }
+    var travellerId by remember { mutableStateOf("") }
+    var travMenuOpen by remember { mutableStateOf(false) }
     fun legLabel(id: String): String =
         legs.firstOrNull { it.id == id }?.let { "${it.fromCity} → ${it.toCity}" } ?: s.attachToNone
 
@@ -485,15 +502,15 @@ private fun AddDocumentDialog(
                             // "None" option
                             DropdownMenuItem(
                                 text = { Text(s.attachToNone) },
-                                onClick = { legId = ""; segmentIndex = -1; legMenuOpen = false },
+                                onClick = { legId = ""; segmentIndex = -1; travellerId = ""; legMenuOpen = false },
                             )
                             legs.sortedWith(compareBy({ it.date }, { parseHourMinute(it.timeLabel).first }, { parseHourMinute(it.timeLabel).second }))
                                 .forEach { leg ->
-                                DropdownMenuItem(
-                                    text = { Text("${leg.fromCity} → ${leg.toCity}") },
-                                    onClick = { legId = leg.id; segmentIndex = -1; legMenuOpen = false },
-                                )
-                            }
+                                    DropdownMenuItem(
+                                        text = { Text("${leg.fromCity} → ${leg.toCity}") },
+                                        onClick = { legId = leg.id; segmentIndex = -1; travellerId = ""; legMenuOpen = false },
+                                    )
+                                }
                         }
                     }
                 }
@@ -535,11 +552,52 @@ private fun AddDocumentDialog(
                         }
                     }
                 }
+
+                // Traveller picker — whose ticket this is (shown when the leg has travellers)
+                val legTravs = legs.firstOrNull { it.id == legId }?.let { lg ->
+                    travellers.filter { it.id in lg.travellerIds }
+                } ?: emptyList()
+                if (legTravs.isNotEmpty()) {
+                    Spacer(Modifier.height(12.dp))
+                    ExposedDropdownMenuBox(
+                        expanded = travMenuOpen,
+                        onExpandedChange = { travMenuOpen = it },
+                    ) {
+                        OutlinedTextField(
+                            value = legTravs.firstOrNull { it.id == travellerId }
+                                ?.let { "${it.firstName} ${it.surname}".trim() } ?: "Anyone",
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Traveller") },
+                            leadingIcon = { Icon(Icons.Filled.Person, contentDescription = null) },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = travMenuOpen) },
+                            modifier = Modifier.menuAnchor().fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                        )
+                        ExposedDropdownMenu(
+                            expanded = travMenuOpen,
+                            onDismissRequest = { travMenuOpen = false },
+                            modifier = Modifier.background(MaterialTheme.colorScheme.surface),
+                            shape = RoundedCornerShape(12.dp),
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Anyone") },
+                                onClick = { travellerId = ""; travMenuOpen = false },
+                            )
+                            legTravs.forEach { t ->
+                                DropdownMenuItem(
+                                    text = { Text("${t.firstName} ${t.surname}".trim()) },
+                                    onClick = { travellerId = t.id; travMenuOpen = false },
+                                )
+                            }
+                        }
+                    }
+                }
             }
         },
         confirmButton = {
             TextButton(
-                onClick = { if (title.isNotBlank()) onConfirm(title.trim(), category, legId, segmentIndex) },
+                onClick = { if (title.isNotBlank()) onConfirm(title.trim(), category, legId, segmentIndex, travellerId) },
                 enabled = title.isNotBlank(),
             ) { Text(s.add) }
         },
@@ -552,8 +610,9 @@ private fun AddDocumentDialog(
 private fun EditDocumentDialog(
     doc: DocItem,
     legs: List<Leg>,
+    travellers: List<Traveller>,
     onDismiss: () -> Unit,
-    onConfirm: (title: String, category: String, legId: String, segmentIndex: Int) -> Unit,
+    onConfirm: (title: String, category: String, legId: String, segmentIndex: Int, travellerId: String) -> Unit,
 ) {
     val s = LocalStrings.current
     var title by remember { mutableStateOf(doc.title) }
@@ -564,6 +623,8 @@ private fun EditDocumentDialog(
     var legMenuOpen by remember { mutableStateOf(false) }
     var segmentIndex by remember { mutableStateOf(doc.segmentIndex) }
     var segMenuOpen by remember { mutableStateOf(false) }
+    var travellerId by remember { mutableStateOf(doc.travellerId) }
+    var travMenuOpen by remember { mutableStateOf(false) }
     fun legLabel(id: String): String =
         legs.firstOrNull { it.id == id }?.let { "${it.fromCity} → ${it.toCity}" } ?: s.attachToNone
 
@@ -641,15 +702,15 @@ private fun EditDocumentDialog(
                         ) {
                             DropdownMenuItem(
                                 text = { Text(s.attachToNone) },
-                                onClick = { legId = ""; segmentIndex = -1; legMenuOpen = false },
+                                onClick = { legId = ""; segmentIndex = -1; travellerId = ""; legMenuOpen = false },
                             )
                             legs.sortedWith(compareBy({ it.date }, { parseHourMinute(it.timeLabel).first }, { parseHourMinute(it.timeLabel).second }))
                                 .forEach { leg ->
-                                DropdownMenuItem(
-                                    text = { Text("${leg.fromCity} → ${leg.toCity}") },
-                                    onClick = { legId = leg.id; segmentIndex = -1; legMenuOpen = false },
-                                )
-                            }
+                                    DropdownMenuItem(
+                                        text = { Text("${leg.fromCity} → ${leg.toCity}") },
+                                        onClick = { legId = leg.id; segmentIndex = -1; travellerId = ""; legMenuOpen = false },
+                                    )
+                                }
                         }
                     }
                 }
@@ -691,11 +752,52 @@ private fun EditDocumentDialog(
                         }
                     }
                 }
+
+                // Traveller picker — whose ticket this is (shown when the leg has travellers)
+                val legTravs = legs.firstOrNull { it.id == legId }?.let { lg ->
+                    travellers.filter { it.id in lg.travellerIds }
+                } ?: emptyList()
+                if (legTravs.isNotEmpty()) {
+                    Spacer(Modifier.height(12.dp))
+                    ExposedDropdownMenuBox(
+                        expanded = travMenuOpen,
+                        onExpandedChange = { travMenuOpen = it },
+                    ) {
+                        OutlinedTextField(
+                            value = legTravs.firstOrNull { it.id == travellerId }
+                                ?.let { "${it.firstName} ${it.surname}".trim() } ?: "Anyone",
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Traveller") },
+                            leadingIcon = { Icon(Icons.Filled.Person, contentDescription = null) },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = travMenuOpen) },
+                            modifier = Modifier.menuAnchor().fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                        )
+                        ExposedDropdownMenu(
+                            expanded = travMenuOpen,
+                            onDismissRequest = { travMenuOpen = false },
+                            modifier = Modifier.background(MaterialTheme.colorScheme.surface),
+                            shape = RoundedCornerShape(12.dp),
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Anyone") },
+                                onClick = { travellerId = ""; travMenuOpen = false },
+                            )
+                            legTravs.forEach { t ->
+                                DropdownMenuItem(
+                                    text = { Text("${t.firstName} ${t.surname}".trim()) },
+                                    onClick = { travellerId = t.id; travMenuOpen = false },
+                                )
+                            }
+                        }
+                    }
+                }
             }
         },
         confirmButton = {
             TextButton(
-                onClick = { if (title.isNotBlank()) onConfirm(title.trim(), category, legId, segmentIndex) },
+                onClick = { if (title.isNotBlank()) onConfirm(title.trim(), category, legId, segmentIndex, travellerId) },
                 enabled = title.isNotBlank(),
             ) { Text(s.save) }
         },

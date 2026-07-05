@@ -334,7 +334,7 @@ private fun AppContent(
                                 onToggleActivity = { repository.toggleActivity(it) },
                                 onDeleteActivity = { repository.deleteActivity(it) },
                                 canEdit = trip.canEdit(repository.authService.currentUid ?: ""),
-                                onMembers = { navigator.push(Screen.Members(screen.tripId)) },
+                                //onMembers = { navigator.push(Screen.Members(screen.tripId)) },
                                 onMap = { navigator.push(Screen.TripMap(screen.tripId)) },
                                 expensesTotal = repository.expensesForTrip(screen.tripId).sumOf { it.amount },
                                 documents = repository.documents.filter { it.tripId == screen.tripId },
@@ -438,12 +438,15 @@ private fun AppContent(
                                 onBack = { navigator.back() },
                                 onOpenDoc = { navigator.push(Screen.DocViewer(it)) },
                                 onDeleteDocument = { repository.deleteDocument(it) },
-                                onUpdateDocument = { docId, title, category, legId, segmentIndex ->
-                                    repository.updateDocument(docId, title, category, legId, segmentIndex)
+                                onUpdateDocument = { docId, title, category, legId, segmentIndex, travellerId ->
+                                    repository.updateDocument(docId, title, category, legId, segmentIndex, travellerId)
                                 },
                                 onMessage = { pillMessage = it },
-                                onUpload = { file, title, category, legId, segmentindex ->
-                                    repository.addDocumentWithFile(screen.tripId, title, category, file, legId, segmentindex)
+                                onUpload = { file, title, category, legId, segmentIndex, travellerId ->
+                                    repository.addDocumentWithFile(
+                                        tripId = screen.tripId, title = title, category = category,
+                                        file = file, legId = legId, segmentIndex = segmentIndex, travellerId = travellerId,
+                                    )
                                 },
                                 canEdit = trip.canEdit(repository.authService.currentUid ?: "")
                             )

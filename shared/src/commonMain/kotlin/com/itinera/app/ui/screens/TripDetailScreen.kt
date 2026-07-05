@@ -65,12 +65,12 @@ import com.itinera.app.data.toPngBytes
 import com.itinera.app.model.DocItem
 import com.itinera.app.model.Leg
 import com.itinera.app.model.Traveller
+import com.itinera.app.model.WalletTicket
 import com.itinera.app.resources.Res
 import com.itinera.app.resources.*
 import com.itinera.app.ui.components.ImageCropScreen
 import com.itinera.app.ui.components.PostcardBack
 import com.itinera.app.ui.components.TicketWalletDialog
-import com.itinera.app.ui.components.WalletTicket
 import com.itinera.app.ui.components.rememberPostcardExporter
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
@@ -106,7 +106,7 @@ fun TripDetailScreen(
     onToggleActivity: (String) -> Unit,
     onDeleteActivity: (String) -> Unit,
     canEdit: Boolean = true,
-    onMembers: () -> Unit,
+    //onMembers: () -> Unit,
     onMap: () -> Unit,
 ) {
     val s = LocalStrings.current
@@ -140,6 +140,8 @@ fun TripDetailScreen(
             isPickingImage = false
         },
     )
+
+
 
     // hoisted so it survives the Dialog leaving/re-entering while the picker is up
     val pagerState = rememberPagerState(pageCount = { 2 })
@@ -176,7 +178,10 @@ fun TripDetailScreen(
                                     listOf(depTimes[si], arrTimes[si]).filter { it.isNotBlank() }.joinToString(" - ")
                         } else "" to ""
 
-                        codes.map { WalletTicket(it, d.id, d.title, routeOverride = route, timeOverride = time) }
+                        val travName = travellers.firstOrNull { it.id == d.travellerId }
+                            ?.let { "${it.firstName} ${it.surname}".trim() } ?: ""
+
+                        codes.map { WalletTicket(it, d.id, d.title, routeOverride = route, timeOverride = time, travellerName = travName) }
                     }
                 }
                 if (tickets.isNotEmpty()) {
@@ -265,9 +270,9 @@ fun TripDetailScreen(
                         IconButton(onClick = onDocuments) {
                             Icon(Icons.AutoMirrored.Filled.InsertDriveFile, contentDescription = s.documents, tint = MaterialTheme.colorScheme.primary)
                         }
-                        IconButton(onClick = onMembers) {
-                            Icon(Icons.Filled.Groups, contentDescription = s.members, tint = MaterialTheme.colorScheme.primary)
-                        }
+//                        IconButton(onClick = onMembers) {
+//                            Icon(Icons.Filled.Groups, contentDescription = s.members, tint = MaterialTheme.colorScheme.primary)
+//                        }
                     }
                 },
             )

@@ -1,5 +1,6 @@
 package com.itinera.app.model
 
+import com.itinera.app.data.BarcodeExtraction
 import kotlinx.datetime.LocalDate
 import com.itinera.app.model.label
 import kotlinx.serialization.Serializable
@@ -116,6 +117,8 @@ data class DocItem(
     val attachedToLabel: String = "",  // legacy
     val memberIds: List<String> = emptyList(),
     val segmentIndex: Int = -1,
+    val travellerId: String = "",
+    val traveller: String = "",
 
     )
 
@@ -229,4 +232,13 @@ data class Invite(
     val createdBy: String = "",
     val status: String = "active",   // "active" | "revoked"
     val createdAt: Long = 0L,
+)
+
+data class WalletTicket(
+    val extraction: BarcodeExtraction,
+    val docId: String,
+    val docTitle: String = "",
+    val routeOverride: String = "",
+    val timeOverride: String = "",
+    val travellerName: String = "",
 )

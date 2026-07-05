@@ -40,35 +40,51 @@ fun ChecklistScreen(
     // existing groups in this checklist, used to offer them in the dialog
     val existingGroups = items.map { it.group }.distinct()
 
-    Column(Modifier.fillMaxSize()) {
-        TopBar(s.beforeYouGo, onBack = onBack)
-        Column(Modifier.padding(horizontal = 16.dp)) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("$doneCount / ${items.size} ${s.done}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                Text("$pct%", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+    Scaffold(
+        modifier = Modifier.fillMaxSize().navigationBarsPadding(),
+        topBar = {
+            Column {
+                TopBar(s.beforeYouGo, onBack = onBack)
+                Column(Modifier.padding(horizontal = 16.dp)) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text("$doneCount / ${items.size} ${s.done}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                        Text("$pct%", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                    }
+                    Spacer(Modifier.height(6.dp))
+                    Progress(if (items.isEmpty()) 0f else doneCount.toFloat() / items.size)
+                }
+                Spacer(Modifier.height(16.dp))
             }
-            Spacer(Modifier.height(6.dp))
-            Progress(if (items.isEmpty()) 0f else doneCount.toFloat() / items.size)
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showAddDialog = true },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = androidx.compose.foundation.shape.CircleShape,
+                modifier = Modifier
+                    .offset(x = (-25).dp, y = (-90).dp)
+                    .padding(end = 20.dp, bottom = 24.dp),
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = s.addItem)
+            }
         }
-        Spacer(Modifier.height(16.dp))
+    ) { innerPadding ->
         Column(
-            Modifier.weight(1f)
+            Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
+                .padding(bottom = 80.dp) // extra space for the FAB
         ) {
             if (items.isEmpty()) {
                 Column(
-                    Modifier.fillMaxWidth().padding(top = 300.dp),
+                    Modifier.fillMaxWidth().padding(top = 270.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
                     Text("🧳", style = MaterialTheme.typography.displayMedium)
-//                    Icon(
-//                        Icons.Outlined.CheckBoxOutlineBlank,
-//                        contentDescription = null,
-//                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
-//                        modifier = Modifier.size(52.dp),
-//                    )
                     Spacer(Modifier.height(16.dp))
                     Text(
                         s.noChecklistItems,
@@ -113,21 +129,6 @@ fun ChecklistScreen(
                         )
                     }
                 }
-            }
-        }
-        Box(
-            modifier = Modifier.fillMaxWidth().padding(16.dp).padding(bottom = 60.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Button(
-                onClick = { showAddDialog = true },
-                modifier = Modifier.padding(bottom = 10.dp),
-                shape = androidx.compose.foundation.shape.CircleShape,
-                contentPadding = PaddingValues(horizontal = 25.dp, vertical = 8.dp)
-            ) {
-                Icon(Icons.Filled.Add, null, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.width(8.dp))
-                Text(s.addItem)
             }
         }
     }
@@ -186,7 +187,7 @@ private fun ChecklistRow(
 }
 
 // ---- Add-item dialog ----
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AddChecklistItemDialog(
     existingGroups: List<String>,
@@ -269,7 +270,6 @@ private fun AddChecklistItemDialog(
                             DropdownMenuItem(
                                 text = { Text(g) },
                                 onClick = { group = g; userPicked = true; expanded = false },
-                                shape = RoundedCornerShape(12.dp),
                             )
                         }
                     }
