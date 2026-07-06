@@ -2,7 +2,6 @@ package com.itinera.app.model
 
 import com.itinera.app.data.BarcodeExtraction
 import kotlinx.datetime.LocalDate
-import com.itinera.app.model.label
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 

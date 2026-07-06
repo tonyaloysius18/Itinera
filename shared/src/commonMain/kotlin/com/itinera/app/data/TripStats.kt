@@ -3,9 +3,9 @@ package com.itinera.app.data
 import com.itinera.app.model.Trip
 import kotlin.math.asin
 import kotlin.math.cos
+import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.math.sqrt
-import kotlin.math.roundToInt
 
 /** Great-circle distance between two coordinates, in km. */
 fun haversineKm(lat1: Double, lng1: Double, lat2: Double, lng2: Double): Double {

@@ -3,7 +3,6 @@ package com.itinera.app.data
 import com.itinera.app.model.UserProfile
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.firestore.firestore
-import kotlinx.serialization.builtins.serializer
 
 /**
  * Reads and writes the user's profile document in Firestore at users/{uid}.

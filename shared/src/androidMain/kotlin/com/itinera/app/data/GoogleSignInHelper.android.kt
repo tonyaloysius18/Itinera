@@ -1,18 +1,14 @@
 package com.itinera.app.data
 
 import android.content.Context
-import androidx.activity.ComponentActivity
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
-import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
-
-import android.util.Log
 import androidx.credentials.exceptions.GetCredentialException
-
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 
 private const val WEB_CLIENT_ID = "780952897576-711qksnhgfp41t0cln1od7gimi7vsphu.apps.googleusercontent.com"
 

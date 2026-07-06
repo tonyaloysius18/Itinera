@@ -2,7 +2,19 @@ package com.itinera.app.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -37,7 +49,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.itinera.app.data.BarcodeExtraction
 import com.itinera.app.model.TransportType
 import com.itinera.app.model.WalletTicket
 
@@ -57,6 +68,7 @@ fun TicketWalletDialog(
     if (tickets.isEmpty()) return
     val pagerState = rememberPagerState(pageCount = { tickets.size })
     val multiDoc = tickets.map { it.docId }.distinct().size > 1
+    val s = com.itinera.app.i18n.LocalStrings.current
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -113,7 +125,7 @@ fun TicketWalletDialog(
                     .padding(12.dp)
                     .background(Color.White.copy(alpha = 0.12f), CircleShape),
             ) {
-                Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
+                Icon(Icons.Default.Close, contentDescription = s.close, tint = Color.White)
             }
         }
     }
@@ -130,6 +142,7 @@ private fun WalletCard(
     showDocTitle: Boolean,
     onOpenFullTicket: () -> Unit,
 ) {
+    val s = com.itinera.app.i18n.LocalStrings.current
     Surface(
         color = Color.White,
         shape = RoundedCornerShape(24.dp),
@@ -150,7 +163,7 @@ private fun WalletCard(
                 }
                 Spacer(Modifier.width(10.dp))
                 Text(
-                    operator.ifBlank { "Ticket" },
+                    operator.ifBlank { s.ticketSingular },
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = Color(0xFF37474F),
@@ -195,7 +208,7 @@ private fun WalletCard(
             val aspect = img.width.toFloat() / img.height.toFloat().coerceAtLeast(1f)
             Image(
                 bitmap = img,
-                contentDescription = "Ticket code",
+                contentDescription = s.ticketCode,
                 modifier = Modifier
                     .fillMaxWidth(if (aspect > 2f) 0.9f else 0.62f)   // wide PDF417 vs square QR/Aztec
                     .aspectRatio(aspect),
@@ -221,7 +234,7 @@ private fun WalletCard(
                     tint = MaterialTheme.colorScheme.primary,
                 )
                 Spacer(Modifier.width(6.dp))
-                Text("View full ticket")
+                Text(s.viewFullTicket)
             }
         }
     }

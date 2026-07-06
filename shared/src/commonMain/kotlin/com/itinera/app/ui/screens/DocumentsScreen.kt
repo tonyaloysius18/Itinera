@@ -6,23 +6,53 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.Upload
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -525,10 +555,10 @@ private fun AddDocumentDialog(
                         onExpandedChange = { segMenuOpen = it },
                     ) {
                         OutlinedTextField(
-                            value = segOptions.firstOrNull { it.first == segmentIndex }?.second ?: "Whole journey",
+                            value = segOptions.firstOrNull { it.first == segmentIndex }?.second ?: s.wholeJourney,
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Segment") },
+                            label = { Text(s.segment) },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = segMenuOpen) },
                             modifier = Modifier.menuAnchor().fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
@@ -540,7 +570,7 @@ private fun AddDocumentDialog(
                             shape = RoundedCornerShape(12.dp),
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Whole journey") },
+                                text = { Text(s.wholeJourney) },
                                 onClick = { segmentIndex = -1; segMenuOpen = false },
                             )
                             segOptions.forEach { (i, label) ->
@@ -565,10 +595,10 @@ private fun AddDocumentDialog(
                     ) {
                         OutlinedTextField(
                             value = legTravs.firstOrNull { it.id == travellerId }
-                                ?.let { "${it.firstName} ${it.surname}".trim() } ?: "Anyone",
+                                ?.let { "${it.firstName} ${it.surname}".trim() } ?: s.anyone,
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Traveller") },
+                            label = { Text(s.travellerSingular) },
                             leadingIcon = { Icon(Icons.Filled.Person, contentDescription = null) },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = travMenuOpen) },
                             modifier = Modifier.menuAnchor().fillMaxWidth(),
@@ -581,7 +611,7 @@ private fun AddDocumentDialog(
                             shape = RoundedCornerShape(12.dp),
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Anyone") },
+                                text = { Text(s.anyone) },
                                 onClick = { travellerId = ""; travMenuOpen = false },
                             )
                             legTravs.forEach { t ->
@@ -725,10 +755,10 @@ private fun EditDocumentDialog(
                         onExpandedChange = { segMenuOpen = it },
                     ) {
                         OutlinedTextField(
-                            value = segOptions.firstOrNull { it.first == segmentIndex }?.second ?: "Whole journey",
+                            value = segOptions.firstOrNull { it.first == segmentIndex }?.second ?: s.wholeJourney,
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Segment") },
+                            label = { Text(s.segment) },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = segMenuOpen) },
                             modifier = Modifier.menuAnchor().fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
@@ -740,7 +770,7 @@ private fun EditDocumentDialog(
                             shape = RoundedCornerShape(12.dp),
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Whole journey") },
+                                text = { Text(s.wholeJourney) },
                                 onClick = { segmentIndex = -1; segMenuOpen = false },
                             )
                             segOptions.forEach { (i, label) ->
@@ -765,10 +795,10 @@ private fun EditDocumentDialog(
                     ) {
                         OutlinedTextField(
                             value = legTravs.firstOrNull { it.id == travellerId }
-                                ?.let { "${it.firstName} ${it.surname}".trim() } ?: "Anyone",
+                                ?.let { "${it.firstName} ${it.surname}".trim() } ?: s.anyone,
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Traveller") },
+                            label = { Text(s.travellerSingular) },
                             leadingIcon = { Icon(Icons.Filled.Person, contentDescription = null) },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = travMenuOpen) },
                             modifier = Modifier.menuAnchor().fillMaxWidth(),
@@ -781,7 +811,7 @@ private fun EditDocumentDialog(
                             shape = RoundedCornerShape(12.dp),
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Anyone") },
+                                text = { Text(s.anyone) },
                                 onClick = { travellerId = ""; travMenuOpen = false },
                             )
                             legTravs.forEach { t ->

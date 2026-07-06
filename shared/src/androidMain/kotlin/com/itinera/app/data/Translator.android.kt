@@ -3,11 +3,11 @@ package com.itinera.app.data
 import com.google.mlkit.common.model.DownloadConditions
 import com.google.mlkit.nl.translate.TranslateLanguage
 import com.google.mlkit.nl.translate.Translation
-import com.google.mlkit.nl.translate.Translator as MlTranslator
 import com.google.mlkit.nl.translate.TranslatorOptions
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import com.google.mlkit.nl.translate.Translator as MlTranslator
 
 /**
  * Android translation via Google ML Kit. On-device, free, offline after a

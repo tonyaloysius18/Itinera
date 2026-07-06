@@ -2,7 +2,6 @@ package com.itinera.app
 
 import android.Manifest
 import android.app.AlarmManager
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -88,13 +87,9 @@ actual class NotificationScheduler actual constructor() {
         )
 
         val alarm = ctx.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val canExact =
-            Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarm.canScheduleExactAlarms()
-        if (canExact) {
-            alarm.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, atEpochMillis, pending)
-        } else {
-            alarm.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, atEpochMillis, pending)
-        }
+        // Inexact alarm: no SCHEDULE_EXACT_ALARM permission, battery-friendly, and
+        // minute-precision isn't needed for a trip reminder (arrives within a few min).
+        alarm.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, atEpochMillis, pending)
     }
 
     actual fun cancel(id: String) {

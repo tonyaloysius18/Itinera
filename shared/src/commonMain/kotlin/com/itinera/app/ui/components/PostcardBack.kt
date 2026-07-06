@@ -3,7 +3,17 @@ package com.itinera.app.ui.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
@@ -85,6 +95,7 @@ fun PostcardBack(
     topPhoto: (@Composable () -> Unit)? = null,
     bottomPhoto: (@Composable () -> Unit)? = null,
 ) {
+    val s = com.itinera.app.i18n.LocalStrings.current
     val topMaskBmp = imageResource(maskTop)
     val bottomMaskBmp = imageResource(maskBottom)
 
@@ -121,7 +132,7 @@ fun PostcardBack(
             contentAlignment = Alignment.BottomStart,
         ) {
             BasicText(
-                text = "From  $country",
+                text = s.fromLabel.replace("%s", country),
                 style = TextStyle(color = Color(0xFF111111), fontWeight = FontWeight.Normal, fontFamily = PostcardBackTitle),
                 maxLines = 1,
                 autoSize = TextAutoSize.StepBased(9.sp, (mw.value * PB_LINE_MAX_FONT).sp, 0.5.sp),
@@ -137,7 +148,7 @@ fun PostcardBack(
                 .width(mw * PB_BLOCK_W),
         ) {
             // Date
-            Text("Date:", fontFamily = PostcardBackTitle, fontSize = labelSize, color = Color(0xFF111111))
+            Text(s.dateLabel, fontFamily = PostcardBackTitle, fontSize = labelSize, color = Color(0xFF111111))
             Spacer(Modifier.height(mh * 0.004f))
             Text(dateRange, fontFamily = PostcardBack, fontSize = valueSize, color = Color(0xFF333333),
                 maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -146,10 +157,12 @@ fun PostcardBack(
             Spacer(Modifier.height(mh * 0.009f))
 
             // Trip Stats — single auto-sized line (shrinks to fit, never truncates)
-            Text("Trip Stats:", fontFamily = PostcardBackTitle, fontSize = labelSize, color = Color(0xFF111111))
+            Text(s.tripStats, fontFamily = PostcardBackTitle, fontSize = labelSize, color = Color(0xFF111111))
             Spacer(Modifier.height(mh * 0.004f))
+            val cWord = if (countriesCount == 1) s.countriesSingular else s.countriesPlural
+            val dWord = if (daysCount == 1) s.daysSingular else s.daysPlural
             BasicText(
-                text = "$countriesCount countries · ${if (distanceKm > 0) "$distanceKm km" else "– km"} · $daysCount days · $expensesLabel ",
+                text = "$countriesCount $cWord · ${if (distanceKm > 0) "$distanceKm ${s.km}" else "– ${s.km}"} · $daysCount $dWord · $expensesLabel ",
                 style = TextStyle(color = Color(0xFF333333), fontFamily = PostcardBack),
                 maxLines = 1,
                 autoSize = TextAutoSize.StepBased(
@@ -163,7 +176,7 @@ fun PostcardBack(
             Spacer(Modifier.height(mh * 0.009f))
 
             // Travellers — one line when short, two when long
-            Text("Travellers:", fontFamily = PostcardBackTitle, fontSize = labelSize, color = Color(0xFF111111))
+            Text(s.travellersLabel, fontFamily = PostcardBackTitle, fontSize = labelSize, color = Color(0xFF111111))
             Spacer(Modifier.height(mh * 0.004f))
             val joined = travellers.joinToString(", ")
             if (joined.length <= 32) {
@@ -205,6 +218,7 @@ private fun BoxScope.PhotoSlot(
     onPick: () -> Unit,
     photo: (@Composable () -> Unit)?,
 ) {
+    val s = com.itinera.app.i18n.LocalStrings.current
     Box(
         Modifier
             .offset(x = mw * slot.x, y = mh * slot.y)
@@ -238,12 +252,12 @@ private fun BoxScope.PhotoSlot(
             ) {
                 Icon(
                     Icons.Outlined.AddPhotoAlternate,
-                    contentDescription = "Add photo",
+                    contentDescription = s.addPhoto,
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                     modifier = Modifier.size(30.dp),
                 )
                 Spacer(Modifier.height(4.dp))
-                Text("Add photo", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f))
+                Text(s.addPhoto, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f))
             }
         }
     }

@@ -1,15 +1,29 @@
 package com.itinera.app.ui.screens
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -19,8 +33,25 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,14 +62,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import com.itinera.app.data.DayForecast
 import com.itinera.app.data.GeoPlace
 import com.itinera.app.data.SavedCity
-import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.data.WeatherResult
 import com.itinera.app.data.WeatherService
 import com.itinera.app.data.weatherEmoji
 import com.itinera.app.data.weatherLabel
+import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.ui.components.CardShape
 import com.itinera.app.ui.components.TopBar
 import kotlinx.coroutines.launch
@@ -297,7 +327,7 @@ private fun SwipeableWeatherCard(
                             ) {
                                 Text(weatherEmoji(day.code), style = MaterialTheme.typography.titleMedium)
                                 Spacer(Modifier.width(12.dp))
-                                Text(prettyDate(day.date), Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+                                Text(prettyDate(day.date, s), Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
                                 Text(
                                     "${day.maxTemp.toInt()}° / ${day.minTemp.toInt()}°",
                                     style = MaterialTheme.typography.bodyMedium,
@@ -378,7 +408,7 @@ private fun AddCityDialog(
                     trailingIcon = {
                         if (query.isNotEmpty()) {
                             IconButton(onClick = { query = "" }) {
-                                Icon(Icons.Filled.Close, contentDescription = "Clear")
+                                Icon(Icons.Filled.Close, contentDescription = s.clearLabel)
                             }
                         }
                     },
@@ -432,18 +462,19 @@ private fun AddCityDialog(
 }
 
 /** "2026-06-26" -> "Fri, Jun 26". */
-private fun prettyDate(iso: String): String {
+private fun prettyDate(iso: String, s: com.itinera.app.i18n.Strings): String {
     val parts = iso.split("-")
     if (parts.size != 3) return iso
     val y = parts[0].toIntOrNull() ?: return iso
     val m = parts[1].toIntOrNull() ?: return iso
     val d = parts[2].toIntOrNull() ?: return iso
-    val months = listOf("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+    val months = listOf(s.jan, s.feb, s.mar, s.apr, s.may, s.jun, s.jul, s.aug, s.sep, s.oct, s.nov, s.dec)
     var mm = m; var yy = y
     if (mm < 3) { mm += 12; yy -= 1 }
     val k = yy % 100; val j = yy / 100
     val h = (d + (13 * (mm + 1)) / 5 + k + k / 4 + j / 4 + 5 * j) % 7
-    val dow = listOf("Sat","Sun","Mon","Tue","Wed","Thu","Fri")[h]
+    val dowList = listOf(s.satShort, s.sunShort, s.monShort, s.tueShort, s.wedShort, s.thuShort, s.friShort)
+    val dow = dowList.getOrElse(h) { "" }
     val mon = months.getOrElse(m - 1) { "" }
     return "$dow, $mon $d"
 }

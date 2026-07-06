@@ -2,7 +2,18 @@ package com.itinera.app.ui.screens
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -12,10 +23,31 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -24,20 +56,16 @@ import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.Leg
 import com.itinera.app.model.LegStop
 import com.itinera.app.model.TransportType
-import com.itinera.app.ui.components.countries          // ⬅ reuse existing country list
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import com.itinera.app.model.Traveller
+import com.itinera.app.model.label
+import com.itinera.app.ui.components.countries
 import dev.darkokoa.datetimewheelpicker.WheelTimePicker
 import dev.darkokoa.datetimewheelpicker.core.format.TimeFormat
 import dev.darkokoa.datetimewheelpicker.core.format.timeFormatter
 import kotlinx.datetime.LocalTime
-import com.itinera.app.model.label
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
-
-import androidx.compose.material.icons.filled.People
-import com.itinera.app.model.Traveller
-
-import androidx.compose.material.icons.filled.SelectAll
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -148,11 +176,11 @@ fun AddLegScreen(
                         // city changed -> reset geo so it re-geocodes
                         stops[index] = stop.copy(city = it.toTitleCase(), lat = 0.0, lng = 0.0, country = "")
                     },
-                    label = { Text("Stop ${index + 1} (layover)") },
+                    label = { Text(s.stopPlaceholder.replace("%d", (index + 1).toString())) },
                     singleLine = true,
                     trailingIcon = {
                         IconButton(onClick = { stops.removeAt(index) }) {
-                            Icon(Icons.Filled.Close, contentDescription = "Remove stop")
+                            Icon(Icons.Filled.Close, contentDescription = s.removeStop)
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -162,7 +190,7 @@ fun AddLegScreen(
                     OutlinedTextField(
                         value = stop.arrivalTime,
                         onValueChange = {}, readOnly = true, enabled = false,
-                        label = { Text("Arrival") },
+                        label = { Text(s.arrival) },
                         trailingIcon = { Icon(Icons.Filled.Schedule, contentDescription = null) },
                         shape = textFieldShape,
                         modifier = Modifier.weight(1f).clickable { stopTimePicker = index to true },
@@ -176,7 +204,7 @@ fun AddLegScreen(
                     OutlinedTextField(
                         value = stop.departureTime,
                         onValueChange = {}, readOnly = true, enabled = false,
-                        label = { Text("Departure") },
+                        label = { Text(s.departure) },
                         trailingIcon = { Icon(Icons.Filled.Schedule, contentDescription = null) },
                         shape = textFieldShape,
                         modifier = Modifier.weight(1f).clickable { stopTimePicker = index to false },
@@ -192,7 +220,7 @@ fun AddLegScreen(
             TextButton(onClick = { stops.add(LegStop()) }) {
                 Icon(Icons.Filled.Add, null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(6.dp))
-                Text("Add stop")
+                Text(s.addStop)
             }
 
             // Destination country (optional) — counts toward the trip's country total

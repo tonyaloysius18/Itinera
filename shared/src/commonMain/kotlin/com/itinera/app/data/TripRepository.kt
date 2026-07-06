@@ -1,21 +1,21 @@
 package com.itinera.app.data
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.itinera.app.NotificationScheduler
 import com.itinera.app.ReminderOffset
 import com.itinera.app.legReminderFireTime
+import com.itinera.app.model.Activity
 import com.itinera.app.model.ChecklistItem
 import com.itinera.app.model.DocItem
-import com.itinera.app.model.Leg
-import com.itinera.app.model.Trip
-import com.itinera.app.model.UserProfile
-import com.itinera.app.model.Activity
 import com.itinera.app.model.Expense
+import com.itinera.app.model.Leg
 import com.itinera.app.model.Traveller
+import com.itinera.app.model.Trip
 import com.itinera.app.model.TripAccent
+import com.itinera.app.model.UserProfile
 import com.itinera.app.model.isOwnedBy
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -25,12 +25,11 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.catch
-
 
 
 /**

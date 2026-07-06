@@ -27,7 +27,26 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.sp
 import com.itinera.app.resources.Res
-import com.itinera.app.resources.*
+import com.itinera.app.resources.caudex_bold
+import com.itinera.app.resources.eagle_lake
+import com.itinera.app.resources.heart_fill
+import com.itinera.app.resources.pb_envelope
+import com.itinera.app.resources.pb_frame_bottom
+import com.itinera.app.resources.pb_frame_top
+import com.itinera.app.resources.pb_map
+import com.itinera.app.resources.pb_mask_bottom
+import com.itinera.app.resources.pb_mask_top
+import com.itinera.app.resources.pb_plane
+import com.itinera.app.resources.pb_stamp
+import com.itinera.app.resources.pb_title
+import com.itinera.app.resources.postcard_halftone
+import com.itinera.app.resources.postcard_heart_frame
+import com.itinera.app.resources.postcard_map
+import com.itinera.app.resources.postcard_paper
+import com.itinera.app.resources.postcard_plane
+import com.itinera.app.resources.postcard_rect_frame
+import com.itinera.app.resources.postcard_title
+import com.itinera.app.resources.rect_fill
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.decodeToImageBitmap
@@ -97,6 +116,7 @@ fun rememberPostcardExporter(
     backBottomUrl: String,
     loadBytes: suspend (String) -> ByteArray?,
 ): suspend () -> ImageBitmap {
+    val s = com.itinera.app.i18n.LocalStrings.current
     // front layers
     val paper      = imageResource(Res.drawable.postcard_paper)
     val halftone   = imageResource(Res.drawable.postcard_halftone)
@@ -137,7 +157,7 @@ fun rememberPostcardExporter(
                 paper, halftone, map, heartFrame, rectFrame, heartMask, rectMask, title, plane, heart, rect,
                 pbMap, pbFrameTop, pbFrameBot, pbMaskTop, pbMaskBot, pbStamp, pbPlane, pbEnvelope, pbTitle, top, bottom,
                 country, dateRange, countriesCount, distanceKm, daysCount, expensesLabel, travellers,
-                frontFromFont, backTitleFont, backBodyFont, measurer,
+                frontFromFont, backTitleFont, backBodyFont, measurer, s,
             )
         }
     }
@@ -160,6 +180,7 @@ private fun renderSheet(
     travellers: List<String>,
     frontFromFont: FontFamily, backTitleFont: FontFamily, backBodyFont: FontFamily,
     measurer: TextMeasurer,
+    s: com.itinera.app.i18n.Strings,
 ): ImageBitmap {
     val w = CARD_W.roundToInt()
     val h = (CARD_H * 2f + CARD_GAP).roundToInt()
@@ -173,7 +194,7 @@ private fun renderSheet(
         fRectPhoto?.let { maskedPhoto(it, fRectMask, rectOf(F_RECT, 0f)) }
         fullArt(fHeartFrame, 0f); fullArt(fRectFrame, 0f); fullArt(fTitle, 0f); fullArt(fPlane, 0f)
         fromLine(
-            measurer, "From  $country", frontFromFont, INK,
+            measurer, s.fromLabel.replace("%s", country), frontFromFont, INK,
             F_LINE_X * CARD_W, F_LINE_TOP * CARD_H,
             F_LINE_W * CARD_W, (F_LINE_BASELINE - F_LINE_TOP) * CARD_H,
             F_LINE_MAX_FONT * CARD_W, F_LINE_ROT,
@@ -187,14 +208,14 @@ private fun renderSheet(
         fullArt(bFrameTop, by); fullArt(bFrameBot, by); fullArt(bStamp, by)
         fullArt(bPlane, by); fullArt(bEnvelope, by); fullArt(bTitle, by)
         fromLine(
-            measurer, "From  $country", backTitleFont, INK,
+            measurer, s.fromLabel.replace("%s", country), backTitleFont, INK,
             B_LINE_X * CARD_W, by + B_LINE_TOP * CARD_H,
             B_LINE_W * CARD_W, (B_LINE_BASELINE - B_LINE_TOP) * CARD_H,
             B_LINE_MAX_FONT * CARD_W, B_LINE_ROT,
         )
         backBlock(
             measurer, by, backTitleFont, backBodyFont,
-            dateRange, countriesCount, distanceKm, daysCount, expensesLabel, travellers,
+            dateRange, countriesCount, distanceKm, daysCount, expensesLabel, travellers, s,
         )
     }
     return image
@@ -259,6 +280,7 @@ private fun DrawScope.backBlock(
     measurer: TextMeasurer, originY: Float, titleFont: FontFamily, bodyFont: FontFamily,
     dateRange: String, countriesCount: Int, distanceKm: Int, daysCount: Int, expensesLabel: String,
     travellers: List<String>,
+    s: com.itinera.app.i18n.Strings,
 ) {
     val w = CARD_W; val h = CARD_H
     val blockX = B_BLOCK_X * w
@@ -297,23 +319,25 @@ private fun DrawScope.backBlock(
     }
 
     // Date
-    cy += text("Date:", titleFont, labelPx, INK)
+    cy += text(s.dateLabel, titleFont, labelPx, INK)
     cy += 0.004f * h
     cy += text(dateRange, bodyFont, valuePx, INK_SOFT)
     divider()
     cy += 0.009f * h
 
     // Trip Stats — single auto-shrunk line
-    cy += text("Trip Stats:", titleFont, labelPx, INK)
+    cy += text(s.tripStats, titleFont, labelPx, INK)
     cy += 0.004f * h
+    val cWord = if (countriesCount == 1) s.countriesSingular else s.countriesPlural
+    val dWord = if (daysCount == 1) s.daysSingular else s.daysPlural
     val statsLine =
-        "$countriesCount countries · ${if (distanceKm > 0) "$distanceKm km" else "– km"} · $daysCount days · $expensesLabel"
+        "$countriesCount $cWord · ${if (distanceKm > 0) "$distanceKm ${s.km}" else "– ${s.km}"} · $daysCount $dWord · $expensesLabel"
     cy += fitText(statsLine, bodyFont, valuePx, INK_SOFT)
     divider()
     cy += 0.009f * h
 
     // Travellers — one line when short, two when long (threshold matches live card)
-    cy += text("Travellers:", titleFont, labelPx, INK)
+    cy += text(s.travellersLabel, titleFont, labelPx, INK)
     cy += 0.004f * h
     val joined = travellers.joinToString(", ")
     if (joined.length <= 32) {

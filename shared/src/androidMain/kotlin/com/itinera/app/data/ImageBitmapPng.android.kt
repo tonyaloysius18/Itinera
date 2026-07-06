@@ -1,8 +1,8 @@
 package com.itinera.app.data
 
+import android.graphics.Bitmap
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
-import android.graphics.Bitmap
 import java.io.ByteArrayOutputStream
 
 actual fun ImageBitmap.toPngBytes(): ByteArray {

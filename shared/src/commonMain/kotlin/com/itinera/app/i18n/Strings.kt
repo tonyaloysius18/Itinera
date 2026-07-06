@@ -479,6 +479,52 @@ class Strings {
 
     var souvenir: String = ""
 
+    // Remaining strings
+    var wholeJourney: String = ""
+    var segment: String = ""
+    var anyone: String = ""
+    var travellerSingular: String = ""
+    var removeStop: String = ""
+    var arrival: String = ""
+    var departure: String = ""
+    var addStop: String = ""
+    var dateLabel: String = ""
+    var tripStats: String = ""
+    var travellersLabel: String = ""
+    var addPhoto: String = ""
+    var fromLabel: String = ""
+    var km: String = ""
+    var countriesSingular: String = ""
+    var countriesPlural: String = ""
+    var daysSingular: String = ""
+    var daysPlural: String = ""
+    var clearLabel: String = ""
+    var stopPlaceholder: String = ""
+    var viewFullTicket: String = ""
+    var ticketSingular: String = ""
+    var ticketCode: String = ""
+
+    // Months and Days
+    var jan: String = ""
+    var feb: String = ""
+    var mar: String = ""
+    var apr: String = ""
+    var may: String = ""
+    var jun: String = ""
+    var jul: String = ""
+    var aug: String = ""
+    var sep: String = ""
+    var oct: String = ""
+    var nov: String = ""
+    var dec: String = ""
+    var monShort: String = ""
+    var tueShort: String = ""
+    var wedShort: String = ""
+    var thuShort: String = ""
+    var friShort: String = ""
+    var satShort: String = ""
+    var sunShort: String = ""
+
     fun copyApply(block: Strings.() -> Unit): Strings {
 
         val c = Strings()
@@ -840,6 +886,51 @@ class Strings {
 
         c.tripCompleted = this.tripCompleted
         c.souvenir = this.souvenir
+
+        c.wholeJourney = this.wholeJourney
+        c.segment = this.segment
+        c.anyone = this.anyone
+        c.travellerSingular = this.travellerSingular
+        c.removeStop = this.removeStop
+        c.arrival = this.arrival
+        c.departure = this.departure
+        c.addStop = this.addStop
+        c.dateLabel = this.dateLabel
+        c.tripStats = this.tripStats
+        c.travellersLabel = this.travellersLabel
+        c.addPhoto = this.addPhoto
+        c.fromLabel = this.fromLabel
+        c.km = this.km
+        c.countriesSingular = this.countriesSingular
+        c.countriesPlural = this.countriesPlural
+        c.daysSingular = this.daysSingular
+        c.daysPlural = this.daysPlural
+        c.clearLabel = this.clearLabel
+        c.stopPlaceholder = this.stopPlaceholder
+        c.viewFullTicket = this.viewFullTicket
+        c.ticketSingular = this.ticketSingular
+        c.ticketCode = this.ticketCode
+
+        c.jan = this.jan
+        c.feb = this.feb
+        c.mar = this.mar
+        c.apr = this.apr
+        c.may = this.may
+        c.jun = this.jun
+        c.jul = this.jul
+        c.aug = this.aug
+        c.sep = this.sep
+        c.oct = this.oct
+        c.nov = this.nov
+        c.dec = this.dec
+        c.monShort = this.monShort
+        c.tueShort = this.tueShort
+        c.wedShort = this.wedShort
+        c.thuShort = this.thuShort
+        c.friShort = this.friShort
+        c.satShort = this.satShort
+        c.sunShort = this.sunShort
+
         c.block()
         return c
     }
