@@ -72,8 +72,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.itinera.app.data.PackingGroups
 import com.itinera.app.data.TripRepository
 import com.itinera.app.data.imageQueryForTrip
+import com.itinera.app.data.packingSuggestions
 import com.itinera.app.i18n.Language
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.i18n.stringsFor
@@ -540,6 +542,23 @@ private fun AppContent(
                                 onToggle = { repository.toggleChecklistItem(it) },
                                 onAdd = { text, group -> repository.addChecklistItem(screen.tripId, text, group) },
                                 onDelete = { repository.deleteChecklistItem(it) },
+                                loadSuggestions = {                                    // ⬅ ADD
+                                    val weather = repository.fetchTripWeatherFor(trip)
+                                    packingSuggestions(
+                                        trip = trip,
+                                        weather = weather,
+                                        groups = PackingGroups(
+                                            documents = s.documents,
+                                            packing = s.packing,
+                                            transport = s.transport,
+                                            money = s.money,
+                                            gadget = s.gadget,
+                                            other = s.other,
+                                        ),
+                                        existingTexts = repository.checklistForTrip(screen.tripId)
+                                            .map { it.text }.toSet(),
+                                    )
+                                },
                             )
                         }
 

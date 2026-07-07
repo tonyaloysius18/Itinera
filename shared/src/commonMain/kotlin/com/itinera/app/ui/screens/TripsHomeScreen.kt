@@ -76,7 +76,11 @@ import com.itinera.app.model.isOwnedBy
 import com.itinera.app.model.label
 import com.itinera.app.ui.components.CardShape
 import com.itinera.app.ui.components.PlaneLoader
+import androidx.compose.ui.text.style.TextOverflow
 import com.itinera.app.ui.components.TopBar
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
+import kotlinx.datetime.daysUntil
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -182,25 +186,25 @@ fun TripsHomeScreen(
 //                    modifier = Modifier.weight(1f),
 //                )
                 visibleTrips.isEmpty() ->
-                        Column(
-                            Modifier.fillMaxSize().padding(horizontal = 32.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center,
-                        ) {
-                            Text("🔎", style = MaterialTheme.typography.displayMedium)
-                            Spacer(Modifier.height(12.dp))
-                            Text(
-                                s.noResults,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
-                            )
-                            Spacer(Modifier.height(6.dp))
-                            Text(
-                                s.noResultsSubtitle,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-                            )
-                        }
+                    Column(
+                        Modifier.fillMaxSize().padding(horizontal = 32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Text("🔎", style = MaterialTheme.typography.displayMedium)
+                        Spacer(Modifier.height(12.dp))
+                        Text(
+                            s.noResults,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            s.noResultsSubtitle,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                        )
+                    }
 
 //                    EmptyState(
 //                    icon = Icons.Filled.Search,
@@ -329,7 +333,7 @@ private fun JoinTripDialog(
                 when {
                     joinedTitle != null -> {
                         Text(
-                            "${s.joined} ${joinedTitle}",
+                            "${s.joined} $joinedTitle",
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.primary,
@@ -655,7 +659,27 @@ fun TripCardContent(
                 }
             }
             Column(Modifier.padding(horizontal = 13.dp, vertical = 11.dp)) {
-                Text(trip.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        trip.title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
+                    )
+                    val startsIn = tripStartsIn(trip)
+                    if (startsIn.isNotBlank()) {
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            startsIn,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            maxLines = 1,
+                        )
+                    }
+                }
                 Spacer(Modifier.height(3.dp))
                 val sub = buildString {
                     val rangeShown = if (trip.legs.isEmpty()) {
@@ -696,19 +720,14 @@ fun TripNameDialog(
 
 
     var name by remember { mutableStateOf(initialName) }
-    val s = com.itinera.app.i18n.LocalStrings.current
+    val s = LocalStrings.current
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (isEdit) s.renameTrip else s.newTrip) },
         text = {
             OutlinedTextField(
                 value = name,
-                onValueChange = { name = it.split(" ")
-                    .joinToString(" ") { word ->
-                        word.replaceFirstChar { c ->
-                            if (c.isLowerCase()) c.titlecase() else c.toString()
-                        }
-                    } },
+                onValueChange = { name = it.toTitleCase() },
                 label = { Text(s.tripName) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
@@ -725,4 +744,20 @@ fun TripNameDialog(
         properties = DialogProperties(usePlatformDefaultWidth = true),
     )
 
+}
+
+/** "Starts in N days" / "Starts tomorrow" / "Starts today" for an upcoming trip; "" otherwise. */
+private fun tripStartsIn(trip: Trip): String {
+    val dates = trip.legs.map { it.date }.sorted()
+    val first = dates.firstOrNull() ?: return ""
+    val last = dates.last()
+    val today = kotlin.time.Clock.System.todayIn(TimeZone.currentSystemDefault())
+    if (last < today) return ""                 // finished
+    val days = today.daysUntil(first)
+    return when {
+        days > 1  -> "Starts in $days days"
+        days == 1 -> "Starts tomorrow"
+        days == 0 -> "Starts today"
+        else      -> "In progress"              // started, not finished
+    }
 }

@@ -48,10 +48,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.itinera.app.i18n.LocalStrings
+import androidx.compose.material3.Surface
 import com.itinera.app.model.ChecklistItem
+import com.itinera.app.data.PackingSuggestion
+//import androidx.compose.material.icons.Icons
+//import androidx.compose.material.icons.filled.Add
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import com.itinera.app.ui.components.Progress
 import com.itinera.app.ui.components.TopBar
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ChecklistScreen(
     items: List<ChecklistItem>,
@@ -59,12 +66,19 @@ fun ChecklistScreen(
     onToggle: (String) -> Unit,
     onAdd: (String, String) -> Unit,
     onDelete: (String) -> Unit,
+    loadSuggestions: (suspend () -> List<PackingSuggestion>)? = null,
 ) {
     val s = LocalStrings.current
     val doneCount = items.count { it.done }
     val pct = if (items.isEmpty()) 0 else (doneCount * 100 / items.size)
 
     var showAddDialog by remember { mutableStateOf(false) }
+
+    // packing suggestions (fetched fresh each time the checklist opens)
+    var suggestions by remember { mutableStateOf<List<PackingSuggestion>>(emptyList()) }
+    var dismissed by remember { mutableStateOf<Set<String>>(emptySet()) }
+    LaunchedEffect(Unit) { loadSuggestions?.let { suggestions = it() } }
+    val visibleSuggestions = suggestions.filter { it.text !in dismissed && items.none { i -> i.text.equals(it.text, ignoreCase = true) } }
 
     // existing groups in this checklist, used to offer them in the dialog
     val existingGroups = items.map { it.group }.distinct()
@@ -107,7 +121,26 @@ fun ChecklistScreen(
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 80.dp) // extra space for the FAB
         ) {
-            if (items.isEmpty()) {
+            if (items.isEmpty() && visibleSuggestions.isNotEmpty()) {
+                Text(
+                    "Suggested for this trip",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = 14.dp, bottom = 6.dp),
+                )
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    visibleSuggestions.forEach { sug ->
+                        SuggestionChip(
+                            suggestion = sug,
+                            onAdd = { onAdd(sug.text, sug.group); dismissed = dismissed + sug.text },
+                            onDismiss = { dismissed = dismissed + sug.text },
+                        )
+                    }
+                }
+            } else if (items.isEmpty()) {
                 Column(
                     Modifier.fillMaxWidth().padding(top = 270.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -130,6 +163,28 @@ fun ChecklistScreen(
                     )
                 }
             } else {
+                if (visibleSuggestions.isNotEmpty()) {
+                    Text(
+                        "Suggested for this trip",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 14.dp, bottom = 6.dp),
+                    )
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        visibleSuggestions.forEach { sug ->
+                            SuggestionChip(
+                                suggestion = sug,
+                                onAdd = { onAdd(sug.text, sug.group); dismissed = dismissed + sug.text },
+                                onDismiss = { dismissed = dismissed + sug.text },
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(4.dp))
+                }
+
                 // canonical order so sections always appear in the same sequence
                 val groupOrder = listOf(
                     s.documents, s.bookings, s.packing,
@@ -379,5 +434,44 @@ private fun suggestGroup(
         ) -> gadget
 
         else -> other
+    }
+}
+
+
+@Composable
+private fun SuggestionChip(
+    suggestion: PackingSuggestion,
+    onAdd: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        modifier = Modifier.clickable { onAdd() },
+    ) {
+        Row(
+            Modifier.padding(start = 12.dp, end = 8.dp, top = 7.dp, bottom = 7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column {
+                Text(
+                    suggestion.text,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    suggestion.reason,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                )
+            }
+            Spacer(Modifier.width(6.dp))
+            Icon(
+                Icons.Filled.Add,
+                contentDescription = "Add",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp),
+            )
+        }
     }
 }

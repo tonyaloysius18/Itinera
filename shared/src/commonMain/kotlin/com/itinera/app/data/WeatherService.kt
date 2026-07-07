@@ -33,7 +33,7 @@ data class GeoPlace(
 @Serializable
 private data class ForecastResponse(
     val current: CurrentBlock? = null,
-    val daily: DailyBlock? = null,
+    val daily: WeatherDailyBlock? = null,
 )
 
 @Serializable
@@ -43,7 +43,7 @@ private data class CurrentBlock(
 )
 
 @Serializable
-private data class DailyBlock(
+private data class WeatherDailyBlock(
     val time: List<String> = emptyList(),
     val weather_code: List<Int> = emptyList(),
     val temperature_2m_max: List<Double> = emptyList(),
@@ -112,7 +112,7 @@ class WeatherService {
             val body = client.get(url).bodyAsText()
             val parsed = json.decodeFromString<ForecastResponse>(body)
             val cur = parsed.current ?: return null
-            val d = parsed.daily ?: return null
+            val d: WeatherDailyBlock = parsed.daily ?: return null
             val list = d.time.indices.map { i ->
                 DayForecast(
                     date = d.time.getOrElse(i) { "" },

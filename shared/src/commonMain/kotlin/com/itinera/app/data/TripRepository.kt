@@ -1024,4 +1024,7 @@ class TripRepository {
             }
             .forEach { geocodeLegAsync(tripId, it.id) }
     }
+
+    suspend fun fetchTripWeatherFor(trip: Trip): List<DestinationWeather> =
+        fetchTripWeather(uploadClient, trip)
 }
