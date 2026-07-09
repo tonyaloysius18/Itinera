@@ -756,8 +756,8 @@ private fun tripStartsIn(trip: Trip): String {
     val days = today.daysUntil(first)
     return when {
         days > 1  -> "Starts in $days days"
-        days == 1 -> "Starts tomorrow"
-        days == 0 -> "Starts today"
-        else      -> "In progress"              // started, not finished
+        days == 1 -> "Starts Tomorrow"
+        days == 0 -> "Starts Today"
+        else      -> "In Progress"              // started, not finished
     }
 }

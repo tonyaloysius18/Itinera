@@ -1,6 +1,7 @@
 package com.itinera.app.ui.screens
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,15 +20,24 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.itinera.app.i18n.Language
@@ -41,6 +51,8 @@ fun LanguageScreen(
     onBack: () -> Unit,
 ) {
     val s = LocalStrings.current
+    var searchQuery by remember { mutableStateOf("") }
+    var isSearching by remember { mutableStateOf(false) }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -63,30 +75,78 @@ fun LanguageScreen(
             // ── Fixed (non-scrolling) section ──
 
             // "System default" card
-            Spacer(Modifier.height(8.dp))
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surface,
-                tonalElevation = 2.dp,
-            ) {
-                LanguageRow(
-                    title = s.followPhone,
-                    subtitle = s.systemDefault,
-                    selected = selected == Language.SYSTEM,
-                    onClick = { onSelect(Language.SYSTEM) },
-                )
+            val showSystem = searchQuery.isEmpty() || 
+                s.followPhone.contains(searchQuery, ignoreCase = true) || 
+                s.systemDefault.contains(searchQuery, ignoreCase = true)
+
+            if (showSystem) {
+                Spacer(Modifier.height(8.dp))
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 2.dp,
+                ) {
+                    LanguageRow(
+                        title = s.followPhone,
+                        subtitle = s.systemDefault,
+                        selected = selected == Language.SYSTEM,
+                        onClick = { onSelect(Language.SYSTEM) },
+                    )
+                }
             }
 
             // Section header
-            Text(
-                s.chooseLanguage,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-                modifier = Modifier.padding(start = 24.dp, top = 24.dp, bottom = 8.dp),
-            )
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = 24.dp, end = 8.dp, top = 24.dp, bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                if (isSearching) {
+                    TextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        placeholder = { Text(s.search, style = MaterialTheme.typography.labelLarge) },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        trailingIcon = {
+                            IconButton(onClick = {
+                                searchQuery = ""
+                                isSearching = false
+                            }) {
+                                Icon(Icons.Default.Close, contentDescription = s.close)
+                            }
+                        },
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                        ),
+                        textStyle = MaterialTheme.typography.labelLarge
+                    )
+                } else {
+                    Text(
+                        s.chooseLanguage,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                        modifier = Modifier.weight(1f),
+                    )
+                    IconButton(onClick = { isSearching = true }) {
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = s.search,
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            }
 
             // ── Scrollable section: ONLY the language list, bled to the bottom edge ──
             Surface(
@@ -102,7 +162,7 @@ fun LanguageScreen(
                 Column(
                     Modifier.verticalScroll(rememberScrollState())
                 ) {
-                    val langs = remember {
+                    val langs = remember(searchQuery) {
                         // European languages to surface right after English (alphabetical among themselves)
                         val european = setOf(
                             Language.FRENCH, Language.SPANISH, Language.GERMAN, Language.ITALIAN,
@@ -115,6 +175,10 @@ fun LanguageScreen(
                         )
                         Language.entries
                             .filter { it != Language.SYSTEM }
+                            .filter {
+                                it.nativeName.contains(searchQuery, ignoreCase = true) ||
+                                        it.englishName.contains(searchQuery, ignoreCase = true)
+                            }
                             .sortedWith(
                                 // tier 0 = English, tier 1 = European, tier 2 = everything else
                                 compareBy<Language> {

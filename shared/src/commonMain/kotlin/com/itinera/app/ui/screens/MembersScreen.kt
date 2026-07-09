@@ -95,7 +95,7 @@ fun MembersScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text(s.members) },
+                title = { Text(s.travellers) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = s.back)

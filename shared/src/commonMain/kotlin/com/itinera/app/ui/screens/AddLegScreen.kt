@@ -115,19 +115,20 @@ fun AddLegScreen(
             }
         }
 
-    Column(Modifier.fillMaxSize()) {
-        Row(
-            Modifier.fillMaxWidth().padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            IconButton(onClick = onClose) { Icon(Icons.Filled.Close, contentDescription = s.close) }
-            Text(if (existing == null) s.newLeg else s.editLeg, style = MaterialTheme.typography.titleLarge)
-        }
+    Box(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize()) {
+            Row(
+                Modifier.fillMaxWidth().padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                IconButton(onClick = onClose) { Icon(Icons.Filled.Close, contentDescription = s.close) }
+                Text(if (existing == null) s.newLeg else s.editLeg, style = MaterialTheme.typography.titleLarge)
+            }
 
-        Column(
-            Modifier.weight(1f).padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
-        ) {
+            Column(
+                Modifier.weight(1f).padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
             OutlinedTextField(from, { from = it.toTitleCase() }, label = { Text(s.from) }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = textFieldShape)
             OutlinedTextField(to, { to = it.toTitleCase() }, label = { Text(s.to) }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = textFieldShape)
 
@@ -308,6 +309,8 @@ fun AddLegScreen(
                     disabledTrailingIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 ),
             )
+            
+            Spacer(Modifier.height(100.dp))
         }
 
         // Calendar dialog
@@ -494,11 +497,13 @@ fun AddLegScreen(
             )
         }
 
-        // Save
-        Row(
-            Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(top = 16.dp, bottom = 60.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
+    } // End of Column
+
+    // Save
+    Row(
+        Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 32.dp),
+        horizontalArrangement = Arrangement.Center,
+    ) {
             Button(
                 onClick = {
                     onSave(
@@ -529,7 +534,7 @@ fun AddLegScreen(
                 },
                 enabled = from.isNotBlank() && to.isNotBlank() && date != null,
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 80.dp).padding(bottom = 16.dp).height(50.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 80.dp).height(50.dp),
             ) { Text(s.saveLeg) }
         }
     }

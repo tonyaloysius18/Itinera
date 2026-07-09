@@ -29,6 +29,8 @@ private data class OpenMeteoDaily(val daily: PackingDailyBlock? = null)
 
 private val pkJson = Json { ignoreUnknownKeys = true }
 
+private fun twoDigit(value: Int): String = value.toString().padStart(2, '0')
+
 suspend fun fetchTripWeather(client: HttpClient, trip: Trip): List<DestinationWeather> {
     val dates = trip.legs.map { it.date }.sorted()
     if (dates.isEmpty()) return emptyList()
@@ -54,8 +56,8 @@ suspend fun fetchTripWeather(client: HttpClient, trip: Trip): List<DestinationWe
             } else {
                 // seasonal proxy: same calendar window, previous year, from the archive
                 val y = start.year - 1
-                val sMd = "%02d-%02d".format(start.monthNumber, start.dayOfMonth)
-                val eMd = "%02d-%02d".format(end.monthNumber, end.dayOfMonth)
+                val sMd = "${twoDigit(start.monthNumber)}-${twoDigit(start.dayOfMonth)}"
+                val eMd = "${twoDigit(end.monthNumber)}-${twoDigit(end.dayOfMonth)}"
                 "https://archive-api.open-meteo.com/v1/archive?latitude=${d.lat}&longitude=${d.lng}" +
                         "&daily=temperature_2m_max,temperature_2m_min,precipitation_sum" +
                         "&start_date=$y-$sMd&end_date=$y-$eMd&timezone=auto"
