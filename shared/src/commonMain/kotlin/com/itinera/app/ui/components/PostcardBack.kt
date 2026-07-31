@@ -59,11 +59,11 @@ private val PB_BOTTOM = PbSlot(0.480f, 0.470f, 0.455f, 0.512f)   // matches pb_m
 
 // "From {country}" live line
 private const val PB_LINE_X        = 0.094f
-private const val PB_LINE_BASELINE = 0.262f
-private const val PB_LINE_TOP      = 0.085f
+private const val PB_LINE_BASELINE = 0.285f
+private const val PB_LINE_TOP      = 0.108f
 private const val PB_LINE_W        = 0.360f
 private const val PB_LINE_ROT      = 0f
-private const val PB_LINE_MAX_FONT = 0.062f
+private const val PB_LINE_MAX_FONT = 0.050f
 
 // Live writing block (Date + Trip Stats + Travellers) on the left
 private const val PB_BLOCK_X = 0.052f
@@ -132,7 +132,7 @@ fun PostcardBack(
             contentAlignment = Alignment.BottomStart,
         ) {
             BasicText(
-                text = s.fromLabel.replace("%s", country),
+                text = "From  $country",
                 style = TextStyle(color = Color(0xFF111111), fontWeight = FontWeight.Normal, fontFamily = PostcardBackTitle),
                 maxLines = 1,
                 autoSize = TextAutoSize.StepBased(9.sp, (mw.value * PB_LINE_MAX_FONT).sp, 0.5.sp),

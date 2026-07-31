@@ -14,25 +14,43 @@ import platform.Foundation.create
 import platform.Foundation.writeToFile
 import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIApplication
+import platform.UIKit.UIImage
 
 actual class FileSharer {
     @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
     actual fun share(bytes: ByteArray, fileName: String, mimeType: String) {
-        val data = bytes.toNSData() ?: return
-        val path = NSTemporaryDirectory() + fileName.ifBlank { "document" }
-        data.writeToFile(path, atomically = true)
-        val url = NSURL.fileURLWithPath(path)
+        val data = bytes.toNSData() ?: run {
+            println("ITINERA SHARE: toNSData null")
+            return
+        }
+        val isImage = mimeType.startsWith("image", ignoreCase = true) ||
+                fileName.endsWith(".png", true) || fileName.endsWith(".jpg", true) ||
+                fileName.endsWith(".jpeg", true)
+
+        val uiImage = if (isImage) UIImage.imageWithData(data) else null
+        println("ITINERA SHARE: mime='$mimeType' file='$fileName' isImage=$isImage uiImage=${uiImage != null} bytes=${bytes.size}")
+
+        // Prefer sharing the UIImage (→ "Save Image"/Photos). Fall back to a file URL.
+        val item: Any = uiImage ?: run {
+            val path = NSTemporaryDirectory() + fileName.ifBlank { "document" }
+            data.writeToFile(path, atomically = true)
+            NSURL.fileURLWithPath(path)
+        }
 
         val activityVC = UIActivityViewController(
-            activityItems = listOf(url),
+            activityItems = listOf(item),
             applicationActivities = null,
         )
 
         val root = UIApplication.sharedApplication.keyWindow?.rootViewController
-        // iPad: a popover anchor would be required; iPhone presents fine as-is.
-        root?.presentViewController(activityVC, animated = true, completion = null)
+        if (root == null) {
+            println("ITINERA SHARE: no root VC")
+            return
+        }
+        root.presentViewController(activityVC, animated = true, completion = null)
     }
-actual fun shareText(text: String) {
+
+    actual fun shareText(text: String) {
         val activityVC = UIActivityViewController(
             activityItems = listOf(text),
             applicationActivities = null,

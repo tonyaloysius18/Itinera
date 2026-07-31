@@ -81,8 +81,8 @@ private const val F_LINE_MAX_FONT = 0.100f
 private val B_TOP    = SlotR(0.517f, 0.018f, 0.432f, 0.444f)
 private val B_BOTTOM = SlotR(0.480f, 0.470f, 0.455f, 0.512f)
 private const val B_LINE_X = 0.094f
-private const val B_LINE_BASELINE = 0.262f
-private const val B_LINE_TOP = 0.085f
+private const val B_LINE_BASELINE = 0.285f
+private const val B_LINE_TOP = 0.108f
 private const val B_LINE_W = 0.360f
 private const val B_LINE_ROT = 0f
 private const val B_LINE_MAX_FONT = 0.062f
@@ -194,7 +194,7 @@ private fun renderSheet(
         fRectPhoto?.let { maskedPhoto(it, fRectMask, rectOf(F_RECT, 0f)) }
         fullArt(fHeartFrame, 0f); fullArt(fRectFrame, 0f); fullArt(fTitle, 0f); fullArt(fPlane, 0f)
         fromLine(
-            measurer, s.fromLabel.replace("%s", country), frontFromFont, INK,
+            measurer, "From  $country", frontFromFont, INK,
             F_LINE_X * CARD_W, F_LINE_TOP * CARD_H,
             F_LINE_W * CARD_W, (F_LINE_BASELINE - F_LINE_TOP) * CARD_H,
             F_LINE_MAX_FONT * CARD_W, F_LINE_ROT,
@@ -208,7 +208,7 @@ private fun renderSheet(
         fullArt(bFrameTop, by); fullArt(bFrameBot, by); fullArt(bStamp, by)
         fullArt(bPlane, by); fullArt(bEnvelope, by); fullArt(bTitle, by)
         fromLine(
-            measurer, s.fromLabel.replace("%s", country), backTitleFont, INK,
+            measurer, "From  $country", backTitleFont, INK,
             B_LINE_X * CARD_W, by + B_LINE_TOP * CARD_H,
             B_LINE_W * CARD_W, (B_LINE_BASELINE - B_LINE_TOP) * CARD_H,
             B_LINE_MAX_FONT * CARD_W, B_LINE_ROT,
