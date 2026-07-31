@@ -62,11 +62,34 @@ suspend fun extractAllBarcodes(bytes: ByteArray, mimeType: String): List<Barcode
     } else {
         runCatching { bytes.decodeToImageBitmap() }.getOrNull() ?: return emptyList()
     }
-    val codes = runCatching { detectBarcodesInImage(page) }.getOrElse { emptyList() }
+    // Small/soft images (screenshots, phone photos) often don't decode — give the
+    // detector more pixels per module by upscaling so the short side is >= 1400px.
+    val minSide = minOf(page.width, page.height)
+    val detectImage = if (minSide in 1 until 1400) upscale(page, 1400f / minSide) else page
+
+    val codes = runCatching { detectBarcodesInImage(detectImage) }.getOrElse { emptyList() }
     return codes
         .sortedByDescending { it.area }
         .distinctBy { it.rawValue.ifBlank { "${it.left},${it.top},${it.right},${it.bottom}" } }
-        .map { BarcodeExtraction(cropTo(page, it), it.rawValue) }
+        .map { BarcodeExtraction(cropTo(detectImage, it), it.rawValue) }   // crop the same image we detected on
+}
+
+/** Scales an ImageBitmap by [factor] (nearest-ish via CanvasDrawScope) for better decoding. */
+private fun upscale(src: ImageBitmap, factor: Float): ImageBitmap {
+    val w = (src.width * factor).roundToInt().coerceAtLeast(1)
+    val h = (src.height * factor).roundToInt().coerceAtLeast(1)
+    val out = ImageBitmap(w, h)
+    val canvas = Canvas(out)
+    CanvasDrawScope().draw(Density(1f, 1f), LayoutDirection.Ltr, canvas, Size(w.toFloat(), h.toFloat())) {
+        drawImage(
+            image = src,
+            srcOffset = IntOffset.Zero,
+            srcSize = IntSize(src.width, src.height),
+            dstOffset = IntOffset.Zero,
+            dstSize = IntSize(w, h),
+        )
+    }
+    return out
 }
 
 /** Crops [src] to the barcode box plus a thin quiet zone, returns a new bitmap. */

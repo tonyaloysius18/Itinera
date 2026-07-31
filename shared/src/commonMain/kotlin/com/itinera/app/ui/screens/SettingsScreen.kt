@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.ScrollState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -83,13 +85,15 @@ fun SettingsScreen(
     val s = LocalStrings.current
     val primary = MaterialTheme.colorScheme.primary
 
+    val scrollState = rememberSaveable(saver = ScrollState.Saver) { ScrollState(0) }
+
     Column(Modifier.fillMaxSize()) {
         TopBar(s.settings)
 
         Column(
             Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
                 .padding(horizontal = 16.dp),
         ) {
             // Profile card

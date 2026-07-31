@@ -1,5 +1,11 @@
 package com.itinera.app.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,7 +27,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.ScrollState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -202,6 +209,8 @@ fun TripDetailScreen(
 
     var showAddChooser by remember { mutableStateOf(false) }
     var showPostcard by remember { mutableStateOf(false) }
+    val bodyScroll = rememberSaveable(saver = ScrollState.Saver) { ScrollState(0) }
+
 
     // ── ticket wallet viewer ──
     var walletTickets by remember { mutableStateOf<List<WalletTicket>>(emptyList()) }
@@ -246,13 +255,16 @@ fun TripDetailScreen(
         }
     }
 
-    val totalItems = trip.legs.size + activities.size
-    val allComplete = totalItems > 0 &&
-            trip.legs.all { it.completed } && activities.all { it.completed }
+    // Postcard unlocks when every LEG is travelled (places/activities don't gate it).
+    val allComplete = trip.legs.isNotEmpty() && trip.legs.all { it.completed }
 
     var wasComplete by remember { mutableStateOf(allComplete) }
     LaunchedEffect(allComplete) {
-        if (allComplete && !wasComplete) showPostcard = true
+        if (allComplete && !wasComplete) {
+            showPostcard = true
+            // bring the newly-revealed souvenir into view, above the fixed buttons
+            bodyScroll.animateScrollTo(bodyScroll.maxValue)
+        }
         wasComplete = allComplete
     }
 
@@ -266,6 +278,17 @@ fun TripDetailScreen(
     val actsByDate = activities
         .sortedWith(compareBy({ it.date }, { parseHourMinute(it.time).first }, { parseHourMinute(it.time).second }))
         .groupBy { it.date }
+
+    // Merge legs + activities per day, ordered by clock time, so a 10:00 place shows
+    // between a 09:00 leg and a 12:45 leg instead of after all legs.
+    val entriesByDate: Map<kotlinx.datetime.LocalDate, List<DayEntry>> = allDatesRaw@ run {
+        val dates = (trip.legs.map { it.date } + activities.map { it.date }).distinct()
+        dates.associateWith { d ->
+            val legEntries = trip.legs.filter { it.date == d }.map { DayEntry.LegEntry(it) as DayEntry }
+            val actEntries = activities.filter { it.date == d }.map { DayEntry.ActEntry(it) as DayEntry }
+            (legEntries + actEntries).sortedWith(compareBy({ it.sortH }, { it.sortM }))
+        }
+    }
 
     val daysCount = if (allDates.isEmpty()) 0
     else allDates.first().daysUntil(allDates.last()) + 1
@@ -308,6 +331,11 @@ fun TripDetailScreen(
         .sortedWith(compareBy({ it.date }, { parseHourMinute(it.timeLabel).first }, { parseHourMinute(it.timeLabel).second }))
         .firstOrNull { !it.completed }?.id
 
+    val bottomClearance by animateDpAsState(
+        targetValue = if (allComplete) 290.dp else 160.dp,
+        label = "bottomClearance"
+    )
+
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
             TopBar(
@@ -349,12 +377,18 @@ fun TripDetailScreen(
                 }
             }
 
-            Box(Modifier.weight(1f).fillMaxWidth()) {
+            Box(
+                Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+
                 Column(
                     Modifier
                         .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 16.dp),
+                        .verticalScroll(bodyScroll)
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = bottomClearance)
                 ) {
                     if (allDates.isEmpty()) {
                         Column(
@@ -389,261 +423,273 @@ fun TripDetailScreen(
                                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
                             )
 
-                            legsByDate[date].orEmpty().forEach { leg ->
-                                val isNext = leg.id == nextLegId
-                                var showMenu by remember { mutableStateOf(false) }
-                                var stopsExpanded by remember(leg.id) { mutableStateOf(false) }
+                            entriesByDate[date].orEmpty().forEach { entry ->
+                                when (entry) {
+                                    is DayEntry.LegEntry -> {
+                                        val leg = entry.leg
+                                        val isNext = leg.id == nextLegId
+                                        var showMenu by remember { mutableStateOf(false) }
+                                        var stopsExpanded by remember(leg.id) { mutableStateOf(false) }
 
-                                Box {
-                                    Row(
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .combinedClickable(
-                                                onClick = { if (canEdit) onToggleLeg(leg.id) },
-                                                onLongClick = { if (canEdit) showMenu = true },
-                                            )
-                                            .padding(vertical = 8.dp),
-                                        verticalAlignment = Alignment.Top,
-                                    ) {
-                                        if (leg.completed) {
-                                            Icon(Icons.Filled.CheckCircle, null, tint = Color(0xFF1D9E75), modifier = Modifier.size(20.dp))
-                                        } else {
-                                            Icon(
-                                                Icons.Outlined.Circle, null,
-                                                tint = if (isNext) Color(0xFFBA7517) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                                                modifier = Modifier.size(20.dp),
-                                            )
-                                        }
-                                        Spacer(Modifier.width(12.dp))
-                                        Column {
-                                            val operatorSuffix = if (leg.operator.isNotBlank()) " (${leg.operator})" else ""
-                                            Text(
-                                                "${leg.fromCity} → ${leg.toCity}$operatorSuffix",
-                                                style = MaterialTheme.typography.bodyLarge,
-                                                fontWeight = if (isNext) FontWeight.Medium else FontWeight.Normal,
-                                                textDecoration = if (leg.completed) TextDecoration.LineThrough else null,
-                                                color = if (leg.completed) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurface,
-                                            )
-                                            Spacer(Modifier.height(2.dp))
-                                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                                Icon(transportIcon(leg.transport), null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                                                Spacer(Modifier.width(6.dp))
-                                                val timeDisplay = buildString {
-                                                    append(leg.timeLabel)
-                                                    if (leg.timeLabel.isNotBlank() && leg.endTimeLabel.isNotBlank()) {
-                                                        val (h1, m1) = parseHourMinute(leg.timeLabel)
-                                                        val (h2, m2) = parseHourMinute(leg.endTimeLabel)
-                                                        var diff = (h2 * 60 + m2) - (h1 * 60 + m1)
-                                                        if (diff < 0) diff += 24 * 60 // crosses midnight
-                                                        val h = diff / 60
-                                                        val m = diff % 60
-                                                        val duration = if (h > 0) "${h}h${m}m" else "${m}m"
-                                                        append(" - $duration - ")
-                                                        append(leg.endTimeLabel)
-                                                    } else if (leg.endTimeLabel.isNotBlank()) {
-                                                        append(" - ")
-                                                        append(leg.endTimeLabel)
-                                                    }
-                                                }
-                                                val tail = if (isNext) {
-                                                    if (timeDisplay.isNotBlank()) "$timeDisplay · ${s.nextUp}" else s.nextUp
+                                        Box {
+                                            Row(
+                                                Modifier
+                                                    .fillMaxWidth()
+                                                    .combinedClickable(
+                                                        onClick = { if (canEdit) onToggleLeg(leg.id) },
+                                                        onLongClick = { if (canEdit) showMenu = true },
+                                                    )
+                                                    .padding(vertical = 8.dp),
+                                                verticalAlignment = Alignment.Top,
+                                            ) {
+                                                if (leg.completed) {
+                                                    Icon(Icons.Filled.CheckCircle, null, tint = Color(0xFF1D9E75), modifier = Modifier.size(20.dp))
                                                 } else {
-                                                    timeDisplay
-                                                }
-                                                Text(
-                                                    tail,
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = if (isNext) Color(0xFFBA7517) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                                )
-
-                                                if (leg.travellerIds.isNotEmpty()) {
-                                                    Spacer(Modifier.width(8.dp))
                                                     Icon(
-                                                        Icons.Filled.People,
-                                                        null,
-                                                        modifier = Modifier.size(14.dp),
-                                                        tint = if (isNext) Color(0xFFBA7517) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                                    )
-                                                    Spacer(Modifier.width(4.dp))
-                                                    Text(
-                                                        "${leg.travellerIds.size}",
-                                                        style = MaterialTheme.typography.bodySmall,
-                                                        color = if (isNext) Color(0xFFBA7517) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                                        Icons.Outlined.Circle, null,
+                                                        tint = if (isNext) Color(0xFFBA7517) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                                                        modifier = Modifier.size(20.dp),
                                                     )
                                                 }
-                                            }
-
-                                            if (leg.stops.isNotEmpty()) {
-                                                Spacer(Modifier.height(2.dp))
-                                                Row(
-                                                    verticalAlignment = Alignment.CenterVertically,
-                                                    modifier = Modifier.clickable(
-                                                        interactionSource = remember { MutableInteractionSource() },
-                                                        indication = null,
-                                                    ) { stopsExpanded = !stopsExpanded },
-                                                ) {
+                                                Spacer(Modifier.width(12.dp))
+                                                Column {
+                                                    val operatorSuffix = if (leg.operator.isNotBlank()) " (${leg.operator})" else ""
                                                     Text(
-                                                        "via ${leg.stops.size} " + if (leg.stops.size == 1) "stop" else "stops",
-                                                        style = MaterialTheme.typography.bodySmall,
-                                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                                        "${leg.fromCity} → ${leg.toCity}$operatorSuffix",
+                                                        style = MaterialTheme.typography.bodyLarge,
+                                                        fontWeight = if (isNext) FontWeight.Medium else FontWeight.Normal,
+                                                        textDecoration = if (leg.completed) TextDecoration.LineThrough else null,
+                                                        color = if (leg.completed) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurface,
                                                     )
-                                                    Icon(
-                                                        if (stopsExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                                                        contentDescription = null,
-                                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                                                        modifier = Modifier.size(18.dp),
-                                                    )
-                                                }
-                                                if (stopsExpanded) {
-                                                    // derive sub-legs: from → stop1 → … → to, with times
-                                                    val segments = buildList {
-                                                        var prevCity = leg.fromCity
-                                                        var prevDep = leg.timeLabel
-                                                        leg.stops.forEach { stop ->
-                                                            add(LegSegment(prevCity, prevDep, stop.city, stop.arrivalTime))
-                                                            prevCity = stop.city
-                                                            prevDep = stop.departureTime
+                                                    Spacer(Modifier.height(2.dp))
+                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                        Icon(transportIcon(leg.transport), null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                                                        Spacer(Modifier.width(6.dp))
+                                                        val timeDisplay = buildString {
+                                                            append(leg.timeLabel)
+                                                            if (leg.timeLabel.isNotBlank() && leg.endTimeLabel.isNotBlank()) {
+                                                                val (h1, m1) = parseHourMinute(leg.timeLabel)
+                                                                val (h2, m2) = parseHourMinute(leg.endTimeLabel)
+                                                                var diff = (h2 * 60 + m2) - (h1 * 60 + m1)
+                                                                if (diff < 0) diff += 24 * 60 // crosses midnight
+                                                                val h = diff / 60
+                                                                val m = diff % 60
+                                                                val duration = if (h > 0) "${h}h${m}m" else "${m}m"
+                                                                append(" - $duration - ")
+                                                                append(leg.endTimeLabel)
+                                                            } else if (leg.endTimeLabel.isNotBlank()) {
+                                                                append(" - ")
+                                                                append(leg.endTimeLabel)
+                                                            }
                                                         }
-                                                        add(LegSegment(prevCity, prevDep, leg.toCity, leg.endTimeLabel))
+                                                        val tail = if (isNext) {
+                                                            if (timeDisplay.isNotBlank()) "$timeDisplay · ${s.nextUp}" else s.nextUp
+                                                        } else {
+                                                            timeDisplay
+                                                        }
+                                                        Text(
+                                                            tail,
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            color = if (isNext) Color(0xFFBA7517) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                                        )
+
+                                                        if (leg.travellerIds.isNotEmpty()) {
+                                                            Spacer(Modifier.width(8.dp))
+                                                            Icon(
+                                                                Icons.Filled.People,
+                                                                null,
+                                                                modifier = Modifier.size(14.dp),
+                                                                tint = if (isNext) Color(0xFFBA7517) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                                            )
+                                                            Spacer(Modifier.width(4.dp))
+                                                            Text(
+                                                                "${leg.travellerIds.size}",
+                                                                style = MaterialTheme.typography.bodySmall,
+                                                                color = if (isNext) Color(0xFFBA7517) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                                            )
+                                                        }
                                                     }
-                                                    segments.forEach { seg ->
+
+                                                    if (leg.stops.isNotEmpty()) {
+                                                        Spacer(Modifier.height(2.dp))
                                                         Row(
                                                             verticalAlignment = Alignment.CenterVertically,
-                                                            modifier = Modifier.padding(start = 8.dp, top = 2.dp),
+                                                            modifier = Modifier.clickable(
+                                                                interactionSource = remember { MutableInteractionSource() },
+                                                                indication = null,
+                                                            ) { stopsExpanded = !stopsExpanded },
                                                         ) {
-                                                            Icon(
-                                                                Icons.Outlined.Circle, null,
-                                                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
-                                                                modifier = Modifier.size(8.dp),
-                                                            )
-                                                            Spacer(Modifier.width(8.dp))
-                                                            val times = listOf(seg.depTime, seg.arrTime)
-                                                                .filter { it.isNotBlank() }.joinToString(" - ")
                                                             Text(
-                                                                "${seg.fromCity} → ${seg.toCity}" +
-                                                                        if (times.isBlank()) "" else "  ·  $times",
+                                                                "via ${leg.stops.size} " + if (leg.stops.size == 1) "stop" else "stops",
                                                                 style = MaterialTheme.typography.bodySmall,
                                                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                                                             )
+                                                            Icon(
+                                                                if (stopsExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                                                                contentDescription = null,
+                                                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                                                modifier = Modifier.size(18.dp),
+                                                            )
+                                                        }
+                                                        if (stopsExpanded) {
+                                                            // derive sub-legs: from → stop1 → … → to, with times
+                                                            val segments = buildList {
+                                                                var prevCity = leg.fromCity
+                                                                var prevDep = leg.timeLabel
+                                                                leg.stops.forEach { stop ->
+                                                                    add(LegSegment(prevCity, prevDep, stop.city, stop.arrivalTime))
+                                                                    prevCity = stop.city
+                                                                    prevDep = stop.departureTime
+                                                                }
+                                                                add(LegSegment(prevCity, prevDep, leg.toCity, leg.endTimeLabel))
+                                                            }
+                                                            segments.forEach { seg ->
+                                                                Row(
+                                                                    verticalAlignment = Alignment.CenterVertically,
+                                                                    modifier = Modifier.padding(start = 8.dp, top = 2.dp),
+                                                                ) {
+                                                                    Icon(
+                                                                        Icons.Outlined.Circle, null,
+                                                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
+                                                                        modifier = Modifier.size(8.dp),
+                                                                    )
+                                                                    Spacer(Modifier.width(8.dp))
+                                                                    val times = listOf(seg.depTime, seg.arrTime)
+                                                                        .filter { it.isNotBlank() }.joinToString(" - ")
+                                                                    Text(
+                                                                        "${seg.fromCity} → ${seg.toCity}" +
+                                                                                if (times.isBlank()) "" else "  ·  $times",
+                                                                        style = MaterialTheme.typography.bodySmall,
+                                                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                                                    )
+                                                                }
+                                                            }
                                                         }
                                                     }
                                                 }
                                             }
-                                        }
-                                    }
 
-                                    val legDocs = documents.filter { it.legId == leg.id }
-                                    if (legDocs.isNotEmpty()) {
-                                        IconButton(
-                                            onClick = { openLegTickets(leg, legDocs) },
-                                            enabled = !barcodeLoading,
-                                            modifier = Modifier.size(34.dp).align(Alignment.CenterEnd),
-                                        ) {
-                                            if (barcodeLoading)
-                                                CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                                            else
-                                                Icon(
-                                                    Icons.Filled.QrCode2,
-                                                    contentDescription = s.viewTicket,
-                                                    tint = MaterialTheme.colorScheme.primary,
-                                                    modifier = Modifier.size(20.dp),
-                                                )
-                                        }
-                                    }
+                                            val legDocs = documents.filter { it.legId == leg.id }
+                                            if (legDocs.isNotEmpty()) {
+                                                IconButton(
+                                                    onClick = { openLegTickets(leg, legDocs) },
+                                                    enabled = !barcodeLoading,
+                                                    modifier = Modifier.size(34.dp).align(Alignment.CenterEnd),
+                                                ) {
+                                                    if (barcodeLoading)
+                                                        CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                                                    else
+                                                        Icon(
+                                                            Icons.Filled.QrCode2,
+                                                            contentDescription = s.viewTicket,
+                                                            tint = MaterialTheme.colorScheme.primary,
+                                                            modifier = Modifier.size(20.dp),
+                                                        )
+                                                }
+                                            }
 
-                                    MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(14.dp))) {
-                                        DropdownMenu(
-                                            expanded = showMenu,
-                                            onDismissRequest = { showMenu = false },
-                                            offset = DpOffset(x = 250.dp, y = 0.dp),
-                                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                        ) {
-                                            DropdownMenuItem(
-                                                text = { Text(s.edit) },
-                                                leadingIcon = { Icon(Icons.Filled.Edit, null) },
-                                                onClick = { showMenu = false; onEditLeg(leg.id) },
-                                            )
-                                            DropdownMenuItem(
-                                                text = { Text(s.delete, color = Color(0xFFE03131)) },
-                                                leadingIcon = { Icon(Icons.Filled.Delete, null, tint = Color(0xFFE03131)) },
-                                                onClick = { showMenu = false; pendingDeleteLegId = leg.id },
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-
-                            actsByDate[date].orEmpty().forEach { act ->
-                                var showMenu by remember { mutableStateOf(false) }
-
-                                Box {
-                                    Row(
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .combinedClickable(
-                                                onClick = { if (canEdit) onToggleActivity(act.id) },
-                                                onLongClick = { if (canEdit) showMenu = true },
-                                            )
-                                            .padding(vertical = 8.dp),
-                                        verticalAlignment = Alignment.Top,
-                                    ) {
-                                        if (act.completed) {
-                                            Icon(Icons.Filled.CheckCircle, null, tint = Color(0xFF1D9E75), modifier = Modifier.size(20.dp))
-                                        } else {
-                                            Icon(Icons.Filled.Place, null, tint = Color(0xFF378ADD), modifier = Modifier.size(20.dp))
-                                        }
-                                        Spacer(Modifier.width(12.dp))
-                                        Column {
-                                            Text(
-                                                act.title,
-                                                style = MaterialTheme.typography.bodyLarge,
-                                                textDecoration = if (act.completed) TextDecoration.LineThrough else null,
-                                                color = if (act.completed) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurface,
-                                            )
-                                            val tail = listOf(act.time, act.location).filter { it.isNotBlank() }.joinToString(" · ")
-                                            if (tail.isNotBlank()) {
-                                                Spacer(Modifier.height(2.dp))
-                                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                                    Icon(Icons.Filled.Schedule, null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                                                    Spacer(Modifier.width(6.dp))
-                                                    Text(
-                                                        tail,
-                                                        style = MaterialTheme.typography.bodySmall,
-                                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                            MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(14.dp))) {
+                                                DropdownMenu(
+                                                    expanded = showMenu,
+                                                    onDismissRequest = { showMenu = false },
+                                                    offset = DpOffset(x = 250.dp, y = 0.dp),
+                                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                ) {
+                                                    DropdownMenuItem(
+                                                        text = { Text(s.edit) },
+                                                        leadingIcon = { Icon(Icons.Filled.Edit, null) },
+                                                        onClick = { showMenu = false; onEditLeg(leg.id) },
+                                                    )
+                                                    DropdownMenuItem(
+                                                        text = { Text(s.delete, color = Color(0xFFE03131)) },
+                                                        leadingIcon = { Icon(Icons.Filled.Delete, null, tint = Color(0xFFE03131)) },
+                                                        onClick = { showMenu = false; pendingDeleteLegId = leg.id },
                                                     )
                                                 }
                                             }
                                         }
                                     }
+                                    is DayEntry.ActEntry -> {
+                                        val act = entry.act
+                                        var showMenu by remember { mutableStateOf(false) }
 
-                                    MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(14.dp))) {
-                                        DropdownMenu(
-                                            expanded = showMenu,
-                                            onDismissRequest = { showMenu = false },
-                                            offset = DpOffset(x = 16.dp, y = 0.dp),
-                                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                        ) {
-                                            DropdownMenuItem(
-                                                text = { Text(s.edit) },
-                                                leadingIcon = { Icon(Icons.Filled.Edit, null) },
-                                                onClick = { showMenu = false; onEditActivity(act.id) },
-                                            )
-                                            DropdownMenuItem(
-                                                text = { Text(s.delete, color = Color(0xFFE03131)) },
-                                                leadingIcon = { Icon(Icons.Filled.Delete, null, tint = Color(0xFFE03131)) },
-                                                onClick = { showMenu = false; pendingDeleteActivityId = act.id },
-                                            )
+                                        Box {
+                                            Row(
+                                                Modifier
+                                                    .fillMaxWidth()
+                                                    .combinedClickable(
+                                                        onClick = { if (canEdit) onToggleActivity(act.id) },
+                                                        onLongClick = { if (canEdit) showMenu = true },
+                                                    )
+                                                    .padding(vertical = 8.dp),
+                                                verticalAlignment = Alignment.Top,
+                                            ) {
+                                                if (act.completed) {
+                                                    Icon(Icons.Filled.CheckCircle, null, tint = Color(0xFF1D9E75), modifier = Modifier.size(20.dp))
+                                                } else {
+                                                    Icon(Icons.Filled.Place, null, tint = Color(0xFF378ADD), modifier = Modifier.size(20.dp))
+                                                }
+                                                Spacer(Modifier.width(12.dp))
+                                                Column {
+                                                    Text(
+                                                        act.title,
+                                                        style = MaterialTheme.typography.bodyLarge,
+                                                        textDecoration = if (act.completed) TextDecoration.LineThrough else null,
+                                                        color = if (act.completed) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurface,
+                                                    )
+                                                    val tail = listOf(act.time, act.location).filter { it.isNotBlank() }.joinToString(" · ")
+                                                    if (tail.isNotBlank()) {
+                                                        Spacer(Modifier.height(2.dp))
+                                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                                            Icon(Icons.Filled.Schedule, null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                                                            Spacer(Modifier.width(6.dp))
+                                                            Text(
+                                                                tail,
+                                                                style = MaterialTheme.typography.bodySmall,
+                                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(14.dp))) {
+                                                DropdownMenu(
+                                                    expanded = showMenu,
+                                                    onDismissRequest = { showMenu = false },
+                                                    offset = DpOffset(x = 16.dp, y = 0.dp),
+                                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                ) {
+                                                    DropdownMenuItem(
+                                                        text = { Text(s.edit) },
+                                                        leadingIcon = { Icon(Icons.Filled.Edit, null) },
+                                                        onClick = { showMenu = false; onEditActivity(act.id) },
+                                                    )
+                                                    DropdownMenuItem(
+                                                        text = { Text(s.delete, color = Color(0xFFE03131)) },
+                                                        leadingIcon = { Icon(Icons.Filled.Delete, null, tint = Color(0xFFE03131)) },
+                                                        onClick = { showMenu = false; pendingDeleteActivityId = act.id },
+                                                    )
+                                                }
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-                    }
 
-                    if (allComplete) {                       // only once the trip is complete (postcard has shown)
-                        Spacer(Modifier.height(28.dp))
-                        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        // Souvenir appears at the END of the itinerary, after the last leg,
+                        // once every leg is checked. It scrolls; the buttons are pinned below.
+                        androidx.compose.animation.AnimatedVisibility(
+                            visible = allComplete,
+                            enter = fadeIn() + slideInVertically { it / 2 },
+                            exit = fadeOut(),
+                        ) {
+                            Column(
+                                Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Spacer(Modifier.height(20.dp))
                                 Box(
                                     Modifier
                                         .size(64.dp)
@@ -664,349 +710,355 @@ fun TripDetailScreen(
                                 )
                             }
                         }
+
                     }
-                    Spacer(Modifier.height(96.dp))
                 }
 
+                // Fixed action buttons — pinned to the bottom, do NOT scroll.
                 Row(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
-                        .padding(top = 12.dp, bottom = 24.dp),
+                        .padding(bottom = 90.dp),
                     horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Button(
                         onClick = onChecklist,
-                        modifier = Modifier.padding(bottom = 60.dp).height(50.dp),
+                        modifier = Modifier.height(50.dp),
                         contentPadding = PaddingValues(horizontal = 25.dp, vertical = 8.dp),
                         shape = CircleShape,
                     ) {
-                        Text(s.beforeYouGo, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
+                        Text(
+                            s.beforeYouGo,
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                        )
                     }
+
                     if (canEdit) {
                         Spacer(Modifier.width(30.dp))
                         Button(
                             onClick = { showAddChooser = true },
-                            modifier = Modifier.padding(bottom = 60.dp).height(50.dp),
+                            modifier = Modifier.height(50.dp),
                             contentPadding = PaddingValues(horizontal = 25.dp, vertical = 8.dp),
                             shape = CircleShape,
                         ) {
-                            Icon(Icons.Filled.Add, null, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.Add, null, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(6.dp))
-                            Text(s.add, style = MaterialTheme.typography.bodyMedium)
+                            Text(s.add)
                         }
                     }
                 }
             }
         }
 
-    }
 
-
-    if (showAddChooser) {
-        AlertDialog(
-            onDismissRequest = { showAddChooser = false },
-            confirmButton = {},
-            title = { Text(s.addToItinerary) },
-            shape = RoundedCornerShape(16.dp),
-            text = {
-                Column {
-                    ListItem(
-                        headlineContent = { Text(s.travel) },
-                        supportingContent = { Text(s.aLegBetween) },
-                        leadingContent = { Icon(Icons.Filled.Flight, null) },
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                        modifier = Modifier.clickable { showAddChooser = false; onAddLeg() },
-                    )
-                    ListItem(
-                        headlineContent = { Text(s.place) },
-                        supportingContent = { Text(s.somewhereToVisit) },
-                        leadingContent = { Icon(Icons.Filled.Place, null) },
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                        modifier = Modifier.clickable { showAddChooser = false; onAddPlace() },
-                    )
-                }
-            },
-        )
-    }
-
-    if (pendingDeleteLegId != null) {
-        AlertDialog(
-            onDismissRequest = { pendingDeleteLegId = null },
-            title = { Text(s.deleteLegQ) },
-            text = { Text(s.cantBeUndone) },
-            confirmButton = {
-                TextButton(onClick = { onDeleteLeg(pendingDeleteLegId!!); pendingDeleteLegId = null }) {
-                    Text(s.delete, color = Color(0xFFE03131))
-                }
-            },
-            dismissButton = { TextButton(onClick = { pendingDeleteLegId = null }) { Text(s.cancel) } },
-        )
-    }
-
-    if (pendingDeleteActivityId != null) {
-        AlertDialog(
-            onDismissRequest = { pendingDeleteActivityId = null },
-            title = { Text(s.deletePlaceQ) },
-            text = { Text(s.cantBeUndone) },
-            confirmButton = {
-                TextButton(onClick = { onDeleteActivity(pendingDeleteActivityId!!); pendingDeleteActivityId = null }) {
-                    Text(s.delete, color = Color(0xFFE03131))
-                }
-            },
-            dismissButton = { TextButton(onClick = { pendingDeleteActivityId = null }) { Text(s.cancel) } },
-        )
-    }
-
-    // ── ticket wallet (swipeable codes for the tapped leg) ──
-    walletLeg?.let { leg ->
-        if (walletTickets.isNotEmpty()) {
-            TicketWalletDialog(
-                legRoute = "${leg.fromCity} → ${leg.toCity}",
-                legDateLabel = leg.date.label(),
-                legTime = leg.timeLabel,
-                operator = leg.operator,
-                transport = leg.transport,
-                tickets = walletTickets,
-                onOpenFullTicket = { docId -> onOpenDoc(docId) },
-                onDismiss = { walletTickets = emptyList(); walletLeg = null },
+        if (showAddChooser) {
+            AlertDialog(
+                onDismissRequest = { showAddChooser = false },
+                confirmButton = {},
+                title = { Text(s.addToItinerary) },
+                shape = RoundedCornerShape(16.dp),
+                text = {
+                    Column {
+                        ListItem(
+                            headlineContent = { Text(s.travel) },
+                            supportingContent = { Text(s.aLegBetween) },
+                            leadingContent = { Icon(Icons.Filled.Flight, null) },
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                            modifier = Modifier.clickable { showAddChooser = false; onAddLeg() },
+                        )
+                        ListItem(
+                            headlineContent = { Text(s.place) },
+                            supportingContent = { Text(s.somewhereToVisit) },
+                            leadingContent = { Icon(Icons.Filled.Place, null) },
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                            modifier = Modifier.clickable { showAddChooser = false; onAddPlace() },
+                        )
+                    }
+                },
             )
         }
-    }
 
-    // ═══════════════════════════════════════════════════════════════════
-    // POSTCARD DIALOG — all extra UI (crop, camera, source sheet) are
-    // overlays INSIDE this one dialog (no stacked dialogs → no iOS freeze).
-    // The dialog is hidden only while the native gallery picker is up.
-    // ═══════════════════════════════════════════════════════════════════
-    if (showPostcard && !isPickingImage) {
-        Dialog(
-            onDismissRequest = { showPostcard = false },
-            properties = DialogProperties(usePlatformDefaultWidth = false),
-        ) {
-            Box(Modifier.fillMaxSize()) {
-                Box(Modifier.fillMaxSize().padding(20.dp), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            "Trip complete !",
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = Color.White, fontWeight = FontWeight.Bold,
-                            fontFamily = displayFont, fontSize = 40.sp,
-                        )
-                        Spacer(Modifier.height(16.dp))
-
-                        HorizontalPager(
-                            state = pagerState,
-                            modifier = Modifier.fillMaxWidth().aspectRatio(1748f / 1240f),
-                        ) { page ->
-                            if (page == 0) {
-                                PostcardFront(
-                                    paper = Res.drawable.postcard_paper,
-                                    halftone = Res.drawable.postcard_halftone,
-                                    map = Res.drawable.postcard_map,
-                                    heartFrame = Res.drawable.postcard_heart_frame,
-                                    rectFrame = Res.drawable.postcard_rect_frame,
-                                    heartMask = Res.drawable.heart_fill,
-                                    rectMask = Res.drawable.rect_fill,
-                                    title = Res.drawable.postcard_title,
-                                    plane = Res.drawable.postcard_plane,
-                                    country = postcardCountry,
-                                    onPickHeart = { activeSlotForSheet = "heart" },
-                                    onPickRect  = { activeSlotForSheet = "rect" },
-                                    modifier = Modifier.clip(RoundedCornerShape(12.dp)),
-                                    heartPhoto = heartUrl.takeIf { it.isNotBlank() }?.let { u -> {
-                                        AsyncImage(u, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                                    } },
-                                    rectPhoto = rectUrl.takeIf { it.isNotBlank() }?.let { u -> {
-                                        AsyncImage(u, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                                    } },
-                                )
-                            } else {
-                                PostcardBack(
-                                    paper = Res.drawable.postcard_paper,
-                                    map = Res.drawable.pb_map,
-                                    frameTop = Res.drawable.pb_frame_top,
-                                    frameBottom = Res.drawable.pb_frame_bottom,
-                                    maskTop = Res.drawable.pb_mask_top,
-                                    maskBottom = Res.drawable.pb_mask_bottom,
-                                    stamp = Res.drawable.pb_stamp,
-                                    plane = Res.drawable.pb_plane,
-                                    envelope = Res.drawable.pb_envelope,
-                                    title = Res.drawable.pb_title,
-                                    country = postcardCountry,
-                                    dateRange = if (allDates.isNotEmpty())
-                                        "${allDates.first().label()} – ${allDates.last().label()}" else "",
-                                    countriesCount = trip.countriesCovered(),
-                                    distanceKm = trip.distanceTravelledKm(),
-                                    daysCount = daysCount,
-                                    expensesLabel = expensesLabel,
-                                    travellers = travellers.map { it.firstName.substringBefore(" ") },
-                                    onPickTop    = { activeSlotForSheet = "backTop" },
-                                    onPickBottom = { activeSlotForSheet = "backBottom" },
-                                    modifier = Modifier.clip(RoundedCornerShape(12.dp)),
-                                    topPhoto = backTopUrl.takeIf { it.isNotBlank() }?.let { u -> {
-                                        AsyncImage(u, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                                    } },
-                                    bottomPhoto = backBottomUrl.takeIf { it.isNotBlank() }?.let { u -> {
-                                        AsyncImage(u, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                                    } },
-                                )
-                            }
-                        }
-
-                        Spacer(Modifier.height(10.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {     // page dots
-                            repeat(2) { i ->
-                                Box(
-                                    Modifier.size(8.dp).clip(CircleShape)
-                                        .background(if (pagerState.currentPage == i) Color.White else Color.White.copy(alpha = 0.4f)),
-                                )
-                                if (i == 0) Spacer(Modifier.width(6.dp))
-                            }
-                        }
-                        Spacer(Modifier.height(16.dp))
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            IconButton(
-                                enabled = !exporting,
-                                onClick = {
-                                    scope.launch {
-                                        exporting = true
-                                        try {
-                                            val png = exporter().toPngBytes()
-                                            fileSharer.share(png, "postcard.png", "image/png")
-                                        } catch (t: Throwable) {
-                                            println("POSTCARD EXPORT FAILED: ${t.message}")
-                                        } finally {
-                                            exporting = false
-                                        }
-                                    }
-                                },
-                                modifier = Modifier.background(Color(0xFF333333).copy(alpha = 0.5f), CircleShape),
-                            ) {
-                                if (exporting)
-                                    CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = Color.White)
-                                else
-                                    Icon(Icons.Filled.Share, contentDescription = "Share", tint = Color.White)
-                            }
-                            IconButton(
-                                onClick = { showPostcard = false },
-                                modifier = Modifier.background(Color(0xFF333333).copy(alpha = 0.5f), CircleShape),
-                            ) {
-                                Icon(Icons.Default.Close, contentDescription = s.close, tint = Color.White)
-                            }
-                        }
+        if (pendingDeleteLegId != null) {
+            AlertDialog(
+                onDismissRequest = { pendingDeleteLegId = null },
+                title = { Text(s.deleteLegQ) },
+                text = { Text(s.cantBeUndone) },
+                confirmButton = {
+                    TextButton(onClick = { onDeleteLeg(pendingDeleteLegId!!); pendingDeleteLegId = null }) {
+                        Text(s.delete, color = Color(0xFFE03131))
                     }
-                }
+                },
+                dismissButton = { TextButton(onClick = { pendingDeleteLegId = null }) { Text(s.cancel) } },
+            )
+        }
 
-                // ── crop overlay ──
-                if (pendingBytes != null) {
-                    val aspect = when (pendingSlot) {
-                        "rect"       -> 0.75f
-                        "heart"      -> 0.78f
-                        "backTop"    -> 0.97f
-                        "backBottom" -> 0.89f
-                        else         -> 0.78f
+        if (pendingDeleteActivityId != null) {
+            AlertDialog(
+                onDismissRequest = { pendingDeleteActivityId = null },
+                title = { Text(s.deletePlaceQ) },
+                text = { Text(s.cantBeUndone) },
+                confirmButton = {
+                    TextButton(onClick = { onDeleteActivity(pendingDeleteActivityId!!); pendingDeleteActivityId = null }) {
+                        Text(s.delete, color = Color(0xFFE03131))
                     }
-                    ImageCropScreen(
-                        imageBytes = pendingBytes!!,
-                        aspectRatio = aspect,
-                        onConfirm = { cropped ->
-                            val slot = pendingSlot
-                            scope.launch {
-                                try {
-                                    val url = onUploadPostcardPhoto?.invoke(slot ?: "", cropped) ?: ""
-                                    if (url.isNotBlank()) when (slot) {
-                                        "heart"      -> heartUrl = url
-                                        "rect"       -> rectUrl = url
-                                        "backTop"    -> backTopUrl = url
-                                        "backBottom" -> backBottomUrl = url
-                                    }
-                                } catch (t: Throwable) {
-                                    println("POSTCARD UPLOAD FAILED: ${t.message}")
-                                } finally {
-                                    pendingBytes = null; pendingSlot = null
+                },
+                dismissButton = { TextButton(onClick = { pendingDeleteActivityId = null }) { Text(s.cancel) } },
+            )
+        }
+
+        // ── ticket wallet (swipeable codes for the tapped leg) ──
+        walletLeg?.let { leg ->
+            if (walletTickets.isNotEmpty()) {
+                TicketWalletDialog(
+                    legRoute = "${leg.fromCity} → ${leg.toCity}",
+                    legDateLabel = leg.date.label(),
+                    legTime = leg.timeLabel,
+                    operator = leg.operator,
+                    transport = leg.transport,
+                    tickets = walletTickets,
+                    onOpenFullTicket = { docId -> onOpenDoc(docId) },
+                    onDismiss = { walletTickets = emptyList(); walletLeg = null },
+                )
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // POSTCARD DIALOG — all extra UI (crop, camera, source sheet) are
+        // overlays INSIDE this one dialog (no stacked dialogs → no iOS freeze).
+        // The dialog is hidden only while the native gallery picker is up.
+        // ═══════════════════════════════════════════════════════════════════
+        if (showPostcard && !isPickingImage) {
+            Dialog(
+                onDismissRequest = { showPostcard = false },
+                properties = DialogProperties(usePlatformDefaultWidth = false),
+            ) {
+                Box(Modifier.fillMaxSize()) {
+                    Box(Modifier.fillMaxSize().padding(20.dp), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                "Trip complete !",
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = Color.White, fontWeight = FontWeight.Bold,
+                                fontFamily = displayFont, fontSize = 40.sp,
+                            )
+                            Spacer(Modifier.height(16.dp))
+
+                            HorizontalPager(
+                                state = pagerState,
+                                modifier = Modifier.fillMaxWidth().aspectRatio(1748f / 1240f),
+                            ) { page ->
+                                if (page == 0) {
+                                    PostcardFront(
+                                        paper = Res.drawable.postcard_paper,
+                                        halftone = Res.drawable.postcard_halftone,
+                                        map = Res.drawable.postcard_map,
+                                        heartFrame = Res.drawable.postcard_heart_frame,
+                                        rectFrame = Res.drawable.postcard_rect_frame,
+                                        heartMask = Res.drawable.heart_fill,
+                                        rectMask = Res.drawable.rect_fill,
+                                        title = Res.drawable.postcard_title,
+                                        plane = Res.drawable.postcard_plane,
+                                        country = postcardCountry,
+                                        onPickHeart = { activeSlotForSheet = "heart" },
+                                        onPickRect  = { activeSlotForSheet = "rect" },
+                                        modifier = Modifier.clip(RoundedCornerShape(12.dp)),
+                                        heartPhoto = heartUrl.takeIf { it.isNotBlank() }?.let { u -> {
+                                            AsyncImage(u, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                                        } },
+                                        rectPhoto = rectUrl.takeIf { it.isNotBlank() }?.let { u -> {
+                                            AsyncImage(u, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                                        } },
+                                    )
+                                } else {
+                                    PostcardBack(
+                                        paper = Res.drawable.postcard_paper,
+                                        map = Res.drawable.pb_map,
+                                        frameTop = Res.drawable.pb_frame_top,
+                                        frameBottom = Res.drawable.pb_frame_bottom,
+                                        maskTop = Res.drawable.pb_mask_top,
+                                        maskBottom = Res.drawable.pb_mask_bottom,
+                                        stamp = Res.drawable.pb_stamp,
+                                        plane = Res.drawable.pb_plane,
+                                        envelope = Res.drawable.pb_envelope,
+                                        title = Res.drawable.pb_title,
+                                        country = postcardCountry,
+                                        dateRange = if (allDates.isNotEmpty())
+                                            "${allDates.first().label()} – ${allDates.last().label()}" else "",
+                                        countriesCount = trip.countriesCovered(),
+                                        distanceKm = trip.distanceTravelledKm(),
+                                        daysCount = daysCount,
+                                        expensesLabel = expensesLabel,
+                                        travellers = travellers.map { it.firstName.substringBefore(" ") },
+                                        onPickTop    = { activeSlotForSheet = "backTop" },
+                                        onPickBottom = { activeSlotForSheet = "backBottom" },
+                                        modifier = Modifier.clip(RoundedCornerShape(12.dp)),
+                                        topPhoto = backTopUrl.takeIf { it.isNotBlank() }?.let { u -> {
+                                            AsyncImage(u, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                                        } },
+                                        bottomPhoto = backBottomUrl.takeIf { it.isNotBlank() }?.let { u -> {
+                                            AsyncImage(u, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                                        } },
+                                    )
                                 }
                             }
-                        },
-                        onDismiss = { pendingBytes = null; pendingSlot = null },
-                    )
-                }
 
-                // ── photo source sheet (gallery / take photo / remove) ──
-                val slot = activeSlotForSheet
-                if (slot != null) {
-                    val currentUrl = when (slot) {
-                        "heart"      -> heartUrl
-                        "rect"       -> rectUrl
-                        "backTop"    -> backTopUrl
-                        "backBottom" -> backBottomUrl
-                        else         -> ""
+                            Spacer(Modifier.height(10.dp))
+                            Row(verticalAlignment = Alignment.CenterVertically) {     // page dots
+                                repeat(2) { i ->
+                                    Box(
+                                        Modifier.size(8.dp).clip(CircleShape)
+                                            .background(if (pagerState.currentPage == i) Color.White else Color.White.copy(alpha = 0.4f)),
+                                    )
+                                    if (i == 0) Spacer(Modifier.width(6.dp))
+                                }
+                            }
+                            Spacer(Modifier.height(16.dp))
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                IconButton(
+                                    enabled = !exporting,
+                                    onClick = {
+                                        scope.launch {
+                                            exporting = true
+                                            try {
+                                                val png = exporter().toPngBytes()
+                                                fileSharer.share(png, "postcard.png", "image/png")
+                                            } catch (t: Throwable) {
+                                                println("POSTCARD EXPORT FAILED: ${t.message}")
+                                            } finally {
+                                                exporting = false
+                                            }
+                                        }
+                                    },
+                                    modifier = Modifier.background(Color(0xFF333333).copy(alpha = 0.5f), CircleShape),
+                                ) {
+                                    if (exporting)
+                                        CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = Color.White)
+                                    else
+                                        Icon(Icons.Filled.Share, contentDescription = "Share", tint = Color.White)
+                                }
+                                IconButton(
+                                    onClick = { showPostcard = false },
+                                    modifier = Modifier.background(Color(0xFF333333).copy(alpha = 0.5f), CircleShape),
+                                ) {
+                                    Icon(Icons.Default.Close, contentDescription = s.close, tint = Color.White)
+                                }
+                            }
+                        }
                     }
-                    val hasPhoto = currentUrl.isNotBlank()
-                    Box(
-                        Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.45f))
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                            ) { activeSlotForSheet = null },
-                        contentAlignment = Alignment.BottomCenter,
-                    ) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.surface,
-                            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
+
+                    // ── crop overlay ──
+                    if (pendingBytes != null) {
+                        val aspect = when (pendingSlot) {
+                            "rect"       -> 0.75f
+                            "heart"      -> 0.78f
+                            "backTop"    -> 0.97f
+                            "backBottom" -> 0.89f
+                            else         -> 0.78f
+                        }
+                        ImageCropScreen(
+                            imageBytes = pendingBytes!!,
+                            aspectRatio = aspect,
+                            onConfirm = { cropped ->
+                                val slot = pendingSlot
+                                scope.launch {
+                                    try {
+                                        val url = onUploadPostcardPhoto?.invoke(slot ?: "", cropped) ?: ""
+                                        if (url.isNotBlank()) when (slot) {
+                                            "heart"      -> heartUrl = url
+                                            "rect"       -> rectUrl = url
+                                            "backTop"    -> backTopUrl = url
+                                            "backBottom" -> backBottomUrl = url
+                                        }
+                                    } catch (t: Throwable) {
+                                        println("POSTCARD UPLOAD FAILED: ${t.message}")
+                                    } finally {
+                                        pendingBytes = null; pendingSlot = null
+                                    }
+                                }
+                            },
+                            onDismiss = { pendingBytes = null; pendingSlot = null },
+                        )
+                    }
+
+                    // ── photo source sheet (gallery / take photo / remove) ──
+                    val slot = activeSlotForSheet
+                    if (slot != null) {
+                        val currentUrl = when (slot) {
+                            "heart"      -> heartUrl
+                            "rect"       -> rectUrl
+                            "backTop"    -> backTopUrl
+                            "backBottom" -> backBottomUrl
+                            else         -> ""
+                        }
+                        val hasPhoto = currentUrl.isNotBlank()
+                        Box(
+                            Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.45f))
                                 .clickable(
                                     interactionSource = remember { MutableInteractionSource() },
                                     indication = null,
-                                ) {},
+                                ) { activeSlotForSheet = null },
+                            contentAlignment = Alignment.BottomCenter,
                         ) {
-                            Column(
-                                Modifier
-                                    .padding(horizontal = 16.dp)
-                                    .padding(bottom = 24.dp)
-                                    .navigationBarsPadding(),
+                            Surface(
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        indication = null,
+                                    ) {},
                             ) {
-                                Text(
-                                    s.choosePhoto,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Medium,
-                                    modifier = Modifier.padding(vertical = 12.dp),
-                                )
-                                HorizontalDivider()
-                                ListItem(
-                                    headlineContent = { Text(s.uploadFromGallery) },
-                                    leadingContent = { Icon(Icons.Filled.PhotoLibrary, contentDescription = null) },
-                                    modifier = Modifier.clickable {
-                                        pickTarget = slot
-                                        activeSlotForSheet = null
-                                        isPickingImage = true
-                                        picker.launch()
-                                    },
-                                )
-                                if (hasPhoto) {
+                                Column(
+                                    Modifier
+                                        .padding(horizontal = 16.dp)
+                                        .padding(bottom = 24.dp)
+                                        .navigationBarsPadding(),
+                                ) {
+                                    Text(
+                                        s.choosePhoto,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Medium,
+                                        modifier = Modifier.padding(vertical = 12.dp),
+                                    )
+                                    HorizontalDivider()
                                     ListItem(
-                                        headlineContent = { Text(s.removePhoto, color = MaterialTheme.colorScheme.error) },
-                                        leadingContent = {
-                                            Icon(Icons.Filled.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error)
-                                        },
+                                        headlineContent = { Text(s.uploadFromGallery) },
+                                        leadingContent = { Icon(Icons.Filled.PhotoLibrary, contentDescription = null) },
                                         modifier = Modifier.clickable {
-                                            when (slot) {
-                                                "heart"      -> heartUrl = ""
-                                                "rect"       -> rectUrl = ""
-                                                "backTop"    -> backTopUrl = ""
-                                                "backBottom" -> backBottomUrl = ""
-                                            }
-                                            onRemovePostcardPhoto?.invoke(slot)
+                                            pickTarget = slot
                                             activeSlotForSheet = null
+                                            isPickingImage = true
+                                            picker.launch()
                                         },
                                     )
+                                    if (hasPhoto) {
+                                        ListItem(
+                                            headlineContent = { Text(s.removePhoto, color = MaterialTheme.colorScheme.error) },
+                                            leadingContent = {
+                                                Icon(Icons.Filled.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+                                            },
+                                            modifier = Modifier.clickable {
+                                                when (slot) {
+                                                    "heart"      -> heartUrl = ""
+                                                    "rect"       -> rectUrl = ""
+                                                    "backTop"    -> backTopUrl = ""
+                                                    "backBottom" -> backBottomUrl = ""
+                                                }
+                                                onRemovePostcardPhoto?.invoke(slot)
+                                                activeSlotForSheet = null
+                                            },
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -1024,3 +1076,19 @@ private data class LegSegment(
     val toCity: String,
     val arrTime: String,
 )
+
+
+private sealed interface DayEntry {
+    val sortH: Int
+    val sortM: Int
+    data class LegEntry(val leg: com.itinera.app.model.Leg) : DayEntry {
+        private val hm = parseHourMinute(leg.timeLabel)
+        override val sortH get() = hm.first
+        override val sortM get() = hm.second
+    }
+    data class ActEntry(val act: com.itinera.app.model.Activity) : DayEntry {
+        private val hm = parseHourMinute(act.time)
+        override val sortH get() = hm.first
+        override val sortM get() = hm.second
+    }
+}

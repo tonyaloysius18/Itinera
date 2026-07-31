@@ -93,7 +93,7 @@ fun AddPlaceScreen(
             )
             OutlinedTextField(
                 location, { location = it.toTitleCase() },
-                label = { Text(s.landmark) },
+                label = { Text(s.remarks) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = textFieldShape,

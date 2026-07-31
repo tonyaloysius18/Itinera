@@ -51,6 +51,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -277,536 +278,543 @@ private fun AppContent(
             .background(MaterialTheme.colorScheme.background)
             .nestedScroll(nestedScrollConnection),
     ) {
-        when (current) {
-            Screen.Login -> LoginScreen(
-                authService = repository.authService,
-                prefillEmail = prefillEmail,
-                onAuthed = {
-                    scope.launch {
-                        val uid = repository.authService.currentUid
-                        if (uid != null) {
-                            try {
-                                val existing = repository.profileService.loadProfile(uid)
-                                if (existing != null) {
-                                    repository.updateProfile(existing)
-                                } else {
-                                    val googleProfile = repository.authService.currentUserProfile()
-                                    if (googleProfile != null) {
-                                        repository.updateProfile(googleProfile)
-                                        repository.profileService.saveProfile(uid, googleProfile)
+        val stateHolder = rememberSaveableStateHolder()
+        // Preserve each screen's rememberSaveable state (e.g. scroll position) across
+        // navigation. This hand-rolled `when` navigator drops a screen from composition
+        // when another is pushed; keying by the screen's type name restores its state
+        // (scroll, expanded rows, field text) when we return to it.
+        stateHolder.SaveableStateProvider(current::class.simpleName ?: "screen") {
+            when (current) {
+                Screen.Login -> LoginScreen(
+                    authService = repository.authService,
+                    prefillEmail = prefillEmail,
+                    onAuthed = {
+                        scope.launch {
+                            val uid = repository.authService.currentUid
+                            if (uid != null) {
+                                try {
+                                    val existing = repository.profileService.loadProfile(uid)
+                                    if (existing != null) {
+                                        repository.updateProfile(existing)
+                                    } else {
+                                        val googleProfile = repository.authService.currentUserProfile()
+                                        if (googleProfile != null) {
+                                            repository.updateProfile(googleProfile)
+                                            repository.profileService.saveProfile(uid, googleProfile)
+                                        }
                                     }
-                                }
-                            } catch (e: Exception) { }
+                                } catch (e: Exception) { }
 
-                            repository.accountStore.remember(
-                                com.itinera.app.data.RememberedAccount(
-                                    uid = uid,
-                                    email = repository.profile.email,
-                                    name = repository.profile.fullName,
-                                    photoUrl = repository.profile.photoUrl,
-                                    method = repository.authService.currentSignInMethod(),
+                                repository.accountStore.remember(
+                                    com.itinera.app.data.RememberedAccount(
+                                        uid = uid,
+                                        email = repository.profile.email,
+                                        name = repository.profile.fullName,
+                                        photoUrl = repository.profile.photoUrl,
+                                        method = repository.authService.currentSignInMethod(),
+                                    )
                                 )
-                            )
 
-                            repository.migrateToSharedIfNeeded(uid)
-                            repository.migrateDocsExpensesIfNeeded(uid)
-                            repository.startSync()
-                            lastSyncedAt = nowMillisApp()
+                                repository.migrateToSharedIfNeeded(uid)
+                                repository.migrateDocsExpensesIfNeeded(uid)
+                                repository.startSync()
+                                lastSyncedAt = nowMillisApp()
+                            }
+                            navigator.resetTo(Screen.Home)
+                            prefillEmail = ""
                         }
-                        navigator.resetTo(Screen.Home)
-                        prefillEmail = ""
-                    }
-                },
-                onCreateAccount = { navigator.push(Screen.CreateAccount) },
-                onMessage = { pillMessage = it },
-            )
+                    },
+                    onCreateAccount = { navigator.push(Screen.CreateAccount) },
+                    onMessage = { pillMessage = it },
+                )
 
-            Screen.LanguagePicker -> LanguageScreen(
-                selected = language,
-                onSelect = onLanguageChange,
-                onBack = { navigator.back() },
-            )
+                Screen.LanguagePicker -> LanguageScreen(
+                    selected = language,
+                    onSelect = onLanguageChange,
+                    onBack = { navigator.back() },
+                )
 
-            else -> {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .statusBarsPadding(),
-                    color = MaterialTheme.colorScheme.background,
-                ) {
-                    when (val screen = current) {
-                        Screen.CreateAccount -> CreateAccountScreen(
-                            authService = repository.authService,
-                            onBack = { navigator.back() },
-                            onMessage = { pillMessage = it },
-                            onCreate = { profile ->
-                                repository.updateProfile(profile)
-                                scope.launch {
-                                    val uid = repository.authService.currentUid
-                                    if (uid != null) {
-                                        try {
-                                            repository.profileService.saveProfile(uid, profile)
-                                        } catch (e: Exception) {}
-                                    }
-                                }
-                                navigator.resetTo(Screen.Login)
-                                pillMessage = s.accountCreated
-                            },
-                        )
-
-                        is Screen.Home -> TripsHomeScreen(
-                            trips = repository.activeTrips(),
-                            isLoading = !repository.tripsSyncedOnce,
-                            onOpenTrip = { navigator.push(Screen.TripDetail(it)) },
-                            onCreateTrip = { name ->
-                                val id = repository.addTrip(name)
-                                scope.launch {
-                                    val trip = repository.tripById(id)
-                                    if (trip != null) {
-                                        val url = repository.unsplashApi.fetchImage(imageQueryForTrip(trip))
-                                        if (url != null) repository.updateTripImage(id, url)
-                                    }
-                                }
-                            },
-                            onRenameTrip = { id, name -> repository.updateTrip(id, name) },
-                            onPinTrip = { repository.togglePin(it) },
-                            onArchiveTrip = { repository.toggleArchive(it) },
-                            onDeleteTrip = { repository.deleteTrip(it) },
-                            currentUid = repository.authService.currentUid ?: "",
-                            onOpenMembers = { navigator.push(Screen.Members(it)) },
-                            onJoinByCode = { repository.joinTripByCode(it) },
-                        )
-
-                        Screen.Currency -> CurrencyScreen(
-                            onMessage = { pillMessage = it },
-                        )
-
-                        is Screen.TripDetail -> {
-                            val trip = repository.tripById(screen.tripId)
-                            if (trip == null) navigator.back()
-                            else TripDetailScreen(
-                                trip = trip,
-                                activities = repository.activitiesForTrip(screen.tripId),
-                                travellers = trip.travellers,
+                else -> {
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .statusBarsPadding(),
+                        color = MaterialTheme.colorScheme.background,
+                    ) {
+                        when (val screen = current) {
+                            Screen.CreateAccount -> CreateAccountScreen(
+                                authService = repository.authService,
                                 onBack = { navigator.back() },
-                                onTravellers = { navigator.push(Screen.Travellers(screen.tripId)) },
-                                onUploadPostcardPhoto = { slot, bytes -> repository.uploadPostcardPhoto(screen.tripId, slot, bytes) },
-                                onRemovePostcardPhoto = { slot -> repository.removePostcardPhoto(screen.tripId, slot) },
-                                onLoadImageBytes = { url -> repository.loadBytes(url) },
-                                onDocuments = { navigator.push(Screen.TripDocuments(screen.tripId)) },
-                                onAddLeg = { navigator.push(Screen.AddLeg(screen.tripId)) },
-                                onAddPlace = { navigator.push(Screen.AddPlace(screen.tripId)) },
-                                onEditActivity = { actId -> navigator.push(Screen.EditPlace(screen.tripId, actId)) },
-                                onChecklist = { navigator.push(Screen.Checklist(screen.tripId)) },
-                                onToggleLeg = { repository.toggleLegCompleted(screen.tripId, it) },
-                                onEditLeg = { legId -> navigator.push(Screen.EditLeg(screen.tripId, legId)) },
-                                onDeleteLeg = { legId -> repository.deleteLeg(screen.tripId, legId) },
-                                onToggleActivity = { repository.toggleActivity(it) },
-                                onDeleteActivity = { repository.deleteActivity(it) },
-                                canEdit = trip.canEdit(repository.authService.currentUid ?: ""),
-                                //onMembers = { navigator.push(Screen.Members(screen.tripId)) },
-                                onMap = { navigator.push(Screen.TripMap(screen.tripId)) },
-                                expensesTotal = repository.expensesForTrip(screen.tripId).sumOf { it.amount },
-                                documents = repository.documents.filter { it.tripId == screen.tripId },
-                                onOpenDoc = { docId -> navigator.push(Screen.DocViewer(docId)) },
+                                onMessage = { pillMessage = it },
+                                onCreate = { profile ->
+                                    repository.updateProfile(profile)
+                                    scope.launch {
+                                        val uid = repository.authService.currentUid
+                                        if (uid != null) {
+                                            try {
+                                                repository.profileService.saveProfile(uid, profile)
+                                            } catch (e: Exception) {}
+                                        }
+                                    }
+                                    navigator.resetTo(Screen.Login)
+                                    pillMessage = s.accountCreated
+                                },
                             )
-                        }
 
-                        is Screen.AddPlace -> AddPlaceScreen(
-                            onClose = { navigator.back() },
-                            onSave = { date, title, time, location ->
-                                repository.addActivity(screen.tripId, date, title, time, location)
-                                navigator.back()
-                            },
-                        )
+                            is Screen.Home -> TripsHomeScreen(
+                                trips = repository.activeTrips(),
+                                isLoading = !repository.tripsSyncedOnce,
+                                onOpenTrip = { navigator.push(Screen.TripDetail(it)) },
+                                onCreateTrip = { name ->
+                                    val id = repository.addTrip(name)
+                                    scope.launch {
+                                        val trip = repository.tripById(id)
+                                        if (trip != null) {
+                                            val url = repository.unsplashApi.fetchImage(imageQueryForTrip(trip))
+                                            if (url != null) repository.updateTripImage(id, url)
+                                        }
+                                    }
+                                },
+                                onRenameTrip = { id, name -> repository.updateTrip(id, name) },
+                                onPinTrip = { repository.togglePin(it) },
+                                onArchiveTrip = { repository.toggleArchive(it) },
+                                onDeleteTrip = { repository.deleteTrip(it) },
+                                currentUid = repository.authService.currentUid ?: "",
+                                onOpenMembers = { navigator.push(Screen.Members(it)) },
+                                onJoinByCode = { repository.joinTripByCode(it) },
+                            )
 
-                        is Screen.EditPlace -> {
-                            val act = repository.activitiesForTrip(screen.tripId).firstOrNull { it.id == screen.activityId }
-                            if (act == null) navigator.back()
-                            else AddPlaceScreen(
-                                existing = act,
+                            Screen.Currency -> CurrencyScreen(
+                                onMessage = { pillMessage = it },
+                            )
+
+                            is Screen.TripDetail -> {
+                                val trip = repository.tripById(screen.tripId)
+                                if (trip == null) navigator.back()
+                                else TripDetailScreen(
+                                    trip = trip,
+                                    activities = repository.activitiesForTrip(screen.tripId),
+                                    travellers = trip.travellers,
+                                    onBack = { navigator.back() },
+                                    onTravellers = { navigator.push(Screen.Travellers(screen.tripId)) },
+                                    onUploadPostcardPhoto = { slot, bytes -> repository.uploadPostcardPhoto(screen.tripId, slot, bytes) },
+                                    onRemovePostcardPhoto = { slot -> repository.removePostcardPhoto(screen.tripId, slot) },
+                                    onLoadImageBytes = { url -> repository.loadBytes(url) },
+                                    onDocuments = { navigator.push(Screen.TripDocuments(screen.tripId)) },
+                                    onAddLeg = { navigator.push(Screen.AddLeg(screen.tripId)) },
+                                    onAddPlace = { navigator.push(Screen.AddPlace(screen.tripId)) },
+                                    onEditActivity = { actId -> navigator.push(Screen.EditPlace(screen.tripId, actId)) },
+                                    onChecklist = { navigator.push(Screen.Checklist(screen.tripId)) },
+                                    onToggleLeg = { repository.toggleLegCompleted(screen.tripId, it) },
+                                    onEditLeg = { legId -> navigator.push(Screen.EditLeg(screen.tripId, legId)) },
+                                    onDeleteLeg = { legId -> repository.deleteLeg(screen.tripId, legId) },
+                                    onToggleActivity = { repository.toggleActivity(it) },
+                                    onDeleteActivity = { repository.deleteActivity(it) },
+                                    canEdit = trip.canEdit(repository.authService.currentUid ?: ""),
+                                    //onMembers = { navigator.push(Screen.Members(screen.tripId)) },
+                                    onMap = { navigator.push(Screen.TripMap(screen.tripId)) },
+                                    expensesTotal = repository.expensesForTrip(screen.tripId).sumOf { it.amount },
+                                    documents = repository.documents.filter { it.tripId == screen.tripId },
+                                    onOpenDoc = { docId -> navigator.push(Screen.DocViewer(docId)) },
+                                )
+                            }
+
+                            is Screen.AddPlace -> AddPlaceScreen(
                                 onClose = { navigator.back() },
                                 onSave = { date, title, time, location ->
-                                    repository.updateActivity(act.id, date, title, time, location)
+                                    repository.addActivity(screen.tripId, date, title, time, location)
                                     navigator.back()
                                 },
                             )
-                        }
 
-                        is Screen.AddLeg -> AddLegScreen(
-                            travellers = repository.tripById(screen.tripId)?.travellers ?: emptyList(),
-                            onClose = { navigator.back() },
-                            onSave = { leg -> repository.addLeg(screen.tripId, leg); navigator.back() },
-                        )
-
-                        is Screen.EditLeg -> {
-                            val trip = repository.tripById(screen.tripId)
-                            val leg = trip?.legs?.firstOrNull { it.id == screen.legId }
-                            if (leg == null) navigator.back()
-                            else AddLegScreen(
-                                existing = leg,
-                                travellers = trip.travellers,
-                                onClose = { navigator.back() },
-                                onSave = { updated -> repository.updateLeg(screen.tripId, updated); navigator.back() },
-                                onDelete = { repository.deleteLeg(screen.tripId, screen.legId); navigator.back() },
-                            )
-                        }
-
-                        is Screen.ArchivedTrips -> ArchivedTripsScreen(
-                            trips = repository.archivedTrips(),
-                            onBack = { navigator.back() },
-                            onUnarchive = { repository.toggleArchive(it) },
-                            onDelete = { repository.deleteTrip(it) },
-                        )
-
-                        is Screen.Travellers -> {
-                            val trip = repository.tripById(screen.tripId)
-                            if (trip == null) navigator.back()
-                            else {
-                                LaunchedEffect(screen.tripId) {
-                                    repository.ensureOwnerTraveller(screen.tripId)
-                                    repository.reconcileMembersToTravellers(screen.tripId)
-                                }
-                                TravellersScreen(
-                                    travellers = trip.travellers,
-                                    onBack = { navigator.back() },
-                                    onAdd = { repository.addTraveller(screen.tripId, it) },
-                                    onUpdate = { repository.updateTraveller(screen.tripId, it) },
-                                    onDelete = { repository.removeTraveller(screen.tripId, it) },
-                                    canEdit = trip.canEdit(repository.authService.currentUid ?: ""),
-                                    currentUid = repository.authService.currentUid ?: "",
-                                )
-                            }
-                        }
-
-                        is Screen.Members -> {
-                            val trip = repository.tripById(screen.tripId)
-                            if (trip == null) navigator.back()
-                            else MembersScreen(
-                                trip = trip,
-                                currentUid = repository.authService.currentUid ?: "",
-                                onSetRole = { uid, role -> repository.setMemberRole(screen.tripId, uid, role) },
-                                onRemoveMember = { uid -> repository.removeMember(screen.tripId, uid) },
-                                onCreateInvite = { repository.createTripInvite(it) },
-                                onLeaveTrip = {
-                                    scope.launch {
-                                        val left = repository.leaveTrip(screen.tripId)
-                                        if (left) navigator.resetTo(Screen.Home)
-                                    }
-                                },
-                                onBack = { navigator.back() },
-                            )
-                        }
-
-                        is Screen.TripDocuments -> {
-                            val trip = repository.tripById(screen.tripId)
-                            if (trip == null) navigator.back()
-                            else DocumentsScreen(
-                                trip = trip,
-                                documents = repository.documentsForTrip(screen.tripId),
-                                isLoading = !repository.documentsSyncedOnce,
-                                onBack = { navigator.back() },
-                                onOpenDoc = { navigator.push(Screen.DocViewer(it)) },
-                                onDeleteDocument = { repository.deleteDocument(it) },
-                                onUpdateDocument = { docId, title, category, legId, segmentIndex, travellerId ->
-                                    repository.updateDocument(docId, title, category, legId, segmentIndex, travellerId)
-                                },
-                                onMessage = { pillMessage = it },
-                                onUpload = { file, title, category, legId, segmentIndex, travellerId ->
-                                    repository.addDocumentWithFile(
-                                        tripId = screen.tripId, title = title, category = category,
-                                        file = file, legId = legId, segmentIndex = segmentIndex, travellerId = travellerId,
-                                    )
-                                },
-                                canEdit = trip.canEdit(repository.authService.currentUid ?: "")
-                            )
-                        }
-
-                        is Screen.DocViewer -> {
-                            val doc = repository.documents.firstOrNull { it.id == screen.docId }
-                            if (doc == null) navigator.back()
-                            else DocumentViewerScreen(
-                                doc = doc,
-                                onBack = { navigator.back() },
-                                onLoadBytes = { url -> repository.downloadBytes(url) },
-                                onMessage = { pillMessage = it },
-                            )
-                        }
-
-                        is Screen.Checklist -> {
-                            val trip = repository.tripById(screen.tripId)
-                            if (trip == null) navigator.back()
-                            else ChecklistScreen(
-                                items = repository.checklistForTrip(screen.tripId),
-                                onBack = { navigator.back() },
-                                onToggle = { repository.toggleChecklistItem(it) },
-                                onAdd = { text, group -> repository.addChecklistItem(screen.tripId, text, group) },
-                                onDelete = { repository.deleteChecklistItem(it) },
-                                loadSuggestions = {                                    // ⬅ ADD
-                                    val weather = repository.fetchTripWeatherFor(trip)
-                                    packingSuggestions(
-                                        trip = trip,
-                                        weather = weather,
-                                        groups = PackingGroups(
-                                            documents = s.documents,
-                                            packing = s.packing,
-                                            transport = s.transport,
-                                            money = s.money,
-                                            gadget = s.gadget,
-                                            other = s.other,
-                                        ),
-                                        existingTexts = repository.checklistForTrip(screen.tripId)
-                                            .map { it.text }.toSet(),
-                                    )
-                                },
-                            )
-                        }
-
-                        is Screen.Split -> {
-                            SplitScreen(
-                                trips = repository.activeTrips(),
-                                expenses = repository.expenses,
-                                onOpenTrip = { navigator.push(Screen.TripExpenses(it)) },
-                                isLoading = !repository.expensesSyncedOnce,
-                            )
-                        }
-                        is Screen.TripExpenses -> {
-                            val trip = repository.tripById(screen.tripId)
-                            if (trip == null) navigator.back()
-                            else {
-                                LaunchedEffect(screen.tripId) {
-                                    repository.ensureOwnerTraveller(screen.tripId)
-                                    repository.reconcileMembersToTravellers(screen.tripId)
-                                }
-                                TripExpensesScreen(
-                                    trip = trip,
-                                    expenses = repository.expensesForTrip(screen.tripId),
-                                    payments = repository.paymentsForTrip(screen.tripId),
-                                    isLoading = !repository.expensesSyncedOnce,
-                                    onBack = { navigator.back() },
-                                    onAddExpense = { navigator.push(Screen.AddExpense(screen.tripId)) },
-                                    onEditExpense = { navigator.push(Screen.AddExpense(screen.tripId, it)) },
-                                    onDeleteExpense = { repository.deleteExpense(it) },
-                                    onSetCurrency = { repository.setTripCurrency(screen.tripId, it) },
-                                    canEdit = trip.canEdit(repository.authService.currentUid ?: ""),
-                                    currentUid = repository.authService.currentUid ?: "",
-                                    onSetSettled = { repository.setTripSettled(screen.tripId, it) },
-                                    onMarkPaid = { from, to, amount ->
-                                        repository.addPayment(screen.tripId, from, to, amount)
-                                    },
-                                    onDeletePayment = { repository.deletePayment(it) },
-                                )
-                            }
-                        }
-
-                        is Screen.AddExpense -> {
-                            val trip = repository.tripById(screen.tripId)
-                            if (trip == null) navigator.back()
-                            else {
-                                val existing = screen.expenseId?.let { id -> repository.expenses.firstOrNull { it.id == id } }
-                                AddExpenseScreen(
-                                    trip = trip,
-                                    existing = existing,
-                                    onBack = { navigator.back() },
-                                    onSave = { exp ->
-                                        if (existing == null) repository.addExpense(exp) else repository.updateExpense(exp)
+                            is Screen.EditPlace -> {
+                                val act = repository.activitiesForTrip(screen.tripId).firstOrNull { it.id == screen.activityId }
+                                if (act == null) navigator.back()
+                                else AddPlaceScreen(
+                                    existing = act,
+                                    onClose = { navigator.back() },
+                                    onSave = { date, title, time, location ->
+                                        repository.updateActivity(act.id, date, title, time, location)
                                         navigator.back()
                                     },
                                 )
                             }
-                        }
 
-                        is Screen.TripMap -> {
-                            val trip = repository.tripById(screen.tripId)
-                            if (trip == null) navigator.back()
-                            else TripMapScreen(
-                                trip = trip,
-                                onBack = { navigator.back() },
-                                onBackfill = { repository.backfillLegCoordinates(screen.tripId) },
+                            is Screen.AddLeg -> AddLegScreen(
+                                travellers = repository.tripById(screen.tripId)?.travellers ?: emptyList(),
+                                onClose = { navigator.back() },
+                                onSave = { leg -> repository.addLeg(screen.tripId, leg); navigator.back() },
                             )
-                        }
 
-                        Screen.Calendar -> CalendarScreen(
-                            trips = repository.trips,
-                            onMarkAdded = { tripId, legId -> repository.markLegAddedToCalendar(tripId, legId) },
-                        )
+                            is Screen.EditLeg -> {
+                                val trip = repository.tripById(screen.tripId)
+                                val leg = trip?.legs?.firstOrNull { it.id == screen.legId }
+                                if (leg == null) navigator.back()
+                                else AddLegScreen(
+                                    existing = leg,
+                                    travellers = trip.travellers,
+                                    onClose = { navigator.back() },
+                                    onSave = { updated -> repository.updateLeg(screen.tripId, updated); navigator.back() },
+                                    onDelete = { repository.deleteLeg(screen.tripId, screen.legId); navigator.back() },
+                                )
+                            }
 
-                        Screen.Settings -> SettingsScreen(
-                            profile = repository.profile,
-                            onEditProfile = { navigator.push(Screen.EditProfile) },
-                            onAccount = { navigator.push(Screen.Account) },
-                            onAppearance = { navigator.push(Screen.Appearance) },
-                            onOpenLanguage = { navigator.push(Screen.LanguagePicker) },
-                            onNotifications = { navigator.push(Screen.Notifications) },
-                            onWorldClock = { navigator.push(Screen.WorldClock) },
-                            onEmergency = { navigator.push(Screen.Emergency) },
-                            onWeather = { navigator.push(Screen.Weather) },
-                            onTranslate = { navigator.push(Screen.Translate) },
-                            onCompass = { navigator.push(Screen.Compass) },
-                            onArchivedTrips = { navigator.push(Screen.ArchivedTrips) },
-                            onExportTrips = { navigator.push(Screen.ExportTrips) },
-                            onBackupStatus = { navigator.push(Screen.BackupStatus) },
-                            onHelp = { navigator.push(Screen.Help) },
-                            onAbout = { navigator.push(Screen.About) },
-                        )
+                            is Screen.ArchivedTrips -> ArchivedTripsScreen(
+                                trips = repository.archivedTrips(),
+                                onBack = { navigator.back() },
+                                onUnarchive = { repository.toggleArchive(it) },
+                                onDelete = { repository.deleteTrip(it) },
+                            )
 
-                        Screen.Account -> AccountScreen(
-                            profile = repository.profile,
-                            accounts = repository.accountStore.all(),
-                            currentUid = repository.authService.currentUid ?: "",
-                            onSwitchAccount = { account ->
-                                scope.launch {
-                                    prefillEmail = account.email
-                                    repository.clearLocal()
-                                    repository.authService.signOut()
-                                    navigator.resetTo(Screen.Login)
-                                }
-                            },
-                            onForgetAccount = { account ->
-                                repository.accountStore.forget(account.uid)
-                                navigator.resetTo(Screen.Account)
-                            },
-                            onAddAccount = {
-                                repository.clearLocal()
-                                navigator.resetTo(Screen.Login)
-                            },
-                            onLogOut = {
-                                repository.clearLocal()
-                                navigator.resetTo(Screen.Login)
-                            },
-                            onDeleteAccount = {
-                                scope.launch {
-                                    val uid = repository.authService.currentUid
-                                    try {
-                                        if (uid != null) {
-                                            repository.profileService.deleteProfile(uid)
-                                        }
-                                        repository.authService.deleteAccount()
-                                        navigator.resetTo(Screen.Login)
-                                        pillMessage = s.accountDeleted
-                                    } catch (e: Exception) {
-                                        navigator.resetTo(Screen.Login)
+                            is Screen.Travellers -> {
+                                val trip = repository.tripById(screen.tripId)
+                                if (trip == null) navigator.back()
+                                else {
+                                    LaunchedEffect(screen.tripId) {
+                                        repository.ensureOwnerTraveller(screen.tripId)
+                                        repository.reconcileMembersToTravellers(screen.tripId)
                                     }
+                                    TravellersScreen(
+                                        travellers = trip.travellers,
+                                        onBack = { navigator.back() },
+                                        onAdd = { repository.addTraveller(screen.tripId, it) },
+                                        onUpdate = { repository.updateTraveller(screen.tripId, it) },
+                                        onDelete = { repository.removeTraveller(screen.tripId, it) },
+                                        canEdit = trip.canEdit(repository.authService.currentUid ?: ""),
+                                        currentUid = repository.authService.currentUid ?: "",
+                                    )
                                 }
-                            },
-                            onBack = { navigator.back() },
-                        )
+                            }
 
-                        Screen.Notifications -> NotificationsScreen(
-                            offsetMinutes = repository.profile.reminderOffsetMinutes,
-                            hasPermission = scheduler.hasPermission(),
-                            onChangeOffset = { newOffset ->
-                                val updated = repository.profile.copy(reminderOffsetMinutes = newOffset)
-                                repository.updateProfile(updated)
-                                repository.rescheduleAllReminders()
-                                scope.launch {
-                                    val uid = repository.authService.currentUid
-                                    if (uid != null) repository.profileService.saveProfile(uid, updated)
+                            is Screen.Members -> {
+                                val trip = repository.tripById(screen.tripId)
+                                if (trip == null) navigator.back()
+                                else MembersScreen(
+                                    trip = trip,
+                                    currentUid = repository.authService.currentUid ?: "",
+                                    onSetRole = { uid, role -> repository.setMemberRole(screen.tripId, uid, role) },
+                                    onRemoveMember = { uid -> repository.removeMember(screen.tripId, uid) },
+                                    onCreateInvite = { repository.createTripInvite(it) },
+                                    onLeaveTrip = {
+                                        scope.launch {
+                                            val left = repository.leaveTrip(screen.tripId)
+                                            if (left) navigator.resetTo(Screen.Home)
+                                        }
+                                    },
+                                    onBack = { navigator.back() },
+                                )
+                            }
+
+                            is Screen.TripDocuments -> {
+                                val trip = repository.tripById(screen.tripId)
+                                if (trip == null) navigator.back()
+                                else DocumentsScreen(
+                                    trip = trip,
+                                    documents = repository.documentsForTrip(screen.tripId),
+                                    isLoading = !repository.documentsSyncedOnce,
+                                    onBack = { navigator.back() },
+                                    onOpenDoc = { navigator.push(Screen.DocViewer(it)) },
+                                    onDeleteDocument = { repository.deleteDocument(it) },
+                                    onUpdateDocument = { docId, title, category, legId, segmentIndex, travellerId ->
+                                        repository.updateDocument(docId, title, category, legId, segmentIndex, travellerId)
+                                    },
+                                    onMessage = { pillMessage = it },
+                                    onUpload = { file, title, category, legId, segmentIndex, travellerId ->
+                                        repository.addDocumentWithFile(
+                                            tripId = screen.tripId, title = title, category = category,
+                                            file = file, legId = legId, segmentIndex = segmentIndex, travellerId = travellerId,
+                                        )
+                                    },
+                                    canEdit = trip.canEdit(repository.authService.currentUid ?: "")
+                                )
+                            }
+
+                            is Screen.DocViewer -> {
+                                val doc = repository.documents.firstOrNull { it.id == screen.docId }
+                                if (doc == null) navigator.back()
+                                else DocumentViewerScreen(
+                                    doc = doc,
+                                    onBack = { navigator.back() },
+                                    onLoadBytes = { url -> repository.downloadBytes(url) },
+                                    onMessage = { pillMessage = it },
+                                )
+                            }
+
+                            is Screen.Checklist -> {
+                                val trip = repository.tripById(screen.tripId)
+                                if (trip == null) navigator.back()
+                                else ChecklistScreen(
+                                    items = repository.checklistForTrip(screen.tripId),
+                                    onBack = { navigator.back() },
+                                    onToggle = { repository.toggleChecklistItem(it) },
+                                    onAdd = { text, group -> repository.addChecklistItem(screen.tripId, text, group) },
+                                    onDelete = { repository.deleteChecklistItem(it) },
+                                    loadSuggestions = {                                    // ⬅ ADD
+                                        val weather = repository.fetchTripWeatherFor(trip)
+                                        packingSuggestions(
+                                            trip = trip,
+                                            weather = weather,
+                                            groups = PackingGroups(
+                                                documents = s.documents,
+                                                packing = s.packing,
+                                                transport = s.transport,
+                                                money = s.money,
+                                                gadget = s.gadget,
+                                                other = s.other,
+                                            ),
+                                            existingTexts = repository.checklistForTrip(screen.tripId)
+                                                .map { it.text }.toSet(),
+                                        )
+                                    },
+                                )
+                            }
+
+                            is Screen.Split -> {
+                                SplitScreen(
+                                    trips = repository.activeTrips(),
+                                    expenses = repository.expenses,
+                                    onOpenTrip = { navigator.push(Screen.TripExpenses(it)) },
+                                    isLoading = !repository.expensesSyncedOnce,
+                                )
+                            }
+                            is Screen.TripExpenses -> {
+                                val trip = repository.tripById(screen.tripId)
+                                if (trip == null) navigator.back()
+                                else {
+                                    LaunchedEffect(screen.tripId) {
+                                        repository.ensureOwnerTraveller(screen.tripId)
+                                        repository.reconcileMembersToTravellers(screen.tripId)
+                                    }
+                                    TripExpensesScreen(
+                                        trip = trip,
+                                        expenses = repository.expensesForTrip(screen.tripId),
+                                        payments = repository.paymentsForTrip(screen.tripId),
+                                        isLoading = !repository.expensesSyncedOnce,
+                                        onBack = { navigator.back() },
+                                        onAddExpense = { navigator.push(Screen.AddExpense(screen.tripId)) },
+                                        onEditExpense = { navigator.push(Screen.AddExpense(screen.tripId, it)) },
+                                        onDeleteExpense = { repository.deleteExpense(it) },
+                                        onSetCurrency = { repository.setTripCurrency(screen.tripId, it) },
+                                        canEdit = trip.canEdit(repository.authService.currentUid ?: ""),
+                                        currentUid = repository.authService.currentUid ?: "",
+                                        onSetSettled = { repository.setTripSettled(screen.tripId, it) },
+                                        onMarkPaid = { from, to, amount ->
+                                            repository.addPayment(screen.tripId, from, to, amount)
+                                        },
+                                        onDeletePayment = { repository.deletePayment(it) },
+                                    )
                                 }
-                            },
-                            onRequestPermission = {
-                                NotificationPermission.request()
-                                scope.launch { repository.notificationScheduler.requestPermission() }
-                            },
-                            onBack = { navigator.back() },
-                        )
+                            }
 
-                        Screen.WorldClock -> {
-                            var zones by remember { mutableStateOf(repository.worldClockStore.all()) }
-                            WorldClockScreen(
-                                zones = zones,
-                                onAddZone = { label, zoneId ->
-                                    repository.worldClockStore.add(label, zoneId)
-                                    zones = repository.worldClockStore.all()
-                                },
-                                onRemoveZone = { entry ->
-                                    repository.worldClockStore.remove(entry)
-                                    zones = repository.worldClockStore.all()
-                                },
-                                onBack = { navigator.back() },
+                            is Screen.AddExpense -> {
+                                val trip = repository.tripById(screen.tripId)
+                                if (trip == null) navigator.back()
+                                else {
+                                    val existing = screen.expenseId?.let { id -> repository.expenses.firstOrNull { it.id == id } }
+                                    AddExpenseScreen(
+                                        trip = trip,
+                                        existing = existing,
+                                        onBack = { navigator.back() },
+                                        onSave = { exp ->
+                                            if (existing == null) repository.addExpense(exp) else repository.updateExpense(exp)
+                                            navigator.back()
+                                        },
+                                    )
+                                }
+                            }
+
+                            is Screen.TripMap -> {
+                                val trip = repository.tripById(screen.tripId)
+                                if (trip == null) navigator.back()
+                                else TripMapScreen(
+                                    trip = trip,
+                                    onBack = { navigator.back() },
+                                    onBackfill = { repository.backfillLegCoordinates(screen.tripId) },
+                                )
+                            }
+
+                            Screen.Calendar -> CalendarScreen(
+                                trips = repository.trips,
+                                onMarkAdded = { tripId, legId -> repository.markLegAddedToCalendar(tripId, legId) },
                             )
-                        }
 
-                        Screen.Emergency -> EmergencyScreen(onBack = { navigator.back() })
-
-                        Screen.Translate -> TranslateScreen(translator = repository.translator, onBack = { navigator.back() })
-
-                        Screen.Compass -> CompassScreen(
-                            compass = repository.compass,
-                            onBack = { navigator.back() },
-                        )
-
-                        Screen.Weather -> {
-                            var cities by remember { mutableStateOf(repository.weatherStore.all()) }
-                            WeatherScreen(
-                                cities = cities,
-                                onAddCity = { repository.weatherStore.add(it); cities = repository.weatherStore.all() },
-                                onRemoveCity = { repository.weatherStore.remove(it); cities = repository.weatherStore.all() },
-                                onBack = { navigator.back() },
+                            Screen.Settings -> SettingsScreen(
+                                profile = repository.profile,
+                                onEditProfile = { navigator.push(Screen.EditProfile) },
+                                onAccount = { navigator.push(Screen.Account) },
+                                onAppearance = { navigator.push(Screen.Appearance) },
+                                onOpenLanguage = { navigator.push(Screen.LanguagePicker) },
+                                onNotifications = { navigator.push(Screen.Notifications) },
+                                onWorldClock = { navigator.push(Screen.WorldClock) },
+                                onEmergency = { navigator.push(Screen.Emergency) },
+                                onWeather = { navigator.push(Screen.Weather) },
+                                onTranslate = { navigator.push(Screen.Translate) },
+                                onCompass = { navigator.push(Screen.Compass) },
+                                onArchivedTrips = { navigator.push(Screen.ArchivedTrips) },
+                                onExportTrips = { navigator.push(Screen.ExportTrips) },
+                                onBackupStatus = { navigator.push(Screen.BackupStatus) },
+                                onHelp = { navigator.push(Screen.Help) },
+                                onAbout = { navigator.push(Screen.About) },
                             )
-                        }
 
-                        Screen.BackupStatus -> BackupStatusScreen(
-                            profile = repository.profile,
-                            tripCount = repository.trips.size,
-                            expenseCount = repository.expenses.size,
-                            documentCount = repository.documents.size,
-                            lastSyncedLabel = syncLabel(lastSyncedAt, s),
-                            syncing = syncing,
-                            onSyncNow = {
-                                val uid = repository.authService.currentUid
-                                if (uid != null && !syncing) {
+                            Screen.Account -> AccountScreen(
+                                profile = repository.profile,
+                                accounts = repository.accountStore.all(),
+                                currentUid = repository.authService.currentUid ?: "",
+                                onSwitchAccount = { account ->
                                     scope.launch {
-                                        syncing = true
+                                        prefillEmail = account.email
+                                        repository.clearLocal()
+                                        repository.authService.signOut()
+                                        navigator.resetTo(Screen.Login)
+                                    }
+                                },
+                                onForgetAccount = { account ->
+                                    repository.accountStore.forget(account.uid)
+                                    navigator.resetTo(Screen.Account)
+                                },
+                                onAddAccount = {
+                                    repository.clearLocal()
+                                    navigator.resetTo(Screen.Login)
+                                },
+                                onLogOut = {
+                                    repository.clearLocal()
+                                    navigator.resetTo(Screen.Login)
+                                },
+                                onDeleteAccount = {
+                                    scope.launch {
+                                        val uid = repository.authService.currentUid
                                         try {
-                                            repository.loadTrips(uid)
-                                            repository.loadDocuments(uid)
-                                            repository.loadExpenses(uid)
-                                            lastSyncedAt = nowMillisApp()
-                                            pillMessage = s.syncComplete
+                                            if (uid != null) {
+                                                repository.profileService.deleteProfile(uid)
+                                            }
+                                            repository.authService.deleteAccount()
+                                            navigator.resetTo(Screen.Login)
+                                            pillMessage = s.accountDeleted
                                         } catch (e: Exception) {
-                                            pillMessage = s.syncFailed
-                                        } finally {
-                                            syncing = false
+                                            navigator.resetTo(Screen.Login)
                                         }
                                     }
-                                }
-                            },
-                            onBack = { navigator.back() },
-                        )
-                        Screen.Help -> HelpScreen(onBack = { navigator.back() })
+                                },
+                                onBack = { navigator.back() },
+                            )
 
-                        Screen.ExportTrips -> ExportTripsScreen(
-                            trips = repository.activeTrips(),
-                            activitiesForTrip = { repository.activitiesForTrip(it) },
-                            expensesForTrip = { repository.expensesForTrip(it) },
-                            onBack = { navigator.back() },
-                        )
+                            Screen.Notifications -> NotificationsScreen(
+                                offsetMinutes = repository.profile.reminderOffsetMinutes,
+                                hasPermission = scheduler.hasPermission(),
+                                onChangeOffset = { newOffset ->
+                                    val updated = repository.profile.copy(reminderOffsetMinutes = newOffset)
+                                    repository.updateProfile(updated)
+                                    repository.rescheduleAllReminders()
+                                    scope.launch {
+                                        val uid = repository.authService.currentUid
+                                        if (uid != null) repository.profileService.saveProfile(uid, updated)
+                                    }
+                                },
+                                onRequestPermission = {
+                                    NotificationPermission.request()
+                                    scope.launch { repository.notificationScheduler.requestPermission() }
+                                },
+                                onBack = { navigator.back() },
+                            )
 
-                        Screen.About -> AboutScreen(onBack = { navigator.back() })
+                            Screen.WorldClock -> {
+                                var zones by remember { mutableStateOf(repository.worldClockStore.all()) }
+                                WorldClockScreen(
+                                    zones = zones,
+                                    onAddZone = { label, zoneId ->
+                                        repository.worldClockStore.add(label, zoneId)
+                                        zones = repository.worldClockStore.all()
+                                    },
+                                    onRemoveZone = { entry ->
+                                        repository.worldClockStore.remove(entry)
+                                        zones = repository.worldClockStore.all()
+                                    },
+                                    onBack = { navigator.back() },
+                                )
+                            }
 
-                        Screen.Appearance -> AppearanceScreen(
-                            selected = themeMode,
-                            onSelect = onThemeChange,
-                            onBack = { navigator.back() },
-                        )
+                            Screen.Emergency -> EmergencyScreen(onBack = { navigator.back() })
 
-                        Screen.EditProfile -> EditProfileScreen(
-                            profile        = repository.profile,
-                            authService    = repository.authService,
-                            profileService = repository.profileService,
-                            onBack         = { navigator.back() },
-                            onUploadPhoto  = { bytes ->
-                                val uid = repository.authService.currentUid
-                                    ?: return@EditProfileScreen ""
-                                repository.uploadProfilePhoto(uid, bytes)
-                            },
-                            onSave = { updated ->
-                                repository.updateProfile(updated)
-                                navigator.back()
-                                pillMessageTop = s.changesSaved
-                            },
-                        )
+                            Screen.Translate -> TranslateScreen(translator = repository.translator, onBack = { navigator.back() })
+
+                            Screen.Compass -> CompassScreen(
+                                compass = repository.compass,
+                                onBack = { navigator.back() },
+                            )
+
+                            Screen.Weather -> {
+                                var cities by remember { mutableStateOf(repository.weatherStore.all()) }
+                                WeatherScreen(
+                                    cities = cities,
+                                    onAddCity = { repository.weatherStore.add(it); cities = repository.weatherStore.all() },
+                                    onRemoveCity = { repository.weatherStore.remove(it); cities = repository.weatherStore.all() },
+                                    onBack = { navigator.back() },
+                                )
+                            }
+
+                            Screen.BackupStatus -> BackupStatusScreen(
+                                profile = repository.profile,
+                                tripCount = repository.trips.size,
+                                expenseCount = repository.expenses.size,
+                                documentCount = repository.documents.size,
+                                lastSyncedLabel = syncLabel(lastSyncedAt, s),
+                                syncing = syncing,
+                                onSyncNow = {
+                                    val uid = repository.authService.currentUid
+                                    if (uid != null && !syncing) {
+                                        scope.launch {
+                                            syncing = true
+                                            try {
+                                                repository.loadTrips(uid)
+                                                repository.loadDocuments(uid)
+                                                repository.loadExpenses(uid)
+                                                lastSyncedAt = nowMillisApp()
+                                                pillMessage = s.syncComplete
+                                            } catch (e: Exception) {
+                                                pillMessage = s.syncFailed
+                                            } finally {
+                                                syncing = false
+                                            }
+                                        }
+                                    }
+                                },
+                                onBack = { navigator.back() },
+                            )
+                            Screen.Help -> HelpScreen(onBack = { navigator.back() })
+
+                            Screen.ExportTrips -> ExportTripsScreen(
+                                trips = repository.activeTrips(),
+                                activitiesForTrip = { repository.activitiesForTrip(it) },
+                                expensesForTrip = { repository.expensesForTrip(it) },
+                                onBack = { navigator.back() },
+                            )
+
+                            Screen.About -> AboutScreen(onBack = { navigator.back() })
+
+                            Screen.Appearance -> AppearanceScreen(
+                                selected = themeMode,
+                                onSelect = onThemeChange,
+                                onBack = { navigator.back() },
+                            )
+
+                            Screen.EditProfile -> EditProfileScreen(
+                                profile        = repository.profile,
+                                authService    = repository.authService,
+                                profileService = repository.profileService,
+                                onBack         = { navigator.back() },
+                                onUploadPhoto  = { bytes ->
+                                    val uid = repository.authService.currentUid
+                                        ?: return@EditProfileScreen ""
+                                    repository.uploadProfilePhoto(uid, bytes)
+                                },
+                                onSave = { updated ->
+                                    repository.updateProfile(updated)
+                                    navigator.back()
+                                    pillMessageTop = s.changesSaved
+                                },
+                            )
+                        }
                     }
                 }
             }

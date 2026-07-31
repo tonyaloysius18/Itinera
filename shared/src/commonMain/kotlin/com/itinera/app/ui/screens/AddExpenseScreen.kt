@@ -24,16 +24,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -167,159 +168,172 @@ fun AddExpenseScreen(
         }
     }
 
-    Box(Modifier.fillMaxSize()) {
-        Column(Modifier.fillMaxSize().imePadding()) {
-            TopBar(
-                title = if (existing == null) s.addExpense else s.editExpense,
-                onBack = onBack,
-            )
-
-            // ── Fixed top section (does NOT scroll) ──────────────────────
-            Column(Modifier.padding(horizontal = 16.dp).padding(top = 16.dp)) {
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it.toTitleCase() },
-                    label = { Text(s.description) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        floatingActionButton = {
+            if (canSave) {
+                ExtendedFloatingActionButton(
+                    onClick = { save() },
+                    icon = { Icon(Icons.Filled.Check, null) },
+                    text = { Text(s.save) },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    elevation = FloatingActionButtonDefaults.elevation(8.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.padding(bottom = 16.dp)
                 )
-                Spacer(Modifier.height(12.dp))
-
-                OutlinedTextField(
-                    value = amountText,
-                    onValueChange = { amountText = it },
-                    label = { Text(s.amount) },
-                    prefix = { Text(currencySymbolOrCode(trip.currencyCode)) },
-                    singleLine = true,
-                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+            }
+        }
+    ) { paddingValues ->
+        Box(Modifier.fillMaxSize().padding(paddingValues)) {
+            Column(Modifier.fillMaxSize().imePadding()) {
+                TopBar(
+                    title = if (existing == null) s.addExpense else s.editExpense,
+                    onBack = onBack,
                 )
-                Spacer(Modifier.height(12.dp))
 
-                // Paid by
-                ExposedDropdownMenuBox(expanded = paidMenuOpen, onExpandedChange = { paidMenuOpen = it }) {
+                // ── Fixed top section (does NOT scroll) ──────────────────────
+                Column(Modifier.padding(horizontal = 16.dp).padding(top = 16.dp)) {
                     OutlinedTextField(
-                        value = nameOf(paidById),
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text(s.paidByLabel) },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = paidMenuOpen) },
-                        modifier = Modifier.menuAnchor().fillMaxWidth(),
+                        value = description,
+                        onValueChange = { description = it.toTitleCase() },
+                        label = { Text(s.description) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                     )
-                    ExposedDropdownMenu(expanded = paidMenuOpen, onDismissRequest = { paidMenuOpen = false }, shape = RoundedCornerShape(12.dp)) {
-                        travellers.forEach { t ->
-                            DropdownMenuItem(
-                                text = { Text(t.firstName) },
-                                onClick = { paidById = t.id; paidMenuOpen = false },
-                            )
-                        }
-                    }
-                }
-                Spacer(Modifier.height(20.dp))
+                    Spacer(Modifier.height(12.dp))
 
-                // Split mode
-                Text(s.splitBetween, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                Spacer(Modifier.height(8.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilterChip(selected = !customMode, onClick = { customMode = false }, label = { Text(s.splitEqually) })
-                    FilterChip(selected = customMode, onClick = { customMode = true }, label = { Text(s.splitCustom) })
-                }
-            }
+                    OutlinedTextField(
+                        value = amountText,
+                        onValueChange = { amountText = it },
+                        label = { Text(s.amount) },
+                        prefix = { Text(currencySymbolOrCode(trip.currencyCode)) },
+                        singleLine = true,
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                    )
+                    Spacer(Modifier.height(12.dp))
 
-            // ── Scrollable travellers list (ONLY this scrolls) ───────────
-            Column(
-                Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp),
-            ) {
-                Spacer(Modifier.height(8.dp))
-                travellers.forEach { t ->
-                    val checked = involved[t.id] == true
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(10.dp))
-                            .clickable { involved[t.id] = !checked }
-                            .padding(vertical = 6.dp, horizontal = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        RoundCheckbox(checked = checked)
-                        Spacer(Modifier.width(12.dp))
-                        Text(t.firstName, Modifier.weight(1f))
-                        if (checked) {
-                            if (customMode) {
-                                OutlinedTextField(
-                                    value = customText[t.id] ?: "",
-                                    onValueChange = { customText[t.id] = it },
-                                    singleLine = true,
-                                    placeholder = { Text("0", style = MaterialTheme.typography.bodySmall) },
-                                    textStyle = MaterialTheme.typography.bodyMedium,
-                                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                                    modifier = Modifier.width(90.dp).height(30.dp),
-                                    shape = RoundedCornerShape(10.dp),
+                    // Paid by
+                    ExposedDropdownMenuBox(expanded = paidMenuOpen, onExpandedChange = { paidMenuOpen = it }) {
+                        OutlinedTextField(
+                            value = nameOf(paidById),
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text(s.paidByLabel) },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = paidMenuOpen) },
+                            modifier = Modifier.menuAnchor().fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                        )
+                        ExposedDropdownMenu(expanded = paidMenuOpen, onDismissRequest = { paidMenuOpen = false }, shape = RoundedCornerShape(12.dp)) {
+                            travellers.forEach { t ->
+                                DropdownMenuItem(
+                                    text = { Text(t.firstName) },
+                                    onClick = { paidById = t.id; paidMenuOpen = false },
                                 )
-                            } else {
-                                val per = if (involvedIds.isNotEmpty()) amount / involvedIds.size else 0.0
-                                Text(formatMoney(per, trip.currencyCode), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
                             }
                         }
                     }
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(20.dp))
+
+                    // Split mode
+                    Text(s.splitBetween, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                    Spacer(Modifier.height(8.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FilterChip(selected = !customMode, onClick = { customMode = false }, label = { Text(s.splitEqually) })
+                        FilterChip(selected = customMode, onClick = { customMode = true }, label = { Text(s.splitCustom) })
+                    }
+                }
+
+                // ── Scrollable travellers list (ONLY this scrolls) ───────────
+                Column(
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp),
+                ) {
+                    Spacer(Modifier.height(8.dp))
+                    travellers.forEach { t ->
+                        val checked = involved[t.id] == true
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp))
+                                .clickable { involved[t.id] = !checked }
+                                .padding(vertical = 6.dp, horizontal = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RoundCheckbox(checked = checked)
+                            Spacer(Modifier.width(12.dp))
+                            Text(t.firstName, Modifier.weight(1f))
+                            if (checked) {
+                                if (customMode) {
+                                    OutlinedTextField(
+                                        value = customText[t.id] ?: "",
+                                        onValueChange = { customText[t.id] = it },
+                                        singleLine = true,
+                                        placeholder = { Text("0", style = MaterialTheme.typography.bodySmall) },
+                                        textStyle = MaterialTheme.typography.bodyMedium,
+                                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                                        modifier = Modifier.width(90.dp),          // let height be intrinsic — a forced 30.dp clipped the text out of view
+                                        shape = RoundedCornerShape(10.dp),
+                                    )
+                                } else {
+                                    val per = if (involvedIds.isNotEmpty()) amount / involvedIds.size else 0.0
+                                    Text(formatMoney(per, trip.currencyCode), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                                }
+                            }
+                        }
+                        Spacer(Modifier.height(12.dp))
+                    }
+                    // Spacer to ensure content isn't hidden behind FAB
+                    Spacer(Modifier.height(80.dp))
+                }
+
+                // ── Fixed bottom section (hint, does NOT scroll) ───────
+                Column(Modifier.padding(horizontal = 16.dp)) {
+                    // custom sum hint — only show remaining/over while it doesn't match
+                    if (customMode && amount > 0.0 && !customMatches) {
+                        val diff = amount - customSum
+                        val msg = if (diff > 0) "${s.remaining}: ${formatMoney(diff, trip.currencyCode)}"
+                        else "${s.over}: ${formatMoney(-diff, trip.currencyCode)}"
+                        Text(
+                            msg,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color(0xFFE8590C),
+                            modifier = Modifier.padding(bottom = 8.dp),
+                        )
+                    }
+
+                    // clears the iPhone home indicator (Surface now bleeds to the bottom edge)
+                    Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.safeDrawing))
                 }
             }
 
-            // ── Fixed bottom section (hint + Save, does NOT scroll) ───────
-            Column(Modifier.padding(horizontal = 16.dp)) {
-                // custom sum hint — only show remaining/over while it doesn't match
-                if (customMode && amount > 0.0 && !customMatches) {
-                    val diff = amount - customSum
-                    val msg = if (diff > 0) "${s.remaining}: ${formatMoney(diff, trip.currencyCode)}"
-                    else "${s.over}: ${formatMoney(-diff, trip.currencyCode)}"
+            // local toast pill — sits just above the bottom area
+            androidx.compose.animation.AnimatedVisibility(
+                visible = pillText != null,
+                enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.slideInVertically { it / 2 },
+                exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.slideOutVertically { it / 2 },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 100.dp),
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(24.dp),
+                    color = Color.DarkGray.copy(alpha = 0.6f),
+                    shadowElevation = 6.dp,
+                ) {
                     Text(
-                        msg,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFFE8590C),
-                        modifier = Modifier.padding(bottom = 8.dp),
+                        pillText ?: "",
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
                     )
                 }
-
-                Button(
-                    onClick = { if (canSave) save() },
-                    enabled = canSave,
-                    colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 100.dp).padding(top = 8.dp, bottom = 32.dp).height(50.dp),
-                ) { Text(s.save) }
-
-                // clears the iPhone home indicator (Surface now bleeds to the bottom edge)
-                Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.safeDrawing))
-            }
-        }
-
-        // local toast pill — sits just above the bottom area
-        androidx.compose.animation.AnimatedVisibility(
-            visible = pillText != null,
-            enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.slideInVertically { it / 2 },
-            exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.slideOutVertically { it / 2 },
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 140.dp),
-        ) {
-            Surface(
-                shape = RoundedCornerShape(24.dp),
-                color = Color.DarkGray.copy(alpha = 0.6f),
-                shadowElevation = 6.dp,
-            ) {
-                Text(
-                    pillText ?: "",
-                    color = Color.White,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
-                )
             }
         }
     }

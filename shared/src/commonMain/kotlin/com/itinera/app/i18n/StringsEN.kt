@@ -105,7 +105,7 @@ internal val EN: Strings by lazy { Strings().apply {
     place = "Place"
     newPlace = "New Place"
     editPlace = "Edit Place"
-    landmark = "Landmark (Optional)"
+    remarks = "Remarks (Optional)"
     savePlace = "Save Place"
     searchTrips = "Search Trips"
     newTrip = "New trip"

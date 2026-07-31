@@ -232,7 +232,7 @@ class Strings {
     var place: String = ""
     var newPlace: String = ""
     var editPlace: String = ""
-    var landmark: String = ""
+    var remarks: String = ""
     var savePlace: String = ""
     var searchTrips: String = ""
     var newTrip: String = ""
@@ -631,7 +631,7 @@ class Strings {
         c.place = this.place
         c.newPlace = this.newPlace
         c.editPlace = this.editPlace
-        c.landmark = this.landmark
+        c.remarks = this.remarks
         c.savePlace = this.savePlace
         c.searchTrips = this.searchTrips
         c.newTrip = this.newTrip

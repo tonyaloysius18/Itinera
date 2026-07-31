@@ -555,9 +555,6 @@ class TripRepository {
         if (trip.ownerId != authService.currentUid) return
 
         val memberUids = trip.members.keys
-        val covered = trip.travellers
-            .mapNotNull { it.userId.takeIf { u -> u.isNotBlank() } }
-            .toSet()
 
         // 1) Remove auto-linked travellers whose member has left.
         //    (Only ones we linked: userId set, not the owner row, not a current member.)
@@ -565,7 +562,40 @@ class TripRepository {
             t.userId.isNotBlank() && t.userId !in memberUids && !t.isOwner
         }
 
-        // 2) Add a traveller for any member not yet represented (skip the owner —
+        // 2) PROMOTE a matching MANUAL traveller (blank userId) into the arriving member,
+        //    instead of adding a duplicate. Match by email first, then by full name.
+        //    This is what prevents "typed Fawaz" + "joined Fawaz" from both appearing.
+        fun norm(x: String) = x.trim().lowercase()
+        for (uid in memberUids) {
+            if (uid == trip.ownerId) continue
+            if (newTravellers.any { it.userId == uid }) continue   // already linked
+
+            val info = trip.memberInfo[uid]
+            val memEmail = norm(info?.email ?: "")
+            val memName = norm(info?.name ?: "")
+
+            val match = newTravellers.firstOrNull { t ->
+                t.userId.isBlank() && !t.isOwner && (
+                        (memEmail.isNotBlank() && norm(t.email) == memEmail) ||
+                                (memName.isNotBlank() && norm("${t.firstName} ${t.surname}") == memName)
+                        )
+            }
+            if (match != null) {
+                newTravellers = newTravellers.map {
+                    if (it.id == match.id) it.copy(
+                        userId = uid,
+                        email = it.email.ifBlank { info?.email ?: "" },
+                    ) else it
+                }
+            }
+        }
+
+        // 3) Now the set of covered uids (after promotions).
+        val covered = newTravellers
+            .mapNotNull { it.userId.takeIf { u -> u.isNotBlank() } }
+            .toSet()
+
+        // 4) Add a traveller for any member still not represented (skip the owner —
         //    they already have their owner-traveller from ensureOwnerTraveller).
         var colorCursor = (newTravellers.maxOfOrNull { it.colorIndex } ?: -1) + 1
         for (uid in memberUids) {

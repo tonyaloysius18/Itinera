@@ -3,6 +3,7 @@ package com.itinera.app.ui.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,6 +40,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.util.lerp
+import kotlin.math.absoluteValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -78,16 +82,23 @@ fun TicketWalletDialog(
 
         Box(Modifier.fillMaxSize().background(Color(0xF2101014))) {
             Column(
-                Modifier.fillMaxSize().padding(horizontal = 20.dp),
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
                 HorizontalPager(
                     state = pagerState,
                     modifier = Modifier.fillMaxWidth(),
-                    pageSpacing = 16.dp,
+                    contentPadding = PaddingValues(horizontal = 48.dp),   // reveal neighbour cards
+                    pageSpacing = 12.dp,
                 ) { page ->
                     val ticket = tickets[page]
+                    // distance of this page from the settled center (0 = centered, 1 = one away)
+                    val fraction = (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
+                    val dist = fraction.absoluteValue.coerceIn(0f, 1f)
+
                     WalletCard(
                         legRoute = legRoute,
                         legDateLabel = legDateLabel,
@@ -97,6 +108,14 @@ fun TicketWalletDialog(
                         ticket = ticket,
                         showDocTitle = multiDoc && ticket.docTitle.isNotBlank(),
                         onOpenFullTicket = { onDismiss(); onOpenFullTicket(ticket.docId) },
+                        modifier = Modifier.graphicsLayer {
+                            val scale = lerp(0.84f, 1f, 1f - dist)
+                            scaleX = scale
+                            scaleY = scale
+                            alpha = lerp(0.45f, 1f, 1f - dist)
+                            rotationY = lerp(0f, 10f, fraction.coerceIn(-1f, 1f))
+                            cameraDistance = 12f * density
+                        },
                     )
                 }
 
@@ -141,16 +160,17 @@ private fun WalletCard(
     ticket: WalletTicket,
     showDocTitle: Boolean,
     onOpenFullTicket: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val s = com.itinera.app.i18n.LocalStrings.current
     Surface(
         color = Color.White,
         shape = RoundedCornerShape(24.dp),
         shadowElevation = 8.dp,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     ) {
         Column(
-            Modifier.padding(horizontal = 22.dp, vertical = 20.dp),
+            Modifier.padding(horizontal = 22.dp, vertical = 14.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             // header: transport + operator
@@ -210,7 +230,7 @@ private fun WalletCard(
                 bitmap = img,
                 contentDescription = s.ticketCode,
                 modifier = Modifier
-                    .fillMaxWidth(if (aspect > 2f) 0.9f else 0.62f)   // wide PDF417 vs square QR/Aztec
+                    .fillMaxWidth(if (aspect > 2f) 0.98f else 0.78f)   // wide PDF417 vs square QR/Aztec
                     .aspectRatio(aspect),
                 contentScale = ContentScale.Fit,
                 filterQuality = FilterQuality.None,
