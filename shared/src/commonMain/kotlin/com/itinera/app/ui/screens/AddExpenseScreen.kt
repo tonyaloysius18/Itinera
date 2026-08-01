@@ -45,13 +45,11 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -70,10 +68,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.itinera.app.i18n.LocalStrings
@@ -93,27 +93,6 @@ import kotlin.math.round
 import kotlin.random.Random
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
-
-/*
- * ─── New string keys to add to your Strings interface (EN + FR) ──────────────
- *   category          "Category"              / "Catégorie"
- *   suggested         "suggested"             / "suggéré"
- *   descriptionHint   "What was it for?"      / "C'était pour quoi ?"
- *   splitEquallyShort "Split equally"         / "Partage égal"
- *   splitCustomShort  "Custom split"          / "Partage libre"
- *   nPeopleEach       "%1$s people · %2$s each" / "%1$s personnes · %2$s chacun"
- *   nPeople           "%s people"             / "%s personnes"
- *   stillToAssign     "%s still to assign"    / "%s encore à répartir"
- *   overAssigned      "%s over"               / "%s en trop"
- *   splitEvenly       "Split evenly"          / "Répartir également"
- *   enterAmount       "Enter an amount"       / "Saisissez un montant"
- *   enterDescription  "Add a description"     / "Ajoutez une description"
- *   selectSomeone     "Pick at least one person" / "Choisissez au moins une personne"
- *   saveExpense       "Save expense"          / "Enregistrer la dépense"
- *
- * Already used elsewhere and reused here: amount, paidByLabel, splitBetween,
- * addExpense, editExpense, save, catAccommodation … catOther.
- */
 
 private fun parseAmount(text: String): Double =
     text.replace(',', '.').toDoubleOrNull() ?: 0.0
@@ -154,11 +133,6 @@ fun AddExpenseScreen(
     val s = LocalStrings.current
     val travellers = trip.travellers
 
-    // ⬅ CHANGED — was rememberSaveable, which survives navigation: leaving this
-    // screen and re-entering it restored the last thing typed, so "add expense"
-    // came back pre-filled with a deleted one. `remember` is dropped on dispose.
-    // Trade-off: a rotation mid-entry now clears the form. See the note at the
-    // bottom of this file if you want both.
     var amountText by remember(existing?.id) {
         mutableStateOf(existing?.amount?.let { if (it == 0.0) "" else twoDecimalsPlain(it) } ?: "")
     }
@@ -171,7 +145,6 @@ fun AddExpenseScreen(
                 ?: ""
         )
     }
-    // Null until the user taps a chip; the inferred suggestion shows through until then.
     var pickedCategoryName by remember(existing?.id) { mutableStateOf(existing?.category?.name) }
     var customMode by remember(existing?.id) { mutableStateOf(existing != null) }
     var splitExpanded by remember(existing?.id) { mutableStateOf(existing != null) }
@@ -198,7 +171,6 @@ fun AddExpenseScreen(
     val customMatches = abs(customSum - amount) < 0.01
     val perPerson = if (involved.isNotEmpty()) amount / involved.size else 0.0
 
-    // The guess follows the description until the user overrides it with a chip.
     val suggested = remember(description) { inferExpenseCategory(description) }
     val picked = pickedCategoryName?.let { name ->
         ExpenseCategory.entries.firstOrNull { it.name == name }
@@ -206,8 +178,6 @@ fun AddExpenseScreen(
     val effectiveCategory = picked ?: suggested ?: ExpenseCategory.OTHER
     val showingSuggestion = picked == null && suggested != null
 
-    // ⬅ CHANGED — was `if (canSave)` hiding the button entirely, which told the
-    // user nothing about what was missing. Now it stays put and says why.
     val blocker: String? = when {
         amount <= 0.0 -> s.enterAmount
         description.isBlank() -> s.enterDescription
@@ -235,21 +205,16 @@ fun AddExpenseScreen(
             Expense(
                 id = existing?.id ?: "exp_${Random.nextLong()}",
                 tripId = trip.id,
-                // ⬅ CHANGED — cased once, on save. Doing it per keystroke fought
-                // anyone typing "petit-déjeuner à Kyoto" or an acronym.
                 description = description.trim().toTitleCase(),
                 amount = amount,
                 paidByTravellerId = paidById,
                 shares = buildShares(),
                 createdAt = existing?.createdAt ?: nowMillis(),
-                // Always explicit, so the inference never has to run again for
-                // this expense — and an override is never silently re-guessed.
                 category = effectiveCategory,
             )
         )
     }
 
-    // Tapping a disabled FAB explains itself rather than doing nothing.
     var pillText by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(pillText) {
         if (pillText != null) {
@@ -258,126 +223,108 @@ fun AddExpenseScreen(
         }
     }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        floatingActionButtonPosition = FabPosition.Center,   // ⬅ CHANGED — was end
-        floatingActionButton = {
-            SaveFab(
-                enabled = canSave,
-                onSave = { save() },
-                onBlocked = { pillText = blocker },
+    Box(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize().imePadding()) {
+            TopBar(
+                title = if (existing == null) s.addExpense else s.editExpense,
+                onBack = onBack,
             )
-        },
-    ) { padding ->
-        // ⬅ CHANGED — only the top inset is applied, so the list runs all the way
-        // to the bottom edge and scrolls under the floating button. Bottom
-        // clearance is handled by the spacer at the end of the scroll instead.
-        Box(Modifier.fillMaxSize().padding(top = padding.calculateTopPadding())) {
-            Column(Modifier.fillMaxSize().imePadding()) {
-                TopBar(
-                    title = if (existing == null) s.addExpense else s.editExpense,
-                    onBack = onBack,
+
+            Column(
+                Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp),
+            ) {
+                AmountField(
+                    value = amountText,
+                    onValueChange = { amountText = sanitizeAmount(amountText, it) },
+                    currencyCode = trip.currencyCode,
                 )
 
-                Column(
-                    Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 16.dp),
-                ) {
-                    AmountField(
-                        value = amountText,
-                        onValueChange = { amountText = sanitizeAmount(amountText, it) },
-                        currencyCode = trip.currencyCode,
-                    )
+                Spacer(Modifier.height(20.dp))
 
-                    Spacer(Modifier.height(20.dp))
+                CategorySection(
+                    selected = effectiveCategory,
+                    isSuggestion = showingSuggestion,
+                    onPick = { pickedCategoryName = it.name },
+                )
 
-                    CategorySection(
-                        selected = effectiveCategory,
-                        isSuggestion = showingSuggestion,
-                        onPick = { pickedCategoryName = it.name },
-                    )
+                Spacer(Modifier.height(20.dp))
 
-                    Spacer(Modifier.height(20.dp))
+                UnderlineField(
+                    label = s.description,
+                    value = description.toTitleCase(),
+                    onValueChange = { description = it },
+                    placeholder = s.descriptionHint,
+                )
 
-                    UnderlineField(
-                        label = s.description,
-                        value = description.toTitleCase(),
-                        onValueChange = { description = it },
-                        placeholder = s.descriptionHint,
-                    )
+                Spacer(Modifier.height(22.dp))
 
-                    Spacer(Modifier.height(22.dp))
+                Text(
+                    s.paidByLabel,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                )
+                Spacer(Modifier.height(10.dp))
+                PayerRow(
+                    travellers = travellers,
+                    selectedId = paidById,
+                    onSelect = { paidById = it },
+                )
 
-                    Text(
-                        s.paidByLabel,
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    )
-                    Spacer(Modifier.height(10.dp))
-                    PayerRow(
-                        travellers = travellers,
-                        selectedId = paidById,
-                        onSelect = { paidById = it },
-                    )
+                Spacer(Modifier.height(22.dp))
 
-                    Spacer(Modifier.height(22.dp))
+                SplitCard(
+                    travellers = travellers,
+                    involvedIds = involvedIds,
+                    customText = customText,
+                    customMode = customMode,
+                    onCustomModeChange = { customMode = it },
+                    expanded = splitExpanded,
+                    onToggleExpanded = { splitExpanded = !splitExpanded },
+                    amount = amount,
+                    customSum = customSum,
+                    perPerson = perPerson,
+                    currencyCode = trip.currencyCode,
+                    onSplitEvenly = {
+                        equalShares(amount, involved).forEach { share ->
+                            customText[share.travellerId] = twoDecimalsPlain(share.amount)
+                        }
+                    },
+                    canSave = canSave,
+                    onSave = { save() },
+                    onBlocked = { pillText = blocker },
+                )
 
-                    SplitCard(
-                        travellers = travellers,
-                        involvedIds = involvedIds,
-                        customText = customText,
-                        customMode = customMode,
-                        onCustomModeChange = { customMode = it },
-                        expanded = splitExpanded,
-                        onToggleExpanded = { splitExpanded = !splitExpanded },
-                        amount = amount,
-                        customSum = customSum,
-                        perPerson = perPerson,
-                        currencyCode = trip.currencyCode,
-                        onSplitEvenly = {
-                            equalShares(amount, involved).forEach { share ->
-                                customText[share.travellerId] = twoDecimalsPlain(share.amount)
-                            }
-                        },
-                    )
-
-                    // Clears the FAB: 40.dp bottom padding + ~56.dp button height
-                    // + breathing room. Bump this if you change the FAB padding.
-                    Spacer(Modifier.height(120.dp))
-                    Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.safeDrawing))
-                }
+                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.safeDrawing))
             }
+        }
 
-            AnimatedVisibility(
-                visible = pillText != null,
-                enter = fadeIn() + slideInVertically { it / 2 },
-                exit = fadeOut() + slideOutVertically { it / 2 },
-                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 120.dp),
+        AnimatedVisibility(
+            visible = pillText != null,
+            enter = fadeIn() + slideInVertically { it / 2 },
+            exit = fadeOut() + slideOutVertically { it / 2 },
+            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 24.dp),
+        ) {
+            Surface(
+                shape = RoundedCornerShape(24.dp),
+                // ⬅ CHANGED — was Color.DarkGray, which didn't adapt to dark mode.
+                color = MaterialTheme.colorScheme.inverseSurface,
+                shadowElevation = 6.dp,
             ) {
-                Surface(
-                    shape = RoundedCornerShape(24.dp),
-                    // ⬅ CHANGED — was Color.DarkGray, which didn't adapt to dark mode.
-                    color = MaterialTheme.colorScheme.inverseSurface,
-                    shadowElevation = 6.dp,
-                ) {
-                    Text(
-                        pillText.orEmpty(),
-                        color = MaterialTheme.colorScheme.inverseOnSurface,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
-                    )
-                }
+                Text(
+                    pillText.orEmpty(),
+                    color = MaterialTheme.colorScheme.inverseOnSurface,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+                )
             }
         }
     }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Amount — the reason the screen exists, sized accordingly
-// ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
 private fun AmountField(
@@ -385,6 +332,29 @@ private fun AmountField(
     onValueChange: (String) -> Unit,
     currencyCode: String,
 ) {
+    val amountTextStyle = MaterialTheme.typography.displaySmall.copy(
+        fontSize = 44.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.onSurface,
+        textAlign = TextAlign.Start,
+    )
+
+    // ⬅ CHANGED — measure the real glyph width instead of guessing (was a fixed
+    // 26.dp/char estimate, then an unbounded widthIn — both left the field either
+    // clipping digits or stretching to fill the row and losing centering). Sizing
+    // to the exact measured width keeps the whole "currency + amount" cluster
+    // tight, so the surrounding Column can center it truly, with a small cursor
+    // buffer so the caret after the last digit is never cropped either.
+    val textMeasurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val fieldWidth = remember(value, amountTextStyle) {
+        val measured = textMeasurer.measure(
+            text = value.ifEmpty { "0" },
+            style = amountTextStyle,
+        )
+        with(density) { measured.size.width.toDp() + 16.dp }
+    }
+
     Column(
         Modifier.fillMaxWidth().padding(top = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -409,15 +379,10 @@ private fun AmountField(
                     value = value,
                     onValueChange = onValueChange,
                     singleLine = true,
-                    textStyle = MaterialTheme.typography.displaySmall.copy(
-                        fontSize = 44.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Start,
-                    ),
+                    textStyle = amountTextStyle,
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    modifier = Modifier.width(amountFieldWidth(value)),
+                    modifier = Modifier.width(fieldWidth),
                 )
             }
         }
@@ -437,18 +402,6 @@ private fun AmountField(
         }
     }
 }
-
-/**
- * Width that grows with the typed digits so the caret sits where you'd expect.
- * 26.dp is roughly one digit at 44.sp SemiBold; if you change the font size,
- * change this with it.
- */
-private fun amountFieldWidth(value: String): Dp =
-    (value.length.coerceAtLeast(1) * 26).dp.coerceAtLeast(30.dp)
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Category
-// ─────────────────────────────────────────────────────────────────────────────
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -524,10 +477,6 @@ private fun CategorySection(
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Description
-// ─────────────────────────────────────────────────────────────────────────────
-
 @Composable
 private fun UnderlineField(
     label: String,
@@ -565,10 +514,6 @@ private fun UnderlineField(
         HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
     }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Paid by
-// ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
 private fun PayerRow(
@@ -626,10 +571,6 @@ private fun PayerRow(
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Split
-// ─────────────────────────────────────────────────────────────────────────────
-
 @Composable
 private fun SplitCard(
     travellers: List<Traveller>,
@@ -644,6 +585,9 @@ private fun SplitCard(
     perPerson: Double,
     currencyCode: String,
     onSplitEvenly: () -> Unit,
+    canSave: Boolean,
+    onSave: () -> Unit,
+    onBlocked: () -> Unit,
 ) {
     val s = LocalStrings.current
     val count = involvedIds.size
@@ -815,6 +759,15 @@ private fun SplitCard(
                     }
                 }
             }
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
+            Box(Modifier.fillMaxWidth().padding(14.dp), contentAlignment = Alignment.Center) {
+                SaveExpenseButton(
+                    enabled = canSave,
+                    onSave = onSave,
+                    onBlocked = onBlocked,
+                )
+            }
         }
     }
 }
@@ -854,57 +807,34 @@ private fun ShareAmountField(value: String, onValueChange: (String) -> Unit) {
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Save bar
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Always present, so the form never loses its primary action mid-entry.
- * When the form isn't valid it dims and reports the blocker on tap rather than
- * vanishing — the old `if (canSave)` left the user with nothing to tap and no
- * idea which field was at fault.
- */
+// Styled to match the Save Leg / Save Place buttons exactly: same ButtonDefaults
+// colors, same size/shape. `enabled` stays true at the Button level (rather than
+// using Button's real disabled state) so a tap while blocked still surfaces the
+// "why can't I save" pill instead of doing nothing.
 @Composable
-private fun SaveFab(
+private fun SaveExpenseButton(
     enabled: Boolean,
     onSave: () -> Unit,
     onBlocked: () -> Unit,
 ) {
     val s = LocalStrings.current
-    // ⬅ CHANGED — the disabled state used onSurface at 12% alpha, which let the
-    // list underneath read straight through the button. Both states are opaque now.
+    val colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
+
     val container by animateColorAsState(
-        targetValue = if (enabled) MaterialTheme.colorScheme.primary
-        else MaterialTheme.colorScheme.surfaceVariant,
+        targetValue = if (enabled) colors.containerColor else colors.disabledContainerColor,
         animationSpec = tween(200),
     )
     val content by animateColorAsState(
-        targetValue = if (enabled) MaterialTheme.colorScheme.onPrimary
-        else MaterialTheme.colorScheme.onSurfaceVariant,
+        targetValue = if (enabled) colors.contentColor else colors.disabledContentColor,
         animationSpec = tween(200),
     )
 
-    ExtendedFloatingActionButton(
+    Button(
         onClick = { if (enabled) onSave() else onBlocked() },
-        containerColor = container,
-        contentColor = content,
-        elevation = FloatingActionButtonDefaults.elevation(if (enabled) 8.dp else 2.dp),
-        shape = RoundedCornerShape(60.dp),
-        modifier = Modifier.padding(bottom = 40.dp),        // ⬅ CHANGED — was 90.dp
-    ) {
-        // ⬅ CHANGED — icon removed; this is the content-lambda overload, so
-        // there's no `icon`/`text` pair to leave half-filled.
-        Text(
-            s.saveExpense,
-            style = MaterialTheme.typography.titleSmall,
-            modifier = Modifier.padding(horizontal = 8.dp),
-        )
-    }
+        colors = ButtonDefaults.buttonColors(containerColor = container, contentColor = content),
+        modifier = Modifier.fillMaxWidth().height(50.dp),
+    ) { Text(s.saveExpense) }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────────────────────────────────────
 
 private fun twoDecimalsPlain(v: Double): String {
     val cents = round(v * 100).toLong()
@@ -919,22 +849,6 @@ private fun currencySymbolOrCode(code: String): String {
     val sym = currencySymbol(code)
     return if (sym.isNotEmpty()) "$sym " else "$code "
 }
-
-/*
- * ─── Why the form state uses `remember`, not `rememberSaveable` ─────────────
- *
- * `rememberSaveable` writes to a SaveableStateRegistry keyed by position in the
- * composition, and that registry outlives this composable. Navigating away and
- * back into the same slot restores whatever was last typed — which meant
- * tapping "+" after deleting an expense re-opened the form pre-filled with it.
- *
- * The cost of `remember` is that rotation (or Android process death) mid-entry
- * clears the form. If that matters more than the above, the fix belongs in the
- * navigation layer rather than here: wrap the screen switch in a
- * `rememberSaveableStateHolder()` and call `removeState(key)` when leaving
- * AddExpense, so the saved bundle is discarded on exit instead of on rotation.
- * Then these can all go back to `rememberSaveable`.
- */
 
 @Composable
 private fun RoundCheckbox(checked: Boolean) {

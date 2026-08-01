@@ -177,6 +177,16 @@ class Strings {
     var amount: String = ""
     var validAmount: String = ""
     var couldntFetch: String = ""
+    var fromYourTrips: String = ""
+    var range7d: String = ""
+    var range30d: String = ""
+    var range90d: String = ""
+    var range1y: String = ""
+    var quickAmounts: String = ""
+    var recentHistory: String = ""
+    var low: String = ""
+    var high: String = ""
+    var average: String = ""
     var fillAllFields: String = ""
     var loginFailed: String = ""
     var passwordTooShort: String = ""
@@ -414,6 +424,7 @@ class Strings {
     var custom: String = ""
 
     var markPaid: String = ""
+    var markAsPaid: String = ""
     var unsettleTrip: String = ""
     var settleUpTrip: String = ""
     var payments: String = ""
@@ -424,6 +435,8 @@ class Strings {
     var youOweBanner: String = ""
     var youAreOwedBanner: String = ""
     var allSquareBanner: String = ""
+    var others: String = ""
+    var waitingOn: String = ""
 
     // World Clock
     var worldClock: String = ""
@@ -639,6 +652,16 @@ class Strings {
         c.amount = this.amount
         c.validAmount = this.validAmount
         c.couldntFetch = this.couldntFetch
+        c.fromYourTrips = this.fromYourTrips
+        c.range7d = this.range7d
+        c.range30d = this.range30d
+        c.range90d = this.range90d
+        c.range1y = this.range1y
+        c.quickAmounts = this.quickAmounts
+        c.recentHistory = this.recentHistory
+        c.low = this.low
+        c.high = this.high
+        c.average = this.average
         c.fillAllFields = this.fillAllFields
         c.loginFailed = this.loginFailed
         c.passwordTooShort = this.passwordTooShort
@@ -865,6 +888,7 @@ class Strings {
         c.custom = this.custom
 
         c.markPaid = this.markPaid
+        c.markAsPaid = this.markAsPaid
         c.unsettleTrip = this.unsettleTrip
         c.settleUpTrip = this.settleUpTrip
         c.payments = this.payments
@@ -875,6 +899,8 @@ class Strings {
         c.youOweBanner = this.youOweBanner
         c.youAreOwedBanner = this.youAreOwedBanner
         c.allSquareBanner = this.allSquareBanner
+        c.others = this.others
+        c.waitingOn = this.waitingOn
 
         c.worldClock = this.worldClock
         c.localLabel = this.localLabel

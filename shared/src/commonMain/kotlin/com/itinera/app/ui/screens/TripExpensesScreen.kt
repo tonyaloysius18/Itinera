@@ -43,7 +43,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -71,6 +70,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -145,9 +145,15 @@ fun TripExpensesScreen(
     }
     val settlements = remember(balances) { computeSettlements(balances) }
     val pairwise = remember(expenses) { computePairwiseDebts(expenses) }
+    // Each person's actual consumption (their share of every expense they're
+    // involved in) — not how much they fronted as the payer.
     val spendingByTraveller = remember(expenses, trip.travellers) {
         trip.travellers
-            .map { t -> t to expenses.filter { it.paidByTravellerId == t.id }.sumOf { it.amount } }
+            .map { t ->
+                t to expenses.sumOf { exp ->
+                    exp.shares.firstOrNull { it.travellerId == t.id }?.amount ?: 0.0
+                }
+            }
             .sortedByDescending { it.second }
     }
 
@@ -243,85 +249,86 @@ fun TripExpensesScreen(
                         )
                     }
 
-                LazyColumn(
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
-                    // ⬅ CHANGED — no horizontal padding here, so sticky day headers span
-                    // edge to edge and rows scroll cleanly underneath them.
-                    contentPadding = PaddingValues(top = 10.dp, bottom = 96.dp + bottomBarInset),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    when (lens) {
-                        ExpenseLens.Timeline -> {
-                            byDay.forEach { (day, dayExpenses) ->
-                                stickyHeader(key = "day-$day") {
-                                    DayHeader(
-                                        label = day.headerLabel(),
-                                        total = dayExpenses.sumOf { it.amount },
-                                        currencyCode = trip.currencyCode,
-                                    )
-                                }
-                                items(dayExpenses, key = { "exp-${it.id}" }) { exp ->
-                                    ExpenseRow(
-                                        expense = exp,
-                                        currencyCode = trip.currencyCode,
-                                        nameOf = nameOf,
-                                        canEdit = canEdit,
-                                        expanded = expandedId == exp.id,
-                                        onToggleExpand = {
-                                            expandedId = if (expandedId == exp.id) null else exp.id
-                                        },
-                                        isSwipeOpen = openSwipeId == exp.id,
-                                        onSwipeOpenChange = { open -> openSwipeId = if (open) exp.id else null },
-                                        onDelete = { onDeleteExpense(exp.id); openSwipeId = null },
-                                        onEdit = { onEditExpense(exp.id) },
-                                        modifier = Modifier.animateItem().padding(horizontal = 16.dp),
-                                    )
+                    LazyColumn(
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                        // ⬅ CHANGED — no horizontal padding here, so sticky day headers span
+                        // edge to edge and rows scroll cleanly underneath them.
+                        contentPadding = PaddingValues(top = 10.dp, bottom = 96.dp + bottomBarInset),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        when (lens) {
+                            ExpenseLens.Timeline -> {
+                                byDay.forEach { (day, dayExpenses) ->
+                                    stickyHeader(key = "day-$day") {
+                                        DayHeader(
+                                            label = day.headerLabel(),
+                                            total = dayExpenses.sumOf { it.amount },
+                                            currencyCode = trip.currencyCode,
+                                        )
+                                    }
+                                    items(dayExpenses, key = { "exp-${it.id}" }) { exp ->
+                                        ExpenseRow(
+                                            expense = exp,
+                                            currencyCode = trip.currencyCode,
+                                            nameOf = nameOf,
+                                            canEdit = canEdit,
+                                            expanded = expandedId == exp.id,
+                                            onToggleExpand = {
+                                                expandedId = if (expandedId == exp.id) null else exp.id
+                                            },
+                                            isSwipeOpen = openSwipeId == exp.id,
+                                            onSwipeOpenChange = { open -> openSwipeId = if (open) exp.id else null },
+                                            onDelete = { onDeleteExpense(exp.id); openSwipeId = null },
+                                            onEdit = { onEditExpense(exp.id) },
+                                            modifier = Modifier.animateItem().padding(horizontal = 16.dp),
+                                        )
+                                    }
                                 }
                             }
-                        }
 
-                        ExpenseLens.Categories -> {
-                            if (byCategory.isEmpty()) {
-                                item(key = "cat-empty") {
-                                    Text(
-                                        s.noCategoryData,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                            ExpenseLens.Categories -> {
+                                if (byCategory.isEmpty()) {
+                                    item(key = "cat-empty") {
+                                        Text(
+                                            s.noCategoryData,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                                            modifier = Modifier.padding(horizontal = 16.dp),
+                                        )
+                                    }
+                                }
+                                items(byCategory, key = { "cat-${it.first.name}" }) { (cat, amount) ->
+                                    CategoryBreakdownRow(
+                                        category = cat,
+                                        amount = amount,
+                                        fraction = if (total > 0) (amount / total).toFloat() else 0f,
+                                        currencyCode = trip.currencyCode,
+                                        onClick = {
+                                            selectedCategoryName = cat.name
+                                            lensOrdinal = ExpenseLens.Timeline.ordinal
+                                        },
                                         modifier = Modifier.padding(horizontal = 16.dp),
                                     )
                                 }
                             }
-                            items(byCategory, key = { "cat-${it.first.name}" }) { (cat, amount) ->
-                                CategoryBreakdownRow(
-                                    category = cat,
-                                    amount = amount,
-                                    fraction = if (total > 0) (amount / total).toFloat() else 0f,
-                                    currencyCode = trip.currencyCode,
-                                    onClick = {
-                                        selectedCategoryName = cat.name
-                                        lensOrdinal = ExpenseLens.Timeline.ordinal
-                                    },
-                                    modifier = Modifier.padding(horizontal = 16.dp),
-                                )
-                            }
-                        }
 
-                        ExpenseLens.Balances -> balancesLens(
-                            trip = trip,
-                            settlements = settlements,
-                            pairwise = pairwise,
-                            spendingByTraveller = spendingByTraveller,
-                            payments = payments,
-                            currentUid = currentUid,
-                            isOwner = isOwner,
-                            isSettled = isSettled,
-                            nameOf = nameOf,
-                            onMarkPaid = onMarkPaid,
-                            onDeletePayment = onDeletePayment,
-                            onSetSettled = onSetSettled,
-                        )
+                            ExpenseLens.Balances -> balancesLens(
+                                trip = trip,
+                                settlements = settlements,
+                                pairwise = pairwise,
+                                spendingByTraveller = spendingByTraveller,
+                                payments = payments,
+                                currentUid = currentUid,
+                                myTravellerId = myTravellerId,   // ⬅ ADD
+                                isOwner = isOwner,
+                                isSettled = isSettled,
+                                nameOf = nameOf,
+                                onMarkPaid = onMarkPaid,
+                                onDeletePayment = onDeletePayment,
+                                onSetSettled = onSetSettled,
+                            )
+                        }
                     }
-                }
                 }
             }
         }
@@ -372,7 +379,7 @@ private fun SummaryHero(
         shape = CardShape,
         color = MaterialTheme.colorScheme.surfaceVariant,
     ) {
-        Column(Modifier.fillMaxWidth().padding(16.dp)) {
+        Column(Modifier.fillMaxWidth().padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text(
@@ -380,11 +387,11 @@ private fun SummaryHero(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     )
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier.height(2.dp))
                     Row(verticalAlignment = Alignment.Bottom) {
                         Text(
                             formatMoney(total, currencyCode),
-                            style = MaterialTheme.typography.headlineMedium,
+                            style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.SemiBold,
                         )
                         if (budget != null) {
@@ -406,13 +413,13 @@ private fun SummaryHero(
                     modifier = Modifier.clickable { onShowCurrencyPicker() },
                 ) {
                     Row(
-                        Modifier.padding(start = 10.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+                        Modifier.padding(start = 8.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(currencyCode, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Medium)
+                        Text(currencyCode, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
                         Icon(
                             Icons.Filled.ArrowDropDown, null,
-                            modifier = Modifier.size(18.dp),
+                            modifier = Modifier.size(16.dp),
                             tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                         )
                     }
@@ -420,11 +427,11 @@ private fun SummaryHero(
             }
 
             if (budget != null) {
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(8.dp))
                 val fraction = (total / budget).toFloat().coerceIn(0f, 1f)
                 val over = total > budget
                 Box(
-                    Modifier.fillMaxWidth().height(6.dp)
+                    Modifier.fillMaxWidth().height(5.dp)
                         .clip(RoundedCornerShape(3.dp))
                         .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f)),
                 ) {
@@ -438,9 +445,9 @@ private fun SummaryHero(
                 }
             }
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(8.dp))
             HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(6.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // The number the viewer actually opened this screen for.
@@ -450,7 +457,7 @@ private fun SummaryHero(
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
                     )
-                    Spacer(Modifier.height(2.dp))
+                    Spacer(Modifier.height(1.dp))
                     val settledUp = myBalance == null || abs(myBalance) < 0.01
                     Text(
                         when {
@@ -503,7 +510,7 @@ private fun CategoryMeter(
 
     Column(modifier.fillMaxWidth()) {
         Row(
-            Modifier.fillMaxWidth().height(12.dp).clip(RoundedCornerShape(6.dp)),
+            Modifier.fillMaxWidth().height(10.dp).clip(RoundedCornerShape(5.dp)),
             horizontalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             slices.forEach { (cat, amount) ->
@@ -527,17 +534,17 @@ private fun CategoryMeter(
             }
         }
 
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(6.dp))
 
         FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             slices.forEach { (cat, amount) ->
                 key(cat) {
                     val active = selected == cat
                     Surface(
-                        shape = RoundedCornerShape(20.dp),
+                        shape = RoundedCornerShape(16.dp),
                         color = if (active) cat.color.copy(alpha = 0.14f) else Color.Transparent,
                         border = BorderStroke(
                             0.5.dp,
@@ -547,16 +554,16 @@ private fun CategoryMeter(
                         modifier = Modifier.clickable { onSelect(if (active) null else cat) },
                     ) {
                         Row(
-                            Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                            Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Box(Modifier.size(7.dp).clip(CircleShape).background(cat.color))
-                            Spacer(Modifier.width(6.dp))
-                            Text(cat.label(), style = MaterialTheme.typography.labelMedium)
-                            Spacer(Modifier.width(6.dp))
+                            Box(Modifier.size(6.dp).clip(CircleShape).background(cat.color))
+                            Spacer(Modifier.width(5.dp))
+                            Text(cat.label(), style = MaterialTheme.typography.labelSmall)
+                            Spacer(Modifier.width(5.dp))
                             Text(
                                 formatMoney(amount, currencyCode),
-                                style = MaterialTheme.typography.labelMedium,
+                                style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                             )
                         }
@@ -818,6 +825,7 @@ private fun LazyListScope.balancesLens(
     spendingByTraveller: List<Pair<Traveller, Double>>,
     payments: List<Payment>,
     currentUid: String,
+    myTravellerId: String?,   // ⬅ ADD — lets the settle-up block lift out your own row
     isOwner: Boolean,
     isSettled: Boolean,
     nameOf: (String) -> String,
@@ -827,14 +835,30 @@ private fun LazyListScope.balancesLens(
 ) {
     item(key = "bal-settle") {
         val s = LocalStrings.current
+        // ⬅ CHANGED — your own settlement is lifted out of the list. "Mark paid"
+        // used to sit inline after the amount, which pushed that row's figure
+        // ~150.dp left of the row above it, so the amounts stopped forming a
+        // column. The action now has its own line and nothing competes with the
+        // number for horizontal space.
+        val mine = settlements.filter {
+            myTravellerId != null &&
+                    (it.fromTravellerId == myTravellerId || it.toTravellerId == myTravellerId)
+        }
+        val others = settlements.filter {
+            myTravellerId == null ||
+                    (it.fromTravellerId != myTravellerId && it.toTravellerId != myTravellerId)
+        }
+
         Surface(
             shape = CardShape,
-            color = MaterialTheme.colorScheme.surfaceVariant,
+            color = MaterialTheme.colorScheme.surface,
+            border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         ) {
             Column(Modifier.fillMaxWidth().padding(16.dp)) {
                 SectionLabel(s.settleUp, s.settleUpHint)
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(14.dp))
+
                 if (settlements.isEmpty()) {
                     Text(
                         s.allSettled,
@@ -842,50 +866,60 @@ private fun LazyListScope.balancesLens(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                     )
                 } else {
-                    settlements.forEach { st ->
-                        val iAmDebtor = trip.travellers
-                            .firstOrNull { it.id == st.fromTravellerId }?.userId == currentUid
-                        Row(
-                            Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
+                    mine.forEach { st ->
+                        val iAmDebtor = st.fromTravellerId == myTravellerId
+                        YourSettlementCard(
+                            counterpartyName = nameOf(
+                                if (iAmDebtor) st.toTravellerId else st.fromTravellerId
+                            ),
+                            amount = st.amount,
+                            currencyCode = trip.currencyCode,
+                            iAmDebtor = iAmDebtor,
+                            onMarkPaid = {
+                                onMarkPaid(st.fromTravellerId, st.toTravellerId, st.amount)
+                            },
+                        )
+                        Spacer(Modifier.height(10.dp))
+                    }
+
+                    if (others.isNotEmpty()) {
+                        if (mine.isNotEmpty()) {
+                            Spacer(Modifier.height(2.dp))
                             Text(
-                                "${nameOf(st.fromTravellerId)} → ${nameOf(st.toTravellerId)}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.weight(1f),
+                                s.others,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                             )
-                            Text(
-                                formatMoney(st.amount, trip.currencyCode),
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.primary,
+                            Spacer(Modifier.height(2.dp))
+                        }
+                        others.forEachIndexed { index, st ->
+                            OtherSettlementRow(
+                                fromName = nameOf(st.fromTravellerId),
+                                toName = nameOf(st.toTravellerId),
+                                amount = st.amount,
+                                currencyCode = trip.currencyCode,
                             )
-                            if (iAmDebtor) {
-                                Spacer(Modifier.width(8.dp))
-                                TextButton(
-                                    onClick = { onMarkPaid(st.fromTravellerId, st.toTravellerId, st.amount) },
-                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
-                                ) { Text(s.markPaid) }
+                            if (index != others.lastIndex) {
+                                HorizontalDivider(
+                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                                )
                             }
                         }
                     }
                 }
 
                 if (isOwner) {
-                    Spacer(Modifier.height(8.dp))
-                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        if (isSettled) {
-                            OutlinedButton(
-                                onClick = { onSetSettled(false) },
-                                contentPadding = PaddingValues(horizontal = 60.dp, vertical = 6.dp),
-                            ) { Text(s.unsettleTrip) }
-                        } else {
-                            Button(
-                                onClick = { onSetSettled(true) },
-                                contentPadding = PaddingValues(horizontal = 60.dp, vertical = 6.dp),
-                                enabled = settlements.isNotEmpty(),
-                            ) { Text(s.settleUpTrip) }
-                        }
+                    Spacer(Modifier.height(16.dp))
+                    // ⬅ CHANGED — outlined in both states. This closes out the whole
+                    // trip and is owner-only, so it shouldn't outrank the viewer's
+                    // own "Mark as paid". One filled control per card.
+                    OutlinedButton(
+                        onClick = { onSetSettled(!isSettled) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(24.dp),
+                        enabled = isSettled || settlements.isNotEmpty(),
+                    ) {
+                        Text(if (isSettled) s.unsettleTrip else s.settleUpTrip)
                     }
                 }
             }
@@ -914,6 +948,7 @@ private fun LazyListScope.balancesLens(
                             formatMoney(amount, trip.currencyCode),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary,
                         )
                     }
                 }
@@ -975,6 +1010,7 @@ private fun LazyListScope.balancesLens(
                             formatMoney(p.amount, trip.currencyCode),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.primary,
                         )
                         if (iMadeIt) {
                             IconButton(onClick = { onDeletePayment(p.id) }) {
@@ -990,6 +1026,129 @@ private fun LazyListScope.balancesLens(
                 }
             }
         }
+    }
+}
+
+/**
+ * Your own settlement, lifted out of the list. The debtor gets a real button;
+ * the creditor gets a status line, because only the person who owes can record
+ * a repayment — `onMarkPaid` writes a Payment from debtor to creditor.
+ */
+@Composable
+private fun YourSettlementCard(
+    counterpartyName: String,
+    amount: Double,
+    currencyCode: String,
+    iAmDebtor: Boolean,
+    onMarkPaid: () -> Unit,
+) {
+    val s = LocalStrings.current
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+    ) {
+        Column(Modifier.fillMaxWidth().padding(12.dp)) {
+            Text(
+                if (iAmDebtor) s.youOweShort else s.youAreOwedShort,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Spacer(Modifier.height(8.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                TravellerAvatar(counterpartyName, size = 32.dp, emphasised = true)
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    counterpartyName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    formatMoney(amount, currencyCode),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            if (iAmDebtor) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth().clickable { onMarkPaid() },
+                    shape = RoundedCornerShape(22.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                ) {
+                    Box(Modifier.padding(vertical = 10.dp), contentAlignment = Alignment.Center) {
+                        Text(
+                            s.markAsPaid,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            fontWeight = FontWeight.Medium,
+                        )
+                    }
+                }
+            } else {
+                Text(
+                    s.waitingOn.replace("%s", counterpartyName),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun OtherSettlementRow(
+    fromName: String,
+    toName: String,
+    amount: Double,
+    currencyCode: String,
+) {
+    Row(
+        Modifier.fillMaxWidth().padding(vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        TravellerAvatar(fromName, size = 26.dp)
+        Spacer(Modifier.width(4.dp))
+        TravellerAvatar(toName, size = 26.dp)
+        Spacer(Modifier.width(10.dp))
+        Text(
+            "$fromName → $toName",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
+            modifier = Modifier.weight(1f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Text(
+            formatMoney(amount, currencyCode),
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold,
+        )
+    }
+}
+
+@Composable
+private fun TravellerAvatar(name: String, size: Dp, emphasised: Boolean = false) {
+    Box(
+        Modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(
+                if (emphasised) MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
+                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            name.firstOrNull()?.uppercase() ?: "?",
+            style = MaterialTheme.typography.labelMedium,
+            color = if (emphasised) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+        )
     }
 }
 
@@ -1016,7 +1175,8 @@ private fun CollapsibleBalanceCard(
     var expanded by rememberSaveable { mutableStateOf(false) }
     Surface(
         shape = CardShape,
-        color = MaterialTheme.colorScheme.surfaceVariant,
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
         modifier = modifier.fillMaxWidth().animateContentSize(),
     ) {
         Column(Modifier.fillMaxWidth().padding(16.dp)) {
