@@ -6,6 +6,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -35,7 +37,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -47,7 +49,6 @@ import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.QrCode2
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material3.AlertDialog
@@ -75,7 +76,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -272,12 +276,8 @@ fun TripDetailScreen(
         .distinct()
         .sorted()
 
-    val legsByDate = trip.legs
-        .sortedWith(compareBy({ it.date }, { parseHourMinute(it.timeLabel).first }, { parseHourMinute(it.timeLabel).second }))
-        .groupBy { it.date }
-    val actsByDate = activities
-        .sortedWith(compareBy({ it.date }, { parseHourMinute(it.time).first }, { parseHourMinute(it.time).second }))
-        .groupBy { it.date }
+    // NOTE — legsByDate / actsByDate were removed: entriesByDate below supersedes
+    // them, and they were re-sorting every leg and activity on each recomposition.
 
     // Merge legs + activities per day, ordered by clock time, so a 10:00 place shows
     // between a 09:00 leg and a 12:45 leg instead of after all legs.
@@ -349,30 +349,90 @@ fun TripDetailScreen(
                         IconButton(onClick = onDocuments) {
                             Icon(Icons.AutoMirrored.Filled.InsertDriveFile, contentDescription = s.documents, tint = MaterialTheme.colorScheme.primary)
                         }
-//                        IconButton(onClick = onMembers) {
-//                            Icon(Icons.Filled.Groups, contentDescription = s.members, tint = MaterialTheme.colorScheme.primary)
-//                        }
                     }
                 },
             )
             Spacer(Modifier.height(8.dp))
             Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-                Text(
-                    "$done ${s.legsTravelled}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Progress(
-                        fraction = if (trip.legs.isEmpty()) 0f else done.toFloat() / trip.legs.size,
-                        modifier = Modifier.weight(1f),
+
+                val rangeLabel = if (allDates.isNotEmpty())
+                    "${allDates.first().label()} – ${allDates.last().label()}" else ""
+                val countries = trip.countriesCovered()
+                val subtitle = listOfNotNull(
+                    rangeLabel.takeIf { it.isNotBlank() },
+                    if (countries > 0) "$countries ${if (countries == 1) s.country else s.countries}" else null,
+                ).joinToString(" · ")
+                if (subtitle.isNotBlank()) {
+                    Text(
+                        subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                     )
-                    Spacer(Modifier.width(12.dp))
-                    IconButton(onClick = onMap) {
-                        Icon(Icons.Filled.Map, contentDescription = "Map", tint = MaterialTheme.colorScheme.primary)
+                    Spacer(Modifier.height(10.dp))
+                }
+
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    TripStatCell("$daysCount", s.days, Modifier.weight(1f))
+                    TripStatCell("${trip.legs.size}", s.legs, Modifier.weight(1f))
+                    TripStatCell("${trip.distanceTravelledKm()}", "km", Modifier.weight(1f))
+                }
+
+                Spacer(Modifier.height(14.dp))
+
+                Column(Modifier.fillMaxWidth()) {
+                    val pct = if (trip.legs.isEmpty()) 0
+                    else (done * 100f / trip.legs.size).roundToInt()
+                    Row(Modifier.fillMaxWidth()) {
+                        // ⬅ CHANGED — "18 Legs Travelled" never said out of how many.
+                        Text(
+                            "$done / ${trip.legs.size} ${s.legsTravelled}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        )
+                        Spacer(Modifier.weight(1f))
+                        Text(
+                            "$pct%",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                        )
+                    }
+                    Spacer(Modifier.height(5.dp))
+                    // ⬅ CHANGED — the Map pill now sits in the same row as the bar
+                    // itself (not the label row above it too), so CenterVertically
+                    // lines its middle up with the bar's middle instead of the
+                    // taller label+bar block.
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Progress(
+                            fraction = if (trip.legs.isEmpty()) 0f else done.toFloat() / trip.legs.size,
+                            modifier = Modifier.weight(1f),
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Surface(
+                            shape = CircleShape,
+                            color = Color.Transparent,
+                            border = BorderStroke(
+                                0.5.dp,
+                                MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
+                            ),
+                            modifier = Modifier.clickable { onMap() },
+                        ) {
+                            Row(
+                                Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Icon(
+                                    Icons.Filled.Map,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(16.dp),
+                                )
+                                Spacer(Modifier.width(6.dp))
+                                Text(s.map, style = MaterialTheme.typography.labelMedium)
+                            }
+                        }
                     }
                 }
             }
@@ -415,261 +475,269 @@ fun TripDetailScreen(
                     } else {
                         allDates.forEachIndexed { index, date ->
                             val dayNumber = index + 1
-                            Text(
-                                "${s.day} $dayNumber · ${date.label()}",
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
-                            )
+                            val entries = entriesByDate[date].orEmpty()
 
-                            entriesByDate[date].orEmpty().forEach { entry ->
-                                when (entry) {
-                                    is DayEntry.LegEntry -> {
-                                        val leg = entry.leg
-                                        val isNext = leg.id == nextLegId
-                                        var showMenu by remember { mutableStateOf(false) }
-                                        var stopsExpanded by remember(leg.id) { mutableStateOf(false) }
+                            DayHeader(dayNumber, date.label())
 
-                                        Box {
-                                            Row(
-                                                Modifier
-                                                    .fillMaxWidth()
-                                                    .combinedClickable(
-                                                        onClick = { if (canEdit) onToggleLeg(leg.id) },
-                                                        onLongClick = { if (canEdit) showMenu = true },
-                                                    )
-                                                    .padding(vertical = 8.dp),
-                                                verticalAlignment = Alignment.Top,
-                                            ) {
-                                                if (leg.completed) {
-                                                    Icon(Icons.Filled.CheckCircle, null, tint = Color(0xFF1D9E75), modifier = Modifier.size(20.dp))
-                                                } else {
-                                                    Icon(
-                                                        Icons.Outlined.Circle, null,
-                                                        tint = if (isNext) Color(0xFFBA7517) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                                                        modifier = Modifier.size(20.dp),
-                                                    )
-                                                }
-                                                Spacer(Modifier.width(12.dp))
-                                                Column {
-                                                    val operatorSuffix = if (leg.operator.isNotBlank()) " (${leg.operator})" else ""
-                                                    Text(
-                                                        "${leg.fromCity} → ${leg.toCity}$operatorSuffix",
-                                                        style = MaterialTheme.typography.bodyLarge,
-                                                        fontWeight = if (isNext) FontWeight.Medium else FontWeight.Normal,
-                                                        textDecoration = if (leg.completed) TextDecoration.LineThrough else null,
-                                                        color = if (leg.completed) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurface,
-                                                    )
-                                                    Spacer(Modifier.height(2.dp))
-                                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                                        Icon(transportIcon(leg.transport), null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                                                        Spacer(Modifier.width(6.dp))
-                                                        val timeDisplay = buildString {
-                                                            append(leg.timeLabel)
-                                                            if (leg.timeLabel.isNotBlank() && leg.endTimeLabel.isNotBlank()) {
-                                                                val (h1, m1) = parseHourMinute(leg.timeLabel)
-                                                                val (h2, m2) = parseHourMinute(leg.endTimeLabel)
-                                                                var diff = (h2 * 60 + m2) - (h1 * 60 + m1)
-                                                                if (diff < 0) diff += 24 * 60 // crosses midnight
-                                                                val h = diff / 60
-                                                                val m = diff % 60
-                                                                val duration = if (h > 0) "${h}h${m}m" else "${m}m"
-                                                                append(" - $duration - ")
-                                                                append(leg.endTimeLabel)
-                                                            } else if (leg.endTimeLabel.isNotBlank()) {
-                                                                append(" - ")
-                                                                append(leg.endTimeLabel)
-                                                            }
-                                                        }
-                                                        val tail = if (isNext) {
-                                                            if (timeDisplay.isNotBlank()) "$timeDisplay · ${s.nextUp}" else s.nextUp
-                                                        } else {
-                                                            timeDisplay
-                                                        }
-                                                        Text(
-                                                            tail,
-                                                            style = MaterialTheme.typography.bodySmall,
-                                                            color = if (isNext) Color(0xFFBA7517) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                                        )
+                            Box(Modifier.fillMaxWidth()) {
+                                // ⬅ ADD — timeline spine. Drawn before the entries so the
+                                // markers paint over it; matchParentSize keeps it out of
+                                // the Box's size calculation.
+                                if (entries.size > 1) {
+                                    val spineColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f)
+                                    Canvas(Modifier.matchParentSize()) {
+                                        val x = 12.dp.toPx()
+                                        val inset = 30.dp.toPx()
+                                        drawLine(
+                                            color = spineColor,
+                                            start = Offset(x, inset),
+                                            end = Offset(x, size.height - inset),
+                                            strokeWidth = 1.5.dp.toPx(),
+                                        )
+                                    }
+                                }
 
-                                                        if (leg.travellerIds.isNotEmpty()) {
-                                                            Spacer(Modifier.width(8.dp))
-                                                            Icon(
-                                                                Icons.Filled.People,
-                                                                null,
-                                                                modifier = Modifier.size(14.dp),
-                                                                tint = if (isNext) Color(0xFFBA7517) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                                            )
-                                                            Spacer(Modifier.width(4.dp))
-                                                            Text(
-                                                                "${leg.travellerIds.size}",
-                                                                style = MaterialTheme.typography.bodySmall,
-                                                                color = if (isNext) Color(0xFFBA7517) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                                            )
-                                                        }
+                                Column(Modifier.fillMaxWidth()) {
+                                    entries.forEach { entry ->
+                                        when (entry) {
+                                            is DayEntry.LegEntry -> {
+                                                val leg = entry.leg
+                                                val isNext = leg.id == nextLegId
+                                                var showMenu by remember { mutableStateOf(false) }
+                                                var stopsExpanded by remember(leg.id) { mutableStateOf(false) }
+                                                val legDocs = documents.filter { it.legId == leg.id }
+
+                                                val duration = if (leg.timeLabel.isNotBlank() && leg.endTimeLabel.isNotBlank()) {
+                                                    val (h1, m1) = parseHourMinute(leg.timeLabel)
+                                                    val (h2, m2) = parseHourMinute(leg.endTimeLabel)
+                                                    var diff = (h2 * 60 + m2) - (h1 * 60 + m1)
+                                                    if (diff < 0) diff += 24 * 60   // crosses midnight
+                                                    val h = diff / 60
+                                                    val m = diff % 60
+                                                    if (h > 0) "${h}h${m}m" else "${m}m"
+                                                } else ""
+
+                                                // ⬅ CHANGED — operator moved out of the title into
+                                                // the meta line. Titles were running to two lines.
+                                                val meta = buildList {
+                                                    if (leg.operator.isNotBlank()) add(leg.operator)
+                                                    when {
+                                                        leg.timeLabel.isNotBlank() && leg.endTimeLabel.isNotBlank() ->
+                                                            add("${leg.timeLabel} – ${leg.endTimeLabel}")
+                                                        leg.timeLabel.isNotBlank() -> add(leg.timeLabel)
+                                                        leg.endTimeLabel.isNotBlank() -> add(leg.endTimeLabel)
                                                     }
+                                                    if (duration.isNotBlank()) add(duration)
+                                                }.joinToString(" · ")
 
-                                                    if (leg.stops.isNotEmpty()) {
-                                                        Spacer(Modifier.height(2.dp))
-                                                        Row(
-                                                            verticalAlignment = Alignment.CenterVertically,
-                                                            modifier = Modifier.clickable(
-                                                                interactionSource = remember { MutableInteractionSource() },
-                                                                indication = null,
-                                                            ) { stopsExpanded = !stopsExpanded },
-                                                        ) {
+                                                Box {
+                                                    Row(
+                                                        Modifier
+                                                            .fillMaxWidth()
+                                                            .combinedClickable(
+                                                                onClick = { if (canEdit) onToggleLeg(leg.id) },
+                                                                onLongClick = { if (canEdit) showMenu = true },
+                                                            )
+                                                            .padding(vertical = 9.dp),
+                                                        verticalAlignment = Alignment.Top,
+                                                    ) {
+                                                        TimelineMarker(
+                                                            completed = leg.completed,
+                                                            highlighted = isNext,
+                                                            icon = transportIcon(leg.transport),
+                                                        )
+                                                        Spacer(Modifier.width(12.dp))
+                                                        Column(Modifier.weight(1f)) {
                                                             Text(
-                                                                "via ${leg.stops.size} " + if (leg.stops.size == 1) "stop" else "stops",
-                                                                style = MaterialTheme.typography.bodySmall,
-                                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                                                "${leg.fromCity} → ${leg.toCity}",
+                                                                style = MaterialTheme.typography.bodyLarge,
+                                                                fontWeight = if (isNext) FontWeight.Medium else FontWeight.Normal,
+                                                                textDecoration = if (leg.completed) TextDecoration.LineThrough else null,
+                                                                color = if (leg.completed)
+                                                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+                                                                else MaterialTheme.colorScheme.onSurface,
                                                             )
-                                                            Icon(
-                                                                if (stopsExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                                                                contentDescription = null,
-                                                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                                                                modifier = Modifier.size(18.dp),
-                                                            )
-                                                        }
-                                                        if (stopsExpanded) {
-                                                            // derive sub-legs: from → stop1 → … → to, with times
-                                                            val segments = buildList {
-                                                                var prevCity = leg.fromCity
-                                                                var prevDep = leg.timeLabel
-                                                                leg.stops.forEach { stop ->
-                                                                    add(LegSegment(prevCity, prevDep, stop.city, stop.arrivalTime))
-                                                                    prevCity = stop.city
-                                                                    prevDep = stop.departureTime
-                                                                }
-                                                                add(LegSegment(prevCity, prevDep, leg.toCity, leg.endTimeLabel))
+                                                            if (meta.isNotBlank()) {
+                                                                Spacer(Modifier.height(2.dp))
+                                                                Text(
+                                                                    meta,
+                                                                    style = MaterialTheme.typography.bodySmall,
+                                                                    color = MaterialTheme.colorScheme.onSurface.copy(
+                                                                        alpha = if (leg.completed) 0.4f else 0.6f
+                                                                    ),
+                                                                )
                                                             }
-                                                            segments.forEach { seg ->
+
+                                                            if (legDocs.isNotEmpty() || leg.travellerIds.isNotEmpty() || isNext) {
+                                                                Spacer(Modifier.height(7.dp))
+                                                                Row(
+                                                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                                                    verticalAlignment = Alignment.CenterVertically,
+                                                                ) {
+                                                                    if (isNext) {
+                                                                        MetaChip(label = s.nextUp, accent = true)
+                                                                    }
+                                                                    if (legDocs.isNotEmpty()) {
+                                                                        MetaChip(
+                                                                            icon = Icons.Filled.QrCode2,
+                                                                            label = s.viewTicket,
+                                                                            loading = barcodeLoading,
+                                                                            onClick = { openLegTickets(leg, legDocs) },
+                                                                        )
+                                                                    }
+                                                                    if (leg.travellerIds.isNotEmpty()) {
+                                                                        MetaChip(
+                                                                            icon = Icons.Filled.People,
+                                                                            label = "${leg.travellerIds.size}",
+                                                                        )
+                                                                    }
+                                                                }
+                                                            }
+
+                                                            if (leg.stops.isNotEmpty()) {
+                                                                Spacer(Modifier.height(4.dp))
                                                                 Row(
                                                                     verticalAlignment = Alignment.CenterVertically,
-                                                                    modifier = Modifier.padding(start = 8.dp, top = 2.dp),
+                                                                    modifier = Modifier.clickable(
+                                                                        interactionSource = remember { MutableInteractionSource() },
+                                                                        indication = null,
+                                                                    ) { stopsExpanded = !stopsExpanded },
                                                                 ) {
-                                                                    Icon(
-                                                                        Icons.Outlined.Circle, null,
-                                                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
-                                                                        modifier = Modifier.size(8.dp),
-                                                                    )
-                                                                    Spacer(Modifier.width(8.dp))
-                                                                    val times = listOf(seg.depTime, seg.arrTime)
-                                                                        .filter { it.isNotBlank() }.joinToString(" - ")
                                                                     Text(
-                                                                        "${seg.fromCity} → ${seg.toCity}" +
-                                                                                if (times.isBlank()) "" else "  ·  $times",
+                                                                        "via ${leg.stops.size} " + if (leg.stops.size == 1) "stop" else "stops",
                                                                         style = MaterialTheme.typography.bodySmall,
                                                                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                                                                     )
+                                                                    Icon(
+                                                                        if (stopsExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                                                                        contentDescription = null,
+                                                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                                                        modifier = Modifier.size(18.dp),
+                                                                    )
+                                                                }
+                                                                if (stopsExpanded) {
+                                                                    val segments = buildList {
+                                                                        var prevCity = leg.fromCity
+                                                                        var prevDep = leg.timeLabel
+                                                                        leg.stops.forEach { stop ->
+                                                                            add(LegSegment(prevCity, prevDep, stop.city, stop.arrivalTime))
+                                                                            prevCity = stop.city
+                                                                            prevDep = stop.departureTime
+                                                                        }
+                                                                        add(LegSegment(prevCity, prevDep, leg.toCity, leg.endTimeLabel))
+                                                                    }
+                                                                    segments.forEach { seg ->
+                                                                        Row(
+                                                                            verticalAlignment = Alignment.CenterVertically,
+                                                                            modifier = Modifier.padding(start = 8.dp, top = 3.dp),
+                                                                        ) {
+                                                                            Icon(
+                                                                                Icons.Outlined.Circle, null,
+                                                                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
+                                                                                modifier = Modifier.size(8.dp),
+                                                                            )
+                                                                            Spacer(Modifier.width(8.dp))
+                                                                            val times = listOf(seg.depTime, seg.arrTime)
+                                                                                .filter { it.isNotBlank() }.joinToString(" - ")
+                                                                            Text(
+                                                                                "${seg.fromCity} → ${seg.toCity}" +
+                                                                                        if (times.isBlank()) "" else "  ·  $times",
+                                                                                style = MaterialTheme.typography.bodySmall,
+                                                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                                                            )
+                                                                        }
+                                                                    }
                                                                 }
                                                             }
                                                         }
                                                     }
-                                                }
-                                            }
 
-                                            val legDocs = documents.filter { it.legId == leg.id }
-                                            if (legDocs.isNotEmpty()) {
-                                                IconButton(
-                                                    onClick = { openLegTickets(leg, legDocs) },
-                                                    enabled = !barcodeLoading,
-                                                    modifier = Modifier.size(34.dp).align(Alignment.CenterEnd),
-                                                ) {
-                                                    if (barcodeLoading)
-                                                        CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                                                    else
-                                                        Icon(
-                                                            Icons.Filled.QrCode2,
-                                                            contentDescription = s.viewTicket,
-                                                            tint = MaterialTheme.colorScheme.primary,
-                                                            modifier = Modifier.size(20.dp),
-                                                        )
-                                                }
-                                            }
-
-                                            MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(14.dp))) {
-                                                DropdownMenu(
-                                                    expanded = showMenu,
-                                                    onDismissRequest = { showMenu = false },
-                                                    offset = DpOffset(x = 250.dp, y = 0.dp),
-                                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                                ) {
-                                                    DropdownMenuItem(
-                                                        text = { Text(s.edit) },
-                                                        leadingIcon = { Icon(Icons.Filled.Edit, null) },
-                                                        onClick = { showMenu = false; onEditLeg(leg.id) },
-                                                    )
-                                                    DropdownMenuItem(
-                                                        text = { Text(s.delete, color = Color(0xFFE03131)) },
-                                                        leadingIcon = { Icon(Icons.Filled.Delete, null, tint = Color(0xFFE03131)) },
-                                                        onClick = { showMenu = false; pendingDeleteLegId = leg.id },
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                    is DayEntry.ActEntry -> {
-                                        val act = entry.act
-                                        var showMenu by remember { mutableStateOf(false) }
-
-                                        Box {
-                                            Row(
-                                                Modifier
-                                                    .fillMaxWidth()
-                                                    .combinedClickable(
-                                                        onClick = { if (canEdit) onToggleActivity(act.id) },
-                                                        onLongClick = { if (canEdit) showMenu = true },
-                                                    )
-                                                    .padding(vertical = 8.dp),
-                                                verticalAlignment = Alignment.Top,
-                                            ) {
-                                                if (act.completed) {
-                                                    Icon(Icons.Filled.CheckCircle, null, tint = Color(0xFF1D9E75), modifier = Modifier.size(20.dp))
-                                                } else {
-                                                    Icon(Icons.Filled.Place, null, tint = Color(0xFF378ADD), modifier = Modifier.size(20.dp))
-                                                }
-                                                Spacer(Modifier.width(12.dp))
-                                                Column {
-                                                    Text(
-                                                        act.title,
-                                                        style = MaterialTheme.typography.bodyLarge,
-                                                        textDecoration = if (act.completed) TextDecoration.LineThrough else null,
-                                                        color = if (act.completed) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurface,
-                                                    )
-                                                    val tail = listOf(act.time, act.location).filter { it.isNotBlank() }.joinToString(" · ")
-                                                    if (tail.isNotBlank()) {
-                                                        Spacer(Modifier.height(2.dp))
-                                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                                            Icon(Icons.Filled.Schedule, null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                                                            Spacer(Modifier.width(6.dp))
-                                                            Text(
-                                                                tail,
-                                                                style = MaterialTheme.typography.bodySmall,
-                                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                                    MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(14.dp))) {
+                                                        DropdownMenu(
+                                                            expanded = showMenu,
+                                                            onDismissRequest = { showMenu = false },
+                                                            offset = DpOffset(x = 250.dp, y = 0.dp),
+                                                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                        ) {
+                                                            DropdownMenuItem(
+                                                                text = { Text(s.edit) },
+                                                                leadingIcon = { Icon(Icons.Filled.Edit, null) },
+                                                                onClick = { showMenu = false; onEditLeg(leg.id) },
+                                                            )
+                                                            DropdownMenuItem(
+                                                                text = { Text(s.delete, color = Color(0xFFE03131)) },
+                                                                leadingIcon = { Icon(Icons.Filled.Delete, null, tint = Color(0xFFE03131)) },
+                                                                onClick = { showMenu = false; pendingDeleteLegId = leg.id },
                                                             )
                                                         }
                                                     }
                                                 }
                                             }
 
-                                            MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(14.dp))) {
-                                                DropdownMenu(
-                                                    expanded = showMenu,
-                                                    onDismissRequest = { showMenu = false },
-                                                    offset = DpOffset(x = 16.dp, y = 0.dp),
-                                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                                ) {
-                                                    DropdownMenuItem(
-                                                        text = { Text(s.edit) },
-                                                        leadingIcon = { Icon(Icons.Filled.Edit, null) },
-                                                        onClick = { showMenu = false; onEditActivity(act.id) },
-                                                    )
-                                                    DropdownMenuItem(
-                                                        text = { Text(s.delete, color = Color(0xFFE03131)) },
-                                                        leadingIcon = { Icon(Icons.Filled.Delete, null, tint = Color(0xFFE03131)) },
-                                                        onClick = { showMenu = false; pendingDeleteActivityId = act.id },
-                                                    )
+                                            is DayEntry.ActEntry -> {
+                                                val act = entry.act
+                                                var showMenu by remember { mutableStateOf(false) }
+                                                val tail = listOf(act.time, act.location)
+                                                    .filter { it.isNotBlank() }.joinToString(" · ")
+
+                                                Box {
+                                                    Row(
+                                                        Modifier
+                                                            .fillMaxWidth()
+                                                            .combinedClickable(
+                                                                onClick = { if (canEdit) onToggleActivity(act.id) },
+                                                                onLongClick = { if (canEdit) showMenu = true },
+                                                            )
+                                                            .padding(vertical = 9.dp),
+                                                        verticalAlignment = Alignment.Top,
+                                                    ) {
+                                                        TimelineMarker(
+                                                            completed = act.completed,
+                                                            highlighted = false,
+                                                            icon = Icons.Filled.Place,
+                                                        )
+                                                        Spacer(Modifier.width(12.dp))
+                                                        Column(Modifier.weight(1f)) {
+                                                            Text(
+                                                                act.title,
+                                                                style = MaterialTheme.typography.bodyLarge,
+                                                                textDecoration = if (act.completed) TextDecoration.LineThrough else null,
+                                                                color = if (act.completed)
+                                                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+                                                                else MaterialTheme.colorScheme.onSurface,
+                                                            )
+                                                            if (tail.isNotBlank()) {
+                                                                Spacer(Modifier.height(2.dp))
+                                                                Text(
+                                                                    tail,
+                                                                    style = MaterialTheme.typography.bodySmall,
+                                                                    color = MaterialTheme.colorScheme.onSurface.copy(
+                                                                        alpha = if (act.completed) 0.4f else 0.6f
+                                                                    ),
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+
+                                                    MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(14.dp))) {
+                                                        DropdownMenu(
+                                                            expanded = showMenu,
+                                                            onDismissRequest = { showMenu = false },
+                                                            offset = DpOffset(x = 16.dp, y = 0.dp),
+                                                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                        ) {
+                                                            DropdownMenuItem(
+                                                                text = { Text(s.edit) },
+                                                                leadingIcon = { Icon(Icons.Filled.Edit, null) },
+                                                                onClick = { showMenu = false; onEditActivity(act.id) },
+                                                            )
+                                                            DropdownMenuItem(
+                                                                text = { Text(s.delete, color = Color(0xFFE03131)) },
+                                                                leadingIcon = { Icon(Icons.Filled.Delete, null, tint = Color(0xFFE03131)) },
+                                                                onClick = { showMenu = false; pendingDeleteActivityId = act.id },
+                                                            )
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
@@ -677,7 +745,6 @@ fun TripDetailScreen(
                                 }
                             }
                         }
-
                         // Souvenir appears at the END of the itinerary, after the last leg,
                         // once every leg is checked. It scrolls; the buttons are pinned below.
                         androidx.compose.animation.AnimatedVisibility(
@@ -715,6 +782,21 @@ fun TripDetailScreen(
                 }
 
                 // Fixed action buttons — pinned to the bottom, do NOT scroll.
+                // ⬅ CHANGED — wrapped in a gradient scrim. The buttons are opaque
+                // pills over a scrolling list; without a fade, day headers and legs
+                // ran straight underneath them.
+                Box(
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .height(190.dp)
+                        .background(
+                            Brush.verticalGradient(
+                                0f to Color.Transparent,
+                                0.45f to MaterialTheme.colorScheme.background,
+                            )
+                        ),
+                )
                 Row(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
@@ -1070,6 +1152,130 @@ fun TripDetailScreen(
 }
 
 /** A derived sub-leg between consecutive points of a leg with stops. */
+/**
+ * Day heading with a numbered chip and the day's destination.
+ *
+ * Not sticky: the itinerary body is a `Column` inside `verticalScroll`, and
+ * `stickyHeader` needs a `LazyColumn`. Converting would also mean reworking the
+ * postcard reveal, which calls `bodyScroll.animateScrollTo(maxValue)`.
+ */
+@Composable
+private fun DayHeader(dayNumber: Int, dateLabel: String) {
+    val s = LocalStrings.current
+    Row(
+        Modifier.fillMaxWidth().padding(top = 20.dp, bottom = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            Modifier
+                .size(24.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                "$dayNumber",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+            )
+        }
+        Spacer(Modifier.width(10.dp))
+        Text(
+            "${s.day} $dayNumber · $dateLabel",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
+        )
+    }
+}
+
+/**
+ * 24dp marker on the timeline spine. Carries the transport type or a pin, so a
+ * completed train and a completed museum no longer look identical — the icon
+ * used to sit at 14dp inside the metadata line where it read as decoration.
+ */
+@Composable
+private fun TimelineMarker(
+    completed: Boolean,
+    highlighted: Boolean,
+    icon: ImageVector,
+) {
+    val done = Color(0xFF1D9E75)
+    val primary = MaterialTheme.colorScheme.primary
+    Box(
+        Modifier
+            .size(24.dp)
+            .clip(CircleShape)
+            .background(
+                when {
+                    completed -> done
+                    highlighted -> primary
+                    else -> MaterialTheme.colorScheme.surfaceVariant
+                }
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            if (completed) Icons.Filled.Check else icon,
+            contentDescription = null,
+            tint = when {
+                completed || highlighted -> Color.White
+                else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f)
+            },
+            modifier = Modifier.size(14.dp),
+        )
+    }
+}
+
+@Composable
+private fun MetaChip(
+    label: String,
+    icon: ImageVector? = null,
+    accent: Boolean = false,
+    loading: Boolean = false,
+    onClick: (() -> Unit)? = null,
+) {
+    val tint = if (accent) MaterialTheme.colorScheme.primary
+    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+    Surface(
+        shape = CircleShape,
+        color = if (accent) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
+        modifier = if (onClick != null && !loading) Modifier.clickable { onClick() } else Modifier,
+    ) {
+        Row(
+            Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (loading) {
+                CircularProgressIndicator(Modifier.size(12.dp), strokeWidth = 1.5.dp, color = tint)
+                Spacer(Modifier.width(5.dp))
+            } else if (icon != null) {
+                Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(13.dp))
+                Spacer(Modifier.width(5.dp))
+            }
+            Text(label, style = MaterialTheme.typography.labelSmall, color = tint)
+        }
+    }
+}
+
+@Composable
+private fun TripStatCell(value: String, label: String, modifier: Modifier = Modifier) {
+    Box(
+        modifier
+            .clip(RoundedCornerShape(10.dp))
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)),
+    ) {
+        Column(Modifier.padding(horizontal = 10.dp, vertical = 8.dp)) {
+            Text(value, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+            Text(
+                label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+            )
+        }
+    }
+}
+
 private data class LegSegment(
     val fromCity: String,
     val depTime: String,

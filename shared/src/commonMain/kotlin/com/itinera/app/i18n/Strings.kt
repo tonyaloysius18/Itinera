@@ -108,6 +108,7 @@ class Strings {
     var appTagline: String = ""
     var myTrips: String = ""
     var countries: String = ""
+    var map: String = ""
     var leg: String = ""
     var legs: String = ""
     var done: String = ""
@@ -585,6 +586,7 @@ class Strings {
         c.appTagline = this.appTagline
         c.myTrips = this.myTrips
         c.countries = this.countries
+        c.map = this.map
         c.leg = this.leg
         c.legs = this.legs
         c.done = this.done
