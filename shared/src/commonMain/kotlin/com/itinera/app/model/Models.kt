@@ -75,6 +75,9 @@ data class Trip(
     val frontRectUrl:  String = "",
     val backTopUrl:    String = "",
     val backBottomUrl: String = "",
+    // Optional trip budget. Leave at 0.0 to hide the budget bar on the expenses
+    // screen; set it and the hero draws spend-against-budget.  ⬅ ADD (optional)
+    val budget: Double = 0.0,
 )
 
 @Serializable
@@ -118,8 +121,7 @@ data class DocItem(
     val segmentIndex: Int = -1,
     val travellerId: String = "",
     val traveller: String = "",
-
-    )
+)
 
 @Serializable
 data class Activity(
@@ -175,6 +177,21 @@ data class ExpenseShare(
     val amount: Double,            // this person's share of the expense
 )
 
+/**
+ * Coarse spend bucket for an expense — drives the category meter and the
+ * Categories lens on TripExpensesScreen.
+ *
+ * Six is deliberate: past that, slices in the stacked bar stop being
+ * distinguishable at phone width and the legend wraps to three rows.
+ *
+ * ⚠️ Adding a value later is only safe if the Json instance gitlive decodes
+ * with has `coerceInputValues = true` — otherwise an older client reading a
+ * document containing the new value throws instead of falling back to OTHER.
+ * Set it before shipping categories; it can't be retrofitted onto installed apps.
+ */
+@Serializable
+enum class ExpenseCategory { ACCOMMODATION, FOOD, TRANSPORT, SHOPPING, ACTIVITIES, OTHER }
+
 @Serializable
 data class Expense(
     val id: String,
@@ -185,8 +202,9 @@ data class Expense(
     val shares: List<ExpenseShare> = emptyList(),   // sums to amount
     val createdAt: Long = 0L,
     val memberIds: List<String> = emptyList(),
-
-    )
+    // Absent on existing documents, so they decode to OTHER. No migration.  ⬅ ADD
+    val category: ExpenseCategory = ExpenseCategory.OTHER,
+)
 
 @Serializable
 data class Payment(
@@ -198,6 +216,7 @@ data class Payment(
     val createdAt: Long = 0L,
     val memberIds: List<String> = emptyList(),
 )
+
 @Serializable                                   // ⬅ ADD
 data class UserProfile(
     val name: String = "",                      // ⬅ defaults added (Firestore needs them)

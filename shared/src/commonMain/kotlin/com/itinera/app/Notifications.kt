@@ -29,6 +29,12 @@ expect class NotificationScheduler() {
 
     /** Cancel a previously scheduled notification by id. */
     fun cancel(id: String)
+
+    /**
+     * Post a notification right away (e.g. "expense added"). Unlike [schedule],
+     * this is not persisted for reboot-rescheduling since it fires immediately.
+     */
+    fun notifyNow(id: String, title: String, body: String, tripId: String = "")
 }
 
 /** Reminder offset choices, in minutes. 0 means reminders are OFF. */

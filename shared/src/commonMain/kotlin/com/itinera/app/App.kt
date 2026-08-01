@@ -81,7 +81,9 @@ import com.itinera.app.i18n.Language
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.i18n.stringsFor
 import com.itinera.app.i18n.systemLanguage
+import com.itinera.app.model.ExpenseCategory
 import com.itinera.app.model.canEdit
+import com.itinera.app.model.classifyExpenseCategory
 import com.itinera.app.ui.Navigator
 import com.itinera.app.ui.Screen
 import com.itinera.app.ui.components.PlaneLoader
@@ -120,6 +122,7 @@ import com.itinera.app.ui.screens.TripMapScreen
 import com.itinera.app.ui.screens.TripsHomeScreen
 import com.itinera.app.ui.screens.WeatherScreen
 import com.itinera.app.ui.screens.WorldClockScreen
+import com.itinera.app.ui.screens.formatMoney
 import com.itinera.app.ui.theme.ThemeMode
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -615,8 +618,25 @@ private fun AppContent(
                                         trip = trip,
                                         existing = existing,
                                         onBack = { navigator.back() },
-                                        onSave = { exp ->
-                                            if (existing == null) repository.addExpense(exp) else repository.updateExpense(exp)
+                                        onSave = { rawExp ->
+                                            val exp = if (rawExp.category == ExpenseCategory.OTHER) {
+                                                rawExp.copy(category = classifyExpenseCategory(rawExp.description))
+                                            } else rawExp
+                                            if (existing == null) {
+                                                repository.addExpense(exp)
+                                                scope.launch {
+                                                    NotificationPermission.request()
+                                                    repository.notificationScheduler.requestPermission()
+                                                    repository.notificationScheduler.notifyNow(
+                                                        id = "expense_added_${exp.id}",
+                                                        title = "New Expense added to ${trip.title}",
+                                                        body = "${exp.description} - ${formatMoney(exp.amount, trip.currencyCode)}",
+                                                        tripId = trip.id,
+                                                    )
+                                                }
+                                            } else {
+                                                repository.updateExpense(exp)
+                                            }
                                             navigator.back()
                                         },
                                     )

@@ -71,6 +71,21 @@ actual class NotificationScheduler actual constructor() {
         ReminderStore.remove(id)
         center.removePendingNotificationRequestsWithIdentifiers(listOf(id))
     }
+
+    actual fun notifyNow(id: String, title: String, body: String, tripId: String) {
+        val content = UNMutableNotificationContent().apply {
+            setTitle(title)
+            setBody(body)
+            setSound(UNNotificationSound.defaultSound)
+            setUserInfo(mapOf("tripId" to tripId))
+        }
+        val request = UNNotificationRequest.requestWithIdentifier(
+            identifier = id,
+            content = content,
+            trigger = null,   // nil trigger = deliver as soon as possible
+        )
+        center.addNotificationRequest(request) { /* ignore error */ }
+    }
 }
 
 private fun currentTimeMillisIos(): Long =

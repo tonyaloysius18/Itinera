@@ -315,6 +315,8 @@ class Strings {
     var remaining: String = ""
     var whoOwesWhom: String = ""
     var whoOwesWhomHint: String = ""
+    var totalSpendings: String = ""
+    var eachTravellerPaid: String = ""
     var splitLabel: String = ""
     var owes: String = ""
     var settleUpHint: String = ""
@@ -524,6 +526,24 @@ class Strings {
     var friShort: String = ""
     var satShort: String = ""
     var sunShort: String = ""
+
+    // Expenses Lenses and Categories
+    var lensTimeline: String = ""
+    var lensCategories: String = ""
+    var lensBalances: String = ""
+    var yourBalance: String = ""
+    var youAreOwedShort: String = ""
+    var youOweShort: String = ""
+    var allSquareShort: String = ""
+    var perDayAverage: String = ""
+    var ofBudget: String = ""
+    var noCategoryData: String = ""
+    var catAccommodation: String = ""
+    var catFood: String = ""
+    var catTransport: String = ""
+    var catShopping: String = ""
+    var catActivities: String = ""
+    var catOther: String = ""
 
     fun copyApply(block: Strings.() -> Unit): Strings {
 
@@ -740,6 +760,8 @@ class Strings {
         c.settleUpHint = this.settleUpHint
         c.whoOwesWhom = this.whoOwesWhom
         c.whoOwesWhomHint = this.whoOwesWhomHint
+        c.totalSpendings = this.totalSpendings
+        c.eachTravellerPaid = this.eachTravellerPaid
         c.splitLabel = this.splitLabel
         c.owes = this.owes
         c.selectTripsToExport = this.selectTripsToExport
@@ -930,6 +952,23 @@ class Strings {
         c.friShort = this.friShort
         c.satShort = this.satShort
         c.sunShort = this.sunShort
+
+        c.lensTimeline = this.lensTimeline
+        c.lensCategories = this.lensCategories
+        c.lensBalances = this.lensBalances
+        c.yourBalance = this.yourBalance
+        c.youAreOwedShort = this.youAreOwedShort
+        c.youOweShort = this.youOweShort
+        c.allSquareShort = this.allSquareShort
+        c.perDayAverage = this.perDayAverage
+        c.ofBudget = this.ofBudget
+        c.noCategoryData = this.noCategoryData
+        c.catAccommodation = this.catAccommodation
+        c.catFood = this.catFood
+        c.catTransport = this.catTransport
+        c.catShopping = this.catShopping
+        c.catActivities = this.catActivities
+        c.catOther = this.catOther
 
         c.block()
         return c

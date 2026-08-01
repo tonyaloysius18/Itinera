@@ -402,6 +402,8 @@ internal val CZ: Strings by lazy { EN.copyApply {
     friShort = "Pá"
     satShort = "So"
     sunShort = "Ne"
+    totalSpendings = "Celkové výdaje"
+    eachTravellerPaid = "Kolik zaplatil každý cestující"
 } }
 
 internal val LV: Strings by lazy { EN.copyApply {
@@ -806,6 +808,8 @@ internal val LV: Strings by lazy { EN.copyApply {
     friShort = "Piek"
     satShort = "Ses"
     sunShort = "Svē"
+    totalSpendings = "Kopējie izdevumi"
+    eachTravellerPaid = "Cik samaksāja katrs ceļotājs"
 } }
 
 internal val LT: Strings by lazy { EN.copyApply {
@@ -1210,6 +1214,8 @@ internal val LT: Strings by lazy { EN.copyApply {
     friShort = "Pen"
     satShort = "Šeš"
     sunShort = "Sek"
+    totalSpendings = "Bendros išlaidos"
+    eachTravellerPaid = "Kiek sumokėjo kiekvienas keliautojas"
 } }
 
 internal val AR: Strings by lazy { EN.copyApply {
@@ -1614,6 +1620,8 @@ internal val AR: Strings by lazy { EN.copyApply {
     friShort = "ج"
     satShort = "س"
     sunShort = "ح"
+    totalSpendings = "إجمالي المصروفات"
+    eachTravellerPaid = "كم دفع كل مسافر"
 } }
 
 internal val TR: Strings by lazy { EN.copyApply {
@@ -2018,6 +2026,8 @@ internal val TR: Strings by lazy { EN.copyApply {
     friShort = "Cum"
     satShort = "Cmt"
     sunShort = "Paz"
+    totalSpendings = "Toplam harcamalar"
+    eachTravellerPaid = "Her gezgin ne kadar ödedi"
 } }
 
 internal val VI: Strings by lazy { EN.copyApply {
@@ -2422,6 +2432,8 @@ internal val VI: Strings by lazy { EN.copyApply {
     friShort = "Th6"
     satShort = "Th7"
     sunShort = "CN"
+    totalSpendings = "Tổng chi tiêu"
+    eachTravellerPaid = "Mỗi du khách đã trả bao nhiêu"
 } }
 
 internal val ID: Strings by lazy { EN.copyApply {
@@ -2826,6 +2838,8 @@ internal val ID: Strings by lazy { EN.copyApply {
     friShort = "Jum"
     satShort = "Sab"
     sunShort = "Min"
+    totalSpendings = "Total pengeluaran"
+    eachTravellerPaid = "Berapa yang dibayar setiap traveler"
 } }
 
 internal val TH: Strings by lazy { EN.copyApply {
@@ -3230,6 +3244,8 @@ internal val TH: Strings by lazy { EN.copyApply {
     friShort = "ศ."
     satShort = "ส."
     sunShort = "อา."
+    totalSpendings = "ยอดใช้จ่ายทั้งหมด"
+    eachTravellerPaid = "แต่ละคนจ่ายไปเท่าไหร่"
 } }
 
 internal val HE: Strings by lazy { EN.copyApply {
@@ -3634,6 +3650,8 @@ internal val HE: Strings by lazy { EN.copyApply {
     friShort = "ו'"
     satShort = "ש'"
     sunShort = "א'"
+    totalSpendings = "סך ההוצאות"
+    eachTravellerPaid = "כמה כל מטייל שילם"
 } }
 
 internal val BN: Strings by lazy { EN.copyApply {
@@ -4038,6 +4056,8 @@ internal val BN: Strings by lazy { EN.copyApply {
     friShort = "শুক্র"
     satShort = "শনি"
     sunShort = "রবি"
+    totalSpendings = "মোট খরচ"
+    eachTravellerPaid = "প্রত্যেক ভ্রমণকারী কত টাকা দিয়েছেন"
 } }
 
 internal val TG: Strings by lazy { EN.copyApply {
@@ -4442,6 +4462,8 @@ internal val TG: Strings by lazy { EN.copyApply {
     friShort = "Ҷм"
     satShort = "Шн"
     sunShort = "Як"
+    totalSpendings = "Хароҷоти умумӣ"
+    eachTravellerPaid = "Ҳар мусофир чанд пул додааст"
 } }
 
 internal val SI: Strings by lazy { EN.copyApply {
@@ -4846,5 +4868,7 @@ internal val SI: Strings by lazy { EN.copyApply {
     friShort = "සිකු"
     satShort = "සෙන"
     sunShort = "ඉරිදා"
+    totalSpendings = "මුළු වියදම්"
+    eachTravellerPaid = "සෑම චාරිකාකරුවෙක්ම කොපමණ ගෙවීය"
 } }
 

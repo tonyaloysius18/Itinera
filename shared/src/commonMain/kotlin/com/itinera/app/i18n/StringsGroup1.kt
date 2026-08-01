@@ -405,6 +405,26 @@ internal val FR: Strings by lazy { EN.copyApply {
     friShort = "Ven"
     satShort = "Sam"
     sunShort = "Dim"
+    totalSpendings = "Dépenses totales"
+    eachTravellerPaid = "Combien chaque voyageur a payé"
+
+    // Expenses
+    lensTimeline = "Chronologie"
+    lensCategories = "Catégories"
+    lensBalances = "Soldes"
+    yourBalance = "Votre solde"
+    youAreOwedShort = "On vous doit"
+    youOweShort = "Vous devez"
+    allSquareShort = "Tout est réglé"
+    perDayAverage = "%s / jour"
+    ofBudget = "sur %s"
+    noCategoryData = "Rien à répartir pour l'instant"
+    catAccommodation = "Logement"
+    catFood = "Repas"
+    catTransport = "Transport"
+    catShopping = "Achats"
+    catActivities = "Activités"
+    catOther = "Autre"
 } }
 
 internal val ES: Strings by lazy { EN.copyApply {
@@ -812,6 +832,8 @@ internal val ES: Strings by lazy { EN.copyApply {
     friShort = "Vie"
     satShort = "Sáb"
     sunShort = "Dom"
+    totalSpendings = "Gastos totales"
+    eachTravellerPaid = "Cuánto pagó cada viajero"
 } }
 
 internal val DE: Strings by lazy { EN.copyApply {
@@ -1219,6 +1241,8 @@ internal val DE: Strings by lazy { EN.copyApply {
     friShort = "Fr"
     satShort = "Sa"
     sunShort = "So"
+    totalSpendings = "Gesamtausgaben"
+    eachTravellerPaid = "Wie viel jeder Reisende bezahlt hat"
 } }
 
 internal val IT: Strings by lazy { EN.copyApply {
@@ -1626,6 +1650,8 @@ internal val IT: Strings by lazy { EN.copyApply {
     friShort = "Ven"
     satShort = "Sab"
     sunShort = "Dom"
+    totalSpendings = "Spese totali"
+    eachTravellerPaid = "Quanto ha pagato ciascun viaggiatore"
 } }
 
 internal val PT: Strings by lazy { EN.copyApply {
@@ -2033,6 +2059,8 @@ internal val PT: Strings by lazy { EN.copyApply {
     friShort = "Sex"
     satShort = "Sáb"
     sunShort = "Dom"
+    totalSpendings = "Total de gastos"
+    eachTravellerPaid = "Quanto cada viajante pagou"
 } }
 
 internal val NL: Strings by lazy { EN.copyApply {
@@ -2440,6 +2468,8 @@ internal val NL: Strings by lazy { EN.copyApply {
     friShort = "Vr"
     satShort = "Za"
     sunShort = "Zo"
+    totalSpendings = "Totale uitgaven"
+    eachTravellerPaid = "Hoeveel elke reiziger heeft betaald"
 } }
 
 internal val PL: Strings by lazy { EN.copyApply {
@@ -2847,6 +2877,8 @@ internal val PL: Strings by lazy { EN.copyApply {
     friShort = "Pt"
     satShort = "Sob"
     sunShort = "Niedz"
+    totalSpendings = "Łączne wydatki"
+    eachTravellerPaid = "Ile zapłacił każdy podróżny"
 } }
 
 internal val ZH: Strings by lazy { EN.copyApply {
@@ -3254,6 +3286,8 @@ internal val ZH: Strings by lazy { EN.copyApply {
     friShort = "周五"
     satShort = "周六"
     sunShort = "周日"
+    totalSpendings = "总支出"
+    eachTravellerPaid = "每位旅行者支付了多少"
 } }
 
 internal val JP: Strings by lazy { EN.copyApply {
@@ -3661,6 +3695,8 @@ internal val JP: Strings by lazy { EN.copyApply {
     friShort = "金"
     satShort = "土"
     sunShort = "日"
+    totalSpendings = "合計支出"
+    eachTravellerPaid = "各旅行者が支払った金額"
 } }
 
 internal val KR: Strings by lazy { EN.copyApply {
@@ -4068,4 +4104,6 @@ internal val KR: Strings by lazy { EN.copyApply {
     friShort = "금"
     satShort = "토"
     sunShort = "일"
+    totalSpendings = "총 지출"
+    eachTravellerPaid = "각 여행자가 지불한 금액"
 } }
