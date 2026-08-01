@@ -1313,9 +1313,6 @@ private fun ExpenseDeleteButton(progress: Float, modifier: Modifier = Modifier, 
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Date helpers
-// ─────────────────────────────────────────────────────────────────────────────
 
 private fun dayOf(epochMillis: Long): LocalDate =
     Instant.fromEpochMilliseconds(epochMillis)
