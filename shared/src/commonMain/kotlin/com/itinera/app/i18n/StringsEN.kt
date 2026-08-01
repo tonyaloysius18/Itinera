@@ -429,4 +429,18 @@ internal val EN: Strings by lazy { Strings().apply {
     catShopping = "Shopping"
     catActivities = "Activities"
     catOther = "Other"
+
+    suggested = "suggested"
+    descriptionHint = "What was it for?"
+    splitEquallyShort = "Split equally"
+    splitCustomShort = "Custom split"
+    nPeopleEach = "%1\$s people · %2\$s each"
+    nPeople = "%s people"
+    stillToAssign = "%s still to assign"
+    overAssigned = "%s over"
+    splitEvenly = "Split evenly"
+    enterAmount = "Enter an amount"
+    enterDescription = "Add a description"
+    selectSomeone = "Pick at least one person"
+    saveExpense = "Save expense"
 } }

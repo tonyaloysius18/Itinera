@@ -545,6 +545,20 @@ class Strings {
     var catActivities: String = ""
     var catOther: String = ""
 
+    var suggested: String = ""
+    var descriptionHint: String = ""
+    var splitEquallyShort: String = ""
+    var splitCustomShort: String = ""
+    var nPeopleEach: String = ""
+    var nPeople: String = ""
+    var stillToAssign: String = ""
+    var overAssigned: String = ""
+    var splitEvenly: String = ""
+    var enterAmount: String = ""
+    var enterDescription: String = ""
+    var selectSomeone: String = ""
+    var saveExpense: String = ""
+
     fun copyApply(block: Strings.() -> Unit): Strings {
 
         val c = Strings()
@@ -969,6 +983,20 @@ class Strings {
         c.catShopping = this.catShopping
         c.catActivities = this.catActivities
         c.catOther = this.catOther
+
+        c.suggested = this.suggested
+        c.descriptionHint = this.descriptionHint
+        c.splitEquallyShort = this.splitEquallyShort
+        c.splitCustomShort = this.splitCustomShort
+        c.nPeopleEach = this.nPeopleEach
+        c.nPeople = this.nPeople
+        c.stillToAssign = this.stillToAssign
+        c.overAssigned = this.overAssigned
+        c.splitEvenly = this.splitEvenly
+        c.enterAmount = this.enterAmount
+        c.enterDescription = this.enterDescription
+        c.selectSomeone = this.selectSomeone
+        c.saveExpense = this.saveExpense
 
         c.block()
         return c

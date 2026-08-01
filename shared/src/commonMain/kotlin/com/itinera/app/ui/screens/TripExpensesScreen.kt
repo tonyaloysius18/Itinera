@@ -332,7 +332,9 @@ fun TripExpensesScreen(
                 // ⬅ CHANGED — was .offset(x = -25.dp, y = 60.dp).padding(end = 20.dp, bottom = 220.dp)
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = 20.dp, bottom = 24.dp + bottomBarInset),
+                    .padding(end = 20.dp, bottom = 24.dp + bottomBarInset)
+                    .offset(x = -10.dp, y = -120.dp),
+
                 containerColor = MaterialTheme.colorScheme.primary,
                 shape = CircleShape,
             ) {

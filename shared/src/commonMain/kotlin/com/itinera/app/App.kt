@@ -83,7 +83,7 @@ import com.itinera.app.i18n.stringsFor
 import com.itinera.app.i18n.systemLanguage
 import com.itinera.app.model.ExpenseCategory
 import com.itinera.app.model.canEdit
-import com.itinera.app.model.classifyExpenseCategory
+import com.itinera.app.model.inferExpenseCategory
 import com.itinera.app.ui.Navigator
 import com.itinera.app.ui.Screen
 import com.itinera.app.ui.components.PlaneLoader
@@ -620,7 +620,7 @@ private fun AppContent(
                                         onBack = { navigator.back() },
                                         onSave = { rawExp ->
                                             val exp = if (rawExp.category == ExpenseCategory.OTHER) {
-                                                rawExp.copy(category = classifyExpenseCategory(rawExp.description))
+                                                rawExp.copy(category = inferExpenseCategory(rawExp.description))
                                             } else rawExp
                                             if (existing == null) {
                                                 repository.addExpense(exp)

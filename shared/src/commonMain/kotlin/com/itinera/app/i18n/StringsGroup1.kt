@@ -425,6 +425,20 @@ internal val FR: Strings by lazy { EN.copyApply {
     catShopping = "Achats"
     catActivities = "Activités"
     catOther = "Autre"
+
+    suggested = "suggéré"
+    descriptionHint = "C'était pour quoi ?"
+    splitEquallyShort = "Partage égal"
+    splitCustomShort = "Partage libre"
+    nPeopleEach = "%1\$s personnes · %2\$s chacun"
+    nPeople = "%s personnes"
+    stillToAssign = "%s encore à répartir"
+    overAssigned = "%s en trop"
+    splitEvenly = "Répartir également"
+    enterAmount = "Saisissez un montant"
+    enterDescription = "Ajoutez une description"
+    selectSomeone = "Choisissez au moins une personne"
+    saveExpense = "Enregistrer la dépense"
 } }
 
 internal val ES: Strings by lazy { EN.copyApply {

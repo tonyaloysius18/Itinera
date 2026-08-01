@@ -43,7 +43,7 @@ private val CATEGORY_RULES: List<CategoryRule> =
  * "Breakfast at hotel" -> FOOD. Falls back to [ExpenseCategory.OTHER] when
  * nothing matches.
  */
-fun classifyExpenseCategory(description: String): ExpenseCategory {
+fun inferExpenseCategory(description: String): ExpenseCategory {
     if (description.isBlank()) return ExpenseCategory.OTHER
     val lower = description.lowercase()
     return CATEGORY_RULES.firstOrNull { it.pattern.containsMatchIn(lower) }?.category
@@ -57,4 +57,4 @@ fun classifyExpenseCategory(description: String): ExpenseCategory {
  * gets a category from the user directly.
  */
 val Expense.effectiveCategory: ExpenseCategory
-    get() = if (category != ExpenseCategory.OTHER) category else classifyExpenseCategory(description)
+    get() = if (category != ExpenseCategory.OTHER) category else inferExpenseCategory(description)
