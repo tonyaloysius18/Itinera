@@ -127,6 +127,10 @@ class Strings {
     var beforeYouGo: String = ""
     var addItem: String = ""
     var settings: String = ""
+    var preferences: String = ""
+    var travelTools: String = ""
+    var tripsAndData: String = ""
+    var support: String = ""
     var backupSync: String = ""
     var appearance: String = ""
     var language: String = ""
@@ -265,6 +269,13 @@ class Strings {
     var archivedTrips: String = ""
     var noArchivedTrips: String = ""
     var noDatesYet: String = ""
+    var inProgress: String = ""
+    var past: String = ""
+    var completed: String = ""
+    var dayXofY: String = ""
+    var startsToday: String = ""
+    var startsTomorrow: String = ""
+    var startsInDays: String = ""
     var tripName: String = ""
     var aLegBetween: String = ""
     var somewhereToVisit: String = ""
@@ -436,6 +447,7 @@ class Strings {
     var minutesPlural: String = ""
     var before: String = ""
     var custom: String = ""
+    var off: String = ""
 
     var markPaid: String = ""
     var markAsPaid: String = ""
@@ -458,6 +470,9 @@ class Strings {
     var addTimeZone: String = ""
     var searchAnyCity: String = ""
     var addCityForTime: String = ""
+    var sameTimeAsYou: String = ""
+    var hoursAhead: String = ""
+    var hoursBehind: String = ""
 
     // Emergency / SOS
     var emergency: String = ""
@@ -494,6 +509,16 @@ class Strings {
     var languageLabel: String = ""
     var searchLanguage: String = ""
     var favorite: String = ""
+    var showLabel: String = ""
+    var commonPhrases: String = ""
+    var savedLabel: String = ""
+    var recentLabel: String = ""
+    var phraseWhereIs: String = ""
+    var phraseHowMuch: String = ""
+    var phraseTableForTwo: String = ""
+    var phraseAllergicTo: String = ""
+    var phraseBillPlease: String = ""
+    var phraseHelpMe: String = ""
 
     // Compass
     var compass: String = ""
@@ -618,6 +643,10 @@ class Strings {
         c.beforeYouGo = this.beforeYouGo
         c.addItem = this.addItem
         c.settings = this.settings
+        c.preferences = this.preferences
+        c.travelTools = this.travelTools
+        c.tripsAndData = this.tripsAndData
+        c.support = this.support
         c.backupSync = this.backupSync
         c.appearance = this.appearance
         c.language = this.language
@@ -723,6 +752,13 @@ class Strings {
         c.archivedTrips = this.archivedTrips
         c.noArchivedTrips = this.noArchivedTrips
         c.noDatesYet = this.noDatesYet
+        c.inProgress = this.inProgress
+        c.past = this.past
+        c.completed = this.completed
+        c.dayXofY = this.dayXofY
+        c.startsToday = this.startsToday
+        c.startsTomorrow = this.startsTomorrow
+        c.startsInDays = this.startsInDays
         c.tripName = this.tripName
         c.aLegBetween = this.aLegBetween
         c.somewhereToVisit = this.somewhereToVisit
@@ -914,6 +950,7 @@ class Strings {
         c.minutesPlural = this.minutesPlural
         c.before = this.before
         c.custom = this.custom
+        c.off = this.off
 
         c.markPaid = this.markPaid
         c.markAsPaid = this.markAsPaid
@@ -935,6 +972,9 @@ class Strings {
         c.addTimeZone = this.addTimeZone
         c.searchAnyCity = this.searchAnyCity
         c.addCityForTime = this.addCityForTime
+        c.sameTimeAsYou = this.sameTimeAsYou
+        c.hoursAhead = this.hoursAhead
+        c.hoursBehind = this.hoursBehind
 
         c.emergency = this.emergency
         c.police = this.police
@@ -968,6 +1008,16 @@ class Strings {
         c.languageLabel = this.languageLabel
         c.searchLanguage = this.searchLanguage
         c.favorite = this.favorite
+        c.showLabel = this.showLabel
+        c.commonPhrases = this.commonPhrases
+        c.savedLabel = this.savedLabel
+        c.recentLabel = this.recentLabel
+        c.phraseWhereIs = this.phraseWhereIs
+        c.phraseHowMuch = this.phraseHowMuch
+        c.phraseTableForTwo = this.phraseTableForTwo
+        c.phraseAllergicTo = this.phraseAllergicTo
+        c.phraseBillPlease = this.phraseBillPlease
+        c.phraseHelpMe = this.phraseHelpMe
         c.compass = this.compass
         c.compassCalibrate = this.compassCalibrate
         c.attachToLeg = this.attachToLeg

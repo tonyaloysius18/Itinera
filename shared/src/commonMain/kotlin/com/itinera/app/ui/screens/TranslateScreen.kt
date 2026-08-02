@@ -5,6 +5,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -12,6 +13,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -34,6 +37,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
@@ -62,14 +66,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.itinera.app.data.FileSharer
 import com.itinera.app.data.TranslateHistoryStore
 import com.itinera.app.data.TranslateLang
@@ -88,7 +96,21 @@ import kotlin.time.ExperimentalTime
 private fun langName(code: String): String =
     translateLanguages.firstOrNull { it.code == code }?.name ?: code
 
-@OptIn(ExperimentalTime::class)
+/**
+ * Comparison key for history de-duplication.
+ *
+ * Case, trailing punctuation and repeated spaces shouldn't make two entries:
+ * "How are you today", "how are you today." and "how  are you today" are the
+ * same lookup. Only used for comparing — what's stored and displayed is
+ * whatever the user actually typed.
+ */
+private fun normalizeForHistory(text: String): String =
+    text.trim()
+        .lowercase()
+        .replace(Regex("\\s+"), " ")
+        .trimEnd('.', ',', '!', '?', ';', ':', '…', ' ')
+
+@OptIn(ExperimentalTime::class, ExperimentalLayoutApi::class)
 @Composable
 fun TranslateScreen(
     translator: Translator,
@@ -110,6 +132,7 @@ fun TranslateScreen(
 
     var history by remember { mutableStateOf(TranslateHistoryStore.all()) }
     var openHistoryId by remember { mutableStateOf<String?>(null) }   // which history card is swiped open
+    var showingFullscreen by remember { mutableStateOf(false) }       // ⬅ ADD
 
     // ── Swap animation (mirrors the currency screen) ──
     val density = LocalDensity.current
@@ -156,6 +179,21 @@ fun TranslateScreen(
         val r = result
         if (text.isBlank() || r.isBlank()) return@LaunchedEffect
         delay(2000)
+        // ⬅ CHANGED — was an exact sourceText comparison, so "how are you today"
+        // and "how are you today." were two entries.
+        val key = normalizeForHistory(text)
+        val samePair = TranslateHistoryStore.all().filter {
+            it.sourceLang == sourceLang.code && it.targetLang == targetLang.code
+        }
+        if (samePair.any { normalizeForHistory(it.sourceText) == key }) return@LaunchedEffect
+
+        // The save fires after a 2s pause, so pausing mid-sentence stored
+        // "how are you" before you'd finished typing "how are you today".
+        // Drop those partials — but never a favourite, which was deliberate.
+        samePair
+            .filter { !it.favorite && key.startsWith(normalizeForHistory(it.sourceText) + " ") }
+            .forEach { TranslateHistoryStore.remove(it.id) }
+
         TranslateHistoryStore.add(
             TranslationEntry(
                 id = Clock.System.now().toEpochMilliseconds().toString(),
@@ -169,17 +207,18 @@ fun TranslateScreen(
         history = TranslateHistoryStore.all()
     }
 
+    val favorites = remember(history) { history.filter { it.favorite } }
+    val recents = remember(history) { history.filterNot { it.favorite } }
+
     Column(Modifier.fillMaxSize()) {
         TopBar(s.translate, onBack = onBack)
 
         LazyColumn(
             Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 120.dp),
             verticalArrangement = Arrangement.spacedBy(0.dp),
         ) {
             item {
-                // ── One connected card: source half / divider / target half ──
-                // Swap button overlaid centered on the seam.
                 Box(Modifier.fillMaxWidth()) {
                     Surface(
                         shape = RoundedCornerShape(16.dp),
@@ -187,7 +226,9 @@ fun TranslateScreen(
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Column(Modifier.fillMaxWidth()) {
-                            // Source half (editable)
+                            // ⬅ CHANGED — source is now the quieter half. You type the
+                            // input once and read the output repeatedly, so the
+                            // emphasis was the wrong way round.
                             FieldHalf(
                                 langName = sourceLang.name,
                                 onPickLang = { pickingSource = true },
@@ -195,7 +236,11 @@ fun TranslateScreen(
                                 trailing = {
                                     if (input.isNotEmpty()) {
                                         IconButton(onClick = { input = "" }) {
-                                            Icon(Icons.Filled.Close, contentDescription = s.close)
+                                            Icon(
+                                                Icons.Filled.Close,
+                                                contentDescription = s.close,
+                                                modifier = Modifier.size(20.dp),
+                                            )
                                         }
                                     }
                                 },
@@ -204,10 +249,12 @@ fun TranslateScreen(
                                     value = input,
                                     onValueChange = { input = it },
                                     textStyle = MaterialTheme.typography.bodyLarge.copy(
-                                        color = MaterialTheme.colorScheme.onSurface,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
                                     ),
                                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                                    modifier = Modifier.fillMaxWidth().heightIn(min = 90.dp),
+                                    // ⬅ CHANGED — was 90.dp on both halves, so a short
+                                    // phrase left most of the card empty.
+                                    modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
                                     decorationBox = { inner ->
                                         if (input.isEmpty()) {
                                             Text(
@@ -221,43 +268,87 @@ fun TranslateScreen(
                                 )
                             }
 
-                            HorizontalDivider(
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                            )
+                            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
 
-                            // Target half (result)
-                            FieldHalf(
-                                langName = targetLang.name,
-                                onPickLang = { pickingTarget = true },
-                                modifier = Modifier.offset { IntOffset(0, bottomSlide.value.toInt()) },
-                                trailing = {
-                                    if (result.isNotBlank()) {
-                                        Row {
-                                            IconButton(onClick = { clipboard.setText(AnnotatedString(result)) }) {
-                                                Icon(Icons.Filled.ContentCopy, contentDescription = s.copy, modifier = Modifier.size(20.dp))
+                            // ⬅ ADD — tinted panel. The translation is what you read
+                            // (or hold up to someone), so it leads.
+                            Box(Modifier.background(MaterialTheme.colorScheme.primary.copy(alpha = 0.09f))) {
+                                FieldHalf(
+                                    langName = targetLang.name,
+                                    onPickLang = { pickingTarget = true },
+                                    modifier = Modifier.offset { IntOffset(0, bottomSlide.value.toInt()) },
+                                    trailing = {
+                                        if (result.isNotBlank()) {
+                                            Row {
+                                                IconButton(onClick = { clipboard.setText(AnnotatedString(result)) }) {
+                                                    Icon(Icons.Filled.ContentCopy, contentDescription = s.copy, modifier = Modifier.size(20.dp))
+                                                }
+                                                IconButton(onClick = { sharer.shareText(result) }) {
+                                                    Icon(Icons.Filled.Share, contentDescription = s.share, modifier = Modifier.size(20.dp))
+                                                }
                                             }
-                                            IconButton(onClick = { sharer.shareText(result) }) {
-                                                Icon(Icons.Filled.Share, contentDescription = s.share, modifier = Modifier.size(20.dp))
+                                        }
+                                    },
+                                ) {
+                                    Column(Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
+                                        when {
+                                            loading -> Row(verticalAlignment = Alignment.CenterVertically) {
+                                                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                                                Spacer(Modifier.width(10.dp))
+                                                Text(
+                                                    s.translating,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                                )
+                                            }
+                                            error != null -> Text(
+                                                error!!,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.error,
+                                            )
+                                            result.isNotBlank() -> SelectionContainer {
+                                                Text(
+                                                    result,
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    fontWeight = FontWeight.Medium,
+                                                )
+                                            }
+                                            else -> Text(
+                                                s.translationLabel,
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                                            )
+                                        }
+
+                                        // ⬅ ADD — the actual use case is holding the phone
+                                        // up to someone. A 16sp line at arm's length
+                                        // doesn't work.
+                                        if (result.isNotBlank() && !loading) {
+                                            Spacer(Modifier.height(12.dp))
+                                            Surface(
+                                                shape = RoundedCornerShape(20.dp),
+                                                color = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.clickable { showingFullscreen = true },
+                                            ) {
+                                                Row(
+                                                    Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                ) {
+                                                    Icon(
+                                                        Icons.Filled.Fullscreen,
+                                                        contentDescription = null,
+                                                        tint = MaterialTheme.colorScheme.onPrimary,
+                                                        modifier = Modifier.size(16.dp),
+                                                    )
+                                                    Spacer(Modifier.width(6.dp))
+                                                    Text(
+                                                        s.showLabel,
+                                                        style = MaterialTheme.typography.labelLarge,
+                                                        color = MaterialTheme.colorScheme.onPrimary,
+                                                    )
+                                                }
                                             }
                                         }
-                                    }
-                                },
-                            ) {
-                                Box(Modifier.fillMaxWidth().heightIn(min = 90.dp)) {
-                                    when {
-                                        loading -> Row(verticalAlignment = Alignment.CenterVertically) {
-                                            CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
-                                            Spacer(Modifier.width(10.dp))
-                                            Text(s.translating, style = MaterialTheme.typography.bodyMedium,
-                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                                        }
-                                        error != null -> Text(error!!, style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.error)
-                                        result.isNotBlank() -> SelectionContainer {
-                                            Text(result, style = MaterialTheme.typography.bodyLarge)
-                                        }
-                                        else -> Text(s.translationLabel, style = MaterialTheme.typography.bodyLarge,
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
                                     }
                                 }
                             }
@@ -269,9 +360,7 @@ fun TranslateScreen(
                         shape = RoundedCornerShape(50),
                         color = MaterialTheme.colorScheme.surface,
                         tonalElevation = 4.dp,
-                        border = androidx.compose.foundation.BorderStroke(
-                            3.dp, MaterialTheme.colorScheme.surfaceVariant,
-                        ),
+                        border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceVariant),
                         modifier = Modifier.align(Alignment.Center),
                     ) {
                         IconButton(onClick = {
@@ -282,7 +371,7 @@ fun TranslateScreen(
                         }) {
                             Icon(
                                 Icons.Filled.SwapVert,
-                                contentDescription = "Swap languages",
+                                contentDescription = s.swap,
                                 modifier = Modifier.rotate(iconRotation),
                             )
                         }
@@ -290,23 +379,68 @@ fun TranslateScreen(
                 }
             }
 
-            // ── History / favorites ──
-            if (history.isNotEmpty()) {
+            // ⬅ ADD — the phrases a traveller actually needs and can't improvise.
+            // Only while the box is empty; they'd be noise otherwise.
+            if (input.isBlank()) {
+                item {
+                    Column(Modifier.fillMaxWidth().padding(top = 20.dp)) {
+                        Text(
+                            s.commonPhrases,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            commonPhrases(s).forEach { phrase ->
+                                Surface(
+                                    shape = RoundedCornerShape(20.dp),
+                                    color = Color.Transparent,
+                                    border = BorderStroke(
+                                        0.5.dp,
+                                        MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
+                                    ),
+                                    modifier = Modifier.clickable { input = phrase },
+                                ) {
+                                    Text(
+                                        phrase,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ⬅ CHANGED — favourites and recents were one undifferentiated list.
+            // Saved phrases are a phrasebook you built; recents are disposable.
+            if (favorites.isNotEmpty()) {
                 item {
                     Row(
                         Modifier.fillMaxWidth().padding(top = 24.dp, bottom = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(s.history, style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
-                        TextButton(onClick = {
-                            TranslateHistoryStore.clearNonFavorites()
-                            history = TranslateHistoryStore.all()
-                        }) { Text(s.clear) }
+                        Icon(
+                            Icons.Filled.Star,
+                            contentDescription = null,
+                            tint = Color(0xFFE8B931),
+                            modifier = Modifier.size(15.dp),
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            s.savedLabel,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                        )
                     }
                 }
-                items(history, key = { it.id }) { entry ->
-                    SwipeableHistoryCard(
+                items(favorites, key = { "fav-${it.id}" }) { entry ->
+                    TranslateEntryCard(
+                        entry = entry,
                         isSwipeOpen = openHistoryId == entry.id,
                         onSwipeOpenChange = { open -> openHistoryId = if (open) entry.id else null },
                         onDelete = {
@@ -314,24 +448,74 @@ fun TranslateScreen(
                             history = TranslateHistoryStore.all()
                             openHistoryId = null
                         },
+                        onTap = {
+                            sourceLang = translateLanguages.first { it.code == entry.sourceLang }
+                            targetLang = translateLanguages.first { it.code == entry.targetLang }
+                            input = entry.sourceText
+                        },
+                        onToggleFavorite = {
+                            TranslateHistoryStore.toggleFavorite(entry.id)
+                            history = TranslateHistoryStore.all()
+                        },
+                    )
+                    Spacer(Modifier.height(8.dp))
+                }
+            }
+
+            if (recents.isNotEmpty()) {
+                item {
+                    Row(
+                        Modifier.fillMaxWidth().padding(top = 20.dp, bottom = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        HistoryRow(
-                            entry = entry,
-                            onTap = {
-                                sourceLang = translateLanguages.first { it.code == entry.sourceLang }
-                                targetLang = translateLanguages.first { it.code == entry.targetLang }
-                                input = entry.sourceText
-                            },
-                            onToggleFavorite = {
-                                TranslateHistoryStore.toggleFavorite(entry.id)
-                                history = TranslateHistoryStore.all()
-                            },
+                        Text(
+                            s.recentLabel,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.weight(1f),
                         )
+                        TextButton(onClick = {
+                            TranslateHistoryStore.clearNonFavorites()
+                            history = TranslateHistoryStore.all()
+                        }) { Text(s.clear) }
                     }
+                }
+                items(recents, key = { it.id }) { entry ->
+                    TranslateEntryCard(
+                        entry = entry,
+                        isSwipeOpen = openHistoryId == entry.id,
+                        onSwipeOpenChange = { open -> openHistoryId = if (open) entry.id else null },
+                        onDelete = {
+                            TranslateHistoryStore.remove(entry.id)
+                            history = TranslateHistoryStore.all()
+                            openHistoryId = null
+                        },
+                        onTap = {
+                            sourceLang = translateLanguages.first { it.code == entry.sourceLang }
+                            targetLang = translateLanguages.first { it.code == entry.targetLang }
+                            input = entry.sourceText
+                        },
+                        onToggleFavorite = {
+                            TranslateHistoryStore.toggleFavorite(entry.id)
+                            history = TranslateHistoryStore.all()
+                        },
+                    )
                     Spacer(Modifier.height(8.dp))
                 }
             }
         }
+    }
+
+    if (showingFullscreen && result.isNotBlank()) {
+        ShowTranslationOverlay(
+            sourceText = input.trim(),
+            resultText = result,
+            fromLang = sourceLang.name,
+            toLang = targetLang.name,
+            onCopy = { clipboard.setText(AnnotatedString(result)) },
+            onShare = { sharer.shareText(result) },
+            onDismiss = { showingFullscreen = false },
+        )
     }
 
     if (pickingSource) {
@@ -575,4 +759,135 @@ private fun LangPickerDialog(
             }
         },
     )
+}
+// ─────────────────────────────────────────────────────────────────────────────
+// Common phrases, entry card, fullscreen show
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Starters a traveller needs and can't improvise. The allergy one especially —
+ * that's the phrase you can't afford to get wrong or paraphrase.
+ */
+private fun commonPhrases(s: com.itinera.app.i18n.Strings): List<String> = listOf(
+    s.phraseWhereIs,
+    s.phraseHowMuch,
+    s.phraseTableForTwo,
+    s.phraseAllergicTo,
+    s.phraseBillPlease,
+    s.phraseHelpMe,
+)
+
+/** History row + swipe-to-delete, so both sections render identically. */
+@Composable
+private fun TranslateEntryCard(
+    entry: TranslationEntry,
+    isSwipeOpen: Boolean,
+    onSwipeOpenChange: (Boolean) -> Unit,
+    onDelete: () -> Unit,
+    onTap: () -> Unit,
+    onToggleFavorite: () -> Unit,
+) {
+    SwipeableHistoryCard(
+        isSwipeOpen = isSwipeOpen,
+        onSwipeOpenChange = onSwipeOpenChange,
+        onDelete = onDelete,
+    ) {
+        HistoryRow(entry = entry, onTap = onTap, onToggleFavorite = onToggleFavorite)
+    }
+}
+
+/**
+ * Fullscreen result, for holding the phone up to someone.
+ *
+ * NOTE — keeping the screen awake and lifting brightness needs an expect/actual
+ * (FLAG_KEEP_SCREEN_ON + WindowManager.LayoutParams.screenBrightness on Android;
+ * UIApplication.isIdleTimerDisabled + UIScreen.brightness on iOS). Left out
+ * deliberately so this change stays in one file — see the follow-up commit.
+ */
+@Composable
+private fun ShowTranslationOverlay(
+    sourceText: String,
+    resultText: String,
+    fromLang: String,
+    toLang: String,
+    onCopy: () -> Unit,
+    onShare: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val s = LocalStrings.current
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background,
+        ) {
+            Column(Modifier.fillMaxSize().padding(24.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "$fromLang → $toLang",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        modifier = Modifier.weight(1f),
+                    )
+                    IconButton(onClick = onDismiss) {
+                        Icon(Icons.Filled.Close, contentDescription = s.close)
+                    }
+                }
+
+                Column(
+                    Modifier.weight(1f).fillMaxWidth(),
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    if (sourceText.isNotBlank()) {
+                        Text(
+                            sourceText,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
+                        )
+                        Spacer(Modifier.height(16.dp))
+                    }
+                    SelectionContainer {
+                        Text(
+                            resultText,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Medium,
+                            lineHeight = MaterialTheme.typography.headlineMedium.fontSize * 1.3,
+                        )
+                    }
+                }
+
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    OverlayAction(Icons.Filled.ContentCopy, s.copy, Modifier.weight(1f), onCopy)
+                    OverlayAction(Icons.Filled.Share, s.share, Modifier.weight(1f), onShare)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun OverlayAction(
+    icon: ImageVector,
+    label: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    Surface(
+        modifier = modifier.clickable { onClick() },
+        shape = RoundedCornerShape(24.dp),
+        color = Color.Transparent,
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
+    ) {
+        Row(
+            Modifier.padding(vertical = 12.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(icon, contentDescription = null, modifier = Modifier.size(17.dp))
+            Spacer(Modifier.width(8.dp))
+            Text(label, style = MaterialTheme.typography.labelLarge, textAlign = TextAlign.Center)
+        }
+    }
 }

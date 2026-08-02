@@ -455,13 +455,18 @@ fun TripDetailScreen(
                 Column(
                     Modifier
                         .fillMaxSize()
-                        .verticalScroll(bodyScroll)
+                        // ⬅ CHANGED — was always scrollable, even with nothing to
+                        // scroll to; the empty state doesn't need it.
+                        .then(if (allDates.isNotEmpty()) Modifier.verticalScroll(bodyScroll) else Modifier)
                         .padding(horizontal = 16.dp)
-                        .padding(bottom = floatingBarHeight + 16.dp)
+                        .padding(bottom = if (allDates.isNotEmpty()) floatingBarHeight + 16.dp else 0.dp)
                 ) {
                     if (allDates.isEmpty()) {
+                        // ⬅ CHANGED — was a 300.dp top-padding guess to fake centering
+                        // inside a scrollable column; now that the column isn't
+                        // scrollable, it can just center for real.
                         Column(
-                            Modifier.fillMaxWidth().padding(top = 300.dp),
+                            Modifier.fillMaxSize(),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center,
                         ) {
@@ -818,7 +823,7 @@ fun TripDetailScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
-                            .padding(bottom = 24.dp),
+                            .padding(bottom = 48.dp),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {

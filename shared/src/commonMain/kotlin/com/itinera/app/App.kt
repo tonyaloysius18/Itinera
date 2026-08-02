@@ -82,6 +82,7 @@ import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.i18n.stringsFor
 import com.itinera.app.i18n.systemLanguage
 import com.itinera.app.model.ExpenseCategory
+import com.itinera.app.model.Trip
 import com.itinera.app.model.canEdit
 import com.itinera.app.model.inferExpenseCategory
 import com.itinera.app.ui.Navigator
@@ -119,14 +120,19 @@ import com.itinera.app.ui.screens.TravellersScreen
 import com.itinera.app.ui.screens.TripDetailScreen
 import com.itinera.app.ui.screens.TripExpensesScreen
 import com.itinera.app.ui.screens.TripMapScreen
+import com.itinera.app.ui.screens.TripPhase
 import com.itinera.app.ui.screens.TripsHomeScreen
 import com.itinera.app.ui.screens.WeatherScreen
 import com.itinera.app.ui.screens.WorldClockScreen
 import com.itinera.app.ui.screens.formatMoney
+import com.itinera.app.ui.screens.tripPhase
 import com.itinera.app.ui.theme.ThemeMode
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 import kotlin.math.abs
+import kotlin.time.Clock
 
 /**
  * App root. Owns the global state and routes the current screen.
@@ -675,6 +681,12 @@ private fun AppContent(
                                 onBackupStatus = { navigator.push(Screen.BackupStatus) },
                                 onHelp = { navigator.push(Screen.Help) },
                                 onAbout = { navigator.push(Screen.About) },
+                                appearanceValue = when (themeMode) {
+                                    ThemeMode.SYSTEM -> if (isSystemInDarkTheme()) s.dark else s.light
+                                    ThemeMode.LIGHT -> s.light
+                                    ThemeMode.DARK -> s.dark
+                                },
+                                languageValue = if (language == Language.SYSTEM) systemLanguage().nativeName else language.nativeName,
                             )
 
                             Screen.Account -> AccountScreen(
@@ -751,7 +763,9 @@ private fun AppContent(
                                         zones = repository.worldClockStore.all()
                                     },
                                     onBack = { navigator.back() },
+                                    tripCities = activeTripCities(repository.trips),
                                 )
+
                             }
 
                             Screen.Emergency -> EmergencyScreen(onBack = { navigator.back() })
@@ -770,6 +784,7 @@ private fun AppContent(
                                     onAddCity = { repository.weatherStore.add(it); cities = repository.weatherStore.all() },
                                     onRemoveCity = { repository.weatherStore.remove(it); cities = repository.weatherStore.all() },
                                     onBack = { navigator.back() },
+                                    tripCities = activeTripCities(repository.trips),
                                 )
                             }
 
@@ -1159,4 +1174,15 @@ private fun syncLabel(lastSyncedAt: Long?, s: com.itinera.app.i18n.Strings): Str
         hours < 24 -> "$hours ${if (hours == 1L) s.hourAgo else s.hoursAgo}"
         else -> "$days ${if (days == 1L) s.dayAgo else s.daysAgo}"
     }
+}
+
+private fun activeTripCities(trips: List<Trip>): List<String> {
+    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+    return trips
+        .filter { tripPhase(it, today) != TripPhase.PAST }
+        .flatMap { it.legs }
+        .map { it.toCity }
+        .filter { it.isNotBlank() }
+        .distinct()
+        .take(6)
 }

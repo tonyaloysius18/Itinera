@@ -114,7 +114,7 @@ fun CalendarScreen(
      * ⬅ ADD — activities carry a date, time and location, and TripDetailScreen
      * already merges them with legs. A calendar that omits "Porsche Museum,
      * 09:00" is showing half the itinerary. Defaulted so existing call sites
-     * still compile; pass repo.activities from App.kt to light this up.
+     * still compile; pass repository.activities from App.kt to light this up.
      */
     activities: List<Activity> = emptyList(),
     /**

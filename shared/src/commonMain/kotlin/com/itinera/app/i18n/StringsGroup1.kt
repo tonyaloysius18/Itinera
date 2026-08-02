@@ -28,6 +28,10 @@ internal val FR: Strings by lazy { EN.copyApply {
     beforeYouGo = "Avant le départ"
     addItem = "Ajouter"
     settings = "Réglages"
+    preferences = "Préférences"
+    travelTools = "Outils de voyage"
+    tripsAndData = "Voyages et données"
+    support = "Aide"
     backupSync = "Sauvegarde et sync"
     appearance = "Apparence"
     language = "Langue"
@@ -302,6 +306,7 @@ internal val FR: Strings by lazy { EN.copyApply {
     minutesPlural = "minutes"
     before = "avant"
     custom = "Personnalisé…"
+    off = "Désactivé"
 
     createTripOption = "Créer un voyage"
     joinTripOption = "Rejoindre un voyage"
