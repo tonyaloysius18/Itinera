@@ -21,14 +21,6 @@ import kotlinx.datetime.toInstant
  * Holds the Application context so the shared scheduler can reach Android APIs.
  * Set this once from MainActivity.onCreate via AndroidApp.init(this).
  */
-object AndroidApp {
-    lateinit var context: Context
-        private set
-
-    fun init(ctx: Context) {
-        context = ctx.applicationContext
-    }
-}
 
 private const val CHANNEL_ID = "itinera_leg_reminders"
 private const val CHANNEL_NAME = "Trip reminders"

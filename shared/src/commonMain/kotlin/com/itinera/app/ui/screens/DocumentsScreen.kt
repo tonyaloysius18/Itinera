@@ -19,18 +19,24 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
@@ -48,19 +54,26 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.itinera.app.data.PickedFile
 import com.itinera.app.data.rememberFilePicker
 import com.itinera.app.i18n.LocalStrings
@@ -143,6 +156,8 @@ fun DocumentsScreen(
     var pendingDeleteId by remember { mutableStateOf<String?>(null) }
     var showChoiceMenu by remember { mutableStateOf(false) }
     var editingDoc by remember { mutableStateOf<DocItem?>(null) }
+    var query by rememberSaveable { mutableStateOf("") }              // ⬅ ADD
+    var activeCategory by rememberSaveable { mutableStateOf<String?>(null) }   // ⬅ ADD
 
     val imagePicker = rememberImagePickerLauncher(
         selectionMode = SelectionMode.Single,
@@ -189,7 +204,22 @@ fun DocumentsScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
                     ) {
-                        Text("📄", style = MaterialTheme.typography.displayMedium)
+                        // ⬅ CHANGED — was Text("📄"), which doesn't tint with the
+                        // theme and renders differently across platforms.
+                        Box(
+                            Modifier
+                                .size(64.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.InsertDriveFile,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(28.dp),
+                            )
+                        }
                         Spacer(Modifier.height(12.dp))
                         Text(
                             s.noDocuments,
@@ -206,74 +236,110 @@ fun DocumentsScreen(
                 }
 
                 else -> {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(11.dp),
-                        verticalArrangement = Arrangement.spacedBy(11.dp),
-                        contentPadding = PaddingValues(vertical = 12.dp),
-                    ) {
-                        items(documents, key = { it.id }) { doc ->
-                            var showMenu by remember { mutableStateOf(false) }
+                    // ⬅ ADD — search + category filter. `category` and ALL_CATEGORIES
+                    // already existed on the model; nothing consumed them.
+                    val counts = remember(documents) {
+                        documents.groupingBy { it.category.ifBlank { CAT_OTHER } }.eachCount()
+                    }
+                    val visible = remember(documents, query, activeCategory, trip.travellers) {
+                        val q = query.trim()
+                        documents.filter { doc ->
+                            val catOk = activeCategory == null ||
+                                    doc.category.ifBlank { CAT_OTHER } == activeCategory
+                            val textOk = q.isBlank() ||
+                                    doc.title.contains(q, ignoreCase = true) ||
+                                    doc.traveller.contains(q, ignoreCase = true) ||
+                                    trip.travellers.firstOrNull { it.id == doc.travellerId }
+                                        ?.let { "${it.firstName} ${it.surname}".contains(q, ignoreCase = true) } == true
+                            catOk && textOk
+                        }
+                    }
 
-                            Box {
-                                Surface(
-                                    modifier = Modifier.combinedClickable(
-                                        onClick = { onOpenDoc(doc.id) },
-                                        onLongClick = { if (canEdit) showMenu = true },
-                                    ),
-                                    shape = CardShape,
-                                    border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
-                                ) {
-                                    Column(
-                                        Modifier.fillMaxWidth().padding(vertical = 16.dp, horizontal = 10.dp),
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                    ) {
-                                        Icon(docIcon(doc.mimeType), null, tint = docColor(doc.mimeType), modifier = Modifier.size(34.dp))
-                                        Spacer(Modifier.height(9.dp))
-                                        Text(doc.title, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
-                                        val travellerName = remember(doc.traveller, doc.travellerId, trip.travellers) {
-                                            if (doc.traveller.isNotBlank()) {
-                                                doc.traveller
-                                            } else {
-                                                trip.travellers.find { it.id == doc.travellerId }?.let { "${it.firstName} ${it.surname}".trim() } ?: ""
-                                            }
-                                        }
-                                        if (travellerName.isNotBlank()) {
-                                            Text(travellerName, style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                                        }
-                                        Text(
-                                            categoryLabel(doc.category, s),
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                            textAlign = TextAlign.Center,
-                                        )
-                                    }
+                    DocumentSearchField(
+                        value = query,
+                        onValueChange = { query = it },
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                    )
+
+                    Spacer(Modifier.height(10.dp))
+
+                    CategoryFilterRow(
+                        counts = counts,
+                        total = documents.size,
+                        active = activeCategory,
+                        onSelect = { activeCategory = it },
+                    )
+
+                    if (visible.isEmpty()) {
+                        Column(
+                            Modifier.fillMaxSize().padding(horizontal = 32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                        ) {
+                            Icon(
+                                Icons.Filled.Search,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                                modifier = Modifier.size(36.dp),
+                            )
+                            Spacer(Modifier.height(10.dp))
+                            Text(
+                                s.noMatchingDocuments,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                    } else {
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(11.dp),
+                            verticalArrangement = Arrangement.spacedBy(11.dp),
+                            contentPadding = PaddingValues(vertical = 12.dp),
+                        ) {
+                            items(visible, key = { it.id }) { doc ->
+                                var showMenu by remember { mutableStateOf(false) }
+
+                                val travellerName = remember(doc.traveller, doc.travellerId, trip.travellers) {
+                                    if (doc.traveller.isNotBlank()) doc.traveller
+                                    else trip.travellers.find { it.id == doc.travellerId }
+                                        ?.let { "${it.firstName} ${it.surname}".trim() }
+                                        .orEmpty()
                                 }
 
-                                MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(14.dp))) {
-                                    DropdownMenu(
-                                        expanded = showMenu,
-                                        onDismissRequest = { showMenu = false },
-                                        offset = DpOffset(x = 40.dp, y = (-40).dp),
-                                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    ) {
-                                        DropdownMenuItem(
-                                            text = { Text(s.edit) },
-                                            leadingIcon = { Icon(Icons.Filled.Edit, null) },
-                                            onClick = {
-                                                showMenu = false
-                                                editingDoc = doc
-                                            },
-                                        )
-                                        DropdownMenuItem(
-                                            text = { Text(s.delete, color = Color(0xFFE03131)) },
-                                            leadingIcon = { Icon(Icons.Filled.Delete, null, tint = Color(0xFFE03131)) },
-                                            onClick = {
-                                                showMenu = false
-                                                pendingDeleteId = doc.id
-                                            },
-                                        )
+                                Box {
+                                    DocumentCard(
+                                        doc = doc,
+                                        subtitle = travellerName.ifBlank { categoryLabel(doc.category, s) },
+                                        onClick = { onOpenDoc(doc.id) },
+                                        onLongClick = { if (canEdit) showMenu = true },
+                                    )
+
+                                    MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(14.dp))) {
+                                        DropdownMenu(
+                                            expanded = showMenu,
+                                            onDismissRequest = { showMenu = false },
+                                            offset = DpOffset(x = 40.dp, y = (-40).dp),
+                                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        ) {
+                                            DropdownMenuItem(
+                                                text = { Text(s.edit) },
+                                                leadingIcon = { Icon(Icons.Filled.Edit, null) },
+                                                onClick = {
+                                                    showMenu = false
+                                                    editingDoc = doc
+                                                },
+                                            )
+                                            DropdownMenuItem(
+                                                text = { Text(s.delete, color = Color(0xFFE03131)) },
+                                                leadingIcon = { Icon(Icons.Filled.Delete, null, tint = Color(0xFFE03131)) },
+                                                onClick = {
+                                                    showMenu = false
+                                                    pendingDeleteId = doc.id
+                                                },
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -417,6 +483,284 @@ fun DocumentsScreen(
                 onUpdateDocument(docId, title, category, legId, segmentIndex, travellerId)
             }
         )
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Search, filter, card
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Accent per category — replaces repeating the word "Transport" on every card. */
+private fun categoryColor(category: String): Color = when (category) {
+    CAT_TRANSPORT -> Color(0xFFBA7517)
+    CAT_ACCOMMODATION -> Color(0xFF7F77DD)
+    CAT_ATTRACTION -> Color(0xFFD85A30)
+    else -> Color(0xFF888780)
+}
+
+/** "PDF" / "JPG" badge, since the file-type icon is hidden behind a thumbnail. */
+private fun formatBadge(mimeType: String, fileName: String): String {
+    val ext = fileName.substringAfterLast('.', "").uppercase()
+    if (ext.isNotBlank() && ext.length <= 4) return ext
+    return when {
+        mimeType.contains("pdf", ignoreCase = true) -> "PDF"
+        mimeType.startsWith("image", ignoreCase = true) -> "IMG"
+        else -> "FILE"
+    }
+}
+
+@Composable
+private fun DocumentSearchField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val s = LocalStrings.current
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        color = onSurface.copy(alpha = 0.06f),
+    ) {
+        Row(
+            Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                Icons.Filled.Search,
+                contentDescription = null,
+                tint = onSurface.copy(alpha = 0.45f),
+                modifier = Modifier.size(18.dp),
+            )
+            Spacer(Modifier.width(10.dp))
+            Box(Modifier.weight(1f)) {
+                if (value.isEmpty()) {
+                    Text(
+                        s.searchDocuments,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = onSurface.copy(alpha = 0.4f),
+                    )
+                }
+                BasicTextField(
+                    value = value,
+                    onValueChange = onValueChange,
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = onSurface),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            if (value.isNotEmpty()) {
+                Icon(
+                    Icons.Filled.Close,
+                    contentDescription = s.clear,
+                    tint = onSurface.copy(alpha = 0.5f),
+                    modifier = Modifier
+                        .size(18.dp)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                        ) { onValueChange("") },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CategoryFilterRow(
+    counts: Map<String, Int>,
+    total: Int,
+    active: String?,
+    onSelect: (String?) -> Unit,
+) {
+    val s = LocalStrings.current
+    // Categories with nothing in them are hidden rather than offering a chip
+    // that leads to an empty grid.
+    val shown = remember(counts) { ALL_CATEGORIES.filter { (counts[it] ?: 0) > 0 } }
+    val listState = rememberLazyListState()
+
+    // ⬅ ADD — bring the selected chip into view. This was a plain Row with
+    // horizontalScroll, so the offset survived the selection change: scrolling
+    // right to reach "Attraction" and then tapping "All" left "All" half
+    // off-screen on the left.
+    val selectedIndex = if (active == null) 0
+    else shown.indexOf(active).let { if (it < 0) 0 else it + 1 }
+    LaunchedEffect(selectedIndex) {
+        listState.animateScrollToItem(selectedIndex)
+    }
+
+    LazyRow(
+        state = listState,
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        item(key = "all") {
+            FilterChipPill(
+                label = s.all,
+                count = total,
+                selected = active == null,
+                dotColor = null,
+                onClick = { onSelect(null) },
+            )
+        }
+        shown.forEach { cat ->
+            item(key = cat) {
+                FilterChipPill(
+                    label = categoryLabel(cat, s),
+                    count = counts[cat] ?: 0,
+                    selected = active == cat,
+                    dotColor = categoryColor(cat),
+                    onClick = { onSelect(if (active == cat) null else cat) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FilterChipPill(
+    label: String,
+    count: Int,
+    selected: Boolean,
+    dotColor: Color?,
+    onClick: () -> Unit,
+) {
+    // ⬅ CHANGED — was a solid primary fill when selected, which turned every
+    // chip blue regardless of category. Mirrors CategoryMeter in
+    // TripExpensesScreen: tint and border in the category's own colour, dot
+    // always visible, label stays onSurface.
+    val accent = dotColor ?: MaterialTheme.colorScheme.onSurface
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = if (selected) accent.copy(alpha = 0.14f) else Color.Transparent,
+        border = BorderStroke(
+            if (selected) 1.dp else 0.5.dp,
+            if (selected) accent.copy(alpha = 0.55f)
+            else MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
+        ),
+        modifier = Modifier.clickable { onClick() },
+    ) {
+        Row(
+            Modifier.padding(horizontal = 11.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (dotColor != null) {
+                Box(Modifier.size(6.dp).clip(CircleShape).background(dotColor))
+                Spacer(Modifier.width(6.dp))
+            }
+            Text(
+                label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (selected) 1f else 0.8f),
+            )
+            Spacer(Modifier.width(5.dp))
+            Text(
+                "$count",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+            )
+        }
+    }
+}
+
+/**
+ * Grid tile. The thumbnail area is a fixed height and the title is one line, so
+ * every card is the same size — previously a card with a traveller name was a
+ * line taller, and LazyVerticalGrid sizes each row to its tallest item, which
+ * left ragged gaps.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun DocumentCard(
+    doc: DocItem,
+    subtitle: String,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+) {
+    val isImage = doc.mimeType.startsWith("image", ignoreCase = true)
+    // ⬅ CHANGED — images preview from fileUrl directly; PDFs preview from a
+    // thumbUrl rendered once at upload time. Blank on both = generic icon.
+    val previewUrl = doc.thumbUrl.ifBlank { if (isImage) doc.fileUrl else "" }
+    val onSurface = MaterialTheme.colorScheme.onSurface
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+        shape = CardShape,
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
+    ) {
+        Column(Modifier.fillMaxWidth()) {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(96.dp)
+                    .background(onSurface.copy(alpha = 0.05f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                // ⬅ ADD — real thumbnails for image documents. fileUrl was already
+                // on the model; every image was rendering as the same generic icon.
+                if (previewUrl.isNotBlank()) {
+                    AsyncImage(
+                        model = previewUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else {
+                    Icon(
+                        docIcon(doc.mimeType),
+                        contentDescription = null,
+                        tint = docColor(doc.mimeType),
+                        modifier = Modifier.size(30.dp),
+                    )
+                }
+
+                // Category accent, top-left.
+                Box(
+                    Modifier
+                        .align(Alignment.TopStart)
+                        .padding(7.dp)
+                        .size(width = 4.dp, height = 24.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(categoryColor(doc.category.ifBlank { CAT_OTHER })),
+                )
+
+                Surface(
+                    shape = RoundedCornerShape(5.dp),
+                    color = Color.Black.copy(alpha = 0.55f),
+                    modifier = Modifier.align(Alignment.BottomEnd).padding(7.dp),
+                ) {
+                    Text(
+                        formatBadge(doc.mimeType, doc.fileName),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White,
+                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp),
+                    )
+                }
+            }
+
+            Column(Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 9.dp)) {
+                Text(
+                    doc.title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                if (subtitle.isNotBlank()) {
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        subtitle,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = onSurface.copy(alpha = 0.55f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+        }
     }
 }
 

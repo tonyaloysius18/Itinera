@@ -1,7 +1,6 @@
 package com.itinera.app.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -19,14 +18,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.ScrollState
@@ -81,6 +85,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -331,10 +337,13 @@ fun TripDetailScreen(
         .sortedWith(compareBy({ it.date }, { parseHourMinute(it.timeLabel).first }, { parseHourMinute(it.timeLabel).second }))
         .firstOrNull { !it.completed }?.id
 
-    val bottomClearance by animateDpAsState(
-        targetValue = if (allComplete) 290.dp else 160.dp,
-        label = "bottomClearance"
-    )
+    // ⬅ CHANGED — was a guessed 160dp/290dp constant, which drifted out of sync
+    // with the floating bar's real size (safe-area inset, button height) and let
+    // the last day/leg end up stuck underneath it, unreachable by scrolling.
+    // Measuring the bar's actual rendered height and using that as the scroll
+    // content's bottom padding keeps them in sync no matter the device.
+    val density = LocalDensity.current
+    var floatingBarHeight by remember { mutableStateOf(0.dp) }
 
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
@@ -448,7 +457,7 @@ fun TripDetailScreen(
                         .fillMaxSize()
                         .verticalScroll(bodyScroll)
                         .padding(horizontal = 16.dp)
-                        .padding(bottom = bottomClearance)
+                        .padding(bottom = floatingBarHeight + 16.dp)
                 ) {
                     if (allDates.isEmpty()) {
                         Column(
@@ -782,54 +791,62 @@ fun TripDetailScreen(
                 }
 
                 // Fixed action buttons — pinned to the bottom, do NOT scroll.
-                // ⬅ CHANGED — wrapped in a gradient scrim. The buttons are opaque
-                // pills over a scrolling list; without a fade, day headers and legs
-                // ran straight underneath them.
-                Box(
+                // ⬅ CHANGED — scrim and buttons are now one self-sizing unit: its
+                // real rendered height (button height + padding + the device's
+                // own safe-area inset) is measured and fed back as the scroll
+                // content's bottom padding, so the last day/leg always clears it
+                // and reaches the true bottom edge instead of getting stuck
+                // underneath. The gradient still gives content a soft fade
+                // rather than a hard cut as it scrolls behind the buttons.
+                Column(
                     Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
-                        .height(190.dp)
+                        .onGloballyPositioned {
+                            floatingBarHeight = with(density) { it.size.height.toDp() }
+                        }
                         .background(
                             Brush.verticalGradient(
                                 0f to Color.Transparent,
-                                0.45f to MaterialTheme.colorScheme.background,
+                                1f to MaterialTheme.colorScheme.background,
                             )
-                        ),
-                )
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .padding(bottom = 90.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Button(
-                        onClick = onChecklist,
-                        modifier = Modifier.height(50.dp),
-                        contentPadding = PaddingValues(horizontal = 25.dp, vertical = 8.dp),
-                        shape = CircleShape,
-                    ) {
-                        Text(
-                            s.beforeYouGo,
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center,
                         )
-                    }
-
-                    if (canEdit) {
-                        Spacer(Modifier.width(30.dp))
+                        .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)),
+                ) {
+                    Spacer(Modifier.height(56.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .padding(bottom = 24.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         Button(
-                            onClick = { showAddChooser = true },
+                            onClick = onChecklist,
                             modifier = Modifier.height(50.dp),
                             contentPadding = PaddingValues(horizontal = 25.dp, vertical = 8.dp),
                             shape = CircleShape,
                         ) {
-                            Icon(Icons.Default.Add, null, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(6.dp))
-                            Text(s.add)
+                            Text(
+                                s.beforeYouGo,
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+
+                        if (canEdit) {
+                            Spacer(Modifier.width(30.dp))
+                            Button(
+                                onClick = { showAddChooser = true },
+                                modifier = Modifier.height(50.dp),
+                                contentPadding = PaddingValues(horizontal = 25.dp, vertical = 8.dp),
+                                shape = CircleShape,
+                            ) {
+                                Icon(Icons.Default.Add, null, modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(6.dp))
+                                Text(s.add)
+                            }
                         }
                     }
                 }

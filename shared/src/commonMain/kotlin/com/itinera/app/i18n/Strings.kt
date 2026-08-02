@@ -235,6 +235,8 @@ class Strings {
     var ferryOperator: String = ""
     var country: String = ""
     var search: String = ""
+    var searchDocuments: String = ""
+    var all: String = ""
 
 
     var add: String = ""
@@ -274,6 +276,7 @@ class Strings {
     var open: String = ""
     var noDocuments: String = ""
     var noDocumentsSubtitle: String = ""
+    var noMatchingDocuments: String = ""
     var deleteDocumentQ: String = ""
     var fileNotUploaded: String = ""
     var category: String = ""
@@ -739,6 +742,8 @@ class Strings {
         c.ferryOperator = this.ferryOperator
         c.country = this.country
         c.search = this.search
+        c.searchDocuments = this.searchDocuments
+        c.all = this.all
         c.addDocument = this.addDocument
         c.title = this.title
         c.attachTo = this.attachTo
@@ -746,6 +751,7 @@ class Strings {
         c.open = this.open
         c.noDocuments = this.noDocuments
         c.noDocumentsSubtitle = this.noDocumentsSubtitle
+        c.noMatchingDocuments = this.noMatchingDocuments
         c.deleteDocumentQ = this.deleteDocumentQ
         c.fileNotUploaded = this.fileNotUploaded
         c.category = this.category

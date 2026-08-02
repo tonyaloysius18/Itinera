@@ -121,6 +121,7 @@ data class DocItem(
     val segmentIndex: Int = -1,
     val travellerId: String = "",
     val traveller: String = "",
+    val thumbUrl: String = "",
 )
 
 @Serializable

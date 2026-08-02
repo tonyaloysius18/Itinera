@@ -468,8 +468,28 @@ class TripRepository {
     ): Boolean {
         return try {
             val url = uploadFileToStorage(uploadClient, file.bytes, file.fileName, file.mimeType)
+            val docId = "doc_${kotlin.random.Random.nextLong()}"   // ⬅ CHANGED — hoisted, the thumb name needs it
+
+            // ⬅ ADD — PDFs get a rendered first-page preview, uploaded alongside.
+            // Done once here rather than in the grid: rendering per tile would
+            // re-download and re-rasterise on every scroll, and wouldn't work offline.
+            // A failure anywhere leaves thumbUrl blank and the card shows the icon —
+            // it must never fail the document upload itself.
+            val thumb: String =
+                if (file.mimeType.contains("pdf", ignoreCase = true)) {
+                    val png = renderPdfFirstPage(file.bytes, 400)
+                    println("ITINERA: PDF THUMB render → ${png?.size ?: "null"} bytes")
+                    png?.let {
+                        runCatching {
+                            uploadFileToStorage(uploadClient, it, "thumb_$docId.png", "image/png")
+                        }.onFailure { e ->
+                            println("ITINERA: PDF THUMB upload failed — ${e.message}")
+                        }.getOrNull()
+                    }.orEmpty()
+                } else ""
+
             val doc = DocItem(
-                id = "doc_${kotlin.random.Random.nextLong()}",
+                id = docId,                       // ⬅ CHANGED
                 tripId = tripId,
                 title = title,
                 category = category,
@@ -480,6 +500,7 @@ class TripRepository {
                 memberIds = memberIdsForTrip(tripId),
                 segmentIndex = segmentIndex,
                 travellerId = travellerId,
+                thumbUrl = thumb,                 // ⬅ ADD
             )
             documents.add(doc)
             docService.saveDocument(doc)
@@ -489,6 +510,39 @@ class TripRepository {
             false
         }
     }
+
+    fun backfillPdfThumbnails(tripId: String) {
+        val targets = documents.filter {
+            it.tripId == tripId &&
+                    it.thumbUrl.isBlank() &&
+                    it.fileUrl.isNotBlank() &&
+                    it.mimeType.contains("pdf", ignoreCase = true)
+        }
+        if (targets.isEmpty()) return
+        println("ITINERA: PDF THUMB backfill — ${targets.size} to do")
+
+        ioScope.launch {
+            // Sequential on purpose: a trip with 20 PDFs shouldn't fire 20
+            // concurrent downloads and uploads at once.
+            for (doc in targets) {
+                runCatching {
+                    val bytes = downloadBytes(doc.fileUrl) ?: return@runCatching
+                    val png = renderPdfFirstPage(bytes, 400) ?: return@runCatching
+                    val url = uploadFileToStorage(uploadClient, png, "thumb_${doc.id}.png", "image/png")
+                    val updated = doc.copy(thumbUrl = url)
+                    val i = documents.indexOfFirst { it.id == doc.id }
+                    if (i >= 0) documents[i] = updated
+                    docService.saveDocument(updated)
+                }.onFailure { e ->
+                    println("ITINERA: PDF THUMB backfill failed for ${doc.id} — ${e.message}")
+                }
+            }
+            println("ITINERA: PDF THUMB backfill — done")
+        }
+    }
+
+
+
 
     suspend fun loadBytes(url: String): ByteArray? {
         return try {
