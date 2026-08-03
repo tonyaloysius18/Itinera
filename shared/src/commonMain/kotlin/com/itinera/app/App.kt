@@ -125,6 +125,7 @@ import com.itinera.app.ui.screens.TripsHomeScreen
 import com.itinera.app.ui.screens.WeatherScreen
 import com.itinera.app.ui.screens.WorldClockScreen
 import com.itinera.app.ui.screens.formatMoney
+import com.itinera.app.ui.screens.languageForCountry
 import com.itinera.app.ui.screens.tripPhase
 import com.itinera.app.ui.theme.ThemeMode
 import kotlinx.coroutines.delay
@@ -341,6 +342,11 @@ private fun AppContent(
                     selected = language,
                     onSelect = onLanguageChange,
                     onBack = { navigator.back() },
+                    // ⬅ CHANGED — was languageForCountry(whereYouAre(trips)), which
+                    // suggested the language of whatever trip you're mid-travel on
+                    // instead of where you actually live. Someone in France planning
+                    // a Germany trip would get German offered, not French.
+                    localLanguage = languageForCountry(deviceCountryName()),
                 )
 
                 else -> {
@@ -1186,3 +1192,14 @@ private fun activeTripCities(trips: List<Trip>): List<String> {
         .distinct()
         .take(6)
 }
+
+private fun currentTripCountry(trips: List<Trip>): String? {
+    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+    val trip = trips.firstOrNull { tripPhase(it, today) == TripPhase.IN_PROGRESS } ?: return null
+    // The most recent leg on or before today — where you've actually arrived.
+    return trip.legs
+        .filter { it.date <= today && it.country.isNotBlank() }
+        .maxByOrNull { it.date }
+        ?.country
+}
+

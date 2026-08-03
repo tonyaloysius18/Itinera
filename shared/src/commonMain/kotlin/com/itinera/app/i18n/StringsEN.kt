@@ -483,6 +483,11 @@ internal val EN: Strings by lazy { Strings().apply {
     catOther = "Other"
 
     suggested = "suggested"
+    suggestedLabel = "Suggested"
+    whereYouAre = "Where you are"
+    allLanguages = "All languages"
+    yourTripLabel = "Your trip"
+    searchLanguages = "Search languages"
     descriptionHint = "What was it for?"
     splitEquallyShort = "Split equally"
     splitCustomShort = "Custom split"

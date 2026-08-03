@@ -60,20 +60,6 @@ import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.UserProfile
 import com.itinera.app.ui.components.TopBar
 
-/*
- * ─── New string keys (EN + FR) ──────────────────────────────────────────────
- *   preferences   "Preferences"   / "Préférences"
- *   travelTools   "Travel tools"  / "Outils de voyage"
- *   tripsAndData  "Trips & data"  / "Voyages et données"
- *   support       "Support"       / "Aide"
- *
- * ─── Also fix in Strings.kt, don't patch here ───────────────────────────────
- * archivedTrips and exportTrips were being run through a local toTitleCase()
- * at the call site because their casing didn't match the other labels. That
- * helper is gone: correct the casing in Strings.kt instead, or the next label
- * added will be inconsistent again — and toTitleCase would mangle French
- * ("Voyages Archivés").
- */
 
 private val ColorAccount = Color(0xFF007AFF)
 private val ColorAppearance = Color(0xFF5856D6)
@@ -117,7 +103,7 @@ fun SettingsScreen(
     appearanceValue: String = "",
     languageValue: String = "",
     notificationsValue: String = "",
-    appVersion: String = "Itinera 1.4.0",
+    appVersion: String = "Itinera 1.0.0",
 ) {
     val s = LocalStrings.current
     val scrollState = rememberSaveable(saver = ScrollState.Saver) { ScrollState(0) }

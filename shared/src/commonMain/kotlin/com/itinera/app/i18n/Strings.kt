@@ -598,6 +598,11 @@ class Strings {
     var catOther: String = ""
 
     var suggested: String = ""
+    var suggestedLabel: String = ""
+    var whereYouAre: String = ""
+    var allLanguages: String = ""
+    var yourTripLabel: String = ""
+    var searchLanguages: String = ""
     var descriptionHint: String = ""
     var splitEquallyShort: String = ""
     var splitCustomShort: String = ""
@@ -1089,6 +1094,11 @@ class Strings {
         c.catOther = this.catOther
 
         c.suggested = this.suggested
+        c.suggestedLabel = this.suggestedLabel
+        c.whereYouAre = this.whereYouAre
+        c.allLanguages = this.allLanguages
+        c.yourTripLabel = this.yourTripLabel
+        c.searchLanguages = this.searchLanguages
         c.descriptionHint = this.descriptionHint
         c.splitEquallyShort = this.splitEquallyShort
         c.splitCustomShort = this.splitCustomShort

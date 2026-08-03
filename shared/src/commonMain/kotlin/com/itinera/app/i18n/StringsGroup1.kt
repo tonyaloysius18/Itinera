@@ -452,6 +452,11 @@ internal val FR: Strings by lazy { EN.copyApply {
     catOther = "Autre"
 
     suggested = "suggéré"
+    suggestedLabel = "Suggérées"
+    whereYouAre = "Où vous êtes"
+    allLanguages = "Toutes les langues"
+    yourTripLabel = "Votre voyage"
+    searchLanguages = "Rechercher une langue"
     descriptionHint = "C'était pour quoi ?"
     splitEquallyShort = "Partage égal"
     splitCustomShort = "Partage libre"
