@@ -2,7 +2,6 @@ package com.itinera.app.data
 
 import com.itinera.app.model.Activity
 import dev.gitlive.firebase.Firebase
-import dev.gitlive.firebase.firestore.FieldValue
 import dev.gitlive.firebase.firestore.firestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

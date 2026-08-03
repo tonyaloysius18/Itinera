@@ -108,6 +108,7 @@ class Strings {
     var appTagline: String = ""
     var myTrips: String = ""
     var countries: String = ""
+    var map: String = ""
     var leg: String = ""
     var legs: String = ""
     var done: String = ""
@@ -126,6 +127,10 @@ class Strings {
     var beforeYouGo: String = ""
     var addItem: String = ""
     var settings: String = ""
+    var preferences: String = ""
+    var travelTools: String = ""
+    var tripsAndData: String = ""
+    var support: String = ""
     var backupSync: String = ""
     var appearance: String = ""
     var language: String = ""
@@ -177,6 +182,16 @@ class Strings {
     var amount: String = ""
     var validAmount: String = ""
     var couldntFetch: String = ""
+    var fromYourTrips: String = ""
+    var range7d: String = ""
+    var range30d: String = ""
+    var range90d: String = ""
+    var range1y: String = ""
+    var quickAmounts: String = ""
+    var recentHistory: String = ""
+    var low: String = ""
+    var high: String = ""
+    var average: String = ""
     var fillAllFields: String = ""
     var loginFailed: String = ""
     var passwordTooShort: String = ""
@@ -200,6 +215,7 @@ class Strings {
 
     var choosePhoto: String = ""
     var uploadFromGallery: String = ""
+    var uploadFromFiles: String = ""
     var takePhoto: String = ""
     var removePhoto: String = ""
     var cropAndScale: String = ""
@@ -223,6 +239,8 @@ class Strings {
     var ferryOperator: String = ""
     var country: String = ""
     var search: String = ""
+    var searchDocuments: String = ""
+    var all: String = ""
 
 
     var add: String = ""
@@ -231,7 +249,7 @@ class Strings {
     var place: String = ""
     var newPlace: String = ""
     var editPlace: String = ""
-    var landmark: String = ""
+    var remarks: String = ""
     var savePlace: String = ""
     var searchTrips: String = ""
     var newTrip: String = ""
@@ -251,6 +269,13 @@ class Strings {
     var archivedTrips: String = ""
     var noArchivedTrips: String = ""
     var noDatesYet: String = ""
+    var inProgress: String = ""
+    var past: String = ""
+    var completed: String = ""
+    var dayXofY: String = ""
+    var startsToday: String = ""
+    var startsTomorrow: String = ""
+    var startsInDays: String = ""
     var tripName: String = ""
     var aLegBetween: String = ""
     var somewhereToVisit: String = ""
@@ -262,6 +287,7 @@ class Strings {
     var open: String = ""
     var noDocuments: String = ""
     var noDocumentsSubtitle: String = ""
+    var noMatchingDocuments: String = ""
     var deleteDocumentQ: String = ""
     var fileNotUploaded: String = ""
     var category: String = ""
@@ -314,6 +340,8 @@ class Strings {
     var remaining: String = ""
     var whoOwesWhom: String = ""
     var whoOwesWhomHint: String = ""
+    var totalSpendings: String = ""
+    var eachTravellerPaid: String = ""
     var splitLabel: String = ""
     var owes: String = ""
     var settleUpHint: String = ""
@@ -350,8 +378,18 @@ class Strings {
     var hoursAgo: String = ""
     var dayAgo: String = ""
     var daysAgo: String = ""
+    var daysAgoRelative: String = ""
     var storedInCloud: String = ""
     var tripsLabel: String = ""
+    var upcoming: String = ""
+    var tomorrow: String = ""
+    var inDays: String = ""
+    var yesterday: String = ""
+    var addAll: String = ""
+    var added: String = ""
+    var addShort: String = ""
+    var nAddedOfM: String = ""
+    var nothingUpcoming: String = ""
     var expensesCountLabel: String = ""
     var documentsLabel: String = ""
     var syncNow: String = ""
@@ -363,6 +401,9 @@ class Strings {
     var noLegsSubtitle: String =""
     var noChecklistItems: String =""
     var noChecklistSubtitle: String = ""
+
+    var selectTravellers: String = ""
+    var travellersCount: String = ""
 
     var inviteToTrip: String = ""
     var inviteFailed: String = ""
@@ -406,8 +447,10 @@ class Strings {
     var minutesPlural: String = ""
     var before: String = ""
     var custom: String = ""
+    var off: String = ""
 
     var markPaid: String = ""
+    var markAsPaid: String = ""
     var unsettleTrip: String = ""
     var settleUpTrip: String = ""
     var payments: String = ""
@@ -418,6 +461,8 @@ class Strings {
     var youOweBanner: String = ""
     var youAreOwedBanner: String = ""
     var allSquareBanner: String = ""
+    var others: String = ""
+    var waitingOn: String = ""
 
     // World Clock
     var worldClock: String = ""
@@ -425,6 +470,9 @@ class Strings {
     var addTimeZone: String = ""
     var searchAnyCity: String = ""
     var addCityForTime: String = ""
+    var sameTimeAsYou: String = ""
+    var hoursAhead: String = ""
+    var hoursBehind: String = ""
 
     // Emergency / SOS
     var emergency: String = ""
@@ -461,6 +509,16 @@ class Strings {
     var languageLabel: String = ""
     var searchLanguage: String = ""
     var favorite: String = ""
+    var showLabel: String = ""
+    var commonPhrases: String = ""
+    var savedLabel: String = ""
+    var recentLabel: String = ""
+    var phraseWhereIs: String = ""
+    var phraseHowMuch: String = ""
+    var phraseTableForTwo: String = ""
+    var phraseAllergicTo: String = ""
+    var phraseBillPlease: String = ""
+    var phraseHelpMe: String = ""
 
     // Compass
     var compass: String = ""
@@ -470,6 +528,93 @@ class Strings {
     var attachToLeg: String = ""
     var attachToNone: String = ""
     var viewTicket: String = ""
+
+    var tripCompleted: String = ""
+
+    var souvenir: String = ""
+
+    // Remaining strings
+    var wholeJourney: String = ""
+    var segment: String = ""
+    var anyone: String = ""
+    var travellerSingular: String = ""
+    var removeStop: String = ""
+    var arrival: String = ""
+    var departure: String = ""
+    var addStop: String = ""
+    var dateLabel: String = ""
+    var tripStats: String = ""
+    var travellersLabel: String = ""
+    var addPhoto: String = ""
+    var fromLabel: String = ""
+    var km: String = ""
+    var countriesSingular: String = ""
+    var countriesPlural: String = ""
+    var daysSingular: String = ""
+    var daysPlural: String = ""
+    var clearLabel: String = ""
+    var stopPlaceholder: String = ""
+    var viewFullTicket: String = ""
+    var ticketSingular: String = ""
+    var ticketCode: String = ""
+
+    // Months and Days
+    var jan: String = ""
+    var feb: String = ""
+    var mar: String = ""
+    var apr: String = ""
+    var may: String = ""
+    var jun: String = ""
+    var jul: String = ""
+    var aug: String = ""
+    var sep: String = ""
+    var oct: String = ""
+    var nov: String = ""
+    var dec: String = ""
+    var monShort: String = ""
+    var tueShort: String = ""
+    var wedShort: String = ""
+    var thuShort: String = ""
+    var friShort: String = ""
+    var satShort: String = ""
+    var sunShort: String = ""
+
+    // Expenses Lenses and Categories
+    var lensTimeline: String = ""
+    var lensCategories: String = ""
+    var lensBalances: String = ""
+    var yourBalance: String = ""
+    var youAreOwedShort: String = ""
+    var youOweShort: String = ""
+    var allSquareShort: String = ""
+    var perDayAverage: String = ""
+    var ofBudget: String = ""
+    var noCategoryData: String = ""
+    var catAccommodation: String = ""
+    var catFood: String = ""
+    var catTransport: String = ""
+    var catShopping: String = ""
+    var catActivities: String = ""
+    var catOther: String = ""
+
+    var suggested: String = ""
+    var suggestedLabel: String = ""
+    var whereYouAre: String = ""
+    var allLanguages: String = ""
+    var yourTripLabel: String = ""
+    var searchLanguages: String = ""
+    var descriptionHint: String = ""
+    var splitEquallyShort: String = ""
+    var splitCustomShort: String = ""
+    var nPeopleEach: String = ""
+    var nPeople: String = ""
+    var stillToAssign: String = ""
+    var overAssigned: String = ""
+    var splitEvenly: String = ""
+    var enterAmount: String = ""
+    var enterDescription: String = ""
+    var selectSomeone: String = ""
+    var saveExpense: String = ""
 
     fun copyApply(block: Strings.() -> Unit): Strings {
 
@@ -484,6 +629,7 @@ class Strings {
         c.appTagline = this.appTagline
         c.myTrips = this.myTrips
         c.countries = this.countries
+        c.map = this.map
         c.leg = this.leg
         c.legs = this.legs
         c.done = this.done
@@ -502,6 +648,10 @@ class Strings {
         c.beforeYouGo = this.beforeYouGo
         c.addItem = this.addItem
         c.settings = this.settings
+        c.preferences = this.preferences
+        c.travelTools = this.travelTools
+        c.tripsAndData = this.tripsAndData
+        c.support = this.support
         c.backupSync = this.backupSync
         c.appearance = this.appearance
         c.language = this.language
@@ -551,6 +701,16 @@ class Strings {
         c.amount = this.amount
         c.validAmount = this.validAmount
         c.couldntFetch = this.couldntFetch
+        c.fromYourTrips = this.fromYourTrips
+        c.range7d = this.range7d
+        c.range30d = this.range30d
+        c.range90d = this.range90d
+        c.range1y = this.range1y
+        c.quickAmounts = this.quickAmounts
+        c.recentHistory = this.recentHistory
+        c.low = this.low
+        c.high = this.high
+        c.average = this.average
         c.fillAllFields = this.fillAllFields
         c.loginFailed = this.loginFailed
         c.passwordTooShort = this.passwordTooShort
@@ -577,7 +737,7 @@ class Strings {
         c.place = this.place
         c.newPlace = this.newPlace
         c.editPlace = this.editPlace
-        c.landmark = this.landmark
+        c.remarks = this.remarks
         c.savePlace = this.savePlace
         c.searchTrips = this.searchTrips
         c.newTrip = this.newTrip
@@ -597,11 +757,19 @@ class Strings {
         c.archivedTrips = this.archivedTrips
         c.noArchivedTrips = this.noArchivedTrips
         c.noDatesYet = this.noDatesYet
+        c.inProgress = this.inProgress
+        c.past = this.past
+        c.completed = this.completed
+        c.dayXofY = this.dayXofY
+        c.startsToday = this.startsToday
+        c.startsTomorrow = this.startsTomorrow
+        c.startsInDays = this.startsInDays
         c.tripName = this.tripName
         c.aLegBetween = this.aLegBetween
         c.somewhereToVisit = this.somewhereToVisit
         c.choosePhoto = this.choosePhoto
         c.uploadFromGallery = this.uploadFromGallery
+        c.uploadFromFiles = this.uploadFromFiles
         c.takePhoto = this.takePhoto
         c.removePhoto = this.removePhoto
         c.cropAndScale = this.cropAndScale
@@ -625,6 +793,8 @@ class Strings {
         c.ferryOperator = this.ferryOperator
         c.country = this.country
         c.search = this.search
+        c.searchDocuments = this.searchDocuments
+        c.all = this.all
         c.addDocument = this.addDocument
         c.title = this.title
         c.attachTo = this.attachTo
@@ -632,6 +802,7 @@ class Strings {
         c.open = this.open
         c.noDocuments = this.noDocuments
         c.noDocumentsSubtitle = this.noDocumentsSubtitle
+        c.noMatchingDocuments = this.noMatchingDocuments
         c.deleteDocumentQ = this.deleteDocumentQ
         c.fileNotUploaded = this.fileNotUploaded
         c.category = this.category
@@ -685,6 +856,8 @@ class Strings {
         c.settleUpHint = this.settleUpHint
         c.whoOwesWhom = this.whoOwesWhom
         c.whoOwesWhomHint = this.whoOwesWhomHint
+        c.totalSpendings = this.totalSpendings
+        c.eachTravellerPaid = this.eachTravellerPaid
         c.splitLabel = this.splitLabel
         c.owes = this.owes
         c.selectTripsToExport = this.selectTripsToExport
@@ -720,8 +893,18 @@ class Strings {
         c.hoursAgo = this.hoursAgo
         c.dayAgo = this.dayAgo
         c.daysAgo = this.daysAgo
+        c.daysAgoRelative = this.daysAgoRelative
         c.storedInCloud = this.storedInCloud
         c.tripsLabel = this.tripsLabel
+        c.upcoming = this.upcoming
+        c.tomorrow = this.tomorrow
+        c.inDays = this.inDays
+        c.yesterday = this.yesterday
+        c.addAll = this.addAll
+        c.added = this.added
+        c.addShort = this.addShort
+        c.nAddedOfM = this.nAddedOfM
+        c.nothingUpcoming = this.nothingUpcoming
         c.expensesCountLabel = this.expensesCountLabel
         c.documentsLabel = this.documentsLabel
         c.syncNow = this.syncNow
@@ -772,8 +955,10 @@ class Strings {
         c.minutesPlural = this.minutesPlural
         c.before = this.before
         c.custom = this.custom
+        c.off = this.off
 
         c.markPaid = this.markPaid
+        c.markAsPaid = this.markAsPaid
         c.unsettleTrip = this.unsettleTrip
         c.settleUpTrip = this.settleUpTrip
         c.payments = this.payments
@@ -784,12 +969,17 @@ class Strings {
         c.youOweBanner = this.youOweBanner
         c.youAreOwedBanner = this.youAreOwedBanner
         c.allSquareBanner = this.allSquareBanner
+        c.others = this.others
+        c.waitingOn = this.waitingOn
 
         c.worldClock = this.worldClock
         c.localLabel = this.localLabel
         c.addTimeZone = this.addTimeZone
         c.searchAnyCity = this.searchAnyCity
         c.addCityForTime = this.addCityForTime
+        c.sameTimeAsYou = this.sameTimeAsYou
+        c.hoursAhead = this.hoursAhead
+        c.hoursBehind = this.hoursBehind
 
         c.emergency = this.emergency
         c.police = this.police
@@ -823,11 +1013,104 @@ class Strings {
         c.languageLabel = this.languageLabel
         c.searchLanguage = this.searchLanguage
         c.favorite = this.favorite
+        c.showLabel = this.showLabel
+        c.commonPhrases = this.commonPhrases
+        c.savedLabel = this.savedLabel
+        c.recentLabel = this.recentLabel
+        c.phraseWhereIs = this.phraseWhereIs
+        c.phraseHowMuch = this.phraseHowMuch
+        c.phraseTableForTwo = this.phraseTableForTwo
+        c.phraseAllergicTo = this.phraseAllergicTo
+        c.phraseBillPlease = this.phraseBillPlease
+        c.phraseHelpMe = this.phraseHelpMe
         c.compass = this.compass
         c.compassCalibrate = this.compassCalibrate
         c.attachToLeg = this.attachToLeg
         c.attachToNone = this.attachToNone
         c.viewTicket = this.viewTicket
+
+        c.tripCompleted = this.tripCompleted
+        c.souvenir = this.souvenir
+
+        c.wholeJourney = this.wholeJourney
+        c.segment = this.segment
+        c.anyone = this.anyone
+        c.travellerSingular = this.travellerSingular
+        c.removeStop = this.removeStop
+        c.arrival = this.arrival
+        c.departure = this.departure
+        c.addStop = this.addStop
+        c.dateLabel = this.dateLabel
+        c.tripStats = this.tripStats
+        c.travellersLabel = this.travellersLabel
+        c.addPhoto = this.addPhoto
+        c.fromLabel = this.fromLabel
+        c.km = this.km
+        c.countriesSingular = this.countriesSingular
+        c.countriesPlural = this.countriesPlural
+        c.daysSingular = this.daysSingular
+        c.daysPlural = this.daysPlural
+        c.clearLabel = this.clearLabel
+        c.stopPlaceholder = this.stopPlaceholder
+        c.viewFullTicket = this.viewFullTicket
+        c.ticketSingular = this.ticketSingular
+        c.ticketCode = this.ticketCode
+
+        c.jan = this.jan
+        c.feb = this.feb
+        c.mar = this.mar
+        c.apr = this.apr
+        c.may = this.may
+        c.jun = this.jun
+        c.jul = this.jul
+        c.aug = this.aug
+        c.sep = this.sep
+        c.oct = this.oct
+        c.nov = this.nov
+        c.dec = this.dec
+        c.monShort = this.monShort
+        c.tueShort = this.tueShort
+        c.wedShort = this.wedShort
+        c.thuShort = this.thuShort
+        c.friShort = this.friShort
+        c.satShort = this.satShort
+        c.sunShort = this.sunShort
+
+        c.lensTimeline = this.lensTimeline
+        c.lensCategories = this.lensCategories
+        c.lensBalances = this.lensBalances
+        c.yourBalance = this.yourBalance
+        c.youAreOwedShort = this.youAreOwedShort
+        c.youOweShort = this.youOweShort
+        c.allSquareShort = this.allSquareShort
+        c.perDayAverage = this.perDayAverage
+        c.ofBudget = this.ofBudget
+        c.noCategoryData = this.noCategoryData
+        c.catAccommodation = this.catAccommodation
+        c.catFood = this.catFood
+        c.catTransport = this.catTransport
+        c.catShopping = this.catShopping
+        c.catActivities = this.catActivities
+        c.catOther = this.catOther
+
+        c.suggested = this.suggested
+        c.suggestedLabel = this.suggestedLabel
+        c.whereYouAre = this.whereYouAre
+        c.allLanguages = this.allLanguages
+        c.yourTripLabel = this.yourTripLabel
+        c.searchLanguages = this.searchLanguages
+        c.descriptionHint = this.descriptionHint
+        c.splitEquallyShort = this.splitEquallyShort
+        c.splitCustomShort = this.splitCustomShort
+        c.nPeopleEach = this.nPeopleEach
+        c.nPeople = this.nPeople
+        c.stillToAssign = this.stillToAssign
+        c.overAssigned = this.overAssigned
+        c.splitEvenly = this.splitEvenly
+        c.enterAmount = this.enterAmount
+        c.enterDescription = this.enterDescription
+        c.selectSomeone = this.selectSomeone
+        c.saveExpense = this.saveExpense
 
         c.block()
         return c

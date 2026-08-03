@@ -51,6 +51,7 @@ sealed interface Screen {
     data object About : Screen
 
     data object ArchivedTrips : Screen
+
     data object LanguagePicker : Screen
 
     data object ExportTrips : Screen
@@ -64,6 +65,8 @@ sealed interface Screen {
     data object Translate : Screen
 
     data object Compass : Screen
+
+    data class TripMap(val tripId: String) : Screen
 
 }
 

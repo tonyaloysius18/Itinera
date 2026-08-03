@@ -2,7 +2,6 @@ package com.itinera.app
 
 import android.Manifest
 import android.app.AlarmManager
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -22,14 +21,6 @@ import kotlinx.datetime.toInstant
  * Holds the Application context so the shared scheduler can reach Android APIs.
  * Set this once from MainActivity.onCreate via AndroidApp.init(this).
  */
-object AndroidApp {
-    lateinit var context: Context
-        private set
-
-    fun init(ctx: Context) {
-        context = ctx.applicationContext
-    }
-}
 
 private const val CHANNEL_ID = "itinera_leg_reminders"
 private const val CHANNEL_NAME = "Trip reminders"
@@ -88,13 +79,9 @@ actual class NotificationScheduler actual constructor() {
         )
 
         val alarm = ctx.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val canExact =
-            Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarm.canScheduleExactAlarms()
-        if (canExact) {
-            alarm.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, atEpochMillis, pending)
-        } else {
-            alarm.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, atEpochMillis, pending)
-        }
+        // Inexact alarm: no SCHEDULE_EXACT_ALARM permission, battery-friendly, and
+        // minute-precision isn't needed for a trip reminder (arrives within a few min).
+        alarm.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, atEpochMillis, pending)
     }
 
     actual fun cancel(id: String) {
@@ -109,65 +96,73 @@ actual class NotificationScheduler actual constructor() {
         val alarm = ctx.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarm.cancel(pending)
     }
+
+    actual fun notifyNow(id: String, title: String, body: String, tripId: String) {
+        ensureChannel()
+        postNotification(ctx, id, title, body, tripId)
+    }
+}
+
+/** Builds and posts the actual notification. Shared by [AlarmReceiver] and [NotificationScheduler.notifyNow]. */
+private fun postNotification(context: Context, id: String, title: String, body: String, tripId: String) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val mgr = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (mgr.getNotificationChannel(CHANNEL_ID) == null) {
+            mgr.createNotificationChannel(
+                NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH)
+            )
+        }
+    }
+
+    // Tap -> open the app (launcher intent; no cross-module class reference needed).
+    val launchIntent = context.packageManager
+        .getLaunchIntentForPackage(context.packageName)
+        ?.apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("tripId", tripId)                    // ⬅ ADD
+        }
+    val contentPending = launchIntent?.let {
+        PendingIntent.getActivity(
+            context,
+            id.hashCode(),
+            it,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+    }
+
+    // Proper notification silhouette icon. Generate ic_stat_itinera via
+    // Android Studio Image Asset (Notification Icons). Falls back to a
+    // built-in silhouette if you haven't created one yet.
+    val iconRes = runCatching {
+        val resId = context.resources.getIdentifier(
+            "ic_stat_itinera", "drawable", context.packageName,
+        )
+        if (resId != 0) resId else android.R.drawable.stat_notify_chat
+    }.getOrDefault(android.R.drawable.stat_notify_chat)
+
+    val builder = androidx.core.app.NotificationCompat.Builder(context, CHANNEL_ID)
+        .setSmallIcon(iconRes)
+        .setColor(0xFF85B7EB.toInt())                 // brand blue tint
+        .setContentTitle(title)
+        .setContentText(body)
+        .setAutoCancel(true)
+        .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
+
+    if (contentPending != null) builder.setContentIntent(contentPending)
+
+    if (NotificationManagerCompat.from(context).areNotificationsEnabled()) {
+        NotificationManagerCompat.from(context).notify(id.hashCode(), builder.build())
+    }
 }
 
 /** Fired by AlarmManager at the scheduled time; posts the actual notification. */
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-
         val id = intent.getStringExtra("id") ?: return
         val title = intent.getStringExtra("title") ?: "Itinera"
         val body = intent.getStringExtra("body") ?: ""
         val tripId = intent.getStringExtra("tripId") ?: ""
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val mgr = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            if (mgr.getNotificationChannel(CHANNEL_ID) == null) {
-                mgr.createNotificationChannel(
-                    NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH)
-                )
-            }
-        }
-
-        // Tap -> open the app (launcher intent; no cross-module class reference needed).
-        val launchIntent = context.packageManager
-            .getLaunchIntentForPackage(context.packageName)
-            ?.apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                putExtra("tripId", tripId)                    // ⬅ ADD
-            }
-        val contentPending = launchIntent?.let {
-            PendingIntent.getActivity(
-                context,
-                id.hashCode(),
-                it,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-            )
-        }
-
-        // Proper notification silhouette icon. Generate ic_stat_itinera via
-        // Android Studio Image Asset (Notification Icons). Falls back to a
-        // built-in silhouette if you haven't created one yet.
-        val iconRes = runCatching {
-            val resId = context.resources.getIdentifier(
-                "ic_stat_itinera", "drawable", context.packageName,
-            )
-            if (resId != 0) resId else android.R.drawable.stat_notify_chat
-        }.getOrDefault(android.R.drawable.stat_notify_chat)
-
-        val builder = androidx.core.app.NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(iconRes)
-            .setColor(0xFF85B7EB.toInt())                 // brand blue tint
-            .setContentTitle(title)
-            .setContentText(body)
-            .setAutoCancel(true)
-            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
-
-        if (contentPending != null) builder.setContentIntent(contentPending)
-
-        if (NotificationManagerCompat.from(context).areNotificationsEnabled()) {
-            NotificationManagerCompat.from(context).notify(id.hashCode(), builder.build())
-        }
+        postNotification(context, id, title, body, tripId)
     }
 }
 

@@ -1,7 +1,7 @@
 package com.itinera.app.model
 
+import com.itinera.app.data.BarcodeExtraction
 import kotlinx.datetime.LocalDate
-import com.itinera.app.model.label
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
@@ -43,6 +43,12 @@ data class Leg(
     val bookingRef: String? = null,
     val completed: Boolean = false,
     val addedToCalendar: Boolean = false,
+    val fromLat: Double = 0.0,          // ⬅ ADD — geocoded once at save time
+    val fromLng: Double = 0.0,          // ⬅ ADD
+    val toLat: Double = 0.0,            // ⬅ ADD
+    val toLng: Double = 0.0,            // ⬅ ADD
+    val travellerIds: List<String> = emptyList(),
+    val stops: List<LegStop> = emptyList(),
 )
 
 /** A trip groups together an ordered list of legs and its documents/checklist. */
@@ -65,6 +71,13 @@ data class Trip(
     val memberInfo: Map<String, MemberInfo> = emptyMap(),
     val settledAt: Long = 0L,        // 0 = not settled; epoch millis when owner settled
     val settledBy: String = "",
+    val frontHeartUrl: String = "",
+    val frontRectUrl:  String = "",
+    val backTopUrl:    String = "",
+    val backBottomUrl: String = "",
+    // Optional trip budget. Leave at 0.0 to hide the budget bar on the expenses
+    // screen; set it and the hero draws spend-against-budget.  ⬅ ADD (optional)
+    val budget: Double = 0.0,
 )
 
 @Serializable
@@ -105,8 +118,11 @@ data class DocItem(
     val type: DocType = DocType.IMAGE, // legacy
     val attachedToLabel: String = "",  // legacy
     val memberIds: List<String> = emptyList(),
-
-    )
+    val segmentIndex: Int = -1,
+    val travellerId: String = "",
+    val traveller: String = "",
+    val thumbUrl: String = "",
+)
 
 @Serializable
 data class Activity(
@@ -133,6 +149,16 @@ data class Traveller(
     val userId: String = "",
 )
 
+@Serializable
+data class LegStop(
+    val city: String = "",
+    val arrivalTime: String = "",     // ⬅ ADD
+    val departureTime: String = "",   // ⬅ ADD
+    val lat: Double = 0.0,
+    val lng: Double = 0.0,
+    val country: String = "",
+)
+
 val Traveller.fullName: String
     get() = listOf(firstName, surname).filter { it.isNotBlank() }.joinToString(" ")
 
@@ -152,6 +178,21 @@ data class ExpenseShare(
     val amount: Double,            // this person's share of the expense
 )
 
+/**
+ * Coarse spend bucket for an expense — drives the category meter and the
+ * Categories lens on TripExpensesScreen.
+ *
+ * Six is deliberate: past that, slices in the stacked bar stop being
+ * distinguishable at phone width and the legend wraps to three rows.
+ *
+ * ⚠️ Adding a value later is only safe if the Json instance gitlive decodes
+ * with has `coerceInputValues = true` — otherwise an older client reading a
+ * document containing the new value throws instead of falling back to OTHER.
+ * Set it before shipping categories; it can't be retrofitted onto installed apps.
+ */
+@Serializable
+enum class ExpenseCategory { ACCOMMODATION, FOOD, TRANSPORT, SHOPPING, ACTIVITIES, OTHER }
+
 @Serializable
 data class Expense(
     val id: String,
@@ -162,8 +203,9 @@ data class Expense(
     val shares: List<ExpenseShare> = emptyList(),   // sums to amount
     val createdAt: Long = 0L,
     val memberIds: List<String> = emptyList(),
-
-    )
+    // Absent on existing documents, so they decode to OTHER. No migration.  ⬅ ADD
+    val category: ExpenseCategory = ExpenseCategory.OTHER,
+)
 
 @Serializable
 data class Payment(
@@ -175,6 +217,7 @@ data class Payment(
     val createdAt: Long = 0L,
     val memberIds: List<String> = emptyList(),
 )
+
 @Serializable                                   // ⬅ ADD
 data class UserProfile(
     val name: String = "",                      // ⬅ defaults added (Firestore needs them)
@@ -208,4 +251,13 @@ data class Invite(
     val createdBy: String = "",
     val status: String = "active",   // "active" | "revoked"
     val createdAt: Long = 0L,
+)
+
+data class WalletTicket(
+    val extraction: BarcodeExtraction,
+    val docId: String,
+    val docTitle: String = "",
+    val routeOverride: String = "",
+    val timeOverride: String = "",
+    val travellerName: String = "",
 )

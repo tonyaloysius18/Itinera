@@ -9,14 +9,29 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Archive
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -25,7 +40,17 @@ import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,11 +63,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -54,8 +82,14 @@ import com.itinera.app.model.isOwnedBy
 import com.itinera.app.model.label
 import com.itinera.app.ui.components.CardShape
 import com.itinera.app.ui.components.PlaneLoader
+import androidx.compose.ui.text.style.TextOverflow
 import com.itinera.app.ui.components.TopBar
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
+import kotlinx.datetime.daysUntil
 import kotlinx.coroutines.launch
+import kotlin.time.Clock
 import kotlin.math.roundToInt
 
 fun accentColor(accent: TripAccent): Color = when (accent) {
@@ -96,6 +130,9 @@ fun TripsHomeScreen(
     val visibleTrips = if (query.isBlank()) trips
     else trips.filter { it.title.contains(query.trim(), ignoreCase = true) }
 
+    val today = remember { Clock.System.todayIn(TimeZone.currentSystemDefault()) }
+    val grouped = remember(visibleTrips, today) { visibleTrips.groupBy { tripPhase(it, today) } }
+
     val listState = androidx.compose.foundation.lazy.rememberLazyListState()
     LaunchedEffect(query) { if (query.isNotBlank()) listState.scrollToItem(0) }
 
@@ -114,14 +151,15 @@ fun TripsHomeScreen(
                 }
             })
             if (searchActive) {
-                OutlinedTextField(
+                // ⬅ CHANGED — was an OutlinedTextField, visually heavier than
+                // everything around it. Matches the search pill on Documents.
+                TripSearchField(
                     value = query,
-                    onValueChange = { query = it.toTitleCase() },
-                    placeholder = { Text(s.searchTrips) },
-                    singleLine = true,
-                    leadingIcon = { Icon(Icons.Filled.Search, null) },
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
-                    shape = RoundedCornerShape(12.dp),
+                    // ⬅ CHANGED — was query = it.toTitleCase(), which fought anyone
+                    // typing. The filter is already ignoreCase, so it bought nothing.
+                    onValueChange = { query = it },
+                    onClear = { query = "" },
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
                 )
             }
             Spacer(Modifier.height(12.dp))
@@ -132,86 +170,70 @@ fun TripsHomeScreen(
                         PlaneLoader(size = 130.dp)
                     }
                 }
-                trips.isEmpty() ->
-                    Column(
-                        Modifier.fillMaxSize().padding(horizontal = 32.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                    ) {
-                        Text("✈️", style = MaterialTheme.typography.displayMedium)
-                        Spacer(Modifier.height(12.dp))
-                        Text(
-                            s.noTripsYet,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                        Spacer(Modifier.height(6.dp))
-                        Text(
-                            s.noTripsSubtitle,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-                        )
-                    }
 
-//                    EmptyState(
-//                    icon = Icons.Filled.Luggage,
-//                    title = s.noTripsYet,
-//                    subtitle = s.noTripsSubtitle,
-//                    modifier = Modifier.weight(1f),
-//                )
-                visibleTrips.isEmpty() ->
-                        Column(
-                            Modifier.fillMaxSize().padding(horizontal = 32.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center,
-                        ) {
-                            Text("🔎", style = MaterialTheme.typography.displayMedium)
-                            Spacer(Modifier.height(12.dp))
-                            Text(
-                                s.noResults,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
-                            )
-                            Spacer(Modifier.height(6.dp))
-                            Text(
-                                s.noResultsSubtitle,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-                            )
-                        }
+                trips.isEmpty() -> HomeEmptyState(
+                    icon = Icons.Filled.Luggage,
+                    title = s.noTripsYet,
+                    subtitle = s.noTripsSubtitle,
+                )
 
-//                    EmptyState(
-//                    icon = Icons.Filled.Search,
-//                    title = s.noResults,
-//                    subtitle = s.noResultsSubtitle,
-//                    modifier = Modifier.weight(1f),
-//                )
+                visibleTrips.isEmpty() -> HomeEmptyState(
+                    icon = Icons.Filled.Search,
+                    title = s.noResults,
+                    subtitle = s.noResultsSubtitle,
+                )
+
                 else -> LazyColumn(
                     state = listState,
                     modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(bottom = 96.dp),
+                    contentPadding = PaddingValues(bottom = 120.dp),
                 ) {
-                    items(visibleTrips, key = { it.id }) { trip ->
-                        SwipeableTripCard(
-                            trip = trip,
-                            countriesWord = s.countries,
-                            legsWord = s.legs,
-                            doneWord = s.done,
-                            isOpen = openCardId == trip.id,
-                            canShare = trip.ownerId == currentUid && currentUid.isNotBlank(),  // owner only
-                            onShare = { onOpenMembers(trip.id) },                               // → Members screen
-                            onOpenChange = { open -> openCardId = if (open) trip.id else null },
-                            onClick = { onOpenTrip(trip.id) },
-                            modifier = Modifier.animateItem(),
-                            onPin = { onPinTrip(trip.id); openCardId = null },
-                            onEdit = { editingTrip = trip; openCardId = null },
-                            onArchive = { onArchiveTrip(trip.id); openCardId = null },
-                            onDelete = { pendingDeleteId = trip.id; openCardId = null },
-                            isOwner = trip.isOwnedBy(currentUid),
-                            isPinned = trip.id in pinnedTripIds,
-                        )
+                    // ⬅ ADD — the phase was already computed by tripStartsIn and
+                    // spent on a line of grey text. Sectioning the list is what
+                    // puts the trip you're on at the top.
+                    fun cardsFor(phase: TripPhase) {
+                        val group = grouped[phase].orEmpty()
+                        if (group.isEmpty()) return
+                        item(key = "hdr-$phase") {
+                            SectionHeader(
+                                label = when (phase) {
+                                    TripPhase.IN_PROGRESS -> s.inProgress
+                                    TripPhase.UPCOMING -> s.upcoming
+                                    TripPhase.PAST -> s.past
+                                },
+                                count = group.size,
+                            )
+                        }
+                        group.forEach { trip ->
+                            item(key = trip.id) {
+                                SwipeableTripCard(
+                                    trip = trip,
+                                    phase = phase,
+                                    today = today,
+                                    countriesWord = s.countries,
+                                    legsWord = s.legs,
+                                    doneWord = s.done,
+                                    isOpen = openCardId == trip.id,
+                                    canShare = trip.ownerId == currentUid && currentUid.isNotBlank(),
+                                    onShare = { onOpenMembers(trip.id) },
+                                    onOpenChange = { open -> openCardId = if (open) trip.id else null },
+                                    onClick = { onOpenTrip(trip.id) },
+                                    modifier = Modifier.animateItem(),
+                                    onPin = { onPinTrip(trip.id); openCardId = null },
+                                    onEdit = { editingTrip = trip; openCardId = null },
+                                    onArchive = { onArchiveTrip(trip.id); openCardId = null },
+                                    onDelete = { pendingDeleteId = trip.id; openCardId = null },
+                                    isOwner = trip.isOwnedBy(currentUid),
+                                    isPinned = trip.id in pinnedTripIds,
+                                )
+                            }
+                        }
                     }
+
+                    cardsFor(TripPhase.IN_PROGRESS)
+                    cardsFor(TripPhase.UPCOMING)
+                    cardsFor(TripPhase.PAST)
                 }
             }
         }
@@ -307,7 +329,7 @@ private fun JoinTripDialog(
                 when {
                     joinedTitle != null -> {
                         Text(
-                            "${s.joined} ${joinedTitle}",
+                            "${s.joined} $joinedTitle",
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.primary,
@@ -379,6 +401,8 @@ private fun JoinTripDialog(
 @Composable
 private fun SwipeableTripCard(
     trip: Trip,
+    phase: TripPhase,     // ⬅ ADD
+    today: LocalDate,     // ⬅ ADD
     countriesWord: String,
     legsWord: String,
     doneWord: String,
@@ -483,6 +507,8 @@ private fun SwipeableTripCard(
         ) {
             TripCardContent(
                 trip = trip,
+                phase = phase,     // ⬅ ADD
+                today = today,     // ⬅ ADD
                 countriesWord = countriesWord,
                 legsWord = legsWord,
                 legWordSingular = s.leg,
@@ -556,12 +582,70 @@ fun TripCardContent(
     onShare: () -> Unit = {},
     onClick: () -> Unit,
     isPinned: Boolean,
-
-    ) {
+    phase: TripPhase = TripPhase.UPCOMING,   // ⬅ ADD
+    today: LocalDate? = null,                // ⬅ ADD
+) {
     val accent = accentColor(trip.accent)
     val doneCount = trip.legs.count { it.completed }
-
     val s = LocalStrings.current
+
+    val dates = trip.legs.map { it.date }.sorted()
+    val rangeShown = if (dates.isEmpty()) noDatesWord
+    else if (dates.first() == dates.last()) dates.first().label()
+    else "${dates.first().label()} – ${dates.last().label()}"
+
+    // ⬅ ADD — finished trips don't need a 120dp photo. Compact row keeps the
+    // swipe actions working while giving the section a much lighter footprint.
+    if (phase == TripPhase.PAST) {
+        Surface(
+            modifier = Modifier.fillMaxWidth().clip(CardShape).clickable(onClick = onClick),
+            shape = CardShape,
+            border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)),
+        ) {
+            Row(
+                Modifier.fillMaxWidth().padding(9.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    Modifier.size(46.dp).clip(RoundedCornerShape(9.dp))
+                        .background(accent.copy(alpha = 0.18f)),
+                ) {
+                    if (trip.imageUrl != null) {
+                        AsyncImage(
+                            model = trip.imageUrl,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.matchParentSize(),
+                        )
+                    }
+                }
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        trip.title,
+                        style = MaterialTheme.typography.bodyLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
+                    )
+                    Text(
+                        "$rangeShown · ${trip.legs.size} ${if (trip.legs.size == 1) legWordSingular else legsWord}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                Icon(
+                    Icons.Filled.CheckCircle,
+                    contentDescription = null,
+                    tint = DoneGreen,
+                    modifier = Modifier.size(18.dp),
+                )
+            }
+        }
+        return
+    }
 
     Surface(
         modifier = Modifier.fillMaxWidth().clip(CardShape).clickable(onClick = onClick),
@@ -571,7 +655,7 @@ fun TripCardContent(
     ) {
         Column {
             Box(
-                Modifier.fillMaxWidth().height(120.dp),
+                Modifier.fillMaxWidth().height(if (phase == TripPhase.IN_PROGRESS) 128.dp else 110.dp),
                 contentAlignment = Alignment.BottomStart,
             ) {
                 if (trip.imageUrl != null) {
@@ -590,11 +674,21 @@ fun TripCardContent(
                     Box(Modifier.matchParentSize().background(accent.copy(alpha = 0.15f)))
                 }
 
+                // ⬅ ADD — status badge. This used to be 0.6-alpha grey text under
+                // the title, competing with it and saying nothing at a glance.
+                if (today != null) {
+                    StatusBadge(
+                        label = statusLabel(trip, today, phase),
+                        inProgress = phase == TripPhase.IN_PROGRESS,
+                        modifier = Modifier.align(Alignment.TopStart).padding(10.dp),
+                    )
+                }
+
                 Row(Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
                     val labelColor = if (trip.imageUrl != null) Color.White else accent
                     if (isPinned) {
                         Icon(Icons.Filled.PushPin, null, tint = labelColor, modifier = Modifier.size(14.dp))
-                        Spacer(Modifier.width(6.6.dp))
+                        Spacer(Modifier.width(6.dp))
                     }
                     Icon(Icons.Filled.Place, null, tint = labelColor, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(4.dp))
@@ -603,55 +697,84 @@ fun TripCardContent(
                         .filter { it.isNotBlank() }
                         .distinct()
                         .size
-
                     Text("$countryCount $countriesWord", color = labelColor, style = MaterialTheme.typography.labelMedium)
                 }
 
-                // Share / members icon (owner only), bottom-right of the image
-                if (canShare) {
-                    Box(
-                        Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(10.dp)
-                            .size(34.dp)
-                            .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.40f))
-                            .clickable(
-                                onClick = onShare,
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() },
-                            ),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            Icons.Filled.PersonAdd,
-                            contentDescription = s.inviteToTrip,
-                            tint = Color.White,
-                            modifier = Modifier.size(18.dp),
-                        )
+                Row(
+                    Modifier.align(Alignment.BottomEnd).padding(10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    // ⬅ ADD — trip.travellers was never shown here. The stack says
+                    // "shared trip" instantly; the lone person-plus icon didn't.
+                    AvatarStack(trip.travellers)
+
+                    if (canShare) {
+                        Spacer(Modifier.width(8.dp))
+                        Box(
+                            Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(Color.Black.copy(alpha = 0.40f))
+                                .clickable(
+                                    onClick = onShare,
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() },
+                                ),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                Icons.Filled.PersonAdd,
+                                contentDescription = s.inviteToTrip,
+                                tint = Color.White,
+                                modifier = Modifier.size(17.dp),
+                            )
+                        }
                     }
                 }
             }
+
             Column(Modifier.padding(horizontal = 13.dp, vertical = 11.dp)) {
-                Text(trip.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
+                Text(
+                    trip.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
                 Spacer(Modifier.height(3.dp))
-                val sub = buildString {
-                    val rangeShown = if (trip.legs.isEmpty()) {
-                        noDatesWord
-                    } else {
-                        val dates = trip.legs.map { it.date }.sorted()
-                        val first = dates.first()
-                        val last = dates.last()
-                        if (first == last) first.label() else "${first.label()} – ${last.label()}"
+                Text(
+                    rangeShown,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                )
+
+                // ⬅ CHANGED — replaces "18 Legs · 18 Done" run-on with something
+                // readable at a glance.
+                if (trip.legs.isNotEmpty()) {
+                    Spacer(Modifier.height(9.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            Modifier
+                                .weight(1f)
+                                .height(5.dp)
+                                .clip(RoundedCornerShape(3.dp))
+                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f)),
+                        ) {
+                            Box(
+                                Modifier
+                                    .fillMaxWidth(doneCount.toFloat() / trip.legs.size)
+                                    .fillMaxHeight()
+                                    .background(if (doneCount == trip.legs.size) DoneGreen else accent),
+                            )
+                        }
+                        Spacer(Modifier.width(9.dp))
+                        Text(
+                            "$doneCount / ${trip.legs.size} ${if (trip.legs.size == 1) legWordSingular else legsWord}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        )
                     }
-
-                    val legCount = trip.legs.size
-                    val legWord = if (legCount == 1) legWordSingular else legsWord
-
-                    append("$rangeShown · ${trip.legs.size} $legWord")
-                    if (doneCount > 0) append(" · $doneCount $doneWord")
                 }
-                Text(sub, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
             }
         }
     }
@@ -674,19 +797,14 @@ fun TripNameDialog(
 
 
     var name by remember { mutableStateOf(initialName) }
-    val s = com.itinera.app.i18n.LocalStrings.current
+    val s = LocalStrings.current
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (isEdit) s.renameTrip else s.newTrip) },
         text = {
             OutlinedTextField(
                 value = name,
-                onValueChange = { name = it.split(" ")
-                    .joinToString(" ") { word ->
-                        word.replaceFirstChar { c ->
-                            if (c.isLowerCase()) c.titlecase() else c.toString()
-                        }
-                    } },
+                onValueChange = { name = it.toTitleCase() },
                 label = { Text(s.tripName) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
@@ -703,4 +821,214 @@ fun TripNameDialog(
         properties = DialogProperties(usePlatformDefaultWidth = true),
     )
 
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Trip phase, status, and the pieces the card and list are built from
+// ─────────────────────────────────────────────────────────────────────────────
+
+internal val DoneGreen = Color(0xFF1D9E75)
+
+enum class TripPhase { IN_PROGRESS, UPCOMING, PAST }
+
+/**
+ * Which section a trip belongs to.
+ *
+ * Replaces tripStartsIn(), which returned hardcoded English ("Starts in 3
+ * days", "In Progress") — the one place in the app that bypassed LocalStrings.
+ * Phase is computed here; the label is built in statusLabel() where strings are
+ * available. A trip with no legs has no dates, so it sits under Upcoming.
+ */
+internal fun tripPhase(trip: Trip, today: LocalDate): TripPhase {
+    val dates = trip.legs.map { it.date }.sorted()
+    val first = dates.firstOrNull() ?: return TripPhase.UPCOMING
+    return when {
+        dates.last() < today -> TripPhase.PAST
+        first <= today -> TripPhase.IN_PROGRESS
+        else -> TripPhase.UPCOMING
+    }
+}
+
+@Composable
+private fun statusLabel(trip: Trip, today: LocalDate, phase: TripPhase): String {
+    val s = LocalStrings.current
+    val dates = trip.legs.map { it.date }.sorted()
+    val first = dates.firstOrNull() ?: return s.noDatesYet
+    return when (phase) {
+        TripPhase.PAST -> s.completed
+        TripPhase.IN_PROGRESS -> s.dayXofY
+            .replace("%1\$s", "${first.daysUntil(today) + 1}")
+            .replace("%2\$s", "${first.daysUntil(dates.last()) + 1}")
+        TripPhase.UPCOMING -> when (val d = today.daysUntil(first)) {
+            0 -> s.startsToday
+            1 -> s.startsTomorrow
+            else -> s.startsInDays.replace("%s", "$d")
+        }
+    }
+}
+
+@Composable
+private fun StatusBadge(label: String, inProgress: Boolean, modifier: Modifier = Modifier) {
+    val bg = if (inProgress) DoneGreen else MaterialTheme.colorScheme.primary
+    Surface(shape = CircleShape, color = bg, modifier = modifier) {
+        Row(
+            Modifier.padding(horizontal = 9.dp, vertical = 3.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (inProgress) {
+                Box(Modifier.size(5.dp).clip(CircleShape).background(Color.White))
+                Spacer(Modifier.width(5.dp))
+            }
+            Text(
+                label,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Medium,
+                color = Color.White,
+            )
+        }
+    }
+}
+
+private val AvatarColors = listOf(
+    Color(0xFF85B7EB), Color(0xFFC9A0DC), Color(0xFF8FD1B6),
+    Color(0xFFE8B87A), Color(0xFFE49AAE), Color(0xFF9FB8E8),
+)
+
+/** Overlapping initials, capped at three plus an overflow count. */
+@Composable
+private fun AvatarStack(travellers: List<com.itinera.app.model.Traveller>, max: Int = 3) {
+    if (travellers.isEmpty()) return
+    val shown = travellers.take(max)
+    val overflow = travellers.size - shown.size
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        shown.forEachIndexed { index, t ->
+            Box(
+                Modifier
+                    .offset(x = if (index == 0) 0.dp else (-8 * index).dp)
+                    .size(26.dp)
+                    .clip(CircleShape)
+                    .background(AvatarColors[t.colorIndex.mod(AvatarColors.size)]),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    t.firstName.firstOrNull()?.uppercase() ?: "?",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.Black.copy(alpha = 0.75f),
+                )
+            }
+        }
+        if (overflow > 0) {
+            Box(
+                Modifier
+                    .offset(x = (-8 * shown.size).dp)
+                    .size(26.dp)
+                    .clip(CircleShape)
+                    .background(Color.Black.copy(alpha = 0.55f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    "+$overflow",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SectionHeader(label: String, count: Int) {
+    Row(
+        Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, top = 6.dp, bottom = 2.dp),
+        verticalAlignment = Alignment.Bottom,
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+        )
+        Spacer(Modifier.width(9.dp))
+        Text(
+            "$count",
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+            modifier = Modifier.padding(bottom = 2.dp),
+        )
+    }
+}
+
+@Composable
+private fun TripSearchField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    onClear: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val s = LocalStrings.current
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    Surface(modifier = modifier, shape = RoundedCornerShape(22.dp), color = onSurface.copy(alpha = 0.06f)) {
+        Row(
+            Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(Icons.Filled.Search, null, tint = onSurface.copy(alpha = 0.45f), modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(10.dp))
+            Box(Modifier.weight(1f)) {
+                if (value.isEmpty()) {
+                    Text(
+                        s.searchTrips,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = onSurface.copy(alpha = 0.4f),
+                    )
+                }
+                BasicTextField(
+                    value = value,
+                    onValueChange = onValueChange,
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = onSurface),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            if (value.isNotEmpty()) {
+                Icon(
+                    Icons.Filled.Close, s.clear,
+                    tint = onSurface.copy(alpha = 0.5f),
+                    modifier = Modifier.size(18.dp).clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                    ) { onClear() },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeEmptyState(icon: ImageVector, title: String, subtitle: String) {
+    Column(
+        Modifier.fillMaxSize().padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        // ⬅ CHANGED — was Text("✈️") / Text("🔎"), which don't tint with the theme
+        // and render differently across platforms.
+        Box(
+            Modifier.size(64.dp).clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(icon, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
+        }
+        Spacer(Modifier.height(14.dp))
+        Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Spacer(Modifier.height(6.dp))
+        Text(
+            subtitle,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+            textAlign = TextAlign.Center,
+        )
+    }
 }

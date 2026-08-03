@@ -1,7 +1,18 @@
 package com.itinera.app.ui.screens
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -10,8 +21,26 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.outlined.CheckBoxOutlineBlank
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,10 +48,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.itinera.app.i18n.LocalStrings
+import androidx.compose.material3.Surface
 import com.itinera.app.model.ChecklistItem
+import com.itinera.app.data.PackingSuggestion
+//import androidx.compose.material.icons.Icons
+//import androidx.compose.material.icons.filled.Add
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import com.itinera.app.ui.components.Progress
 import com.itinera.app.ui.components.TopBar
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ChecklistScreen(
     items: List<ChecklistItem>,
@@ -30,6 +66,7 @@ fun ChecklistScreen(
     onToggle: (String) -> Unit,
     onAdd: (String, String) -> Unit,
     onDelete: (String) -> Unit,
+    loadSuggestions: (suspend () -> List<PackingSuggestion>)? = null,
 ) {
     val s = LocalStrings.current
     val doneCount = items.count { it.done }
@@ -37,38 +74,79 @@ fun ChecklistScreen(
 
     var showAddDialog by remember { mutableStateOf(false) }
 
+    // packing suggestions (fetched fresh each time the checklist opens)
+    var suggestions by remember { mutableStateOf<List<PackingSuggestion>>(emptyList()) }
+    var dismissed by remember { mutableStateOf<Set<String>>(emptySet()) }
+    LaunchedEffect(Unit) { loadSuggestions?.let { suggestions = it() } }
+    val visibleSuggestions = suggestions.filter { it.text !in dismissed && items.none { i -> i.text.equals(it.text, ignoreCase = true) } }
+
     // existing groups in this checklist, used to offer them in the dialog
     val existingGroups = items.map { it.group }.distinct()
 
-    Column(Modifier.fillMaxSize()) {
-        TopBar(s.beforeYouGo, onBack = onBack)
-        Column(Modifier.padding(horizontal = 16.dp)) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("$doneCount / ${items.size} ${s.done}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                Text("$pct%", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+    Scaffold(
+        modifier = Modifier.fillMaxSize().navigationBarsPadding(),
+        topBar = {
+            Column {
+                TopBar(s.beforeYouGo, onBack = onBack)
+                Column(Modifier.padding(horizontal = 16.dp)) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text("$doneCount / ${items.size} ${s.done}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                        Text("$pct%", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                    }
+                    Spacer(Modifier.height(6.dp))
+                    Progress(if (items.isEmpty()) 0f else doneCount.toFloat() / items.size)
+                }
+                Spacer(Modifier.height(16.dp))
             }
-            Spacer(Modifier.height(6.dp))
-            Progress(if (items.isEmpty()) 0f else doneCount.toFloat() / items.size)
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showAddDialog = true },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = androidx.compose.foundation.shape.CircleShape,
+                modifier = Modifier
+                    .offset(x = (-25).dp, y = (-90).dp)
+                    .padding(end = 20.dp, bottom = 24.dp),
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = s.addItem)
+            }
         }
-        Spacer(Modifier.height(16.dp))
+    ) { innerPadding ->
         Column(
-            Modifier.weight(1f)
+            Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
+                .padding(bottom = 80.dp) // extra space for the FAB
         ) {
-            if (items.isEmpty()) {
+            if (items.isEmpty() && visibleSuggestions.isNotEmpty()) {
+                Text(
+                    "Suggested for this trip",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = 14.dp, bottom = 6.dp),
+                )
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    visibleSuggestions.forEach { sug ->
+                        SuggestionChip(
+                            suggestion = sug,
+                            onAdd = { onAdd(sug.text, sug.group); dismissed = dismissed + sug.text },
+                            onDismiss = { dismissed = dismissed + sug.text },
+                        )
+                    }
+                }
+            } else if (items.isEmpty()) {
                 Column(
-                    Modifier.fillMaxWidth().padding(top = 300.dp),
+                    Modifier.fillMaxWidth().padding(top = 270.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
                     Text("🧳", style = MaterialTheme.typography.displayMedium)
-//                    Icon(
-//                        Icons.Outlined.CheckBoxOutlineBlank,
-//                        contentDescription = null,
-//                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
-//                        modifier = Modifier.size(52.dp),
-//                    )
                     Spacer(Modifier.height(16.dp))
                     Text(
                         s.noChecklistItems,
@@ -85,6 +163,28 @@ fun ChecklistScreen(
                     )
                 }
             } else {
+                if (visibleSuggestions.isNotEmpty()) {
+                    Text(
+                        "Suggested for this trip",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 14.dp, bottom = 6.dp),
+                    )
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        visibleSuggestions.forEach { sug ->
+                            SuggestionChip(
+                                suggestion = sug,
+                                onAdd = { onAdd(sug.text, sug.group); dismissed = dismissed + sug.text },
+                                onDismiss = { dismissed = dismissed + sug.text },
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(4.dp))
+                }
+
                 // canonical order so sections always appear in the same sequence
                 val groupOrder = listOf(
                     s.documents, s.bookings, s.packing,
@@ -113,21 +213,6 @@ fun ChecklistScreen(
                         )
                     }
                 }
-            }
-        }
-        Box(
-            modifier = Modifier.fillMaxWidth().padding(16.dp).padding(bottom = 60.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Button(
-                onClick = { showAddDialog = true },
-                modifier = Modifier.padding(bottom = 10.dp),
-                shape = androidx.compose.foundation.shape.CircleShape,
-                contentPadding = PaddingValues(horizontal = 25.dp, vertical = 8.dp)
-            ) {
-                Icon(Icons.Filled.Add, null, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.width(8.dp))
-                Text(s.addItem)
             }
         }
     }
@@ -186,7 +271,7 @@ private fun ChecklistRow(
 }
 
 // ---- Add-item dialog ----
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AddChecklistItemDialog(
     existingGroups: List<String>,
@@ -269,7 +354,6 @@ private fun AddChecklistItemDialog(
                             DropdownMenuItem(
                                 text = { Text(g) },
                                 onClick = { group = g; userPicked = true; expanded = false },
-                                shape = RoundedCornerShape(12.dp),
                             )
                         }
                     }
@@ -350,5 +434,44 @@ private fun suggestGroup(
         ) -> gadget
 
         else -> other
+    }
+}
+
+
+@Composable
+private fun SuggestionChip(
+    suggestion: PackingSuggestion,
+    onAdd: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        modifier = Modifier.clickable { onAdd() },
+    ) {
+        Row(
+            Modifier.padding(start = 12.dp, end = 8.dp, top = 7.dp, bottom = 7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column {
+                Text(
+                    suggestion.text,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    suggestion.reason,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                )
+            }
+            Spacer(Modifier.width(6.dp))
+            Icon(
+                Icons.Filled.Add,
+                contentDescription = "Add",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp),
+            )
+        }
     }
 }

@@ -64,6 +64,11 @@ kotlin {
             implementation(libs.androidx.activity.compose.v193)
 
             implementation(libs.translate)
+            implementation(libs.barcode.scanning)
+            implementation(libs.maps.compose)
+            implementation(libs.play.services.maps)
+            implementation(libs.osmdroid.android)
+
 
         }
         commonMain.dependencies {

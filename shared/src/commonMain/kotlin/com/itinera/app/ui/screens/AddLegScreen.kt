@@ -2,40 +2,76 @@ package com.itinera.app.ui.screens
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.Leg
+import com.itinera.app.model.LegStop
 import com.itinera.app.model.TransportType
-import com.itinera.app.ui.components.countries          // ⬅ reuse existing country list
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import com.itinera.app.model.Traveller
+import com.itinera.app.model.label
+import com.itinera.app.ui.components.countries
 import dev.darkokoa.datetimewheelpicker.WheelTimePicker
 import dev.darkokoa.datetimewheelpicker.core.format.TimeFormat
 import dev.darkokoa.datetimewheelpicker.core.format.timeFormatter
 import kotlinx.datetime.LocalTime
-import com.itinera.app.model.label
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddLegScreen(
     existing: Leg? = null,
+    travellers: List<Traveller> = emptyList(),
     onClose: () -> Unit,
     onSave: (Leg) -> Unit,
     onDelete: (() -> Unit)? = null,
@@ -49,11 +85,17 @@ fun AddLegScreen(
     var operator by remember { mutableStateOf(existing?.operator ?: "") }
     var country by remember { mutableStateOf(existing?.country ?: "") }            // ⬅ ADD
     var transport by remember { mutableStateOf(existing?.transport ?: TransportType.TRAIN) }
+    var selectedTravellerIds by remember { mutableStateOf(existing?.travellerIds?.toSet() ?: travellers.map { it.id }.toSet()) }
+    val stops = remember {
+        mutableStateListOf<LegStop>().apply { existing?.stops?.forEach { add(it) } }
+    }
+    var stopTimePicker by remember { mutableStateOf<Pair<Int, Boolean>?>(null) }  // index to isArrival
 
     var showDatePicker by remember { mutableStateOf(false) }
     var showStartTimePicker by remember { mutableStateOf(false) }
     var showEndTimePicker by remember { mutableStateOf(false) }
     var showCountryPicker by remember { mutableStateOf(false) }                    // ⬅ ADD
+    var showTravellerPicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
 
     val textFieldShape = RoundedCornerShape(12.dp)
@@ -73,21 +115,114 @@ fun AddLegScreen(
             }
         }
 
-    Column(Modifier.fillMaxSize()) {
-        Row(
-            Modifier.fillMaxWidth().padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            IconButton(onClick = onClose) { Icon(Icons.Filled.Close, contentDescription = s.close) }
-            Text(if (existing == null) s.newLeg else s.editLeg, style = MaterialTheme.typography.titleLarge)
-        }
+    Box(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize()) {
+            Row(
+                Modifier.fillMaxWidth().padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                IconButton(onClick = onClose) { Icon(Icons.Filled.Close, contentDescription = s.close) }
+                Text(if (existing == null) s.newLeg else s.editLeg, style = MaterialTheme.typography.titleLarge)
+            }
 
-        Column(
-            Modifier.weight(1f).padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
-        ) {
+            Column(
+                Modifier.weight(1f).padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
             OutlinedTextField(from, { from = it.toTitleCase() }, label = { Text(s.from) }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = textFieldShape)
             OutlinedTextField(to, { to = it.toTitleCase() }, label = { Text(s.to) }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = textFieldShape)
+
+            // Start time | End time
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = startTime,
+                    onValueChange = {},
+                    readOnly = true,
+                    enabled = false,
+                    label = { Text(s.startTime) },
+                    trailingIcon = { Icon(Icons.Filled.Schedule, contentDescription = null) },
+                    shape = textFieldShape,
+                    modifier = Modifier.weight(1f).clickable { showStartTimePicker = true },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                        disabledBorderColor = MaterialTheme.colorScheme.outline,
+                        disabledLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        disabledTrailingIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    ),
+                )
+
+                OutlinedTextField(
+                    value = endTime,
+                    onValueChange = {},
+                    readOnly = true,
+                    enabled = false,
+                    label = { Text(s.endTime) },
+                    trailingIcon = { Icon(Icons.Filled.Schedule, contentDescription = null) },
+                    shape = textFieldShape,
+                    modifier = Modifier.weight(1f).clickable { showEndTimePicker = true },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                        disabledBorderColor = MaterialTheme.colorScheme.outline,
+                        disabledLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        disabledTrailingIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    ),
+                )
+            }
+
+            // Layovers / changes (optional)
+            stops.forEachIndexed { index, stop ->
+                OutlinedTextField(
+                    value = stop.city,
+                    onValueChange = {
+                        // city changed -> reset geo so it re-geocodes
+                        stops[index] = stop.copy(city = it.toTitleCase(), lat = 0.0, lng = 0.0, country = "")
+                    },
+                    label = { Text(s.stopPlaceholder.replace("%d", (index + 1).toString())) },
+                    singleLine = true,
+                    trailingIcon = {
+                        IconButton(onClick = { stops.removeAt(index) }) {
+                            Icon(Icons.Filled.Close, contentDescription = s.removeStop)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = textFieldShape,
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = stop.arrivalTime,
+                        onValueChange = {}, readOnly = true, enabled = false,
+                        label = { Text(s.arrival) },
+                        trailingIcon = { Icon(Icons.Filled.Schedule, contentDescription = null) },
+                        shape = textFieldShape,
+                        modifier = Modifier.weight(1f).clickable { stopTimePicker = index to true },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                            disabledBorderColor = MaterialTheme.colorScheme.outline,
+                            disabledLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            disabledTrailingIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        ),
+                    )
+                    OutlinedTextField(
+                        value = stop.departureTime,
+                        onValueChange = {}, readOnly = true, enabled = false,
+                        label = { Text(s.departure) },
+                        trailingIcon = { Icon(Icons.Filled.Schedule, contentDescription = null) },
+                        shape = textFieldShape,
+                        modifier = Modifier.weight(1f).clickable { stopTimePicker = index to false },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                            disabledBorderColor = MaterialTheme.colorScheme.outline,
+                            disabledLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            disabledTrailingIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        ),
+                    )
+                }
+            }
+            TextButton(onClick = { stops.add(LegStop()) }) {
+                Icon(Icons.Filled.Add, null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text(s.addStop)
+            }
 
             // Destination country (optional) — counts toward the trip's country total
             OutlinedTextField(
@@ -147,43 +282,6 @@ fun AddLegScreen(
                 ),
             )
 
-            // Start time | End time
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = startTime,
-                    onValueChange = {},
-                    readOnly = true,
-                    enabled = false,
-                    label = { Text(s.startTime) },
-                    trailingIcon = { Icon(Icons.Filled.Schedule, contentDescription = null) },
-                    shape = textFieldShape,
-                    modifier = Modifier.weight(1f).clickable { showStartTimePicker = true },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                        disabledBorderColor = MaterialTheme.colorScheme.outline,
-                        disabledLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                        disabledTrailingIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    ),
-                )
-
-                OutlinedTextField(
-                    value = endTime,
-                    onValueChange = {},
-                    readOnly = true,
-                    enabled = false,
-                    label = { Text(s.endTime) },
-                    trailingIcon = { Icon(Icons.Filled.Schedule, contentDescription = null) },
-                    shape = textFieldShape,
-                    modifier = Modifier.weight(1f).clickable { showEndTimePicker = true },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                        disabledBorderColor = MaterialTheme.colorScheme.outline,
-                        disabledLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                        disabledTrailingIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    ),
-                )
-            }
-
             // Operator (full width, label changes with transport)
             OutlinedTextField(
                 value = operator,
@@ -193,6 +291,26 @@ fun AddLegScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = textFieldShape,
             )
+
+            // Travellers (multi-select dropdown/dialog)
+            OutlinedTextField(
+                value = if (selectedTravellerIds.isEmpty()) "" else "${selectedTravellerIds.size} ${s.travellersCount}",
+                onValueChange = {},
+                readOnly = true,
+                enabled = false,
+                label = { Text(s.selectTravellers) },
+                trailingIcon = { Icon(Icons.Filled.People, contentDescription = null) },
+                shape = textFieldShape,
+                modifier = Modifier.fillMaxWidth().clickable { showTravellerPicker = true },
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                ),
+            )
+            
+            Spacer(Modifier.height(100.dp))
         }
 
         // Calendar dialog
@@ -258,6 +376,28 @@ fun AddLegScreen(
             )
         }
 
+        // Stop arrival/departure time picker
+        stopTimePicker?.let { (index, isArrival) ->
+            var picked by remember(index, isArrival) { mutableStateOf(LocalTime(12, 0)) }
+            AlertDialog(
+                onDismissRequest = { stopTimePicker = null },
+                confirmButton = {
+                    TextButton(onClick = {
+                        val h = picked.hour.toString().padStart(2, '0')
+                        val m = picked.minute.toString().padStart(2, '0')
+                        val t = "$h:$m"
+                        stops[index] = if (isArrival) stops[index].copy(arrivalTime = t)
+                        else stops[index].copy(departureTime = t)
+                        stopTimePicker = null
+                    }) { Text(s.ok) }
+                },
+                dismissButton = { TextButton(onClick = { stopTimePicker = null }) { Text(s.cancel) } },
+                text = {
+                    WheelTimePicker(timeFormatter = timeFormatter(timeFormat = TimeFormat.HOUR_24)) { picked = it }
+                },
+            )
+        }
+
         // Country picker (searchable, reuses the existing `countries` list)
         if (showCountryPicker) {
 
@@ -305,11 +445,65 @@ fun AddLegScreen(
             )
         }
 
-        // Save
-        Row(
-            Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(top = 16.dp, bottom = 60.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
+        if (showTravellerPicker) {
+            val allSelected = selectedTravellerIds.size == travellers.size
+            AlertDialog(
+                onDismissRequest = { showTravellerPicker = false },
+                confirmButton = {
+                    TextButton(onClick = { showTravellerPicker = false }) { Text(s.ok) }
+                },
+                title = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(s.selectTravellers)
+                        IconButton(onClick = {
+                            selectedTravellerIds = if (allSelected) emptySet() else travellers.map { it.id }.toSet()
+                        }) {
+                            Icon(
+                                Icons.Filled.SelectAll,
+                                contentDescription = s.selectAll
+                            )
+                        }
+                    }
+                },
+                shape = RoundedCornerShape(16.dp),
+                text = {
+                    LazyColumn(Modifier.heightIn(max = 300.dp)) {
+                        items(travellers) { t ->
+                            val isSelected = t.id in selectedTravellerIds
+                            Row(
+                                Modifier.fillMaxWidth()
+                                    .clickable {
+                                        selectedTravellerIds = if (isSelected) selectedTravellerIds - t.id else selectedTravellerIds + t.id
+                                    }
+                                    .padding(vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Checkbox(
+                                    checked = isSelected,
+                                    onCheckedChange = {
+                                        selectedTravellerIds = if (it) selectedTravellerIds + t.id else selectedTravellerIds - t.id
+                                    }
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text("${t.firstName} ${t.surname}".trim())
+                            }
+                        }
+                    }
+                }
+            )
+        }
+
+    } // End of Column
+
+    // Save
+    Row(
+        Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 32.dp),
+        horizontalArrangement = Arrangement.Center,
+    ) {
             Button(
                 onClick = {
                     onSave(
@@ -324,14 +518,23 @@ fun AddLegScreen(
                             timeLabel = startTime.ifBlank { "" },
                             endTimeLabel = endTime.ifBlank { "" },
                             operator = operator.trim(),
-                            country = country.trim(),                    // ⬅ ADD
+                            country = country.trim(),
                             bookingRef = null,
+                            travellerIds = selectedTravellerIds.toList(),
+                            // keep coords when the city didn't change (edit shouldn't wipe them)
+                            fromLat = if (existing?.fromCity == from) existing.fromLat else 0.0,
+                            fromLng = if (existing?.fromCity == from) existing.fromLng else 0.0,
+                            toLat = if (existing?.toCity == to) existing.toLat else 0.0,
+                            toLng = if (existing?.toCity == to) existing.toLng else 0.0,
+                            stops = stops.mapNotNull { st ->
+                                st.city.trim().ifBlank { null }?.let { st.copy(city = it) }
+                            },
                         )
                     )
                 },
                 enabled = from.isNotBlank() && to.isNotBlank() && date != null,
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 80.dp).padding(bottom = 16.dp).height(50.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 80.dp).height(50.dp),
             ) { Text(s.saveLeg) }
         }
     }

@@ -4,30 +4,70 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.NightlightRound
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.itinera.app.data.SavedZone
@@ -36,12 +76,12 @@ import com.itinera.app.ui.components.CardShape
 import com.itinera.app.ui.components.TopBar
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
-import kotlin.time.Clock
-import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
 import kotlinx.datetime.toLocalDateTime
+import kotlin.math.roundToInt
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 /** "Europe/Paris" -> "Paris", "America/New_York" -> "New York". */
 private fun friendlyZone(id: String): String =
@@ -60,6 +100,11 @@ fun WorldClockScreen(
     onAddZone: (String, String) -> Unit,   // (label, zoneId)
     onRemoveZone: (SavedZone) -> Unit,
     onBack: () -> Unit,
+    /**
+     * Destinations from the user's trips, offered as shortcuts in the picker.
+     * Optional, so existing call sites still compile.
+     */
+    tripCities: List<String> = emptyList(),
 ) {
     val s = LocalStrings.current
     var showPicker by remember { mutableStateOf(false) }
@@ -68,10 +113,14 @@ fun WorldClockScreen(
 
     // live tick — update every second so minutes roll over naturally
     var now by remember { mutableStateOf(nowInstant()) }
+    // ⬅ CHANGED — was delay(1000). Only minutes are displayed, so ticking every
+    // second recomposed every row 3,600 times an hour to change the display 60.
+    // Sleeping to the next minute boundary also lands the rollover on time
+    // rather than up to a second late.
     LaunchedEffect(Unit) {
         while (true) {
             now = nowInstant()
-            delay(1000)
+            delay(60_000 - (now.toEpochMilliseconds() % 60_000))
         }
     }
 
@@ -88,21 +137,34 @@ fun WorldClockScreen(
             ) {
                 // Home / local zone, pinned at top — not swipeable (not removable)
                 item {
-                    ClockRow(
-                        label = friendlyZone(homeTz.id),
-                        sublabel = s.localLabel,
-                        zoneId = homeTz.id,
-                        now = now,
-                    )
+                    // ⬅ CHANGED — was an identical ClockRow. Home is the reference
+                    // every other row is measured against.
+                    HomeClockCard(zoneId = homeTz.id, now = now)
                 }
 
                 if (zones.isEmpty()) {
                     item {
                         Column(
-                            Modifier.fillMaxWidth().padding(top = 200.dp, start = 32.dp, end = 32.dp),
+                            // ⬅ CHANGED — was padding(top = 200.dp), a magic number
+                            // that lands differently on every screen size.
+                            Modifier.fillMaxWidth().padding(top = 64.dp, start = 32.dp, end = 32.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
-                            Text("🕐", style = MaterialTheme.typography.displayMedium)
+                            // ⬅ CHANGED — was Text("🕐"), which doesn't tint with the theme.
+                            Box(
+                                Modifier
+                                    .size(64.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Icon(
+                                    Icons.Filled.Schedule,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(28.dp),
+                                )
+                            }
                             Spacer(Modifier.height(12.dp))
                             Text(
                                 s.noCitiesYet,
@@ -123,6 +185,7 @@ fun WorldClockScreen(
                         SwipeableClockCard(
                             entry = entry,
                             now = now,
+                            homeTz = homeTz,     // ⬅ ADD
                             isOpen = openKey == k,
                             onOpenChange = { open -> openKey = if (open) k else null },
                             onDelete = { onRemoveZone(entry); openKey = null },
@@ -147,6 +210,7 @@ fun WorldClockScreen(
 
     if (showPicker) {
         ZonePickerDialog(
+            tripCities = tripCities,
             onPick = { label, zoneId -> onAddZone(label, zoneId); showPicker = false },
             onDismiss = { showPicker = false },
         )
@@ -157,6 +221,7 @@ fun WorldClockScreen(
 private fun SwipeableClockCard(
     entry: SavedZone,
     now: Instant,
+    homeTz: TimeZone,     // ⬅ ADD
     isOpen: Boolean,
     onOpenChange: (Boolean) -> Unit,
     onDelete: () -> Unit,
@@ -241,9 +306,9 @@ private fun SwipeableClockCard(
         ) {
             ClockRow(
                 label = entry.label,
-                sublabel = friendlyZone(entry.zoneId),
                 zoneId = entry.zoneId,
                 now = now,
+                homeTz = homeTz,     // ⬅ ADD
                 onTap = {
                     // tapping an open card closes it
                     if (offsetX.value != 0f) {
@@ -255,15 +320,118 @@ private fun SwipeableClockCard(
     }
 }
 
+/** Warm for day, cool for night — answers "can I call them?" without reading the clock. */
+private val DayTint = Color(0xFFE0A93C)
+private val NightTint = Color(0xFF9B92DD)
+
+/**
+ * Signed offset in minutes between a zone and home. Positive = ahead.
+ * Minutes, not hours: Chennai is +5:30 and Kathmandu +5:45.
+ */
+private fun offsetMinutesFromHome(tz: TimeZone, home: TimeZone, now: Instant): Int =
+    (tz.offsetAt(now).totalSeconds - home.offsetAt(now).totalSeconds) / 60
+
+@Composable
+private fun relativeToHome(minutes: Int): String {
+    val s = LocalStrings.current
+    if (minutes == 0) return s.sameTimeAsYou
+    val abs = kotlin.math.abs(minutes)
+    val h = abs / 60
+    val m = abs % 60
+    val amount = when {
+        h > 0 && m > 0 -> "${h}h${pad2(m)}m"
+        h > 0 -> "${h}h"
+        else -> "${m}m"
+    }
+    return if (minutes > 0) s.hoursAhead.replace("%s", amount)
+    else s.hoursBehind.replace("%s", amount)
+}
+
+@Composable
+private fun dayOfWeekShort(dow: kotlinx.datetime.DayOfWeek): String {
+    val s = LocalStrings.current
+    return when (dow) {
+        kotlinx.datetime.DayOfWeek.MONDAY -> s.monShort
+        kotlinx.datetime.DayOfWeek.TUESDAY -> s.tueShort
+        kotlinx.datetime.DayOfWeek.WEDNESDAY -> s.wedShort
+        kotlinx.datetime.DayOfWeek.THURSDAY -> s.thuShort
+        kotlinx.datetime.DayOfWeek.FRIDAY -> s.friShort
+        kotlinx.datetime.DayOfWeek.SATURDAY -> s.satShort
+        kotlinx.datetime.DayOfWeek.SUNDAY -> s.sunShort
+    }
+}
+
+private fun utcOffsetLabel(tz: TimeZone, now: Instant): String {
+    val secs = tz.offsetAt(now).totalSeconds
+    val h = secs / 3600
+    val m = (kotlin.math.abs(secs) % 3600) / 60
+    return buildString {
+        append("UTC")
+        append(if (h >= 0) "+" else "-")
+        append(kotlin.math.abs(h))
+        if (m != 0) append(":").append(pad2(m))
+    }
+}
+
+/**
+ * The local zone, as a hero. It's the reference every other row is measured
+ * against, so it shouldn't look identical to them — which it did, apart from
+ * the word "Local".
+ */
+@Composable
+private fun HomeClockCard(zoneId: String, now: Instant) {
+    val s = LocalStrings.current
+    val tz = remember(zoneId) { runCatching { TimeZone.of(zoneId) }.getOrNull() } ?: return
+    val ldt = now.toLocalDateTime(tz)
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 2.dp,
+    ) {
+        Column(Modifier.fillMaxWidth().padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Filled.Place,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(14.dp),
+                )
+                Spacer(Modifier.width(5.dp))
+                Text(
+                    "${friendlyZone(zoneId)} · ${s.localLabel}",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "${pad2(ldt.hour)}:${pad2(ldt.minute)}",
+                style = MaterialTheme.typography.displaySmall,
+                fontWeight = FontWeight.Medium,
+            )
+            Spacer(Modifier.height(3.dp))
+            Text(
+                "${dayOfWeekShort(ldt.dayOfWeek)} ${ldt.dayOfMonth} · ${utcOffsetLabel(tz, now)}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+            )
+        }
+    }
+}
+
 @Composable
 private fun ClockRow(
     label: String,
-    sublabel: String,
     zoneId: String,
     now: Instant,
+    homeTz: TimeZone,
     onTap: (() -> Unit)? = null,
 ) {
+    val s = LocalStrings.current
     val tz = remember(zoneId) { runCatching { TimeZone.of(zoneId) }.getOrNull() }
+
     Surface(
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surface,
@@ -273,39 +441,76 @@ private fun ClockRow(
             .then(if (onTap != null) Modifier.clickable(onClick = onTap) else Modifier),
     ) {
         Row(
-            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp),
+            Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 13.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(Modifier.weight(1f)) {
-                Text(label, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                Text(
-                    sublabel,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+            if (tz == null) {
+                Text(label, style = MaterialTheme.typography.titleMedium)
+                return@Row
+            }
+
+            val ldt = now.toLocalDateTime(tz)
+            val homeLdt = now.toLocalDateTime(homeTz)
+            val isDay = ldt.hour in 6..19
+            val diffMinutes = offsetMinutesFromHome(tz, homeTz, now)
+
+            // ⬅ ADD — day/night marker. 21:32 and 18:02 used to look identical.
+            Box(
+                Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background((if (isDay) DayTint else NightTint).copy(alpha = 0.16f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    if (isDay) Icons.Filled.WbSunny else Icons.Filled.NightlightRound,
+                    contentDescription = null,
+                    tint = if (isDay) DayTint else NightTint,
+                    modifier = Modifier.size(18.dp),
                 )
             }
-            if (tz != null) {
-                val ldt = now.toLocalDateTime(tz)
-                val offsetSecs = tz.offsetAt(now).totalSeconds
-                val offH = offsetSecs / 3600
-                val offM = (kotlin.math.abs(offsetSecs) % 3600) / 60
-                val offLabel = buildString {
-                    append(if (offH >= 0) "+" else "-")
-                    append(kotlin.math.abs(offH))
-                    if (offM != 0) append(":").append(pad2(offM))
-                }
-                Column(horizontalAlignment = Alignment.End) {
+
+            Spacer(Modifier.width(12.dp))
+
+            Column(Modifier.weight(1f)) {
+                Text(
+                    label,
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Spacer(Modifier.height(1.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // ⬅ CHANGED — was the raw zone id ("Kolkata"). The offset from
+                    // home is the number people were computing in their heads.
                     Text(
-                        "${pad2(ldt.hour)}:${pad2(ldt.minute)}",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.SemiBold,
+                        relativeToHome(diffMinutes),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                     )
-                    Text(
-                        "${ldt.dayOfWeek.name.take(3).lowercase().replaceFirstChar { it.uppercase() }} · UTC$offLabel",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-                    )
+                    // ⬅ ADD — "Sun" on every row said nothing about the rollover.
+                    val dayShift = ldt.date.toEpochDays() - homeLdt.date.toEpochDays()
+                    if (dayShift != 0L) {
+                        Text(
+                            " · " + if (dayShift > 0) s.tomorrow else s.yesterday,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (dayShift > 0) DayTint else NightTint,
+                        )
+                    }
                 }
+            }
+
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    "${pad2(ldt.hour)}:${pad2(ldt.minute)}",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Medium,
+                )
+                Text(
+                    "${dayOfWeekShort(ldt.dayOfWeek)} · ${utcOffsetLabel(tz, now)}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                )
             }
         }
     }
@@ -354,12 +559,20 @@ private fun ActionButton(
     }
 }
 
+/**
+ * Zone picker. Already filtered live — this is the same pill-field styling as
+ * the weather and documents search, plus the UTC offset on each result so you
+ * can tell "Munich" apart from "Munich, North Dakota" before adding it.
+ */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ZonePickerDialog(
+    tripCities: List<String>,
     onPick: (String, String) -> Unit,   // (label, zoneId)
     onDismiss: () -> Unit,
 ) {
     val s = LocalStrings.current
+    val onSurface = MaterialTheme.colorScheme.onSurface
     var query by remember { mutableStateOf("") }
 
     data class ZoneResult(val label: String, val zoneId: String)
@@ -372,61 +585,192 @@ private fun ZonePickerDialog(
     }
 
     val filtered = remember(query) {
-        if (query.isBlank()) {
-            cityResults.sortedBy { it.label }
+        val q = query.trim()
+        // ⬅ CHANGED — was cityResults.sortedBy { it.label } when blank, which
+        // dumped the whole alphabetical city list on you before you'd typed
+        // anything. Abu Dhabi is not a useful default.
+        if (q.isBlank()) {
+            emptyList()
         } else {
-            val q = query.trim()
             val cityHits = cityResults.filter { it.label.contains(q, ignoreCase = true) }
             val ianaHits = ianaResults.filter {
-                it.label.contains(q, ignoreCase = true) || it.zoneId.replace('_', ' ').contains(q, ignoreCase = true)
+                it.label.contains(q, ignoreCase = true) ||
+                        it.zoneId.replace('_', ' ').contains(q, ignoreCase = true)
             }
             (cityHits + ianaHits).distinctBy { it.label + "|" + it.zoneId }
         }
     }
+
+    // One timestamp for the whole dialog — offsets don't shift while it's open.
+    val now = remember { nowInstant() }
+
+    val focusRequester = remember { FocusRequester() }
+    // The dialog exists to be typed into, so open the keyboard with it.
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {},
         dismissButton = { TextButton(onClick = onDismiss) { Text(s.close) } },
         title = { Text(s.addTimeZone) },
+        shape = RoundedCornerShape(20.dp),
         text = {
             Column {
-                OutlinedTextField(
-                    value = query,
-                    onValueChange = { query = it },
-                    label = { Text(s.searchAnyCity) },
-                    singleLine = true,
-                    trailingIcon = {
+                // ⬅ CHANGED — was an OutlinedTextField. Pill field, matching the
+                // weather and documents search.
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(22.dp),
+                    color = onSurface.copy(alpha = 0.06f),
+                ) {
+                    Row(
+                        Modifier.padding(horizontal = 14.dp, vertical = 11.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            Icons.Filled.Search, null,
+                            tint = onSurface.copy(alpha = 0.45f),
+                            modifier = Modifier.size(18.dp),
+                        )
+                        Spacer(Modifier.width(10.dp))
+                        Box(Modifier.weight(1f)) {
+                            if (query.isEmpty()) {
+                                Text(
+                                    s.searchAnyCity,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = onSurface.copy(alpha = 0.4f),
+                                )
+                            }
+                            BasicTextField(
+                                value = query,
+                                onValueChange = { query = it },
+                                singleLine = true,
+                                textStyle = MaterialTheme.typography.bodyMedium.copy(color = onSurface),
+                                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                                modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+                            )
+                        }
                         if (query.isNotEmpty()) {
-                            IconButton(onClick = { query = "" }) {
-                                Icon(Icons.Filled.Close, contentDescription = "Clear")
+                            Icon(
+                                Icons.Filled.Close,
+                                contentDescription = s.clearLabel,
+                                tint = onSurface.copy(alpha = 0.5f),
+                                modifier = Modifier.size(18.dp).clickable(
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() },
+                                ) { query = "" },
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(12.dp))
+
+                // ⬅ ADD — destinations from the user's trips. Fills the box rather
+                // than adding directly, so the same filter resolves the zone.
+                if (tripCities.isNotEmpty() && query.isBlank()) {
+                    Text(
+                        s.fromYourTrips,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = onSurface.copy(alpha = 0.6f),
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        tripCities.forEach { name ->
+                            Surface(
+                                shape = RoundedCornerShape(20.dp),
+                                color = Color.Transparent,
+                                border = BorderStroke(
+                                    0.5.dp,
+                                    MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
+                                ),
+                                modifier = Modifier.clickable { query = name },
+                            ) {
+                                Row(
+                                    Modifier.padding(horizontal = 11.dp, vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Icon(
+                                        Icons.Filled.Add, null,
+                                        modifier = Modifier.size(13.dp),
+                                        tint = onSurface.copy(alpha = 0.6f),
+                                    )
+                                    Spacer(Modifier.width(5.dp))
+                                    Text(name, style = MaterialTheme.typography.labelMedium)
+                                }
                             }
                         }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                )
-                Spacer(Modifier.height(8.dp))
-                LazyColumn(Modifier.heightIn(max = 360.dp)) {
+                    }
+                    Spacer(Modifier.height(10.dp))
+                }
+
+                // ⬅ CHANGED — was firing on a blank query too, so the dialog
+                // opened saying "no matches" before you'd typed.
+                if (query.isNotBlank() && filtered.isEmpty()) {
+                    Text(
+                        s.noCityMatches,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = onSurface.copy(alpha = 0.6f),
+                        modifier = Modifier.padding(vertical = 10.dp),
+                    )
+                }
+//                else if (query.isBlank() && tripCities.isEmpty()) {
+//                    // Without trip chips the dialog would otherwise be empty.
+//                    Text(
+//                        s.searchAnyCity,
+//                        style = MaterialTheme.typography.bodyMedium,
+//                        color = onSurface.copy(alpha = 0.45f),
+//                        modifier = Modifier.padding(vertical = 16.dp),
+//                    )
+//                }
+
+                LazyColumn(Modifier.heightIn(max = 320.dp)) {
                     items(filtered, key = { it.label + "|" + it.zoneId }) { r ->
+                        val tz = remember(r.zoneId) { runCatching { TimeZone.of(r.zoneId) }.getOrNull() }
                         Row(
                             Modifier
                                 .fillMaxWidth()
                                 .clickable { onPick(r.label, r.zoneId) }
-                                .padding(vertical = 12.dp, horizontal = 4.dp),
+                                .padding(vertical = 11.dp, horizontal = 2.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
+                            Icon(
+                                Icons.Filled.Place,
+                                contentDescription = null,
+                                tint = onSurface.copy(alpha = 0.45f),
+                                modifier = Modifier.size(18.dp),
+                            )
+                            Spacer(Modifier.width(11.dp))
                             Column(Modifier.weight(1f)) {
-                                Text(r.label, style = MaterialTheme.typography.bodyLarge)
-                                if (!r.zoneId.endsWith("/" + r.label.replace(' ', '_'))) {
+                                Text(
+                                    r.label,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                                // ⬅ CHANGED — the zone id was only shown when it
+                                // didn't match the label, so most rows had nothing to
+                                // tell them apart. The offset always distinguishes.
+                                val second = listOfNotNull(
+                                    tz?.let { utcOffsetLabel(it, now) },
+                                    r.zoneId.substringBeforeLast('/').replace('_', ' ')
+                                        .takeIf { it.isNotBlank() && it != r.zoneId },
+                                ).joinToString(" · ")
+                                if (second.isNotBlank()) {
                                     Text(
-                                        r.zoneId.replace('_', ' '),
+                                        second,
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
+                                        color = onSurface.copy(alpha = 0.5f),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
                                     )
                                 }
                             }
                         }
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
                     }
                 }
             }

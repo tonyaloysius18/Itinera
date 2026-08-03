@@ -1,21 +1,21 @@
 package com.itinera.app.data
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.itinera.app.NotificationScheduler
 import com.itinera.app.ReminderOffset
 import com.itinera.app.legReminderFireTime
+import com.itinera.app.model.Activity
 import com.itinera.app.model.ChecklistItem
 import com.itinera.app.model.DocItem
-import com.itinera.app.model.Leg
-import com.itinera.app.model.Trip
-import com.itinera.app.model.UserProfile
-import com.itinera.app.model.Activity
 import com.itinera.app.model.Expense
+import com.itinera.app.model.Leg
 import com.itinera.app.model.Traveller
+import com.itinera.app.model.Trip
 import com.itinera.app.model.TripAccent
+import com.itinera.app.model.UserProfile
 import com.itinera.app.model.isOwnedBy
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -25,12 +25,11 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.catch
-
 
 
 /**
@@ -101,7 +100,6 @@ class TripRepository {
 
     var checklistSyncedOnce by mutableStateOf(false)
         private set
-
 
 
     @OptIn(kotlin.time.ExperimentalTime::class)
@@ -282,6 +280,7 @@ class TripRepository {
         trips[index] = trip.copy(legs = trip.legs + leg)
         persist(trips[index])
         scheduleLegReminder(trips[index], leg)
+        geocodeLegAsync(tripId, leg.id)
     }
 
     fun updateLeg(tripId: String, leg: Leg) {
@@ -291,6 +290,7 @@ class TripRepository {
         trips[index] = trip.copy(legs = trip.legs.map { if (it.id == leg.id) leg else it })
         persist(trips[index])
         scheduleLegReminder(trips[index], leg)
+        geocodeLegAsync(tripId, leg.id)
     }
 
     fun deleteLeg(tripId: String, legId: String) {
@@ -382,6 +382,37 @@ class TripRepository {
         return uploadBytesToStorage(uploadClient, bytes)
     }
 
+    /** Uploads a cropped postcard photo to Cloudinary and saves its URL on the trip slot. */
+    suspend fun uploadPostcardPhoto(tripId: String, slot: String, bytes: ByteArray): String {
+        val url = uploadBytesToStorage(uploadClient, bytes)   // uploadClient is private — fine here
+        val idx = trips.indexOfFirst { it.id == tripId }
+        if (idx >= 0) {
+            trips[idx] = when (slot) {
+                "heart"      -> trips[idx].copy(frontHeartUrl = url)
+                "rect"       -> trips[idx].copy(frontRectUrl  = url)
+                "backTop"    -> trips[idx].copy(backTopUrl    = url)
+                "backBottom" -> trips[idx].copy(backBottomUrl = url)
+                else         -> trips[idx]
+            }
+            persist(trips[idx])   // writes to Firestore, same as your other updates
+        }
+        return url
+    }
+
+    fun removePostcardPhoto(tripId: String, slot: String) {
+        val idx = trips.indexOfFirst { it.id == tripId }
+        if (idx >= 0) {
+            trips[idx] = when (slot) {
+                "heart"      -> trips[idx].copy(frontHeartUrl = "")
+                "rect"       -> trips[idx].copy(frontRectUrl  = "")
+                "backTop"    -> trips[idx].copy(backTopUrl    = "")
+                "backBottom" -> trips[idx].copy(backBottomUrl = "")
+                else         -> trips[idx]
+            }
+            persist(trips[idx])
+        }
+    }
+
     fun clearLocal() {
         stopSync()
         trips.clear()
@@ -407,6 +438,21 @@ class TripRepository {
         if (doc != null) ioScope.launch { runCatching { docService.deleteDocument(doc.tripId, docId) } }
     }
 
+    fun updateDocument(docId: String, title: String, category: String, legId: String, segmentIndex: Int = -1, travellerId: String = "") {
+        val i = documents.indexOfFirst { it.id == docId }
+        if (i < 0) return
+        val updated = documents[i].copy(
+            title = title.trim(),
+            category = category,
+            legId = legId,
+            memberIds = memberIdsForTrip(documents[i].tripId),
+            segmentIndex = segmentIndex,
+            travellerId = travellerId,
+        )
+        documents[i] = updated
+        ioScope.launch { runCatching { docService.saveDocument(updated) } }
+    }
+
     /** No longer needed for live sync (collection-group flow handles it); kept as a no-op
      *  so the Backup "Sync Now" call site still compiles. */
     suspend fun loadDocuments(uid: String) { /* handled by live collection-group sync */ }
@@ -417,11 +463,33 @@ class TripRepository {
         category: String,
         file: PickedFile,
         legId: String = "",
+        segmentIndex: Int = -1,
+        travellerId: String = ""
     ): Boolean {
         return try {
             val url = uploadFileToStorage(uploadClient, file.bytes, file.fileName, file.mimeType)
+            val docId = "doc_${kotlin.random.Random.nextLong()}"   // ⬅ CHANGED — hoisted, the thumb name needs it
+
+            // ⬅ ADD — PDFs get a rendered first-page preview, uploaded alongside.
+            // Done once here rather than in the grid: rendering per tile would
+            // re-download and re-rasterise on every scroll, and wouldn't work offline.
+            // A failure anywhere leaves thumbUrl blank and the card shows the icon —
+            // it must never fail the document upload itself.
+            val thumb: String =
+                if (file.mimeType.contains("pdf", ignoreCase = true)) {
+                    val png = renderPdfFirstPage(file.bytes, 400)
+                    println("ITINERA: PDF THUMB render → ${png?.size ?: "null"} bytes")
+                    png?.let {
+                        runCatching {
+                            uploadFileToStorage(uploadClient, it, "thumb_$docId.png", "image/png")
+                        }.onFailure { e ->
+                            println("ITINERA: PDF THUMB upload failed — ${e.message}")
+                        }.getOrNull()
+                    }.orEmpty()
+                } else ""
+
             val doc = DocItem(
-                id = "doc_${kotlin.random.Random.nextLong()}",
+                id = docId,                       // ⬅ CHANGED
                 tripId = tripId,
                 title = title,
                 category = category,
@@ -430,6 +498,9 @@ class TripRepository {
                 fileUrl = url,
                 mimeType = file.mimeType,
                 memberIds = memberIdsForTrip(tripId),
+                segmentIndex = segmentIndex,
+                travellerId = travellerId,
+                thumbUrl = thumb,                 // ⬅ ADD
             )
             documents.add(doc)
             docService.saveDocument(doc)
@@ -439,6 +510,39 @@ class TripRepository {
             false
         }
     }
+
+    fun backfillPdfThumbnails(tripId: String) {
+        val targets = documents.filter {
+            it.tripId == tripId &&
+                    it.thumbUrl.isBlank() &&
+                    it.fileUrl.isNotBlank() &&
+                    it.mimeType.contains("pdf", ignoreCase = true)
+        }
+        if (targets.isEmpty()) return
+        println("ITINERA: PDF THUMB backfill — ${targets.size} to do")
+
+        ioScope.launch {
+            // Sequential on purpose: a trip with 20 PDFs shouldn't fire 20
+            // concurrent downloads and uploads at once.
+            for (doc in targets) {
+                runCatching {
+                    val bytes = downloadBytes(doc.fileUrl) ?: return@runCatching
+                    val png = renderPdfFirstPage(bytes, 400) ?: return@runCatching
+                    val url = uploadFileToStorage(uploadClient, png, "thumb_${doc.id}.png", "image/png")
+                    val updated = doc.copy(thumbUrl = url)
+                    val i = documents.indexOfFirst { it.id == doc.id }
+                    if (i >= 0) documents[i] = updated
+                    docService.saveDocument(updated)
+                }.onFailure { e ->
+                    println("ITINERA: PDF THUMB backfill failed for ${doc.id} — ${e.message}")
+                }
+            }
+            println("ITINERA: PDF THUMB backfill — done")
+        }
+    }
+
+
+
 
     suspend fun loadBytes(url: String): ByteArray? {
         return try {
@@ -505,9 +609,6 @@ class TripRepository {
         if (trip.ownerId != authService.currentUid) return
 
         val memberUids = trip.members.keys
-        val covered = trip.travellers
-            .mapNotNull { it.userId.takeIf { u -> u.isNotBlank() } }
-            .toSet()
 
         // 1) Remove auto-linked travellers whose member has left.
         //    (Only ones we linked: userId set, not the owner row, not a current member.)
@@ -515,7 +616,40 @@ class TripRepository {
             t.userId.isNotBlank() && t.userId !in memberUids && !t.isOwner
         }
 
-        // 2) Add a traveller for any member not yet represented (skip the owner —
+        // 2) PROMOTE a matching MANUAL traveller (blank userId) into the arriving member,
+        //    instead of adding a duplicate. Match by email first, then by full name.
+        //    This is what prevents "typed Fawaz" + "joined Fawaz" from both appearing.
+        fun norm(x: String) = x.trim().lowercase()
+        for (uid in memberUids) {
+            if (uid == trip.ownerId) continue
+            if (newTravellers.any { it.userId == uid }) continue   // already linked
+
+            val info = trip.memberInfo[uid]
+            val memEmail = norm(info?.email ?: "")
+            val memName = norm(info?.name ?: "")
+
+            val match = newTravellers.firstOrNull { t ->
+                t.userId.isBlank() && !t.isOwner && (
+                        (memEmail.isNotBlank() && norm(t.email) == memEmail) ||
+                                (memName.isNotBlank() && norm("${t.firstName} ${t.surname}") == memName)
+                        )
+            }
+            if (match != null) {
+                newTravellers = newTravellers.map {
+                    if (it.id == match.id) it.copy(
+                        userId = uid,
+                        email = it.email.ifBlank { info?.email ?: "" },
+                    ) else it
+                }
+            }
+        }
+
+        // 3) Now the set of covered uids (after promotions).
+        val covered = newTravellers
+            .mapNotNull { it.userId.takeIf { u -> u.isNotBlank() } }
+            .toSet()
+
+        // 4) Add a traveller for any member still not represented (skip the owner —
         //    they already have their owner-traveller from ensureOwnerTraveller).
         var colorCursor = (newTravellers.maxOfOrNull { it.colorIndex } ?: -1) + 1
         for (uid in memberUids) {
@@ -917,4 +1051,64 @@ class TripRepository {
         trips[idx] = updated
         persist(updated)
     }
+
+    // ===== geocoding (for the trip map) =====
+    private val geocodeCache = mutableMapOf<String, GeoPoint?>()
+
+    private suspend fun geocode(city: String): GeoPoint? {
+        val key = city.trim().lowercase()
+        if (key.isBlank()) return null
+        return geocodeCache.getOrPut(key) { geocodeCity(uploadClient, city) }
+    }
+
+    /** Fills any missing lat/lng on one leg in the background, then persists. */
+    private fun geocodeLegAsync(tripId: String, legId: String) {
+        ioScope.launch {
+            val idx = trips.indexOfFirst { it.id == tripId }
+            if (idx < 0) return@launch
+            val leg = trips[idx].legs.firstOrNull { it.id == legId } ?: return@launch
+
+            val from = if (leg.fromLat == 0.0 && leg.fromLng == 0.0) geocode(leg.fromCity) else null
+            val to   = if (leg.toLat == 0.0 && leg.toLng == 0.0) geocode(leg.toCity) else null
+
+            // geocode any stop that's missing coordinates                          // ⬅ ADD
+            val stopsNeedWork = leg.stops.any { it.lat == 0.0 && it.lng == 0.0 }     // ⬅ ADD
+            val newStops = if (stopsNeedWork) leg.stops.map { stop ->                // ⬅ ADD
+                if (stop.lat != 0.0 || stop.lng != 0.0) stop                         // ⬅ ADD
+                else geocode(stop.city)?.let {                                       // ⬅ ADD
+                    stop.copy(lat = it.lat, lng = it.lng, country = stop.country.ifBlank { it.country })
+                } ?: stop                                                            // ⬅ ADD
+            } else leg.stops                                                         // ⬅ ADD
+
+            if (from == null && to == null && !stopsNeedWork) return@launch          // ⬅ CHANGED
+
+            val i = trips.indexOfFirst { it.id == tripId }
+            if (i < 0) return@launch
+            trips[i] = trips[i].copy(legs = trips[i].legs.map { l ->
+                if (l.id != legId) l else l.copy(
+                    fromLat = from?.lat ?: l.fromLat, fromLng = from?.lng ?: l.fromLng,
+                    toLat = to?.lat ?: l.toLat,       toLng = to?.lng ?: l.toLng,
+                    country = l.country.ifBlank { to?.country ?: "" },
+                    stops = newStops,                                                // ⬅ ADD
+                )
+            })
+            persist(trips[i])
+        }
+    }
+
+    /** One-shot backfill for legs saved before coordinates existed. Call when the map opens. */
+    fun backfillLegCoordinates(tripId: String) {
+        val trip = tripById(tripId) ?: return
+        trip.legs
+            .filter {
+                (it.fromLat == 0.0 && it.fromLng == 0.0) ||
+                        (it.toLat == 0.0 && it.toLng == 0.0) ||
+                        it.country.isBlank() ||
+                        it.stops.any { s -> s.lat == 0.0 && s.lng == 0.0 }        // ⬅ ADD
+            }
+            .forEach { geocodeLegAsync(tripId, it.id) }
+    }
+
+    suspend fun fetchTripWeatherFor(trip: Trip): List<DestinationWeather> =
+        fetchTripWeather(uploadClient, trip)
 }

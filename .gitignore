@@ -21,3 +21,15 @@ node_modules/
 # Firebase config (keep out of public repo)
 androidApp/google-services.json
 iosApp/iosApp/GoogleService-Info.plist
+
+# Signing — SECRET, never commit
+*.jks
+*.keystore
+credentials.rtf
+keystore.properties
+
+# Release build artifacts
+*.apk
+*.aab
+*.dm
+**/output-metadata.json
