@@ -2,6 +2,7 @@ package com.itinera.app.data
 
 import com.itinera.app.model.UserProfile
 import dev.gitlive.firebase.Firebase
+import dev.gitlive.firebase.auth.EmailAuthProvider
 import dev.gitlive.firebase.auth.FirebaseUser
 import dev.gitlive.firebase.auth.GoogleAuthProvider
 import dev.gitlive.firebase.auth.auth
@@ -26,6 +27,18 @@ class AuthService {
     suspend fun updatePassword(newPassword: String) {
         Firebase.auth.currentUser?.updatePassword(newPassword)
     }
+
+    suspend fun reauthenticate(currentPassword: String) {
+        val user = Firebase.auth.currentUser ?: error("Not signed in")
+        val email = user.email ?: error("No email on account")
+        user.reauthenticate(EmailAuthProvider.credential(email, currentPassword))
+    }
+
+    /** False for Google/Apple sign-in — there's no password to change. */
+    val hasPasswordProvider: Boolean
+        get() = Firebase.auth.currentUser
+            ?.providerData
+            ?.any { it.providerId == "password" } == true
 
     suspend fun deleteAccount() {
         Firebase.auth.currentUser?.delete()

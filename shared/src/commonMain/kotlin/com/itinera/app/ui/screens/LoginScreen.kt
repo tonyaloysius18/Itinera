@@ -197,9 +197,7 @@ fun LoginScreen(
                 email = email,
                 onEmailChange = { email = it },
                 label = { Text(s.email) },
-                //singleLine = true,
                 colors = fieldColors,
-                //colors = fieldColors,
                 modifier = Modifier.fillMaxWidth(),
                 shape = textFieldShape,
             )

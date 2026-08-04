@@ -111,6 +111,7 @@ import com.itinera.app.ui.screens.ExportTripsScreen
 import com.itinera.app.ui.screens.tripPhase
 import com.itinera.app.ui.screens.statusLabel
 import com.itinera.app.data.tripStartsInDays
+import com.itinera.app.ui.screens.ChangePasswordScreen
 import com.itinera.app.ui.screens.TripPhase
 import kotlinx.datetime.LocalDate
 import com.itinera.app.ui.screens.HelpScreen
@@ -870,6 +871,15 @@ private fun AppContent(
                                     navigator.back()
                                     pillMessageTop = s.changesSaved
                                 },
+                                onChangePassword = { navigator.push(Screen.ChangePassword) },
+                            )
+
+                            Screen.ChangePassword -> ChangePasswordScreen(
+                                onBack = { navigator.back() },
+                                onChanged = { navigator.back() },
+                                reauthenticate = { repository.authService.reauthenticate(it) },
+                                updatePassword = { repository.authService.updatePassword(it) },
+                                hasPasswordAccount = repository.authService.hasPasswordProvider,
                             )
                         }
                     }

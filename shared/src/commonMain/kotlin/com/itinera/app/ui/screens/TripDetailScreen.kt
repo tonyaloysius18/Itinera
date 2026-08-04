@@ -745,9 +745,9 @@ fun TripDetailScreen(
                                                                     .clip(CircleShape)
                                                                     .clickable {
                                                                         openInMaps(
-                                                                            label = listOf(act.title, act.location)
-                                                                                .filter { it.isNotBlank() }
-                                                                                .joinToString(", "),
+                                                                            label = listOf(act.title, act.location).filter { it.isNotBlank() }.joinToString(", "),
+                                                                            latitude = act.lat.takeIf { it != 0.0 },
+                                                                            longitude = act.lng.takeIf { it != 0.0 },
                                                                         )
                                                                     },
                                                                 contentAlignment = Alignment.Center,

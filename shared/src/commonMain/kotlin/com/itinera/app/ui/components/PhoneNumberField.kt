@@ -1,10 +1,14 @@
 package com.itinera.app.ui.components
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -25,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 
@@ -32,7 +37,9 @@ data class Country(
     val name: String,
     val code: String,
     val dialCode: String,
-    val flag: String
+    val flag: String,
+    val minDigits: Int = 8,
+    val maxDigits: Int = 12
 )
 
 val countries = listOf(
@@ -48,7 +55,7 @@ val countries = listOf(
     Country("Argentina", "AR", "+54", "🇦🇷"),
     Country("Armenia", "AM", "+374", "🇦🇲"),
     Country("Aruba", "AW", "+297", "🇦🇼"),
-    Country("Australia", "AU", "+61", "🇦🇺"),
+    Country("Australia", "AU", "+61", "🇦🇺", minDigits = 9, maxDigits = 9),
     Country("Austria", "AT", "+43", "🇦🇹"),
     Country("Azerbaijan", "AZ", "+994", "🇦🇿"),
     Country("Bahamas", "BS", "+1", "🇧🇸"),
@@ -64,7 +71,7 @@ val countries = listOf(
     Country("Bolivia", "BO", "+591", "🇧🇴"),
     Country("Bosnia and Herzegovina", "BA", "+387", "🇧🇦"),
     Country("Botswana", "BW", "+267", "🇧🇼"),
-    Country("Brazil", "BR", "+55", "🇧🇷"),
+    Country("Brazil", "BR", "+55", "🇧🇷", minDigits = 11, maxDigits = 11),
     Country("British Indian Ocean Territory", "IO", "+246", "🇮🇴"),
     Country("British Virgin Islands", "VG", "+1", "🇻🇬"),
     Country("Brunei", "BN", "+673", "🇧🇳"),
@@ -73,13 +80,13 @@ val countries = listOf(
     Country("Burundi", "BI", "+257", "🇧🇮"),
     Country("Cambodia", "KH", "+855", "🇰🇭"),
     Country("Cameroon", "CM", "+237", "🇨🇲"),
-    Country("Canada", "CA", "+1", "🇨🇦"),
+    Country("Canada", "CA", "+1", "🇨🇦", minDigits = 10, maxDigits = 10),
     Country("Cape Verde", "CV", "+238", "🇨🇻"),
     Country("Cayman Islands", "KY", "+1", "🇰🇾"),
     Country("Central African Republic", "CF", "+236", "🇨🇫"),
     Country("Chad", "TD", "+235", "🇹🇩"),
     Country("Chile", "CL", "+56", "🇨🇱"),
-    Country("China", "CN", "+86", "🇨🇳"),
+    Country("China", "CN", "+86", "🇨🇳", minDigits = 11, maxDigits = 11),
     Country("Christmas Island", "CX", "+61", "🇨🇽"),
     Country("Cocos Islands", "CC", "+61", "🇨🇨"),
     Country("Colombia", "CO", "+57", "🇨🇴"),
@@ -108,7 +115,7 @@ val countries = listOf(
     Country("Faroe Islands", "FO", "+298", "🇫🇴"),
     Country("Fiji", "FJ", "+679", "🇫🇯"),
     Country("Finland", "FI", "+358", "🇫🇮"),
-    Country("France", "FR", "+33", "🇫🇷"),
+    Country("France", "FR", "+33", "🇫🇷", minDigits = 9, maxDigits = 9),
     Country("French Guiana", "GF", "+594", "🇬🇫"),
     Country("French Polynesia", "PF", "+689", "🇵🇫"),
     Country("Gabon", "GA", "+241", "🇬🇦"),
@@ -132,7 +139,7 @@ val countries = listOf(
     Country("Hong Kong", "HK", "+852", "🇭🇰"),
     Country("Hungary", "HU", "+36", "🇭🇺"),
     Country("Iceland", "IS", "+354", "🇮🇸"),
-    Country("India", "IN", "+91", "🇮🇳"),
+    Country("India", "IN", "+91", "🇮🇳", minDigits = 10, maxDigits = 10),
     Country("Indonesia", "ID", "+62", "🇮🇩"),
     Country("Iran", "IR", "+98", "🇮🇷"),
     Country("Iraq", "IQ", "+964", "🇮🇶"),
@@ -266,8 +273,8 @@ val countries = listOf(
     Country("Uganda", "UG", "+256", "🇺🇬"),
     Country("Ukraine", "UA", "+380", "🇺🇦"),
     Country("United Arab Emirates", "AE", "+971", "🇦🇪"),
-    Country("United Kingdom", "GB", "+44", "🇬🇧"),
-    Country("United States", "US", "+1", "🇺🇸"),
+    Country("United Kingdom", "GB", "+44", "🇬🇧", minDigits = 10, maxDigits = 10),
+    Country("United States", "US", "+1", "🇺🇸", minDigits = 10, maxDigits = 10),
     Country("Uruguay", "UY", "+598", "🇺🇾"),
     Country("Uzbekistan", "UZ", "+998", "🇺🇿"),
     Country("Vanuatu", "VU", "+678", "🇻🇺"),
@@ -291,34 +298,57 @@ fun PhoneNumberField(
     label: @Composable () -> Unit,
     shape: Shape,
     modifier: Modifier = Modifier,
+    isError: Boolean = false,
+    borderless: Boolean = false,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    Row(modifier = modifier.fillMaxWidth(),
+    Row(
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         ExposedDropdownMenuBox(
             expanded = expanded,
-            onExpandedChange = { expanded = !expanded },
-            modifier = Modifier.width(145.dp)
+            onExpandedChange = { expanded = it },
+            modifier = if (borderless) Modifier.wrapContentWidth() else Modifier.width(145.dp)
         ) {
-            OutlinedTextField(
-                value = "${selectedCountry.dialCode} ${selectedCountry.code} ${selectedCountry.flag}",
-                onValueChange = {},
-                readOnly = true,
-                enabled = false,
-                trailingIcon = { Icon(Icons.Filled.ArrowDropDown, contentDescription = null) },
-                shape = shape,
-                singleLine = true,
-                modifier = Modifier
-                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                    .fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(
-                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                    disabledBorderColor = MaterialTheme.colorScheme.outline,
-                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                ),
-            )
+            if (borderless) {
+                Row(
+                    modifier = Modifier
+                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "${selectedCountry.dialCode} ${selectedCountry.code} ${selectedCountry.flag}",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Icon(
+                        Icons.Filled.ArrowDropDown,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+            } else {
+                OutlinedTextField(
+                    value = "${selectedCountry.dialCode} ${selectedCountry.code} ${selectedCountry.flag}",
+                    onValueChange = {},
+                    readOnly = true,
+                    enabled = false,
+                    trailingIcon = { Icon(Icons.Filled.ArrowDropDown, contentDescription = null) },
+                    shape = shape,
+                    singleLine = true,
+                    modifier = Modifier
+                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                        .fillMaxWidth(),
+                    isError = isError,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                        disabledBorderColor = MaterialTheme.colorScheme.outline,
+                        disabledTrailingIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    ),
+                )
+            }
 
             MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))) {
                 ExposedDropdownMenu(
@@ -340,14 +370,44 @@ fun PhoneNumberField(
 
         Spacer(Modifier.width(8.dp))
 
-        OutlinedTextField(
-            value = value,
-            onValueChange = { input -> onValueChange(input.filter { it.isDigit() }) },
-            placeholder = label,                // ⬅ CHANGED: placeholder, not label
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-            shape = shape,
-            modifier = Modifier.weight(1f),
-        )
+        if (borderless) {
+            Box(Modifier.weight(1f)) {
+                if (value.isEmpty()) {
+                    label()
+                }
+                BasicTextField(
+                    value = value,
+                    onValueChange = { input ->
+                        val digits = input.filter { it.isDigit() }
+                        if (digits.length <= selectedCountry.maxDigits) {
+                            onValueChange(digits)
+                        }
+                    },
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.onSurface,
+                    ),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        } else {
+            OutlinedTextField(
+                value = value,
+                onValueChange = { input ->
+                    val digits = input.filter { it.isDigit() }
+                    if (digits.length <= selectedCountry.maxDigits) {
+                        onValueChange(digits)
+                    }
+                },
+                placeholder = label,
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                shape = shape,
+                isError = isError,
+                modifier = Modifier.weight(1f),
+            )
+        }
     }
 }

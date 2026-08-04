@@ -1,21 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>com.googleusercontent.apps.780952897576-haep7mo2v5ieek1a9mj4548q71tgdiqg</string>
-			</array>
-		</dict>
-	</array>
-	<key>GIDClientID</key>
-	<string>780952897576-haep7mo2v5ieek1a9mj4548q71tgdiqg.apps.googleusercontent.com</string>
-</dict>
+    <dict>
+        <key>CADisableMinimumFrameDurationOnPhone</key>
+        <true/>
+        <key>CFBundleURLTypes</key>
+        <array>
+            <dict>
+                <key>CFBundleTypeRole</key>
+                <string>Editor</string>
+                <key>CFBundleURLSchemes</key>
+                <array>
+                    <string>com.googleusercontent.apps.780952897576-haep7mo2v5ieek1a9mj4548q71tgdiqg</string>
+                </array>
+            </dict>
+        </array>
+        <key>GIDClientID</key>
+        <string>780952897576-haep7mo2v5ieek1a9mj4548q71tgdiqg.apps.googleusercontent.com</string>
+        <!-- Schemes the app is allowed to probe with canOpenURL. Without these,
+             canOpenURL always returns false and openInMaps falls through to the
+             browser instead of opening Google or Apple Maps. -->
+        <key>LSApplicationQueriesSchemes</key>
+        <array>
+            <string>comgooglemaps</string>
+            <string>maps</string>
+        </array>
+    </dict>
 </plist>

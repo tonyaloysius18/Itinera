@@ -135,7 +135,9 @@ data class Activity(
     val location: String = "",
     val note: String = "",
     val completed: Boolean = false,
-    val memberIds: List<String> = emptyList(),   // ⬅ ADD
+    val memberIds: List<String> = emptyList(),
+    val lat: Double = 0.0,
+    val lng: Double = 0.0,
 )
 
 @Serializable

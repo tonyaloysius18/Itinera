@@ -5,20 +5,28 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -35,14 +43,17 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -53,13 +64,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.itinera.app.data.AuthService
 import com.itinera.app.i18n.LocalStrings
@@ -72,268 +87,387 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
-/**
- * Collects the user's details and creates a REAL Firebase account via AuthService.
- * Firebase stores only email + password; the rest of the details are handed up
- * through onCreate(UserProfile) so App.kt can save them to the repository profile.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateAccountScreen(
-    authService: AuthService,                 // ⬅ ADD
+    authService: AuthService,
     onBack: () -> Unit,
-    onCreate: (UserProfile) -> Unit, // ⬅ CHANGED: now carries the profile up
+    onCreate: (UserProfile) -> Unit,
     onMessage: (String) -> Unit,
+    /** Optional — shows an "Already have an account? Sign in" link. */
+    onSignIn: (() -> Unit)? = null,
+    /** Optional — Play Store review expects these to be reachable from signup. */
+    onOpenTerms: (() -> Unit)? = null,
+    onOpenPrivacy: (() -> Unit)? = null,
+    /**
+     * ISO code for the phone field's default country. Was hardcoded to "US" in
+     * a French-market app; pass one derived from the device region.
+     */
+    defaultCountryCode: String = "US",
 ) {
     val s = LocalStrings.current
-    val textFieldShape = RoundedCornerShape(12.dp)
+    val scope = rememberCoroutineScope()
 
+
+    // step 1
     var name by remember { mutableStateOf("") }
     var surname by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    var triedSubmit by remember { mutableStateOf(false) }
 
+    // step 2 — all optional
     var mobile by remember { mutableStateOf("") }
-    
-    // Default country (e.g., US)
-    var country by remember { mutableStateOf(countries.find { it.code == "US" } ?: countries.first()) }
-
-    // Date of birth
+    var country by remember {
+        mutableStateOf(
+            countries.find { it.code == defaultCountryCode } ?: countries.first()
+        )
+    }
     var dob by remember { mutableStateOf("") }
-    var showDatePicker by remember { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState()
-
-    // Address
     var street by remember { mutableStateOf("") }
     var city by remember { mutableStateOf("") }
     var postalCode by remember { mutableStateOf("") }
 
-    var error by remember { mutableStateOf<String?>(null) }    // ⬅ ADD
-    var loading by remember { mutableStateOf(false) }          // ⬅ ADD
-    val scope = rememberCoroutineScope()
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
+    var loading by remember { mutableStateOf(false) }
 
-    // ⬅ ADD
-
-
+    // ⬅ CHANGED — cased once when the profile is built. Per keystroke it fought
+    // anyone typing "van der Berg" or a lowercase street name.
     fun String.toTitleCase(): String =
         split(" ").joinToString(" ") { word ->
-            word.replaceFirstChar { char ->
-                if (char.isLowerCase()) char.titlecase() else char.toString()
-            }
+            word.replaceFirstChar { c -> if (c.isLowerCase()) c.titlecase() else c.toString() }
         }
 
-    // Validate, then create the Firebase account. Suspends, so runs in a coroutine.
+    // ⬅ CHANGED — per-field errors shown under the field they belong to, rather
+    // than one pill at a time on submit. The old flow made you press Create up
+    // to five times to discover five problems.
+    val emailLooksValid = email.contains("@") && email.substringAfter("@").contains(".")
+    val pwUpper = password.any { it.isUpperCase() }
+    val pwLower = password.any { it.isLowerCase() }
+    val pwDigit = password.any { it.isDigit() }
+    val pwSpecial = password.any { !it.isLetterOrDigit() }
+    val pwLength = password.length >= 6
+    val passwordOk = pwUpper && pwLower && pwDigit && pwSpecial && pwLength
+
+    val nameError = if (triedSubmit && name.isBlank()) s.requiredField else null
+    val surnameError = if (triedSubmit && surname.isBlank()) s.requiredField else null
+    val emailError = when {
+        !triedSubmit -> null
+        email.isBlank() -> s.requiredField
+        !emailLooksValid -> s.invalidEmail
+        else -> null
+    }
+    val mobileError = if (triedSubmit && mobile.length < country.minDigits) s.requiredField else null
+    val allRequiredFilled = name.isNotBlank() && surname.isNotBlank() && email.isNotBlank() && mobile.length >= country.minDigits && passwordOk
+    val requiredValid = allRequiredFilled && emailLooksValid
+
+    fun buildProfile() = UserProfile(
+        name = name.trim().toTitleCase(),
+        surname = surname.trim().toTitleCase(),
+        email = email.trim(),
+        mobile = if (mobile.isBlank()) "" else country.dialCode + mobile.trim(),
+        dob = dob,
+        street = street.trim().toTitleCase(),
+        city = city.trim().toTitleCase(),
+        postalCode = postalCode.trim(),
+    )
+
     fun attemptCreate() {
-        when {
-            listOf(name, surname, email, password, mobile, dob, street, city, postalCode).any { it.isBlank() } -> {
-                onMessage(s.fillAllFields); return
-            }
-            password.length < 6 -> {
-                onMessage(s.passwordTooShort); return
-            }
-            !password.any { it.isUpperCase() } -> {
-                onMessage(s.uppercase); return
-            }
-            !password.any { it.isLowerCase() } -> {
-                onMessage(s.lowercase); return
-            }
-            !password.any { it.isDigit() } -> {
-                onMessage(s.number); return
-            }
-            !password.any { !it.isLetterOrDigit() } -> {
-                onMessage(s.specialCharacter); return
-            }
-        }
-        error = null
+        triedSubmit = true
+        // ⬅ CHANGED — was a chain of `when` branches each calling onMessage and
+        // returning, so you learned about one problem per button press. The
+        // errors are on the fields now; this just stops the submit.
+        if (!requiredValid) return
         loading = true
         scope.launch {
             try {
-                authService.signUp(email, password)
-                val profile = UserProfile(
-                    name = name.trim(),
-                    surname = surname.trim(),
-                    email = email.trim(),
-                    mobile = country.dialCode + mobile.trim(),
-                    dob = dob,
-                    street = street.trim(),
-                    city = city.trim(),
-                    postalCode = postalCode.trim(),
-                )
+                authService.signUp(email.trim(), password)
                 loading = false
-                onCreate(profile)                              // success → save profile + navigate
+                onCreate(buildProfile())
             } catch (e: Exception) {
                 loading = false
-                onMessage(s.signupFailed)                         // email in use / weak pw / network
+                // Email in use / weak password / network. Firebase's own text
+                // isn't for users, so the detail goes to the log.
+                onMessage(s.signupFailed)
+                println("ITINERA: SIGNUP FAILED — ${e.message}")
             }
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp, vertical = 5.dp)
-            .padding(top = 8.dp),
-    ) {
-        Spacer(Modifier.statusBarsPadding())
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(bottom = 16.dp).offset(x = (-12).dp)
-        ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = s.back
+    Box(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize().statusBarsPadding()) {
+            Row(
+                Modifier.fillMaxWidth().padding(start = 4.dp, end = 16.dp, top = 4.dp, bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                IconButton(onClick = onBack) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
+                }
+                Text(
+                    s.createAccount,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Medium,
                 )
             }
-            Text(
-                s.createAccount,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Medium,
-            )
-        }
 
+            Column(
+                Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .imePadding()
+                    .padding(horizontal = 20.dp),
+            ) {
+                // ── Required ──────────────────────────────────────────────
+                SignupCard {
+                    // Short fields side by side — three rows saved.
+                    Row(Modifier.height(IntrinsicSize.Min)) {
+                        SignupField(
+                            label = s.firstName,
+                            value = name,
+                            error = nameError,
+                            modifier = Modifier.weight(1f),
+                        ) { name = it.toTitleCase() }
+                        VerticalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f))
+                        SignupField(
+                            label = s.surname,
+                            value = surname,
+                            error = surnameError,
+                            modifier = Modifier.weight(1f),
+                        ) { surname = it.toTitleCase() }
+                    }
+                    HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f))
 
+                    // Keeps the domain autocomplete, which is genuinely good.
+                    Column(Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
+                        Text(
+                            s.email,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (emailError != null) MaterialTheme.colorScheme.error
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        )
+                        EmailFieldWithSuggestions(
+                            email = email,
+                            onEmailChange = { email = it },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        if (emailError != null) FieldError(emailError)
+                    }
+                    HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f))
 
-        Column(
-            Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState()),
-        ) {
-            Spacer(Modifier.height(5.dp))
-            OutlinedTextField(
-                value = name, onValueChange = { name = it.toTitleCase() ; error = null },
-                label = { RequiredLabel(s.name) }, singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                shape = textFieldShape,
-            )
-            Spacer(Modifier.height(9.dp))
-            OutlinedTextField(
-                value = surname, onValueChange = { surname = it.toTitleCase() },
-                label = { RequiredLabel(s.surname) }, singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                shape = textFieldShape,
-            )
-            Spacer(Modifier.height(9.dp))
-            EmailFieldWithSuggestions(
-                email = email,
-                onEmailChange = { email = it; error = null },
-                label = { RequiredLabel(s.email) },
-                shape = textFieldShape,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Spacer(Modifier.height(9.dp))
-            OutlinedTextField(
-                value = password, onValueChange = { password = it; error = null },
-                label = { RequiredLabel(s.password) }, singleLine = true,
-                visualTransformation = if (passwordVisible)               // ⬅ CHANGED
-                    VisualTransformation.None
-                else
-                    PasswordVisualTransformation(),
-                trailingIcon = {                                          // ⬅ ADD
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Column(Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
+                        Text(
+                            s.mobile,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (mobileError != null) MaterialTheme.colorScheme.error
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        )
+                        PhoneNumberField(
+                            value = mobile,
+                            onValueChange = { mobile = it },
+                            selectedCountry = country,
+                            onCountrySelected = { country = it },
+                            label = {
+                                Text(
+                                    s.mobile,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
+                                )
+                            },
+                            shape = RoundedCornerShape(12.dp),
+                            isError = mobileError != null,
+                            borderless = true,
+                        )
+                        if (mobileError != null) FieldError(mobileError)
+                    }
+                    HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f))
+
+                    Row(
+                        Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                s.password,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                            )
+                            BasicTextField(
+                                value = password,
+                                onValueChange = { password = it },
+                                singleLine = true,
+                                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                ),
+                                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                                visualTransformation = if (passwordVisible) VisualTransformation.None
+                                else PasswordVisualTransformation(),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
                         Icon(
-                            imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                            if (passwordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
                             contentDescription = if (passwordVisible) s.hidePassword else s.showPassword,
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                            modifier = Modifier.size(20.dp).clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() },
+                            ) { passwordVisible = !passwordVisible },
                         )
                     }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = textFieldShape,
-            )
+                }
 
-            PasswordRequirementsDropdown(password = password)
+                PasswordRequirementsDropdown(password = password)
 
-            Spacer(Modifier.height(9.dp))
-            PhoneNumberField(
-                value = mobile,
-                onValueChange = { mobile = it; error = null },
-                selectedCountry = country,
-                onCountrySelected = { country = it },
-                label = { RequiredLabel(s.mobile) },
-                shape = textFieldShape,
-            )
+                // ── Optional ──────────────────────────────────────────────
+                // ⬅ CHANGED — these were all required. Nothing in Itinera reads
+                // them; they're stored and displayed back. Same page, clearly
+                // marked, so anyone who wants to fill them still can.
+                Text(
+                    s.optionalAddLater,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                    modifier = Modifier.padding(start = 2.dp, top = 26.dp, bottom = 8.dp),
+                )
 
+                SignupCard {
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .clickable { showDatePicker = true }
+                            .padding(horizontal = 14.dp, vertical = 11.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                s.dob,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                            )
+                            Text(
+                                dob.ifBlank { s.optionalLabel },
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = if (dob.isBlank())
+                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                                else MaterialTheme.colorScheme.onSurface,
+                            )
+                        }
+                        Icon(
+                            Icons.Filled.CalendarMonth,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                            modifier = Modifier.size(18.dp),
+                        )
+                    }
+                }
 
-            // Date of birth — read-only field that opens the calendar on tap
-            Spacer(Modifier.height(9.dp))
-            OutlinedTextField(
-                value = dob,
-                onValueChange = {},
-                readOnly = true,
-                enabled = false,                       // so the whole field is tappable
-                label = { RequiredLabel(s.dob) },
-                trailingIcon = { Icon(Icons.Filled.CalendarMonth, contentDescription = null) },
-                shape = textFieldShape,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { showDatePicker = true },
-                colors = OutlinedTextFieldDefaults.colors(
-                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                    disabledBorderColor = MaterialTheme.colorScheme.outline,
-                    disabledLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                ),
-            )
+                Text(
+                    s.address.uppercase(),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                    modifier = Modifier.padding(start = 2.dp, top = 20.dp, bottom = 8.dp),
+                )
+                SignupCard {
+                    SignupField(
+                        label = s.street,
+                        value = street,
+                        placeholder = s.optionalLabel,
+                    ) { street = it }
+                    HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f))
+                    Row(Modifier.height(IntrinsicSize.Min)) {
+                        SignupField(
+                            label = s.city,
+                            value = city,
+                            placeholder = s.optionalLabel,
+                            modifier = Modifier.weight(1.6f),
+                        ) { city = it }
+                        VerticalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f))
+                        SignupField(
+                            label = s.postelCode,
+                            value = postalCode,
+                            placeholder = s.optionalLabel,
+                            keyboardType = KeyboardType.Number,
+                            modifier = Modifier.weight(1f),
+                        ) { postalCode = it }
+                    }
+                }
 
-            // Address — three separate fields
-            Spacer(Modifier.height(20.dp))
-            Text(s.address, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Medium)
-            Spacer(Modifier.height(9.dp))
-            OutlinedTextField(
-                value = street, onValueChange = { street = it.toTitleCase()},
-                label = { RequiredLabel(s.street) }, singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                shape = textFieldShape,
-            )
-            Spacer(Modifier.height(9.dp))
-            OutlinedTextField(
-                value = city, onValueChange = { city = it.toTitleCase() },
-                label = { RequiredLabel(s.city) }, singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                shape = textFieldShape,
-            )
-            Spacer(Modifier.height(9.dp))
-            OutlinedTextField(
-                value = postalCode, onValueChange = { postalCode = it },
-                label = { RequiredLabel(s.postelCode) }, singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                shape = textFieldShape,
-            )
+                Spacer(Modifier.height(150.dp))
+            }
+        }
 
-//            // Inline error message
-//            if (error != null) {                               // ⬅ ADD
-//                Spacer(Modifier.height(12.dp))
+        Column(
+            Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(top = 16.dp, bottom = 90.dp)
+                .imePadding(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Button(
+                onClick = { attemptCreate() },
+                enabled = !loading && allRequiredFilled,
+                shape = RoundedCornerShape(26.dp),
+                modifier = Modifier.fillMaxWidth().height(52.dp).padding(start = 65.dp, end = 65.dp),
+            ) {
+                if (loading) PlaneLoader() else Text(s.createAccount)
+            }
+
+//            // ⬅ ADD — Play Store review expects these reachable from signup.
+//            Spacer(Modifier.height(12.dp))
+//            Row(
+//                horizontalArrangement = Arrangement.Center,
+//                verticalAlignment = Alignment.CenterVertically,
+//            ) {
 //                Text(
-//                    error!!,
-//                    style = MaterialTheme.typography.bodySmall,
-//                    color = MaterialTheme.colorScheme.error,
-//                    modifier = Modifier.fillMaxWidth(),
+//                    s.termsPrefix + " ",
+//                    style = MaterialTheme.typography.labelSmall,
+//                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+//                    textAlign = TextAlign.Center,
+//                )
+//                Text(
+//                    s.termsLabel,
+//                    style = MaterialTheme.typography.labelSmall,
+//                    color = MaterialTheme.colorScheme.primary,
+//                    modifier = Modifier.clickable(enabled = onOpenTerms != null) { onOpenTerms?.invoke() },
+//                )
+//                Text(
+//                    " ${s.andLabel} ",
+//                    style = MaterialTheme.typography.labelSmall,
+//                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+//                )
+//                Text(
+//                    s.privacyLabel,
+//                    style = MaterialTheme.typography.labelSmall,
+//                    color = MaterialTheme.colorScheme.primary,
+//                    modifier = Modifier.clickable(enabled = onOpenPrivacy != null) { onOpenPrivacy?.invoke() },
 //                )
 //            }
 
-            Spacer(Modifier.height(20.dp))
-            Button(
-                onClick = { attemptCreate() },                 // ⬅ CHANGED: real sign-up
-                enabled = !loading,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 45.dp),
-            ) {
-                if (loading) {
-//                    CircularProgressIndicator(
-//                        modifier = Modifier.size(20.dp),
-//                        strokeWidth = 2.dp,
-//                        color = MaterialTheme.colorScheme.onPrimary,
-//                    )
-                    PlaneLoader()
-                } else {
-                    Text(s.createAccount)
+            if (onSignIn != null) {
+                Spacer(Modifier.height(10.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        s.alreadyHaveAccount,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    )
+                    Spacer(Modifier.width(5.dp))
+                    Text(
+                        s.signIn,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.clickable { onSignIn() },
+                    )
                 }
             }
-            Spacer(Modifier.height(24.dp))
         }
     }
-    // The calendar dialog
+
     if (showDatePicker) {
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
@@ -347,13 +481,75 @@ fun CreateAccountScreen(
                     showDatePicker = false
                 }) { Text(s.ok) }
             },
-            dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text(s.cancel) }
-            },
+            dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text(s.cancel) } },
         ) {
             DatePicker(state = datePickerState)
         }
     }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun SignupCard(content: @Composable ColumnScope.() -> Unit) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+    ) {
+        Column(content = content)
+    }
+}
+
+@Composable
+private fun SignupField(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    error: String? = null,
+    placeholder: String = "",
+    keyboardType: KeyboardType = KeyboardType.Text,
+    onValueChange: (String) -> Unit,
+) {
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    Column(modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelSmall,
+            color = if (error != null) MaterialTheme.colorScheme.error
+            else onSurface.copy(alpha = 0.5f),
+        )
+        Spacer(Modifier.height(1.dp))
+        Box {
+            if (value.isEmpty() && placeholder.isNotEmpty()) {
+                Text(
+                    placeholder,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = onSurface.copy(alpha = 0.35f),
+                )
+            }
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                singleLine = true,
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = onSurface),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        if (error != null) FieldError(error)
+    }
+}
+
+@Composable
+private fun FieldError(message: String) {
+    Text(
+        message,
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.error,
+        modifier = Modifier.padding(top = 2.dp),
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -361,15 +557,15 @@ fun CreateAccountScreen(
 fun EmailFieldWithSuggestions(
     email: String,
     onEmailChange: (String) -> Unit,
-    label: @Composable () -> Unit,
-    shape: Shape,
     modifier: Modifier = Modifier,
-    colors: TextFieldColors = OutlinedTextFieldDefaults.colors(),
+    label: @Composable (() -> Unit)? = null,
+    colors: TextFieldColors? = null,
+    shape: Shape = OutlinedTextFieldDefaults.shape,
 ) {
     val domains = listOf("gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "icloud.com", "proton.me")
 
     var fieldValue by remember { mutableStateOf(TextFieldValue(email, TextRange(email.length))) }
-    var justSelected by remember { mutableStateOf(false) }  // ⬅ ADD
+    var justSelected by remember { mutableStateOf(false) }
 
     LaunchedEffect(email) {
         if (fieldValue.text != email) {
@@ -380,13 +576,12 @@ fun EmailFieldWithSuggestions(
     val localPart = fieldValue.text.substringBefore("@")
     val afterAt = if (fieldValue.text.contains("@")) fieldValue.text.substringAfter("@") else null
 
-    // ⬅ Reset justSelected only when user fully backspaces to "@"
     LaunchedEffect(afterAt) {
         if (afterAt == null || afterAt.isEmpty()) justSelected = false
     }
 
     val suggestions = if (
-        !justSelected &&                         // ⬅ suppressed after a selection
+        !justSelected &&
         fieldValue.text.contains("@") &&
         localPart.isNotBlank() &&
         afterAt != null &&
@@ -403,23 +598,43 @@ fun EmailFieldWithSuggestions(
         onExpandedChange = { },
         modifier = modifier,
     ) {
-        OutlinedTextField(
-            value = fieldValue,
-            onValueChange = {
-                fieldValue = it
-                onEmailChange(it.text)
-            },
-            label = label,
-            singleLine = true,
-            shape = shape,
-            modifier = Modifier.menuAnchor().fillMaxWidth(),
-            colors = colors,
-        )
+        if (label != null || colors != null) {
+            OutlinedTextField(
+                value = fieldValue,
+                onValueChange = {
+                    fieldValue = it
+                    onEmailChange(it.text)
+                },
+                label = label,
+                colors = colors ?: OutlinedTextFieldDefaults.colors(),
+                shape = shape,
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                modifier = Modifier.menuAnchor().fillMaxWidth(),
+            )
+        } else {
+            // ⬅ CHANGED — borderless now, so it sits inside the card like the others
+            // instead of drawing a second outline within one.
+            BasicTextField(
+                value = fieldValue,
+                onValueChange = {
+                    fieldValue = it
+                    onEmailChange(it.text)
+                },
+                singleLine = true,
+                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                    color = MaterialTheme.colorScheme.onSurface,
+                ),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                modifier = Modifier.menuAnchor().fillMaxWidth(),
+            )
+        }
         MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))) {
             ExposedDropdownMenu(
                 expanded = suggestions.isNotEmpty(),
                 onDismissRequest = { },
-                modifier = Modifier.exposedDropdownSize()
+                modifier = Modifier.exposedDropdownSize(),
             ) {
                 suggestions.forEach { suggestion ->
                     DropdownMenuItem(
@@ -427,7 +642,7 @@ fun EmailFieldWithSuggestions(
                         onClick = {
                             fieldValue = TextFieldValue(suggestion, TextRange(suggestion.length))
                             onEmailChange(suggestion)
-                            justSelected = true   // ⬅ suppress dropdown until back at "@"
+                            justSelected = true
                         },
                     )
                 }
@@ -437,24 +652,15 @@ fun EmailFieldWithSuggestions(
 }
 
 @Composable
-private fun RequiredLabel(text: String) {
-    Row {
-        Text(text)
-        Text(" *", color = MaterialTheme.colorScheme.error)
-    }
-}
-
-@Composable
 private fun PasswordRequirementsDropdown(password: String) {
     val s = LocalStrings.current
     val requirements = listOf(
         s.uppercase to password.any { it.isUpperCase() },
         s.lowercase to password.any { it.isLowerCase() },
-        s.number           to password.any { it.isDigit() },
+        s.number to password.any { it.isDigit() },
         s.specialCharacter to password.any { !it.isLetterOrDigit() },
-        s.minimumCharacters          to (password.length >= 6),
+        s.minimumCharacters to (password.length >= 6),
     )
-
     val allMet = requirements.all { it.second }
 
     AnimatedVisibility(
@@ -465,13 +671,11 @@ private fun PasswordRequirementsDropdown(password: String) {
         Card(
             shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
             ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 6.dp),
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
         ) {
-            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
+            Column(Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
                 requirements.forEach { (label, met) ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

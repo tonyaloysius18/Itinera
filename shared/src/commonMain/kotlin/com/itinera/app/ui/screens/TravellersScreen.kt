@@ -277,14 +277,14 @@ private fun SectionHeader(label: String)
                           //count: Int)
 {
     Row(
-        Modifier.fillMaxWidth().padding(start = 2.dp, end = 2.dp, bottom = 8.dp),
+        Modifier.fillMaxWidth().padding(start = 2.dp, end = 2.dp, bottom = 10.dp, top = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             label.uppercase(),
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             modifier = Modifier.weight(1f),
         )
 //        Text(
@@ -320,7 +320,7 @@ private fun TravellerCard(
                 )
                 if (index < travellers.lastIndex) {
                     HorizontalDivider(
-                        modifier = Modifier.padding(start = 65.dp),
+                        modifier = Modifier.padding(start = 88.dp),
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
                     )
                 }
@@ -348,48 +348,63 @@ private fun TravellerRow(
                 onClick = { if (canEdit) onEdit() },
                 onLongClick = { if (canEdit && !traveller.isOwner) onLongPressDelete() },
             )
-            .padding(horizontal = 13.dp, vertical = 11.dp),
+            .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         TravellerAvatarImage(
             traveller = traveller,
-            size = 40.dp,
+            size = 56.dp,
         )
 
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(16.dp))
 
         Column(Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     traveller.fullName,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f, fill = false),
                 )
                 if (isMe) {
-                    Spacer(Modifier.width(6.dp))
+                    Spacer(Modifier.width(8.dp))
                     Badge(s.you, accent = true)
                 }
                 // ⬅ ADD — isOwner existed on Traveller and nothing showed it.
                 if (traveller.isOwner) {
-                    Spacer(Modifier.width(6.dp))
+                    Spacer(Modifier.width(8.dp))
                     Badge(s.owner, accent = false)
                 }
             }
 
-            val sub = listOf(traveller.email, traveller.phone)
-                .filter { it.isNotBlank() }
-                .joinToString(" · ")
-            Text(
-                // ⬅ CHANGED — a row with no contact details used to be a line
-                // shorter than its neighbours, which read as a rendering glitch.
-                sub.ifBlank { s.noContactDetails },
-                style = MaterialTheme.typography.bodySmall,
-                color = onSurface.copy(alpha = if (sub.isBlank()) 0.35f else 0.6f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            if (traveller.phone.isNotBlank()) {
+                Text(
+                    traveller.phone,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = onSurface.copy(alpha = 0.6f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            if (traveller.email.isNotBlank()) {
+                Text(
+                    traveller.email,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = onSurface.copy(alpha = 0.6f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            if (traveller.phone.isBlank() && traveller.email.isBlank()) {
+                Text(
+                    s.noContactDetails,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = onSurface.copy(alpha = 0.35f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
 
         // ⬅ ADD — email and phone were shown as text but weren't actionable.
@@ -400,10 +415,10 @@ private fun TravellerRow(
             else -> null
         }
         if (contactIcon != null) {
-            Spacer(Modifier.width(10.dp))
+            Spacer(Modifier.width(12.dp))
             Box(
                 Modifier
-                    .size(32.dp)
+                    .size(40.dp)
                     .clip(CircleShape)
                     .background(onSurface.copy(alpha = 0.07f))
                     .clickable {
@@ -416,7 +431,7 @@ private fun TravellerRow(
                     contactIcon,
                     contentDescription = if (traveller.phone.isNotBlank()) s.phone else s.email,
                     tint = onSurface.copy(alpha = 0.65f),
-                    modifier = Modifier.size(16.dp),
+                    modifier = Modifier.size(20.dp),
                 )
             }
         }
@@ -433,10 +448,11 @@ private fun Badge(label: String, accent: Boolean) {
     ) {
         Text(
             label,
-            style = MaterialTheme.typography.labelSmall,
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.Medium,
             color = if (accent) MaterialTheme.colorScheme.primary
             else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-            modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
         )
     }
 }

@@ -7,9 +7,25 @@ import platform.Foundation.*
 import platform.posix.*
 
 @OptIn(ExperimentalForeignApi::class)
-actual fun cropToCircle(bytes: ByteArray, size: Int): ByteArray {
+actual fun cropToCircle(
+    bytes: ByteArray,
+    left: Float, top: Float, right: Float, bottom: Float,
+    size: Int
+): ByteArray {
     val data = bytes.toNSData()
-    val image = UIImage(data = data) ?: return bytes
+    val fullImage = UIImage(data = data) ?: return bytes
+    
+    val iw = fullImage.size.useContents { width }
+    val ih = fullImage.size.useContents { height }
+    
+    val x = (left * iw)
+    val y = (top * ih)
+    val w = ((right - left) * iw)
+    val h = ((bottom - top) * ih)
+    
+    val cropRect = CGRectMake(x, y, w, h)
+    val cgImage = fullImage.CGImage?.let { CGImageCreateWithImageInRect(it, cropRect) } ?: return bytes
+    val image = UIImage.imageWithCGImage(cgImage)
     
     val side = size.toDouble()
     UIGraphicsBeginImageContextWithOptions(CGSizeMake(side, side), false, 1.0)
@@ -17,20 +33,7 @@ actual fun cropToCircle(bytes: ByteArray, size: Int): ByteArray {
     val rect = CGRectMake(0.0, 0.0, side, side)
     UIBezierPath.bezierPathWithOvalInRect(rect).addClip()
     
-    val width = image.size.useContents { width }
-    val height = image.size.useContents { height }
-    
-    val drawRect = if (width > height) {
-        val scale = side / height
-        val xOffset = (width * scale - side) / 2.0
-        CGRectMake(-xOffset, 0.0, width * scale, side)
-    } else {
-        val scale = side / width
-        val yOffset = (height * scale - side) / 2.0
-        CGRectMake(0.0, -yOffset, side, height * scale)
-    }
-    
-    image.drawInRect(drawRect)
+    image.drawInRect(rect)
     
     val resultImage = UIGraphicsGetImageFromCurrentImageContext()
     UIGraphicsEndImageContext()

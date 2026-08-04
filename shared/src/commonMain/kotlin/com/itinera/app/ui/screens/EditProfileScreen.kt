@@ -9,6 +9,9 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -20,22 +23,28 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Cake
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhotoLibrary
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -43,9 +52,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,15 +67,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.Image
+import androidx.compose.ui.geometry.isUnspecified
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.unit.IntSize
+import coil3.compose.rememberAsyncImagePainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.itinera.app.data.AuthService
@@ -89,6 +108,11 @@ fun EditProfileScreen(
     onSave: (UserProfile) -> Unit,
     // ⬅ ADD: pass `{ bytes -> repository.uploadProfilePhoto(uid, bytes) }` from App.kt
     onUploadPhoto: (suspend (ByteArray) -> String)? = null,
+    /**
+     * Opens the change-password screen. Optional — omit and the Security
+     * section is hidden.
+     */
+    onChangePassword: (() -> Unit)? = null,
 ) {
     val s = LocalStrings.current
     val textFieldShape = RoundedCornerShape(12.dp)
@@ -97,11 +121,11 @@ fun EditProfileScreen(
     // ── Editable fields ──────────────────────────────────────────────
     var name       by remember { mutableStateOf(profile.name) }
     var surname    by remember { mutableStateOf(profile.surname) }
-    var password   by remember { mutableStateOf("") }
     var mobile by remember { mutableStateOf(profile.mobile) }
     var street     by remember { mutableStateOf(profile.street) }
     var city       by remember { mutableStateOf(profile.city) }
     var postalCode by remember { mutableStateOf(profile.postalCode) }
+    var currentPhotoUrl by remember { mutableStateOf(profile.photoUrl) }
 
     // ── Photo state ──────────────────────────────────────────────────
     var photoBytes    by remember { mutableStateOf<ByteArray?>(null) }  // confirmed crop result
@@ -110,7 +134,6 @@ fun EditProfileScreen(
     var showCrop      by remember { mutableStateOf(false) }
 
     // ── UI state ─────────────────────────────────────────────────────
-    var passwordVisible by remember { mutableStateOf(false) }
     var error   by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
 
@@ -129,19 +152,14 @@ fun EditProfileScreen(
 
     // ── Save logic ───────────────────────────────────────────────────
     fun attemptSave() {
-        if (password.isNotBlank() && password.length < 6) {
-            error = s.passwordTooShort
-            return
-        }
         error = null
         loading = true
         scope.launch {
             try {
                 // Upload photo to Firebase Storage if a new one was picked
-                var newPhotoUrl = profile.photoUrl       // keep existing URL by default
+                var newPhotoUrl = currentPhotoUrl       // use stateful URL (might be cleared)
                 if (photoBytes != null && onUploadPhoto != null) {
                     newPhotoUrl = onUploadPhoto(photoBytes!!)
-                    println("UPLOADED PHOTO URL = $newPhotoUrl")   // ⬅ temporary debug
                 }
 
                 val updated = profile.copy(
@@ -152,18 +170,21 @@ fun EditProfileScreen(
                     city       = city.trim(),
                     postalCode = postalCode.trim(),
                     photoUrl   = newPhotoUrl,
+                    photoBytes = photoBytes,
                 )
 
                 val uid = authService.currentUid
                 if (uid != null) profileService.saveProfile(uid, updated)
-                if (password.isNotBlank()) authService.updatePassword(password)
 
                 loading = false
                 onSave(updated)
             } catch (e: Exception) {
                 loading = false
-                error = e.message ?: "Unknown error"   // ⬅ show the real error
-                println("SAVE FAILED: ${e.message}")
+                // ⬅ CHANGED — was e.message, which surfaces raw Firebase text like
+                // "An internal error has occurred. [ CONFIGURATION_NOT_FOUND ]".
+                // The detail still goes to the log for you.
+                error = s.couldntSaveProfile
+                println("ITINERA: PROFILE SAVE FAILED — ${e.message}")
             }
         }
     }
@@ -177,32 +198,18 @@ fun EditProfileScreen(
         Column(Modifier.fillMaxSize()) {
 
             // ── Fixed header ──────────────────────────────────────
-            Column(Modifier.padding(horizontal = 24.dp)) {
-                Row(
-                    Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
-                    }
-                    Text(
-                        s.editProfile,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Medium,
-                    )
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                IconButton(onClick = onBack) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
                 }
-
-                Spacer(Modifier.height(8.dp))
-
-                // ⬅ CHANGED: replaced ProfileAvatar + edit Surface with ProfilePhotoPicker
-                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    ProfilePhotoPicker(
-                        photoBytes = photoBytes,             // newly picked (overrides URL)
-                        photoUrl   = profile.photoUrl,       // existing remote photo
-                        onPickerRequested = { showSourceSheet = true },
-                    )
-                }
-                Spacer(Modifier.height(14.dp))
+                Text(
+                    s.editProfile,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Medium,
+                )
             }
 
             // ── Scrollable body ───────────────────────────────────
@@ -211,108 +218,136 @@ fun EditProfileScreen(
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
                     .imePadding()
-                    .padding(horizontal = 24.dp),
+                    .padding(horizontal = 16.dp),
             ) {
-                OutlinedTextField(
-                    name, { name = it },
-                    label = { Text(s.name) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = textFieldShape,
-                )
-                Spacer(Modifier.height(10.dp))
-                OutlinedTextField(
-                    surname, { surname = it },
-                    label = { Text(s.surname) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = textFieldShape,
+                // ⬅ CHANGED — name and email under the avatar. Free context, and
+                // it makes the top of the screen read as a profile rather than
+                // the first row of a form.
+                Column(
+                    Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    ProfilePhotoPicker(
+                        photoBytes = photoBytes,
+                        photoUrl = currentPhotoUrl,
+                        onPickerRequested = { showSourceSheet = true },
+                    )
+                    val shownName = listOf(name, surname).filter { it.isNotBlank() }.joinToString(" ")
+                    if (shownName.isNotBlank()) {
+                        Spacer(Modifier.height(12.dp))
+                        Text(
+                            shownName,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Medium,
+                        )
+                    }
+                    if (profile.email.isNotBlank()) {
+                        Text(
+                            profile.email,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                        )
+                    }
+                }
+
+                // ── YOUR DETAILS ──────────────────────────────────
+                // ⬅ CHANGED — was nine identically-outlined boxes. Grouped cards
+                // with borderless inputs, matching the leg and place forms.
+                FieldSectionLabel(s.yourDetails)
+                FieldCard {
+                    LabeledField(s.name, name) { name = it }
+                    FieldDivider()
+                    LabeledField(s.surname, surname) { surname = it }
+                    FieldDivider()
+                    // ⬅ CHANGED — mobile was the one field with no Spacer before
+                    // it, so it butted up against the e-mail box.
+                    LabeledField(
+                        label = s.mobile,
+                        value = mobile,
+                        keyboardType = KeyboardType.Phone,
+                    ) { mobile = it }
+                }
+
+                // ── ACCOUNT (locked) ──────────────────────────────
+                FieldSectionLabel(s.account)
+                FieldCard {
+                    // ⬅ CHANGED — these were OutlinedTextFields with
+                    // enabled = false, which renders at ~38% alpha and reads as a
+                    // rendering fault. A padlock and a reason say what's going on.
+                    LockedRow(Icons.Filled.MailOutline, s.email, profile.email)
+                    FieldDivider(startInset = 46.dp)
+                    LockedRow(Icons.Filled.Cake, s.dob, profile.dob)
+                }
+                Text(
+                    s.setAtSignup,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
+                    modifier = Modifier.padding(start = 4.dp, top = 6.dp),
                 )
 
-                // Email — fixed, disabled
-                Spacer(Modifier.height(10.dp))
-                OutlinedTextField(
-                    value = profile.email, onValueChange = {}, enabled = false,
-                    label = { Text(s.email) }, singleLine = true,
-                    modifier = Modifier.fillMaxWidth(), shape = textFieldShape,
-                )
+                // ── ADDRESS ───────────────────────────────────────
+                FieldSectionLabel(s.address)
+                FieldCard {
+                    LabeledField(s.street, street) { street = it }
+                    FieldDivider()
+                    // City and postal code are short and always entered together;
+                    // two full-width boxes for them was wasteful.
+                    Row(Modifier.height(IntrinsicSize.Min)) {
+                        LabeledField(
+                            label = s.city,
+                            value = city,
+                            modifier = Modifier.weight(1.6f),
+                        ) { city = it }
+                        VerticalDivider(
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f),
+                        )
+                        LabeledField(
+                            label = s.postelCode,
+                            value = postalCode,
+                            keyboardType = KeyboardType.Number,
+                            modifier = Modifier.weight(1f),
+                        ) { postalCode = it }
+                    }
+                }
 
-                OutlinedTextField(
-                    value = mobile,
-                    onValueChange = { mobile = it },
-                    label = { Text(s.mobile) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = textFieldShape,
-                )
-
-                // Date of birth — fixed, disabled
-                Spacer(Modifier.height(10.dp))
-                OutlinedTextField(
-                    value = profile.dob, onValueChange = {}, enabled = false,
-                    label = { Text(s.dob) }, singleLine = true,
-                    modifier = Modifier.fillMaxWidth(), shape = textFieldShape,
-                )
-
-                // New password (optional) with show/hide
-                Spacer(Modifier.height(10.dp))
-                OutlinedTextField(
-                    password, { password = it; error = null },
-                    label = { Text(s.newPassword) },
-                    visualTransformation = if (passwordVisible)
-                        VisualTransformation.None
-                    else
-                        PasswordVisualTransformation(),
-                    trailingIcon = {
-                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                // ── SECURITY ──────────────────────────────────────
+                // ⬅ CHANGED — the password field sat between date of birth and
+                // street. Changing a password is a different kind of action, and
+                // it needs a current-password check this form never had.
+                if (onChangePassword != null) {
+                    FieldSectionLabel(s.security)
+                    FieldCard {
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable { onChangePassword() }
+                                .padding(horizontal = 14.dp, vertical = 13.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
                             Icon(
-                                imageVector = if (passwordVisible) Icons.Filled.Visibility
-                                else Icons.Filled.VisibilityOff,
-                                contentDescription = if (passwordVisible) s.hidePassword
-                                else s.showPassword,
+                                Icons.Filled.Key,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                modifier = Modifier.size(18.dp),
+                            )
+                            Spacer(Modifier.width(14.dp))
+                            Text(
+                                s.changePassword,
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.weight(1f),
+                            )
+                            Icon(
+                                Icons.Filled.ChevronRight,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                                modifier = Modifier.size(18.dp),
                             )
                         }
-                    },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = textFieldShape,
-                )
+                    }
+                }
 
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    s.address,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Medium,
-                )
-                Spacer(Modifier.height(10.dp))
-                OutlinedTextField(
-                    street, { street = it },
-                    label = { Text(s.street) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = textFieldShape,
-                )
-                Spacer(Modifier.height(10.dp))
-                OutlinedTextField(
-                    city, { city = it },
-                    label = { Text(s.city) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = textFieldShape,
-                )
-                Spacer(Modifier.height(10.dp))
-                OutlinedTextField(
-                    postalCode, { postalCode = it },
-                    label = { Text(s.postelCode) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = textFieldShape,
-                )
-
-                // Inline error
                 if (error != null) {
-                    Spacer(Modifier.height(10.dp))
+                    Spacer(Modifier.height(14.dp))
                     Text(
                         error!!,
                         style = MaterialTheme.typography.bodySmall,
@@ -321,28 +356,34 @@ fun EditProfileScreen(
                     )
                 }
 
-                Spacer(Modifier.height(18.dp))
-                Button(
-                    onClick = { attemptSave() },
-                    enabled = !loading,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                        .padding(horizontal = 60.dp),
-                ) {
-                    if (loading) {
-//                        CircularProgressIndicator(
-//                            modifier = Modifier.size(20.dp),
-//                            strokeWidth = 2.dp,
-//                            color = MaterialTheme.colorScheme.onPrimary,
-//                        )
-                        PlaneLoader()
-                    } else {
-                        Text(s.saveChanges)
-                    }
-                }
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(120.dp))
                 Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.safeDrawing))
+            }
+        }
+
+        // ⬅ CHANGED — was inside the scroll at the very bottom, so it sat over
+        // the home indicator and scrolled away.
+        Column(
+            Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+                .background(
+                    Brush.verticalGradient(
+                        0f to Color.Transparent,
+                        0.4f to MaterialTheme.colorScheme.background,
+                    )
+                )
+                .padding(horizontal = 16.dp)
+                .padding(top = 24.dp, bottom = 40.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Button(
+                onClick = { attemptSave() },
+                enabled = !loading,
+                shape = RoundedCornerShape(26.dp),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp),
+                contentPadding = PaddingValues(horizontal = 52.dp, vertical = 0.dp),
+                modifier = Modifier.height(52.dp),
+            ) {
+                if (loading) PlaneLoader() else Text(s.saveChanges)
             }
         }
 
@@ -375,7 +416,7 @@ fun EditProfileScreen(
                     )
 
                     // Remove option — only shown if there's already a photo
-                    if (photoBytes != null || profile.photoUrl.isNotBlank()) {
+                    if (photoBytes != null || currentPhotoUrl.isNotBlank()) {
                         ListItem(
                             headlineContent = {
                                 Text(
@@ -392,6 +433,7 @@ fun EditProfileScreen(
                             },
                             modifier = Modifier.clickable {
                                 photoBytes = null
+                                currentPhotoUrl = ""
                                 showSourceSheet = false
                             },
                         )
@@ -417,6 +459,115 @@ fun EditProfileScreen(
                 },
             )
         }
+    }
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
+// FORM PIECES
+// ═══════════════════════════════════════════════════════════════════
+
+@Composable
+private fun FieldSectionLabel(label: String) {
+    Text(
+        label.uppercase(),
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+        modifier = Modifier.padding(start = 2.dp, top = 20.dp, bottom = 8.dp),
+    )
+}
+
+@Composable
+private fun FieldCard(content: @Composable ColumnScope.() -> Unit) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+    ) {
+        Column(content = content)
+    }
+}
+
+@Composable
+private fun FieldDivider(startInset: Dp = 0.dp) {
+    HorizontalDivider(
+        modifier = Modifier.padding(start = startInset),
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f),
+    )
+}
+
+/** Label above a borderless input, so fields inside a card share one outline. */
+@Composable
+private fun LabeledField(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    onValueChange: (String) -> Unit,
+) {
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    Column(modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelSmall,
+            color = onSurface.copy(alpha = 0.5f),
+        )
+        Spacer(Modifier.height(1.dp))
+        Box {
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                singleLine = true,
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = onSurface),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+/**
+ * A value the user can't change, with a padlock.
+ *
+ * Replaces an OutlinedTextField with enabled = false, which renders every part
+ * at ~38% alpha and reads as a rendering fault rather than a deliberate lock.
+ */
+@Composable
+private fun LockedRow(icon: ImageVector, label: String, value: String) {
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    Row(
+        Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 11.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = onSurface.copy(alpha = 0.45f),
+            modifier = Modifier.size(18.dp),
+        )
+        Spacer(Modifier.width(14.dp))
+        Column(Modifier.weight(1f)) {
+            Text(
+                label,
+                style = MaterialTheme.typography.labelSmall,
+                color = onSurface.copy(alpha = 0.5f),
+            )
+            Text(
+                value.ifBlank { "—" },
+                style = MaterialTheme.typography.bodyLarge,
+                color = onSurface.copy(alpha = 0.75f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        Icon(
+            Icons.Filled.Lock,
+            contentDescription = null,
+            tint = onSurface.copy(alpha = 0.35f),
+            modifier = Modifier.size(15.dp),
+        )
     }
 }
 
@@ -507,22 +658,26 @@ private fun CropScreen(
     onDismiss: () -> Unit,
 ) {
     val s = LocalStrings.current
+    val painter = rememberAsyncImagePainter(model = imageBytes)
     var scale  by remember { mutableStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
+    var parentSize by remember { mutableStateOf(IntSize.Zero) }
+    val density = LocalDensity.current
 
     val transformableState = rememberTransformableState { zoomChange, panChange, _ ->
-        scale  = (scale * zoomChange).coerceIn(0.5f, 5f)
+        scale  = (scale * zoomChange).coerceIn(0.5f, 8f)
         offset = offset + panChange
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black),
+            .background(Color.Black)
+            .onSizeChanged { parentSize = it },
     ) {
         // ── Image with pan + zoom ──────────────────────────────────
-        AsyncImage(
-            model = imageBytes,
+        Image(
+            painter = painter,
             contentDescription = null,
             contentScale = ContentScale.Fit,
             modifier = Modifier
@@ -536,25 +691,26 @@ private fun CropScreen(
                 ),
         )
 
-        // ── Dark overlay with transparent circle cutout ────────────
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen },
         ) {
+            val holeRadius = minOf(size.width, size.height) / 2f - 48.dp.toPx()
             drawRect(Color.Black.copy(alpha = 0.55f))
             drawCircle(
                 color = Color.Transparent,
-                radius = size.minDimension / 2f - 48f,
+                radius = holeRadius,
                 blendMode = BlendMode.Clear,
             )
         }
 
         // ── Circle border ──────────────────────────────────────────
         Canvas(modifier = Modifier.fillMaxSize()) {
+            val holeRadius = minOf(size.width, size.height) / 2f - 48.dp.toPx()
             drawCircle(
                 color = Color.White.copy(alpha = 0.75f),
-                radius = size.minDimension / 2f - 48f,
+                radius = holeRadius,
                 style = Stroke(width = 1.5f),
             )
         }
@@ -584,9 +740,26 @@ private fun CropScreen(
             }
             Button(
                 onClick = {
-                    // cropToCircle is an expect/actual — see platform implementations
-                    val cropped = cropToCircle(imageBytes, size = 512)
-                    onConfirm(cropped)
+                    val img = painter.intrinsicSize
+                    if (img.isUnspecified || parentSize.width <= 0) return@Button
+
+                    val iw = img.width; val ih = img.height
+                    val pw = parentSize.width.toFloat(); val ph = parentSize.height.toFloat()
+                    val fitScale = minOf(pw / iw, ph / ih)
+                    val scl = fitScale * scale
+                    val cx = pw / 2f; val cy = ph / 2f
+                    val holeRadius = (minOf(pw, ph) / 2f) - with(density) { 48.dp.toPx() }
+
+                    fun srcX(gx: Float) = (iw / 2f) + (gx - cx - offset.x) / scl
+                    fun srcY(gy: Float) = (ih / 2f) + (gy - cy - offset.y) / scl
+
+                val nL = (srcX(cx - holeRadius) / iw).coerceIn(0f, 1f)
+                val nT = (srcY(cy - holeRadius) / ih).coerceIn(0f, 1f)
+                val nR = (srcX(cx + holeRadius) / iw).coerceIn(0f, 1f)
+                val nB = (srcY(cy + holeRadius) / ih).coerceIn(0f, 1f)
+
+                val cropped = cropToCircle(imageBytes, nL, nT, nR, nB, size = 512)
+                onConfirm(cropped)
                 },
             ) {
                 Text(s.usePhoto)
