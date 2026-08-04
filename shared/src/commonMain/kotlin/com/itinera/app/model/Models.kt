@@ -131,6 +131,7 @@ data class Activity(
     val date: LocalDate,
     val title: String,
     val time: String = "",
+    val endTime: String = "",
     val location: String = "",
     val note: String = "",
     val completed: Boolean = false,

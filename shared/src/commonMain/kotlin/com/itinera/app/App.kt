@@ -108,6 +108,11 @@ import com.itinera.app.ui.screens.DocumentsScreen
 import com.itinera.app.ui.screens.EditProfileScreen
 import com.itinera.app.ui.screens.EmergencyScreen
 import com.itinera.app.ui.screens.ExportTripsScreen
+import com.itinera.app.ui.screens.tripPhase
+import com.itinera.app.ui.screens.statusLabel
+import com.itinera.app.data.tripStartsInDays
+import com.itinera.app.ui.screens.TripPhase
+import kotlinx.datetime.LocalDate
 import com.itinera.app.ui.screens.HelpScreen
 import com.itinera.app.ui.screens.LanguageScreen
 import com.itinera.app.ui.screens.LoginScreen
@@ -120,13 +125,11 @@ import com.itinera.app.ui.screens.TravellersScreen
 import com.itinera.app.ui.screens.TripDetailScreen
 import com.itinera.app.ui.screens.TripExpensesScreen
 import com.itinera.app.ui.screens.TripMapScreen
-import com.itinera.app.ui.screens.TripPhase
 import com.itinera.app.ui.screens.TripsHomeScreen
 import com.itinera.app.ui.screens.WeatherScreen
 import com.itinera.app.ui.screens.WorldClockScreen
 import com.itinera.app.ui.screens.formatMoney
 import com.itinera.app.ui.screens.languageForCountry
-import com.itinera.app.ui.screens.tripPhase
 import com.itinera.app.ui.theme.ThemeMode
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -436,8 +439,9 @@ private fun AppContent(
 
                             is Screen.AddPlace -> AddPlaceScreen(
                                 onClose = { navigator.back() },
-                                onSave = { date, title, time, location ->
-                                    repository.addActivity(screen.tripId, date, title, time, location)
+                                tripDates = repository.tripDates(screen.tripId),          // ⬅ ADD — day chips
+                                onSave = { date, title, time, endTime, location, note ->  // ⬅ CHANGED
+                                    repository.addActivity(screen.tripId, date, title, time, endTime, location, note)
                                     navigator.back()
                                 },
                             )
@@ -448,8 +452,9 @@ private fun AppContent(
                                 else AddPlaceScreen(
                                     existing = act,
                                     onClose = { navigator.back() },
-                                    onSave = { date, title, time, location ->
-                                        repository.updateActivity(act.id, date, title, time, location)
+                                    tripDates = repository.tripDates(screen.tripId),          // ⬅ ADD
+                                    onSave = { date, title, time, endTime, location, note ->  // ⬅ CHANGED
+                                        repository.updateActivity(act.id, date, title, time, endTime, location, note)
                                         navigator.back()
                                     },
                                 )
@@ -557,31 +562,42 @@ private fun AppContent(
 
                             is Screen.Checklist -> {
                                 val trip = repository.tripById(screen.tripId)
-                                if (trip == null) navigator.back()
-                                else ChecklistScreen(
-                                    items = repository.checklistForTrip(screen.tripId),
-                                    onBack = { navigator.back() },
-                                    onToggle = { repository.toggleChecklistItem(it) },
-                                    onAdd = { text, group -> repository.addChecklistItem(screen.tripId, text, group) },
-                                    onDelete = { repository.deleteChecklistItem(it) },
-                                    loadSuggestions = {                                    // ⬅ ADD
+                                if (trip == null) {
+                                    navigator.back()
+                                } else {
+                                    val today = remember { Clock.System.todayIn(TimeZone.currentSystemDefault()) }
+                                    val items = repository.checklistForTrip(screen.tripId)
+                                    val groups = PackingGroups(
+                                        documents = s.documents,
+                                        packing = s.packing,
+                                        transport = s.transport,
+                                        money = s.money,
+                                        gadget = s.gadget,
+                                        other = s.other,
+                                    )
+
+                                    var suggestions by remember(trip.id) {
+                                        mutableStateOf(packingSuggestions(trip, emptyList(), groups, items.map { it.text }.toSet()))
+                                    }
+
+                                    LaunchedEffect(trip.id) {
                                         val weather = repository.fetchTripWeatherFor(trip)
-                                        packingSuggestions(
-                                            trip = trip,
-                                            weather = weather,
-                                            groups = PackingGroups(
-                                                documents = s.documents,
-                                                packing = s.packing,
-                                                transport = s.transport,
-                                                money = s.money,
-                                                gadget = s.gadget,
-                                                other = s.other,
-                                            ),
-                                            existingTexts = repository.checklistForTrip(screen.tripId)
-                                                .map { it.text }.toSet(),
-                                        )
-                                    },
-                                )
+                                        suggestions = packingSuggestions(trip, weather, groups, items.map { it.text }.toSet())
+                                    }
+
+                                    val days = tripStartsInDays(trip)
+                                    val note = if (days == Int.MAX_VALUE) "" else statusLabel(trip, today, tripPhase(trip, today))
+
+                                    ChecklistScreen(
+                                        items = items,
+                                        onBack = { navigator.back() },
+                                        onToggle = { repository.toggleChecklistItem(it) },
+                                        onAdd = { text, group -> repository.addChecklistItem(screen.tripId, text, group) },
+                                        onDelete = { repository.deleteChecklistItem(it) },
+                                        suggestions = suggestions,
+                                        departureNote = note,
+                                    )
+                                }
                             }
 
                             is Screen.Split -> {

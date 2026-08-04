@@ -44,6 +44,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Directions
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
@@ -105,6 +106,7 @@ import com.itinera.app.data.primaryCountry
 import com.itinera.app.data.rememberFileSharer
 import com.itinera.app.data.toPngBytes
 import com.itinera.app.i18n.LocalStrings
+import com.itinera.app.openInMaps
 import com.itinera.app.model.Activity
 import com.itinera.app.model.DocItem
 import com.itinera.app.model.Leg
@@ -728,6 +730,33 @@ fun TripDetailScreen(
                                                                     color = MaterialTheme.colorScheme.onSurface.copy(
                                                                         alpha = if (act.completed) 0.4f else 0.6f
                                                                     ),
+                                                                )
+                                                            }
+                                                        }
+
+                                                        // ⬅ ADD — opens the place in the platform maps app.
+                                                        // Only when there's something to search for; the row's
+                                                        // own tap still toggles completion.
+                                                        if (act.location.isNotBlank()) {
+                                                            Spacer(Modifier.width(8.dp))
+                                                            Box(
+                                                                Modifier
+                                                                    .size(32.dp)
+                                                                    .clip(CircleShape)
+                                                                    .clickable {
+                                                                        openInMaps(
+                                                                            label = listOf(act.title, act.location)
+                                                                                .filter { it.isNotBlank() }
+                                                                                .joinToString(", "),
+                                                                        )
+                                                                    },
+                                                                contentAlignment = Alignment.Center,
+                                                            ) {
+                                                                Icon(
+                                                                    Icons.Filled.Directions,
+                                                                    contentDescription = s.openInMaps,
+                                                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                                                    modifier = Modifier.size(18.dp),
                                                                 )
                                                             }
                                                         }
