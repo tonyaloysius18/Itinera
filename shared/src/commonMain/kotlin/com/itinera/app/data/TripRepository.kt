@@ -587,6 +587,7 @@ class TripRepository {
             colorIndex = existingOwner?.colorIndex ?: 0,
             isOwner = true,
             userId = authService.currentUid ?: "",
+            avatarId = profile.avatarId,
         )
 
         if (existingOwner == owner) return
@@ -701,6 +702,22 @@ class TripRepository {
         )
         trips[idx] = updated
         persist(updated)
+
+        // If this is me, sync back to profile so the choice sticks across all trips
+        val uid = authService.currentUid
+        if (uid != null && traveller.userId == uid) {
+            val updatedProfile = profile.copy(
+                name = traveller.firstName,
+                surname = traveller.surname,
+                email = traveller.email,
+                mobile = traveller.phone,
+                avatarId = traveller.avatarId
+            )
+            profile = updatedProfile
+            ioScope.launch {
+                profileService.saveProfile(uid, updatedProfile)
+            }
+        }
     }
 
     fun removeTraveller(tripId: String, travellerId: String) {

@@ -148,6 +148,7 @@ data class Traveller(
     val colorIndex: Int = 0,
     val isOwner: Boolean = false,
     val userId: String = "",
+    val avatarId: String = "",
 )
 
 @Serializable
@@ -229,6 +230,7 @@ data class UserProfile(
     val street: String = "",
     val city: String = "",
     val postalCode: String = "",
+    val avatarId: String = "",
     val reminderOffsetMinutes: Int = 0,
     val photoUrl: String = "",
     val migratedToShared: Boolean = false,
