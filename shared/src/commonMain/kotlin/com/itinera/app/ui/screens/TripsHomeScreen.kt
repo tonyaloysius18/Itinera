@@ -850,7 +850,7 @@ internal fun tripPhase(trip: Trip, today: LocalDate): TripPhase {
 }
 
 @Composable
-private fun statusLabel(trip: Trip, today: LocalDate, phase: TripPhase): String {
+internal fun statusLabel(trip: Trip, today: LocalDate, phase: TripPhase): String {
     val s = LocalStrings.current
     val dates = trip.legs.map { it.date }.sorted()
     val first = dates.firstOrNull() ?: return s.noDatesYet

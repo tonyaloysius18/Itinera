@@ -122,6 +122,9 @@ class Strings {
     var bookingRef: String = ""
     var optional: String = ""
     var saveLeg: String = ""
+    var swapDirection: String = ""
+    var needFromAndTo: String = ""
+    var needDate: String = ""
     var tickets: String = ""
     var event: String = ""
     var beforeYouGo: String = ""
@@ -232,15 +235,29 @@ class Strings {
     var noResultsSubtitle: String = ""
     var startTime: String = ""
     var endTime: String = ""
+    var whenLabel: String = ""
+    var detailsLabel: String = ""
+    var optionalLabel: String = ""
     var operatorGeneric: String = ""
     var busOperator: String = ""
     var trainOperator: String = ""
     var flightOperator: String = ""
     var ferryOperator: String = ""
+    var flightLabel: String = ""
+    var trainLabel: String = ""
+    var busLabel: String = ""
+    var ferryLabel: String = ""
     var country: String = ""
     var search: String = ""
     var searchDocuments: String = ""
     var all: String = ""
+
+    var needPlaceName: String = ""
+    var otherDate: String = ""
+    var startsLabel: String = ""
+    var endsLabel: String = ""
+    var locationLabel: String = ""
+    var notesLabel: String = ""
 
 
     var add: String = ""
@@ -285,6 +302,7 @@ class Strings {
     var attachTo: String = ""
     var wholeTrip: String = ""
     var open: String = ""
+    var openInMaps: String = ""
     var noDocuments: String = ""
     var noDocumentsSubtitle: String = ""
     var noMatchingDocuments: String = ""
@@ -401,6 +419,7 @@ class Strings {
     var noLegsSubtitle: String =""
     var noChecklistItems: String =""
     var noChecklistSubtitle: String = ""
+    var nSuggestions: String = ""
 
     var selectTravellers: String = ""
     var travellersCount: String = ""
@@ -643,6 +662,9 @@ class Strings {
         c.bookingRef = this.bookingRef
         c.optional = this.optional
         c.saveLeg = this.saveLeg
+        c.swapDirection = this.swapDirection
+        c.needFromAndTo = this.needFromAndTo
+        c.needDate = this.needDate
         c.tickets = this.tickets
         c.event = this.event
         c.beforeYouGo = this.beforeYouGo
@@ -786,20 +808,36 @@ class Strings {
         c.noResultsSubtitle = this.noResultsSubtitle
         c.startTime = this.startTime
         c.endTime = this.endTime
+        c.whenLabel = this.whenLabel
+        c.detailsLabel = this.detailsLabel
+        c.optionalLabel = this.optionalLabel
         c.operatorGeneric = this.operatorGeneric
         c.busOperator = this.busOperator
         c.trainOperator = this.trainOperator
         c.flightOperator = this.flightOperator
         c.ferryOperator = this.ferryOperator
+        c.flightLabel = this.flightLabel
+        c.trainLabel = this.trainLabel
+        c.busLabel = this.busLabel
+        c.ferryLabel = this.ferryLabel
         c.country = this.country
         c.search = this.search
         c.searchDocuments = this.searchDocuments
         c.all = this.all
+
+        c.needPlaceName = this.needPlaceName
+        c.otherDate = this.otherDate
+        c.startsLabel = this.startsLabel
+        c.endsLabel = this.endsLabel
+        c.locationLabel = this.locationLabel
+        c.notesLabel = this.notesLabel
+
         c.addDocument = this.addDocument
         c.title = this.title
         c.attachTo = this.attachTo
         c.wholeTrip = this.wholeTrip
         c.open = this.open
+        c.openInMaps = this.openInMaps
         c.noDocuments = this.noDocuments
         c.noDocumentsSubtitle = this.noDocumentsSubtitle
         c.noMatchingDocuments = this.noMatchingDocuments
@@ -915,6 +953,7 @@ class Strings {
         c.noLegsSubtitle = this.noLegsSubtitle
         c.noChecklistItems = this.noChecklistItems
         c.noChecklistSubtitle = this.noChecklistSubtitle
+        c.nSuggestions = this.nSuggestions
         c.inviteToTrip = this.inviteToTrip
         c.inviteFailed = this.inviteFailed
         c.inviteCodeHint = this.inviteCodeHint

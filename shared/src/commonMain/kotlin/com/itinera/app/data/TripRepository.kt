@@ -322,25 +322,27 @@ class TripRepository {
     fun activitiesForTrip(tripId: String): List<Activity> =
         activities.filter { it.tripId == tripId }
 
-    fun addActivity(tripId: String, date: LocalDate, title: String, time: String, location: String) {
+    fun addActivity(tripId: String, date: LocalDate, title: String, time: String, endTime: String, location: String, note:String) {
         val act = Activity(
             id = "a_${kotlin.random.Random.nextLong()}",
             tripId = tripId,
             date = date,
             title = title.trim(),
             time = time.trim(),
+            endTime = endTime.trim(),
             location = location.trim(),
+            note = note.trim(),
             memberIds = memberIdsForTrip(tripId),
         )
         activities.add(act)
         ioScope.launch { runCatching { activityService.saveActivity(act) } }
     }
 
-    fun updateActivity(id: String, date: LocalDate, title: String, time: String, location: String) {
+    fun updateActivity(id: String, date: LocalDate, title: String, time: String, endTime: String, location: String, note:String) {
         val i = activities.indexOfFirst { it.id == id }
         if (i < 0) return
         val updated = activities[i].copy(
-            date = date, title = title.trim(), time = time.trim(), location = location.trim(),
+            date = date, title = title.trim(), time = time.trim(), endTime = endTime.trim(), location = location.trim(), note = note.trim(),
             memberIds = memberIdsForTrip(activities[i].tripId),
         )
         activities[i] = updated
