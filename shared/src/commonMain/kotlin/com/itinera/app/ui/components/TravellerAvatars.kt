@@ -20,21 +20,6 @@ import com.itinera.app.resources.avatar_searched
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
-/*
- * ⚠️ The `itinera.shared.generated.resources` package is generated from your
- * module name. If the build can't resolve it, check what Res is imported as in
- * a file that already uses composeResources and match that — it'll be
- * <namespace>.generated.resources.
- *
- * PNGs go in: shared/src/commonMain/composeResources/drawable/
- */
-
-/**
- * Illustrated avatars a traveller can pick.
- *
- * [id] is what gets persisted, so these strings must not change once anyone has
- * chosen one — renaming a value silently resets that traveller to initials.
- */
 enum class TravellerAvatar(val id: String, val resource: DrawableResource) {
     BACKPACKER("backpacker", Res.drawable.avatar_backpacker),
     EXPLORER("explorer", Res.drawable.avatar_explorer),
