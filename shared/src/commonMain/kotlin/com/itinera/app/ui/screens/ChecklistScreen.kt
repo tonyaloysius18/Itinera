@@ -127,9 +127,7 @@ fun ChecklistScreen(
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 16.dp),
             ) {
-            // ⬅ CHANGED — was a full-width bar plus a separate count row. The ring
-            // is compact enough to sit beside the count, and pairing it with the
-            // departure note makes the header answer "should I be worried".
+
             Spacer(Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 ProgressRing(
@@ -153,9 +151,7 @@ fun ChecklistScreen(
                 }
             }
 
-            // ⬅ CHANGED — was duplicated verbatim in both branches of the
-            // items.isEmpty() check, and permanently outweighed the list it was
-            // meant to help with. Now one collapsed row that expands on demand.
+
             if (visibleSuggestions.isNotEmpty()) {
                 Spacer(Modifier.height(18.dp))
                 SuggestionsPanel(
@@ -170,12 +166,10 @@ fun ChecklistScreen(
             if (items.isEmpty()) {
                 if (visibleSuggestions.isEmpty()) {
                     Column(
-                        // ⬅ CHANGED — was padding(top = 270.dp), which lands
-                        // differently on every screen size.
+
                         Modifier.fillMaxWidth().padding(top = 80.dp, start = 24.dp, end = 24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        // ⬅ CHANGED — was Text("🧳"), which doesn't tint with the theme.
                         Box(
                             Modifier
                                 .size(64.dp)
@@ -224,8 +218,7 @@ fun ChecklistScreen(
                         Modifier.fillMaxWidth().padding(top = 20.dp, bottom = 7.dp, start = 2.dp, end = 2.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        // ⬅ CHANGED — group headers were primary blue, competing
-                        // with the chips and the plus icons for the same accent.
+
                         Text(
                             group,
                             style = MaterialTheme.typography.titleSmall,
