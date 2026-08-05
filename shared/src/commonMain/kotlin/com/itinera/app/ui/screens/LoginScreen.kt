@@ -241,7 +241,7 @@ fun LoginScreen(
             Button(
                 onClick = { attemptLogin() },
                 enabled = !loading,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 90.dp),
             ) {
                 if (loading) {
 //                    CircularProgressIndicator(
