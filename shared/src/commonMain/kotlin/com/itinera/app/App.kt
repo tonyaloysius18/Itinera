@@ -765,6 +765,7 @@ private fun AppContent(
                                             val uid = repository.authService.currentUid
                                             try {
                                                 if (uid != null) {
+                                                    repository.deleteAllUserData(uid)
                                                     repository.profileService.deleteProfile(uid)
                                                 }
                                                 repository.authService.deleteAccount()

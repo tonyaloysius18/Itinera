@@ -28,6 +28,14 @@ class ChecklistService {
         checklistRef(uid).document(itemId).delete()
     }
 
+    /** Delete every checklist item this user has, across all their trips. */
+    suspend fun deleteAllForUser(uid: String) {
+        val snapshot = checklistRef(uid).get()
+        for (doc in snapshot.documents) {
+            checklistRef(uid).document(doc.id).delete()
+        }
+    }
+
     /** Live stream of all this user's checklist items (across all their trips). */
     fun checklistFlow(uid: String): Flow<List<ChecklistItem>> =
         checklistRef(uid).snapshots.map { snapshot ->

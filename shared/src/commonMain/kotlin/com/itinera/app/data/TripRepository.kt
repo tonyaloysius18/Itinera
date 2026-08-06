@@ -415,6 +415,31 @@ class TripRepository {
         }
     }
 
+    /**
+     * Delete everything this user owns or is a member of, ahead of account deletion:
+     * owned trips are cascade-deleted (documents/expenses/activities/payments, then
+     * the trip itself); trips the user only belongs to are just left. Also clears
+     * their personal checklist and any un-migrated legacy records. Firestore only —
+     * uploaded files on Cloudinary aren't reachable from the client without the
+     * account's admin credentials, so those aren't removed here.
+     */
+    suspend fun deleteAllUserData(uid: String) {
+        val ownedAndMember = tripService.loadTrips(uid)
+        for (trip in ownedAndMember) {
+            if (trip.isOwnedBy(uid)) {
+                runCatching { tripService.deleteTripCascade(trip.id) }
+            } else {
+                runCatching {
+                    inviteService.removeSelfFromSubcollections(trip.id, uid)
+                    inviteService.leaveTripRemoveSelf(trip.id, uid)
+                }
+            }
+        }
+        runCatching { checklistService.deleteAllForUser(uid) }
+        runCatching { expenseService.deleteLegacyForUser(uid) }
+        runCatching { docService.deleteLegacyForUser(uid) }
+    }
+
     fun clearLocal() {
         stopSync()
         trips.clear()

@@ -44,4 +44,13 @@ class DocService {
         val snapshot = db.collection("users").document(uid).collection("documents").get()
         return snapshot.documents.map { it.data(DocItem.serializer()) }
     }
+
+    /** Delete any un-migrated documents left at the old users/{uid}/documents location. */
+    suspend fun deleteLegacyForUser(uid: String) {
+        val ref = db.collection("users").document(uid).collection("documents")
+        val snapshot = ref.get()
+        for (doc in snapshot.documents) {
+            ref.document(doc.id).delete()
+        }
+    }
 }

@@ -39,6 +39,23 @@ class TripService {
         tripsRef().document(tripId).delete()
     }
 
+    /**
+     * Owner-only: delete a trip and everything under it (documents, expenses,
+     * activities, payments) before removing the trip document itself. Used when
+     * an owner deletes their account, so nothing is left orphaned under a trip
+     * whose owner no longer exists.
+     */
+    suspend fun deleteTripCascade(tripId: String) {
+        val tripRef = tripsRef().document(tripId)
+        for (sub in listOf("documents", "expenses", "activities", "payments")) {
+            val snapshot = tripRef.collection(sub).get()
+            for (doc in snapshot.documents) {
+                tripRef.collection(sub).document(doc.id).delete()
+            }
+        }
+        tripRef.delete()
+    }
+
     // ── one-off migration helper: reads the OLD users/{uid}/trips location ──
     suspend fun loadLegacyTrips(uid: String): List<Trip> {
         val snapshot = db.collection("users").document(uid).collection("trips").get()

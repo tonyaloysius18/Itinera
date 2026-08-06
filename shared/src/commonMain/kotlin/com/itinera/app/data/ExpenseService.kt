@@ -44,4 +44,13 @@ class ExpenseService {
         val snapshot = db.collection("users").document(uid).collection("expenses").get()
         return snapshot.documents.map { it.data(Expense.serializer()) }
     }
+
+    /** Delete any un-migrated expenses left at the old users/{uid}/expenses location. */
+    suspend fun deleteLegacyForUser(uid: String) {
+        val ref = db.collection("users").document(uid).collection("expenses")
+        val snapshot = ref.get()
+        for (doc in snapshot.documents) {
+            ref.document(doc.id).delete()
+        }
+    }
 }
