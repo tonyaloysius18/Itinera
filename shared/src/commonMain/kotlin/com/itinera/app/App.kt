@@ -712,47 +712,85 @@ private fun AppContent(
                                 languageValue = if (language == Language.SYSTEM) systemLanguage().nativeName else language.nativeName,
                             )
 
-                            Screen.Account -> AccountScreen(
-                                profile = repository.profile,
-                                accounts = repository.accountStore.all(),
-                                currentUid = repository.authService.currentUid ?: "",
-                                onSwitchAccount = { account ->
-                                    scope.launch {
-                                        prefillEmail = account.email
-                                        repository.clearLocal()
-                                        repository.authService.signOut()
-                                        navigator.resetTo(Screen.Login)
-                                    }
-                                },
-                                onForgetAccount = { account ->
-                                    repository.accountStore.forget(account.uid)
-                                    navigator.resetTo(Screen.Account)
-                                },
-                                onAddAccount = {
-                                    repository.clearLocal()
-                                    navigator.resetTo(Screen.Login)
-                                },
-                                onLogOut = {
-                                    repository.clearLocal()
-                                    navigator.resetTo(Screen.Login)
-                                },
-                                onDeleteAccount = {
-                                    scope.launch {
-                                        val uid = repository.authService.currentUid
-                                        try {
-                                            if (uid != null) {
-                                                repository.profileService.deleteProfile(uid)
-                                            }
-                                            repository.authService.deleteAccount()
-                                            navigator.resetTo(Screen.Login)
-                                            pillMessage = s.accountDeleted
-                                        } catch (e: Exception) {
+                            Screen.Account -> {
+                                // ⬅ FIX (back button) — accountStore.all() was read
+                                // inline, so removing an account didn't recompose.
+                                // The workaround was navigator.resetTo(Screen.Account),
+                                // which WIPES THE BACK STACK — that's why the back
+                                // arrow stopped working after removing an account.
+                                //
+                                // Local state refreshes the list without touching
+                                // navigation. Same pattern as Screen.WorldClock below.
+                                var accounts by remember {
+                                    mutableStateOf(repository.accountStore.all())
+                                }
+
+                                AccountScreen(
+                                    profile = repository.profile,
+                                    accounts = accounts,
+                                    currentUid = repository.authService.currentUid ?: "",
+                                    onSwitchAccount = { account ->
+                                        scope.launch {
+                                            prefillEmail = account.email
+                                            repository.clearLocal()
+                                            repository.authService.signOut()
                                             navigator.resetTo(Screen.Login)
                                         }
-                                    }
-                                },
-                                onBack = { navigator.back() },
-                            )
+                                    },
+                                    onForgetAccount = { account ->
+                                        repository.accountStore.forget(account.uid)
+                                        accounts = repository.accountStore.all()   // ⬅ FIX
+                                    },
+                                    onAddAccount = {
+                                        scope.launch {
+                                            repository.clearLocal()
+                                            // ⬅ FIX — clearLocal() only empties the
+                                            // in-memory lists; without signOut() the
+                                            // Firebase session survives, so the
+                                            // LaunchedEffect at line 153 signs the old
+                                            // user straight back in on next launch.
+                                            repository.authService.signOut()
+                                            navigator.resetTo(Screen.Login)
+                                        }
+                                    },
+                                    onLogOut = {
+                                        scope.launch {
+                                            repository.clearLocal()
+                                            repository.authService.signOut()   // ⬅ FIX — same
+                                            navigator.resetTo(Screen.Login)
+                                        }
+                                    },
+                                    onDeleteAccount = {
+                                        scope.launch {
+                                            val uid = repository.authService.currentUid
+                                            try {
+                                                if (uid != null) {
+                                                    repository.profileService.deleteProfile(uid)
+                                                }
+                                                repository.authService.deleteAccount()
+                                                // ⬅ FIX (empty card) — the account was
+                                                // deleted from Firebase but left in the
+                                                // remembered list, so it kept appearing
+                                                // as a row with nothing in it.
+                                                if (uid != null) repository.accountStore.forget(uid)
+                                                repository.clearLocal()
+                                                navigator.resetTo(Screen.Login)
+                                                pillMessage = s.accountDeleted
+                                            } catch (e: Exception) {
+                                                // ⬅ FIX — the old catch navigated to
+                                                // Login silently, so a failed deletion
+                                                // looked exactly like a successful one.
+                                                // Firebase throws requires-recent-login
+                                                // here on an older session, which is the
+                                                // common case.
+                                                println("ITINERA: DELETE ACCOUNT FAILED — ${e.message}")
+                                                pillMessage = s.couldntDeleteAccount
+                                            }
+                                        }
+                                    },
+                                    onBack = { navigator.back() },
+                                )
+                            }
 
                             Screen.Notifications -> NotificationsScreen(
                                 offsetMinutes = repository.profile.reminderOffsetMinutes,

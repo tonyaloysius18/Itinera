@@ -160,6 +160,8 @@ class Strings {
     var orDivider: String = ""
     var continueGoogle: String = ""
     var continueApple: String = ""
+    var googleSignInFailed: String = ""
+    var appleSignInSoon: String = ""
     var newHere: String = ""
     var createAccount: String = ""
     var calendar: String = ""
@@ -215,6 +217,7 @@ class Strings {
     var signupFailed: String = ""
     var deleteAccount: String = ""
     var deleteAccountConfirm: String = ""
+    var deleteAccountLong: String = ""
     var deleteButton: String = ""
     var showPassword: String = ""
     var hidePassword: String = ""
@@ -222,6 +225,7 @@ class Strings {
     var recentLoginRequired: String = ""
     var accountCreated: String = ""
     var accountDeleted: String = ""
+    var couldntDeleteAccount: String = ""
     var changesSaved: String = ""
     var invalidCredentials: String = ""
     var setAtSignup: String = ""
@@ -410,6 +414,8 @@ class Strings {
     var account: String = ""
     var signedInAs: String = ""
     var addAnotherAccount: String = ""
+    var otherAccounts: String = ""
+    var tapToSwitch: String = ""
     var notifications: String = ""
     var backupStatus: String = ""
     var help: String = ""
@@ -727,6 +733,8 @@ class Strings {
         c.orDivider = this.orDivider
         c.continueGoogle = this.continueGoogle
         c.continueApple = this.continueApple
+        c.googleSignInFailed = this.googleSignInFailed
+        c.appleSignInSoon = this.appleSignInSoon
         c.newHere = this.newHere
         c.createAccount = this.createAccount
         c.requiredField = this.requiredField
@@ -790,6 +798,7 @@ class Strings {
         c.signupFailed = this.signupFailed
         c.deleteAccount = this.deleteAccount
         c.deleteAccountConfirm = this.deleteAccountConfirm
+        c.deleteAccountLong = this.deleteAccountLong
         c.deleteButton = this.deleteButton
         c.showPassword = this.showPassword
         c.hidePassword = this.hidePassword
@@ -797,6 +806,7 @@ class Strings {
         c.recentLoginRequired = this.recentLoginRequired
         c.accountCreated = this.accountCreated
         c.accountDeleted = this.accountDeleted
+        c.couldntDeleteAccount = this.couldntDeleteAccount
         c.changesSaved = this.changesSaved
         c.invalidCredentials = this.invalidCredentials
         c.setAtSignup = this.setAtSignup
@@ -983,6 +993,8 @@ class Strings {
         c.account = this.account
         c.signedInAs = this.signedInAs
         c.addAnotherAccount = this.addAnotherAccount
+        c.otherAccounts = this.otherAccounts
+        c.tapToSwitch = this.tapToSwitch
         c.notifications = this.notifications
         c.backupStatus = this.backupStatus
         c.help = this.help

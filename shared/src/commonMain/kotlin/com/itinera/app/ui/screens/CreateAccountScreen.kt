@@ -47,12 +47,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
@@ -66,7 +63,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
@@ -87,6 +83,40 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
+/*
+ * ─── New string keys (EN + FR) ──────────────────────────────────────────────
+ *   optionalAddLater  "Optional — you can add these later"
+ *                     / "Facultatif — vous pourrez les ajouter plus tard"
+ *   optionalLabel     "Optional"           / "Facultatif"   (shared)
+ *   requiredField     "Required"           / "Obligatoire"
+ *   invalidEmail      "Enter a valid e-mail" / "Saisissez un e-mail valide"
+ *   alreadyHaveAccount "Already have an account?" / "Vous avez déjà un compte ?"
+ *   termsPrefix       "By continuing you agree to our"
+ *                     / "En continuant, vous acceptez nos"
+ *   termsLabel        "Terms"              / "Conditions"
+ *   andLabel          "and"                / "et"
+ *   privacyLabel      "Privacy Policy"     / "Politique de confidentialité"
+ *   firstName         "First name"         / "Prénom"
+ *
+ * Reused: createAccount, back, surname, email, password, mobile, dob, address,
+ * street, city, postelCode, ok, cancel, signupFailed, showPassword,
+ * hidePassword, uppercase, lowercase, number, specialCharacter,
+ * minimumCharacters, signIn.
+ *
+ * No longer used here: fillAllFields, passwordTooShort — validation is inline
+ * and per-field now.
+ */
+
+/**
+ * One page, two halves.
+ *
+ * The top card is what's actually required — Firebase needs an email and
+ * password, and the app needs a name. Everything below it used to be mandatory
+ * but isn't read by anything in Itinera: street, city, postal code and date of
+ * birth are stored and displayed back, nothing more. Marking them optional
+ * removes eight blockers between someone and a working account without hiding
+ * the fields from anyone who wants to fill them in.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateAccountScreen(
@@ -159,9 +189,7 @@ fun CreateAccountScreen(
         !emailLooksValid -> s.invalidEmail
         else -> null
     }
-    val mobileError = if (triedSubmit && mobile.length < country.minDigits) s.requiredField else null
-    val allRequiredFilled = name.isNotBlank() && surname.isNotBlank() && email.isNotBlank() && mobile.length >= country.minDigits && passwordOk
-    val requiredValid = allRequiredFilled && emailLooksValid
+    val requiredValid = name.isNotBlank() && surname.isNotBlank() && emailLooksValid && passwordOk
 
     fun buildProfile() = UserProfile(
         name = name.trim().toTitleCase(),
@@ -228,14 +256,14 @@ fun CreateAccountScreen(
                             value = name,
                             error = nameError,
                             modifier = Modifier.weight(1f),
-                        ) { name = it.toTitleCase() }
+                        ) { name = it }
                         VerticalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f))
                         SignupField(
                             label = s.surname,
                             value = surname,
                             error = surnameError,
                             modifier = Modifier.weight(1f),
-                        ) { surname = it.toTitleCase() }
+                        ) { surname = it }
                     }
                     HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f))
 
@@ -253,33 +281,6 @@ fun CreateAccountScreen(
                             modifier = Modifier.fillMaxWidth(),
                         )
                         if (emailError != null) FieldError(emailError)
-                    }
-                    HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f))
-
-                    Column(Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
-                        Text(
-                            s.mobile,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = if (mobileError != null) MaterialTheme.colorScheme.error
-                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                        )
-                        PhoneNumberField(
-                            value = mobile,
-                            onValueChange = { mobile = it },
-                            selectedCountry = country,
-                            onCountrySelected = { country = it },
-                            label = {
-                                Text(
-                                    s.mobile,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
-                                )
-                            },
-                            shape = RoundedCornerShape(12.dp),
-                            isError = mobileError != null,
-                            borderless = true,
-                        )
-                        if (mobileError != null) FieldError(mobileError)
                     }
                     HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f))
 
@@ -334,6 +335,22 @@ fun CreateAccountScreen(
                 )
 
                 SignupCard {
+                    Column(Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
+                        Text(
+                            s.mobile,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        )
+                        PhoneNumberField(
+                            value = mobile,
+                            onValueChange = { mobile = it },
+                            selectedCountry = country,
+                            onCountrySelected = { country = it },
+                            label = { Text(s.optionalLabel) },
+                            shape = RoundedCornerShape(12.dp),
+                        )
+                    }
+                    HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f))
                     Row(
                         Modifier
                             .fillMaxWidth()
@@ -403,15 +420,15 @@ fun CreateAccountScreen(
         Column(
             Modifier.align(Alignment.BottomCenter).fillMaxWidth()
                 .padding(horizontal = 20.dp)
-                .padding(top = 16.dp, bottom = 90.dp)
+                .padding(top = 16.dp, bottom = 32.dp)
                 .imePadding(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Button(
                 onClick = { attemptCreate() },
-                enabled = !loading && allRequiredFilled,
+                enabled = !loading,
                 shape = RoundedCornerShape(26.dp),
-                modifier = Modifier.fillMaxWidth().height(52.dp).padding(start = 65.dp, end = 65.dp),
+                modifier = Modifier.fillMaxWidth().height(52.dp),
             ) {
                 if (loading) PlaneLoader() else Text(s.createAccount)
             }
@@ -558,9 +575,12 @@ fun EmailFieldWithSuggestions(
     email: String,
     onEmailChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    label: @Composable (() -> Unit)? = null,
-    colors: TextFieldColors? = null,
-    shape: Shape = OutlinedTextFieldDefaults.shape,
+    /**
+     * Override for surfaces that aren't themed — the login panel sits on a
+     * photo and is dark regardless of the app's light/dark setting, so
+     * onSurface would be invisible there in light mode.
+     */
+    textColor: Color? = null,
 ) {
     val domains = listOf("gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "icloud.com", "proton.me")
 
@@ -598,38 +618,22 @@ fun EmailFieldWithSuggestions(
         onExpandedChange = { },
         modifier = modifier,
     ) {
-        if (label != null || colors != null) {
-            OutlinedTextField(
-                value = fieldValue,
-                onValueChange = {
-                    fieldValue = it
-                    onEmailChange(it.text)
-                },
-                label = label,
-                colors = colors ?: OutlinedTextFieldDefaults.colors(),
-                shape = shape,
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                modifier = Modifier.menuAnchor().fillMaxWidth(),
-            )
-        } else {
-            // ⬅ CHANGED — borderless now, so it sits inside the card like the others
-            // instead of drawing a second outline within one.
-            BasicTextField(
-                value = fieldValue,
-                onValueChange = {
-                    fieldValue = it
-                    onEmailChange(it.text)
-                },
-                singleLine = true,
-                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                    color = MaterialTheme.colorScheme.onSurface,
-                ),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                modifier = Modifier.menuAnchor().fillMaxWidth(),
-            )
-        }
+        // ⬅ CHANGED — borderless now, so it sits inside the card like the others
+        // instead of drawing a second outline within one.
+        BasicTextField(
+            value = fieldValue,
+            onValueChange = {
+                fieldValue = it
+                onEmailChange(it.text)
+            },
+            singleLine = true,
+            textStyle = MaterialTheme.typography.bodyLarge.copy(
+                color = textColor ?: MaterialTheme.colorScheme.onSurface,
+            ),
+            cursorBrush = SolidColor(textColor ?: MaterialTheme.colorScheme.primary),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            modifier = Modifier.menuAnchor().fillMaxWidth(),
+        )
         MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))) {
             ExposedDropdownMenu(
                 expanded = suggestions.isNotEmpty(),

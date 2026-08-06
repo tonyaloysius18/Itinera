@@ -1,8 +1,9 @@
 package com.itinera.app.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,10 +24,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -44,33 +45,48 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.itinera.app.data.RememberedAccount
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.UserProfile
 import com.itinera.app.ui.components.TopBar
 
+
 private val AccentRed = Color(0xFFE03131)
 
-@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun AccountScreen(
     profile: UserProfile,
-    accounts: List<com.itinera.app.data.RememberedAccount> = emptyList(),
+    accounts: List<RememberedAccount> = emptyList(),
     currentUid: String = "",
-    onSwitchAccount: (com.itinera.app.data.RememberedAccount) -> Unit = {},
-    onForgetAccount: (com.itinera.app.data.RememberedAccount) -> Unit = {},
+    onSwitchAccount: (RememberedAccount) -> Unit = {},
+    onForgetAccount: (RememberedAccount) -> Unit = {},
     onAddAccount: () -> Unit,
     onLogOut: () -> Unit,
     onDeleteAccount: () -> Unit,
-    onBack: () -> Unit,          // ⬅ ADD
+    onBack: () -> Unit,
 ) {
     val s = LocalStrings.current
-    val primary = MaterialTheme.colorScheme.primary
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var pendingForget by remember { mutableStateOf<RememberedAccount?>(null) }
 
-    var pendingForget by remember { mutableStateOf<com.itinera.app.data.RememberedAccount?>(null) }
+    // ⬅ FIX — the active row rendered `profile` unconditionally. After the
+    // account is deleted, profile resets to UserProfile() while this screen is
+    // still on-screen, so you got a card with an avatar and two blank lines.
+    val hasActiveAccount = currentUid.isNotBlank() &&
+            (profile.fullName.isNotBlank() || profile.email.isNotBlank())
+
+    // ⬅ FIX — also drop the current account from the "other" list, dedupe by
+    // uid, and skip entries with nothing to show. A deleted account can linger
+    // in the remembered list until AccountStore catches up.
+    val otherAccounts = remember(accounts, currentUid) {
+        accounts
+            .filter { it.uid != currentUid && it.uid.isNotBlank() }
+            .filter { it.name.isNotBlank() || it.email.isNotBlank() }
+            .distinctBy { it.uid }
+    }
 
     Column(Modifier.fillMaxSize()) {
         TopBar(title = s.account, onBack = onBack)
@@ -81,118 +97,213 @@ fun AccountScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp),
         ) {
-            Spacer(Modifier.height(8.dp))
-            Text(
-                s.signedInAs,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
-            )
-
-            // Accounts list. For now this is just the active account.
-            // PHASE 2: render every remembered account here and switch on tap.
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surface,
-                tonalElevation = 2.dp,
-            ) {
-                Column {
-                    AccountRow(profile = profile, active = true)
-
-                    // Other remembered accounts on this device — tap to switch
-                    accounts.filter { it.uid != currentUid }.forEach { account ->
-                        ThinDivider()
-                        Row(
-                            Modifier
-                                .fillMaxWidth()
-                                .combinedClickable(
-                                    onClick = { onSwitchAccount(account) },
-                                    onLongClick = { pendingForget = account },
-                                )
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            // avatar: initial in a circle
-                            Box(
-                                Modifier.size(40.dp).clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.secondaryContainer),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                if (account.photoUrl.isNotBlank()) {
-                                    AsyncImage(
-                                        model = account.photoUrl,
-                                        contentDescription = null,
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier.matchParentSize(),
-                                    )
-                                } else {
-                                    Text(
-                                        (account.name.firstOrNull() ?: account.email.firstOrNull() ?: '?').uppercase(),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                    )
-                                }
-                            }
-                            Spacer(Modifier.width(14.dp))
-                            Column(Modifier.weight(1f)) {
-                                Text(
-                                    account.name.ifBlank { account.email },
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Medium,
-                                )
-                                if (account.email.isNotBlank()) {
-                                    Text(
-                                        account.email,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    ThinDivider()
-                    // Add another account
+            if (hasActiveAccount) {
+                SectionLabel(s.signedInAs)
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 2.dp,
+                ) {
                     Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .clickable(onClick = onAddAccount)
-                            .padding(horizontal = 16.dp, vertical = 16.dp),
+                        Modifier.fillMaxWidth().padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Icon(Icons.Filled.PersonAdd, null, tint = primary, modifier = Modifier.size(22.dp))
+                        ProfileAvatar(profile, size = 46.dp)
                         Spacer(Modifier.width(14.dp))
-                        Text(s.addAnotherAccount, style = MaterialTheme.typography.bodyLarge)
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                profile.fullName.ifBlank { profile.email },
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            if (profile.email.isNotBlank()) {
+                                Text(
+                                    profile.email,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                        }
+                        Box(
+                            Modifier
+                                .size(24.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                Icons.Filled.Check,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.size(16.dp),
+                            )
+                        }
                     }
                 }
             }
 
-            Spacer(Modifier.height(28.dp))
+            // ⬅ CHANGED — was one card mixing the active account, the others and
+            // "Add another". Switching accounts and adding one are different
+            // actions, and the others were only removable by long-press, which
+            // nothing indicated.
+            if (otherAccounts.isNotEmpty()) {
+                SectionLabel(s.otherAccounts, hint = s.tapToSwitch)
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 2.dp,
+                ) {
+                    Column {
+                        otherAccounts.forEachIndexed { index, account ->
+                            Row(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onSwitchAccount(account) }
+                                    .padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Box(
+                                    Modifier.size(40.dp).clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.secondaryContainer),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    if (account.photoUrl.isNotBlank()) {
+                                        AsyncImage(
+                                            model = account.photoUrl,
+                                            contentDescription = null,
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier.matchParentSize(),
+                                        )
+                                    } else {
+                                        Text(
+                                            (account.name.firstOrNull()
+                                                ?: account.email.firstOrNull() ?: '?').uppercase(),
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        )
+                                    }
+                                }
+                                Spacer(Modifier.width(14.dp))
+                                Column(Modifier.weight(1f)) {
+                                    Text(
+                                        account.name.ifBlank { account.email },
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                    if (account.email.isNotBlank() && account.name.isNotBlank()) {
+                                        Text(
+                                            account.email,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                    }
+                                }
+                                // ⬅ ADD — removing was long-press only, with nothing
+                                // saying so.
+                                Box(
+                                    Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape)
+                                        .clickable { pendingForget = account },
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Icon(
+                                        Icons.Filled.Close,
+                                        contentDescription = s.removeAccount,
+                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                                        modifier = Modifier.size(17.dp),
+                                    )
+                                }
+                            }
+                            if (index < otherAccounts.lastIndex) ThinDivider()
+                        }
+                    }
+                }
+            }
 
-            // Log out
-            Button(
-                onClick = onLogOut,
-                modifier = Modifier.fillMaxWidth().height(52.dp).padding(horizontal = 45
-                    .dp),
-                shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = AccentRed, contentColor = Color.White),
+            Spacer(Modifier.height(20.dp))
+
+            Surface(
+                modifier = Modifier.fillMaxWidth().clickable(onClick = onAddAccount),
+                shape = RoundedCornerShape(16.dp),
+                color = Color.Transparent,
+                border = androidx.compose.foundation.BorderStroke(
+                    0.5.dp,
+                    MaterialTheme.colorScheme.outline.copy(alpha = 0.45f),
+                ),
             ) {
-                Icon(Icons.AutoMirrored.Filled.Logout, null, modifier = Modifier.size(20.dp))
-                Spacer(Modifier.width(8.dp))
-                Text(s.logOut, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                Row(
+                    Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        Icons.Filled.PersonAdd,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Spacer(Modifier.width(14.dp))
+                    Text(s.addAnotherAccount, style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+
+            Spacer(Modifier.height(32.dp))
+
+            // ⬅ CHANGED — both actions were full-width solid red, which made
+            // logging out look as consequential as deleting everything. Log out
+            // is routine and reversible; only one of these deserves the colour.
+            Surface(
+                modifier = Modifier.fillMaxWidth().clickable(onClick = onLogOut),
+                shape = RoundedCornerShape(14.dp),
+                color = Color.Transparent,
+                border = androidx.compose.foundation.BorderStroke(
+                    0.5.dp,
+                    MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                ),
+            ) {
+                Row(
+                    Modifier.fillMaxWidth().padding(vertical = 14.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.Logout,
+                        contentDescription = null,
+                        modifier = Modifier.size(19.dp),
+                    )
+                    Spacer(Modifier.width(9.dp))
+                    Text(s.logOut, fontWeight = FontWeight.Medium)
+                }
             }
 
             Spacer(Modifier.height(12.dp))
 
-            // Delete account
-            Button(
-                onClick = { showDeleteDialog = true },
-                modifier = Modifier.fillMaxWidth().height(52.dp).padding(horizontal = 45.dp),
-                shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = AccentRed, contentColor = Color.White),
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .clickable { showDeleteDialog = true }
+                    .padding(vertical = 14.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(s.deleteAccount, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                Icon(
+                    Icons.Filled.DeleteForever,
+                    contentDescription = null,
+                    tint = AccentRed,
+                    modifier = Modifier.size(19.dp),
+                )
+                Spacer(Modifier.width(9.dp))
+                Text(s.deleteAccount, color = AccentRed, fontWeight = FontWeight.Medium)
             }
 
             Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.safeDrawing))
@@ -203,8 +314,14 @@ fun AccountScreen(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
+            icon = {
+                Icon(Icons.Filled.DeleteForever, contentDescription = null, tint = AccentRed)
+            },
             title = { Text(s.deleteAccount) },
-            text = { Text(s.deleteAccountConfirm) },
+            // ⬅ CHANGED — spells out what goes. "Are you sure?" doesn't say that
+            // the trips and everything shared with travellers go too.
+            text = { Text(s.deleteAccountLong) },
+            shape = RoundedCornerShape(20.dp),
             confirmButton = {
                 TextButton(onClick = {
                     showDeleteDialog = false
@@ -216,15 +333,29 @@ fun AccountScreen(
             },
         )
     }
-    if (pendingForget != null) {
+
+    pendingForget?.let { account ->
         AlertDialog(
             onDismissRequest = { pendingForget = null },
             title = { Text(s.removeAccount) },
-            text = { Text(s.removeAccountConfirm) },
+            text = {
+                Column {
+                    Text(s.removeAccountConfirm)
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        account.email.ifBlank { account.name },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    )
+                }
+            },
+            shape = RoundedCornerShape(20.dp),
             confirmButton = {
                 TextButton(onClick = {
-                    onForgetAccount(pendingForget!!)
+                    // Clear the dialog first: if onForgetAccount throws, the old
+                    // order left it stuck open with no way out.
                     pendingForget = null
+                    onForgetAccount(account)
                 }) { Text(s.remove, color = AccentRed) }
             },
             dismissButton = { TextButton(onClick = { pendingForget = null }) { Text(s.cancel) } },
@@ -233,23 +364,23 @@ fun AccountScreen(
 }
 
 @Composable
-private fun AccountRow(profile: UserProfile, active: Boolean) {
+private fun SectionLabel(label: String, hint: String = "") {
     Row(
-        Modifier.fillMaxWidth().padding(16.dp),
+        Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, top = 18.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        ProfileAvatar(profile, size = 44.dp)
-        Spacer(Modifier.width(14.dp))
-        Column(Modifier.weight(1f)) {
-            Text(profile.fullName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(
+            label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+            modifier = Modifier.weight(1f),
+        )
+        if (hint.isNotBlank()) {
             Text(
-                profile.email,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                hint,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
             )
-        }
-        if (active) {
-            Icon(Icons.Filled.Check, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
         }
     }
 }
@@ -257,7 +388,7 @@ private fun AccountRow(profile: UserProfile, active: Boolean) {
 @Composable
 private fun ThinDivider() {
     HorizontalDivider(
-        modifier = Modifier.padding(start = 52.dp),
+        modifier = Modifier.padding(start = 70.dp),
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
     )
 }

@@ -48,6 +48,8 @@ internal val FR: Strings by lazy { EN.copyApply {
     orDivider = "ou"
     continueGoogle = "Continuer avec Google"
     continueApple = "Continuer avec Apple"
+    googleSignInFailed = "Échec de la connexion Google"
+    appleSignInSoon = "La connexion avec Apple n'est pas encore disponible"
     newHere = "Nouveau ?"
     createAccount = "Créer un compte"
 
