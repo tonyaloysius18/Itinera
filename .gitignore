@@ -30,6 +30,7 @@ keystore.properties
 
 # Release build artifacts
 *.apk
+*.apks
 *.aab
 *.dm
 **/output-metadata.json

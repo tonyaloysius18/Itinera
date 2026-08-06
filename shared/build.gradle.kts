@@ -22,8 +22,8 @@ kotlin {
 
     androidLibrary {
         namespace = "com.itinera.app.shared"
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
-        minSdk = libs.versions.android.minSdk.get().toInt()
+        compileSdk = 36
+        minSdk = 24
 
 
         compilerOptions {
