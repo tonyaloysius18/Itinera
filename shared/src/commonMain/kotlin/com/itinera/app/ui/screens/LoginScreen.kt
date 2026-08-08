@@ -305,20 +305,47 @@ fun LoginScreen(
                         tintIcon = false,
                         modifier = Modifier.weight(1f),
                     ) {
+//                        scope.launch {
+//                            try {
+//                                val tokens = googleHelper.signIn()
+//                                if (tokens != null) {
+//                                    authService.signInWithGoogle(tokens.idToken, tokens.accessToken)
+//                                    onAuthed()
+//                                }
+//                            } catch (e: Exception) {
+//                                val msg = e.message.orEmpty()
+//                                // A cancelled sheet isn't a failure worth a pill.
+//                                if (!msg.contains("cancel", ignoreCase = true)) {
+//
+//                                    onMessage(s.googleSignInFailed)
+//                                    println("ITINERA: GOOGLE SIGN-IN FAILED — $msg")
+//                                }
+//                            }
+//                        }
                         scope.launch {
                             try {
                                 val tokens = googleHelper.signIn()
+
                                 if (tokens != null) {
-                                    authService.signInWithGoogle(tokens.idToken, tokens.accessToken)
+                                    authService.signInWithGoogle(
+                                        tokens.idToken,
+                                        tokens.accessToken
+                                    )
+
                                     onAuthed()
                                 }
                             } catch (e: Exception) {
                                 val msg = e.message.orEmpty()
-                                // A cancelled sheet isn't a failure worth a pill.
-                                if (!msg.contains("cancel", ignoreCase = true)) {
 
+                                if (!msg.contains("cancel", ignoreCase = true)) {
                                     onMessage(s.googleSignInFailed)
-                                    println("ITINERA: GOOGLE SIGN-IN FAILED — $msg")
+
+                                    println(
+                                        "ITINERA: GOOGLE SIGN-IN FAILED — " +
+                                                "${e::class.simpleName}: $msg"
+                                    )
+
+                                    e.printStackTrace()
                                 }
                             }
                         }

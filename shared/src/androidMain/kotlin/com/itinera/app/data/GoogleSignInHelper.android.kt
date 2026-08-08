@@ -26,7 +26,11 @@ actual class GoogleSignInHelper(private val context: Context) {
         return try {
             val result = credentialManager.getCredential(context, request)
             val cred = GoogleIdTokenCredential.createFrom(result.credential.data)
-            GoogleTokens(idToken = cred.idToken, accessToken = cred.idToken)
+            //GoogleTokens(idToken = cred.idToken, accessToken = cred.idToken)
+            GoogleTokens(
+                idToken = cred.idToken,
+                accessToken = null
+            )
         } catch (e: GetCredentialException) {
             Log.e("GoogleSignIn", "Credential Manager error: ${e.type} ${e.message}")
             // Re-throw so the UI can catch it and show a meaningful message or ignore cancellations

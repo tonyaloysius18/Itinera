@@ -66,8 +66,19 @@ class AuthService {
         Firebase.auth.sendPasswordResetEmail(email)
     }
 
-    suspend fun signInWithGoogle(idToken: String, accessToken: String) {
-        val credential = GoogleAuthProvider.credential(idToken, accessToken)
+//    suspend fun signInWithGoogle(idToken: String, accessToken: String) {
+//        val credential = GoogleAuthProvider.credential(idToken, accessToken)
+//        Firebase.auth.signInWithCredential(credential)
+//    }
+    suspend fun signInWithGoogle(
+        idToken: String,
+        accessToken: String?
+    ) {
+        val credential = GoogleAuthProvider.credential(
+            idToken = idToken,
+            accessToken = accessToken
+        )
+
         Firebase.auth.signInWithCredential(credential)
     }
     fun currentUserProfile(): UserProfile? {
