@@ -5,6 +5,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -28,6 +29,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -62,24 +64,34 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.itinera.app.data.SavedZone
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.ui.components.CardShape
 import com.itinera.app.ui.components.TopBar
+import com.itinera.app.ui.components.reorderableItem
+import com.itinera.app.ui.components.rememberReorderableLazyListState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
 import kotlinx.datetime.toLocalDateTime
+import kotlin.math.PI
+import kotlin.math.cos
 import kotlin.math.roundToInt
+import kotlin.math.sin
 import kotlin.time.Clock
 import kotlin.time.Instant
 
@@ -93,12 +105,14 @@ private fun pad2(n: Int): String = if (n < 10) "0$n" else "$n"
 private fun nowInstant(): Instant = Clock.System.now()
 
 private fun keyOf(z: SavedZone) = z.label + "|" + z.zoneId
+private const val HomeClockKey = "__local_world_clock__"
 
 @Composable
 fun WorldClockScreen(
     zones: List<SavedZone>,
     onAddZone: (String, String) -> Unit,   // (label, zoneId)
     onRemoveZone: (SavedZone) -> Unit,
+    onReorderZones: (List<SavedZone>) -> Unit = {},
     onBack: () -> Unit,
     /**
      * Destinations from the user's trips, offered as shortcuts in the picker.
@@ -110,6 +124,36 @@ fun WorldClockScreen(
     var showPicker by remember { mutableStateOf(false) }
     // which card is currently swiped open (only one at a time)
     var openKey by remember { mutableStateOf<String?>(null) }
+    var orderedZones by remember(zones) { mutableStateOf(zones) }
+    val clockListState = rememberLazyListState()
+
+    fun moveZone(draggedKey: String, targetKey: String): List<SavedZone>? {
+        val fromIndex = orderedZones.indexOfFirst { keyOf(it) == draggedKey }
+        val toIndex = orderedZones.indexOfFirst { keyOf(it) == targetKey }
+        if (fromIndex < 0 || toIndex < 0 || fromIndex == toIndex) return null
+        return orderedZones.toMutableList().apply { add(toIndex, removeAt(fromIndex)) }
+    }
+
+    fun moveZoneBy(key: String, delta: Int) {
+        val fromIndex = orderedZones.indexOfFirst { keyOf(it) == key }
+        val toIndex = fromIndex + delta
+        if (fromIndex !in orderedZones.indices || toIndex !in orderedZones.indices) return
+        val next = orderedZones.toMutableList().apply { add(toIndex, removeAt(fromIndex)) }
+        orderedZones = next
+        onReorderZones(next)
+    }
+
+    val reorderState = rememberReorderableLazyListState(
+        listState = clockListState,
+        canMoveOver = { it != HomeClockKey },
+        onMove = { draggedKey, targetKey ->
+            moveZone(draggedKey, targetKey)?.let {
+                orderedZones = it
+                openKey = null
+            }
+        },
+        onDrop = { onReorderZones(orderedZones) },
+    )
 
     // live tick — update every second so minutes roll over naturally
     var now by remember { mutableStateOf(nowInstant()) }
@@ -132,17 +176,18 @@ fun WorldClockScreen(
 
             LazyColumn(
                 Modifier.weight(1f).fillMaxWidth(),
+                state = clockListState,
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 // Home / local zone, pinned at top — not swipeable (not removable)
-                item {
+                item(key = HomeClockKey) {
                     // ⬅ CHANGED — was an identical ClockRow. Home is the reference
                     // every other row is measured against.
                     HomeClockCard(zoneId = homeTz.id, now = now)
                 }
 
-                if (zones.isEmpty()) {
+                if (orderedZones.isEmpty()) {
                     item {
                         Column(
                             // ⬅ CHANGED — was padding(top = 200.dp), a magic number
@@ -180,8 +225,9 @@ fun WorldClockScreen(
                         }
                     }
                 } else {
-                    items(zones, key = { keyOf(it) }) { entry ->
+                    items(orderedZones, key = { keyOf(it) }) { entry ->
                         val k = keyOf(entry)
+                        val index = orderedZones.indexOfFirst { keyOf(it) == k }
                         SwipeableClockCard(
                             entry = entry,
                             now = now,
@@ -189,7 +235,17 @@ fun WorldClockScreen(
                             isOpen = openKey == k,
                             onOpenChange = { open -> openKey = if (open) k else null },
                             onDelete = { onRemoveZone(entry); openKey = null },
-                            modifier = Modifier.animateItem(),
+                            modifier = Modifier
+                                .animateItem()
+                                .reorderableItem(
+                                    state = reorderState,
+                                    key = k,
+                                    itemLabel = entry.label,
+                                    canMoveUp = index > 0,
+                                    canMoveDown = index in 0 until orderedZones.lastIndex,
+                                    onMoveUp = { moveZoneBy(k, -1) },
+                                    onMoveDown = { moveZoneBy(k, 1) },
+                                ),
                         )
                     }
                 }
@@ -390,34 +446,143 @@ private fun HomeClockCard(zoneId: String, now: Instant) {
         color = MaterialTheme.colorScheme.surface,
         tonalElevation = 2.dp,
     ) {
-        Column(Modifier.fillMaxWidth().padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    Icons.Filled.Place,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(14.dp),
-                )
-                Spacer(Modifier.width(5.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Filled.Place,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(14.dp),
+                    )
+                    Spacer(Modifier.width(5.dp))
+                    Text(
+                        "${friendlyZone(zoneId)} · ${s.localLabel}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                Spacer(Modifier.height(4.dp))
                 Text(
-                    "${friendlyZone(zoneId)} · ${s.localLabel}",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
+                    "${pad2(ldt.hour)}:${pad2(ldt.minute)}",
+                    style = MaterialTheme.typography.displaySmall,
+                    fontWeight = FontWeight.Medium,
+                )
+                Spacer(Modifier.height(3.dp))
+                Text(
+                    "${dayOfWeekShort(ldt.dayOfWeek)} ${ldt.dayOfMonth} · ${utcOffsetLabel(tz, now)}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
                 )
             }
-            Spacer(Modifier.height(4.dp))
-            Text(
-                "${pad2(ldt.hour)}:${pad2(ldt.minute)}",
-                style = MaterialTheme.typography.displaySmall,
-                fontWeight = FontWeight.Medium,
-            )
-            Spacer(Modifier.height(3.dp))
-            Text(
-                "${dayOfWeekShort(ldt.dayOfWeek)} ${ldt.dayOfMonth} · ${utcOffsetLabel(tz, now)}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+
+            Spacer(Modifier.width(16.dp))
+            LiveAnalogClock(
+                zoneId = zoneId,
+                modifier = Modifier.size(76.dp),
             )
         }
+    }
+}
+
+@Composable
+private fun LiveAnalogClock(
+    zoneId: String,
+    modifier: Modifier = Modifier,
+) {
+    val tz = remember(zoneId) { runCatching { TimeZone.of(zoneId) }.getOrNull() } ?: return
+    var currentInstant by remember(zoneId) { mutableStateOf(nowInstant()) }
+
+    LaunchedEffect(zoneId) {
+        while (true) {
+            currentInstant = nowInstant()
+            delay(1_000 - (currentInstant.toEpochMilliseconds() % 1_000))
+        }
+    }
+
+    val time = currentInstant.toLocalDateTime(tz)
+    val faceColor = MaterialTheme.colorScheme.surfaceVariant
+    val borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.55f)
+    val hourHandColor = MaterialTheme.colorScheme.onSurface
+    val minuteHandColor = MaterialTheme.colorScheme.primary
+    val secondHandColor = MaterialTheme.colorScheme.tertiary
+    val tickColor = MaterialTheme.colorScheme.onSurfaceVariant
+
+    Canvas(
+        modifier = modifier.semantics {
+            contentDescription =
+                "${pad2(time.hour)}:${pad2(time.minute)}:${pad2(time.second)}"
+        },
+    ) {
+        val center = androidx.compose.ui.geometry.Offset(size.width / 2f, size.height / 2f)
+        val radius = size.minDimension / 2f
+
+        drawCircle(color = faceColor, radius = radius)
+        drawCircle(
+            color = borderColor,
+            radius = radius - 0.75.dp.toPx(),
+            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.5.dp.toPx()),
+        )
+
+        repeat(12) { index ->
+            val angle = index * (2f * PI.toFloat() / 12f) - PI.toFloat() / 2f
+            val isCardinal = index % 3 == 0
+            val outerRadius = radius * 0.84f
+            val innerRadius = radius * if (isCardinal) 0.69f else 0.75f
+            drawLine(
+                color = tickColor.copy(alpha = if (isCardinal) 0.8f else 0.45f),
+                start = androidx.compose.ui.geometry.Offset(
+                    center.x + cos(angle) * innerRadius,
+                    center.y + sin(angle) * innerRadius,
+                ),
+                end = androidx.compose.ui.geometry.Offset(
+                    center.x + cos(angle) * outerRadius,
+                    center.y + sin(angle) * outerRadius,
+                ),
+                strokeWidth = if (isCardinal) 2.dp.toPx() else 1.dp.toPx(),
+                cap = StrokeCap.Round,
+            )
+        }
+
+        val secondProgress = (time.second + time.nanosecond / 1_000_000_000f) / 60f
+        val minuteProgress = (time.minute + secondProgress) / 60f
+        val hourProgress = ((time.hour % 12) + minuteProgress) / 12f
+
+        fun handEnd(progress: Float, length: Float): androidx.compose.ui.geometry.Offset {
+            val angle = progress * 2f * PI.toFloat() - PI.toFloat() / 2f
+            return androidx.compose.ui.geometry.Offset(
+                center.x + cos(angle) * length,
+                center.y + sin(angle) * length,
+            )
+        }
+
+        drawLine(
+            color = hourHandColor,
+            start = center,
+            end = handEnd(hourProgress, radius * 0.45f),
+            strokeWidth = 3.5.dp.toPx(),
+            cap = StrokeCap.Round,
+        )
+        drawLine(
+            color = minuteHandColor,
+            start = center,
+            end = handEnd(minuteProgress, radius * 0.66f),
+            strokeWidth = 2.5.dp.toPx(),
+            cap = StrokeCap.Round,
+        )
+        drawLine(
+            color = secondHandColor,
+            start = center,
+            end = handEnd(secondProgress, radius * 0.72f),
+            strokeWidth = 1.dp.toPx(),
+            cap = StrokeCap.Round,
+        )
+        drawCircle(color = secondHandColor, radius = 2.5.dp.toPx(), center = center)
     }
 }
 
@@ -512,6 +677,16 @@ private fun ClockRow(
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                 )
             }
+
+            Spacer(Modifier.width(6.dp))
+            Text(
+                "::",
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.width(20.dp),
+            )
         }
     }
 }

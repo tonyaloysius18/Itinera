@@ -47,4 +47,8 @@ object WorldClockStore {
             all().filterNot { it.label == entry.label && it.zoneId == entry.zoneId }
         )
     }
+
+    fun saveOrder(entries: List<SavedZone>) {
+        settings[KEY] = json.encodeToString(entries.distinctBy { "${it.label}|${it.zoneId}" })
+    }
 }

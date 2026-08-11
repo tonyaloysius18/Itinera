@@ -76,11 +76,10 @@ import com.itinera.app.ui.components.InlineTimeSlot
 import com.itinera.app.ui.components.PickerRow
 import com.itinera.app.ui.components.PlainTextInput
 import com.itinera.app.ui.components.SectionLabel
+import com.itinera.app.ui.components.TravelTimePickerSheet
 import com.itinera.app.ui.components.countries
-import dev.darkokoa.datetimewheelpicker.WheelTimePicker
-import dev.darkokoa.datetimewheelpicker.core.format.TimeFormat
-import dev.darkokoa.datetimewheelpicker.core.format.timeFormatter
-import kotlinx.datetime.LocalTime
+import com.itinera.app.ui.components.parseTimeOrNoon
+import com.itinera.app.ui.components.toStoredTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
@@ -454,66 +453,45 @@ fun AddLegScreen(
 
             // Start time picker
             if (showStartTimePicker) {
-                var picked by remember { mutableStateOf(LocalTime(12, 0)) }
-                AlertDialog(
-                    onDismissRequest = { showStartTimePicker = false },
-                    confirmButton = {
-                        TextButton(onClick = {
-                            val h = picked.hour.toString().padStart(2, '0')
-                            val m = picked.minute.toString().padStart(2, '0')
-                            startTime = "$h:$m"
-                            showStartTimePicker = false
-                        }) { Text(s.ok) }
-                    },
-                    dismissButton = { TextButton(onClick = { showStartTimePicker = false }) { Text(s.cancel) } },
-                    text = {
-                        WheelTimePicker(timeFormatter = timeFormatter(timeFormat = TimeFormat.HOUR_24)) { snappedTime ->
-                            picked = snappedTime
-                        }
+                TravelTimePickerSheet(
+                    title = s.departure,
+                    initialTime = parseTimeOrNoon(startTime),
+                    confirmLabel = s.ok,
+                    onDismiss = { showStartTimePicker = false },
+                    onTimeSelected = {
+                        startTime = it.toStoredTime()
+                        showStartTimePicker = false
                     },
                 )
             }
 
             // End time picker
             if (showEndTimePicker) {
-                var picked by remember { mutableStateOf(LocalTime(12, 0)) }
-                AlertDialog(
-                    onDismissRequest = { showEndTimePicker = false },
-                    confirmButton = {
-                        TextButton(onClick = {
-                            val h = picked.hour.toString().padStart(2, '0')
-                            val m = picked.minute.toString().padStart(2, '0')
-                            endTime = "$h:$m"
-                            showEndTimePicker = false
-                        }) { Text(s.ok) }
-                    },
-                    dismissButton = { TextButton(onClick = { showEndTimePicker = false }) { Text(s.cancel) } },
-                    text = {
-                        WheelTimePicker(timeFormatter = timeFormatter(timeFormat = TimeFormat.HOUR_24)) { snappedTime ->
-                            picked = snappedTime
-                        }
+                TravelTimePickerSheet(
+                    title = s.arrival,
+                    initialTime = parseTimeOrNoon(endTime),
+                    confirmLabel = s.ok,
+                    onDismiss = { showEndTimePicker = false },
+                    onTimeSelected = {
+                        endTime = it.toStoredTime()
+                        showEndTimePicker = false
                     },
                 )
             }
 
             // Stop arrival/departure time picker
             stopTimePicker?.let { (index, isArrival) ->
-                var picked by remember(index, isArrival) { mutableStateOf(LocalTime(12, 0)) }
-                AlertDialog(
-                    onDismissRequest = { stopTimePicker = null },
-                    confirmButton = {
-                        TextButton(onClick = {
-                            val h = picked.hour.toString().padStart(2, '0')
-                            val m = picked.minute.toString().padStart(2, '0')
-                            val t = "$h:$m"
-                            stops[index] = if (isArrival) stops[index].copy(arrivalTime = t)
-                            else stops[index].copy(departureTime = t)
-                            stopTimePicker = null
-                        }) { Text(s.ok) }
-                    },
-                    dismissButton = { TextButton(onClick = { stopTimePicker = null }) { Text(s.cancel) } },
-                    text = {
-                        WheelTimePicker(timeFormatter = timeFormatter(timeFormat = TimeFormat.HOUR_24)) { picked = it }
+                val value = if (isArrival) stops[index].arrivalTime else stops[index].departureTime
+                TravelTimePickerSheet(
+                    title = if (isArrival) s.arrival else s.departure,
+                    initialTime = parseTimeOrNoon(value),
+                    confirmLabel = s.ok,
+                    onDismiss = { stopTimePicker = null },
+                    onTimeSelected = { selected ->
+                        val time = selected.toStoredTime()
+                        stops[index] = if (isArrival) stops[index].copy(arrivalTime = time)
+                        else stops[index].copy(departureTime = time)
+                        stopTimePicker = null
                     },
                 )
             }

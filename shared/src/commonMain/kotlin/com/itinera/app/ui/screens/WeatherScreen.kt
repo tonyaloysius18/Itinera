@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -74,6 +75,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.itinera.app.data.GeoPlace
 import com.itinera.app.data.SavedCity
 import com.itinera.app.data.WeatherResult
@@ -83,6 +85,8 @@ import com.itinera.app.data.weatherLabel
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.ui.components.CardShape
 import com.itinera.app.ui.components.TopBar
+import com.itinera.app.ui.components.reorderableItem
+import com.itinera.app.ui.components.rememberReorderableLazyListState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -92,6 +96,7 @@ fun WeatherScreen(
     cities: List<SavedCity>,
     onAddCity: (SavedCity) -> Unit,
     onRemoveCity: (SavedCity) -> Unit,
+    onReorderCities: (List<SavedCity>) -> Unit = {},
     onBack: () -> Unit,
     /**
      * City names pulled from the user's trips, offered as shortcuts in the add
@@ -104,12 +109,41 @@ fun WeatherScreen(
     var showAdd by remember { mutableStateOf(false) }
     // which card is swiped open (one at a time)
     var openKey by remember { mutableStateOf<String?>(null) }
+    var orderedCities by remember(cities) { mutableStateOf(cities) }
+    val weatherListState = rememberLazyListState()
+
+    fun moveCity(draggedKey: String, targetKey: String): List<SavedCity>? {
+        val fromIndex = orderedCities.indexOfFirst { it.key == draggedKey }
+        val toIndex = orderedCities.indexOfFirst { it.key == targetKey }
+        if (fromIndex < 0 || toIndex < 0 || fromIndex == toIndex) return null
+        return orderedCities.toMutableList().apply { add(toIndex, removeAt(fromIndex)) }
+    }
+
+    fun moveCityBy(key: String, delta: Int) {
+        val fromIndex = orderedCities.indexOfFirst { it.key == key }
+        val toIndex = fromIndex + delta
+        if (fromIndex !in orderedCities.indices || toIndex !in orderedCities.indices) return
+        val next = orderedCities.toMutableList().apply { add(toIndex, removeAt(fromIndex)) }
+        orderedCities = next
+        onReorderCities(next)
+    }
+
+    val reorderState = rememberReorderableLazyListState(
+        listState = weatherListState,
+        onMove = { draggedKey, targetKey ->
+            moveCity(draggedKey, targetKey)?.let {
+                orderedCities = it
+                openKey = null
+            }
+        },
+        onDrop = { onReorderCities(orderedCities) },
+    )
 
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
             TopBar(s.weather, onBack = onBack)
 
-            if (cities.isEmpty()) {
+            if (orderedCities.isEmpty()) {
                 Column(
                     Modifier.fillMaxSize().padding(horizontal = 32.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -148,17 +182,29 @@ fun WeatherScreen(
             } else {
                 LazyColumn(
                     Modifier.weight(1f).fillMaxWidth(),
+                    state = weatherListState,
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    items(cities, key = { it.key }) { city ->
+                    items(orderedCities, key = { it.key }) { city ->
+                        val index = orderedCities.indexOfFirst { it.key == city.key }
                         SwipeableWeatherCard(
                             city = city,
                             service = service,
                             isOpen = openKey == city.key,
                             onOpenChange = { open -> openKey = if (open) city.key else null },
                             onDelete = { onRemoveCity(city); openKey = null },
-                            modifier = Modifier.animateItem(),
+                            modifier = Modifier
+                                .animateItem()
+                                .reorderableItem(
+                                    state = reorderState,
+                                    key = city.key,
+                                    itemLabel = city.name,
+                                    canMoveUp = index > 0,
+                                    canMoveDown = index in 0 until orderedCities.lastIndex,
+                                    onMoveUp = { moveCityBy(city.key, -1) },
+                                    onMoveDown = { moveCityBy(city.key, 1) },
+                                ),
                         )
                     }
                 }
@@ -553,6 +599,15 @@ private fun SwipeableWeatherCard(
                                 fontWeight = FontWeight.Medium,
                             )
                         }
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            "::",
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.width(20.dp),
+                        )
                     }
 
                     // ⬅ CHANGED — was "H 35°  L 25°" as a bare string. The bar spans

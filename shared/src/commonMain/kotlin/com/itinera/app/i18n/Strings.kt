@@ -619,6 +619,18 @@ class Strings {
     var viewFullTicket: String = ""
     var ticketSingular: String = ""
     var ticketCode: String = ""
+    // English defaults keep new wallet safety copy available in locales that have
+    // not received dedicated translations yet.
+    var myPass: String = "My Pass"
+    var groupPasses: String = "Group passes"
+    var viewGroupPasses: String = "View group passes"
+    var backToMyPass: String = "Back to my pass"
+    var noPassAssigned: String = "No boarding pass is assigned to you"
+    var accountNotLinkedToTraveller: String = "Your account is not linked to a traveller on this trip."
+    var passAssignmentHelp: String = "Assign each pass to its traveller in Documents before scanning."
+    var assignPasses: String = "Assign passes"
+    var unassignedPass: String = "Unassigned pass — verify the passenger"
+    var multipleCodesWarning: String = "Multiple codes in one document — verify the passenger"
 
     // Months and Days
     var jan: String = ""
@@ -1181,6 +1193,16 @@ class Strings {
         c.viewFullTicket = this.viewFullTicket
         c.ticketSingular = this.ticketSingular
         c.ticketCode = this.ticketCode
+        c.myPass = this.myPass
+        c.groupPasses = this.groupPasses
+        c.viewGroupPasses = this.viewGroupPasses
+        c.backToMyPass = this.backToMyPass
+        c.noPassAssigned = this.noPassAssigned
+        c.accountNotLinkedToTraveller = this.accountNotLinkedToTraveller
+        c.passAssignmentHelp = this.passAssignmentHelp
+        c.assignPasses = this.assignPasses
+        c.unassignedPass = this.unassignedPass
+        c.multipleCodesWarning = this.multipleCodesWarning
 
         c.jan = this.jan
         c.feb = this.feb

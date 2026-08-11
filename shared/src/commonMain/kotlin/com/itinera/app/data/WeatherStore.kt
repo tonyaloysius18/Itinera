@@ -48,4 +48,8 @@ object WeatherStore {
     fun remove(city: SavedCity) {
         settings[KEY] = json.encodeToString(all().filterNot { it.key == city.key })
     }
+
+    fun saveOrder(cities: List<SavedCity>) {
+        settings[KEY] = json.encodeToString(cities.distinctBy { it.key })
+    }
 }

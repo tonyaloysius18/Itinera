@@ -26,7 +26,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Notes
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -64,12 +63,11 @@ import com.itinera.app.ui.components.InlineTimeSlot
 import com.itinera.app.ui.components.PickerRow
 import com.itinera.app.ui.components.PlainTextInput
 import com.itinera.app.ui.components.SectionLabel
-import dev.darkokoa.datetimewheelpicker.WheelTimePicker
-import dev.darkokoa.datetimewheelpicker.core.format.TimeFormat
-import dev.darkokoa.datetimewheelpicker.core.format.timeFormatter
+import com.itinera.app.ui.components.TravelTimePickerSheet
+import com.itinera.app.ui.components.parseTimeOrNoon
+import com.itinera.app.ui.components.toStoredTime
 import kotlinx.coroutines.delay
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
@@ -477,35 +475,27 @@ fun AddPlaceScreen(
     }
 
     if (showTimePicker) {
-        var picked by remember { mutableStateOf(LocalTime(12, 0)) }
-        AlertDialog(
-            onDismissRequest = { showTimePicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    time = "${picked.hour.toString().padStart(2, '0')}:${picked.minute.toString().padStart(2, '0')}"
-                    showTimePicker = false
-                }) { Text(s.ok) }
-            },
-            dismissButton = { TextButton(onClick = { showTimePicker = false }) { Text(s.cancel) } },
-            text = {
-                WheelTimePicker(timeFormatter = timeFormatter(timeFormat = TimeFormat.HOUR_24)) { picked = it }
+        TravelTimePickerSheet(
+            title = s.startTime,
+            initialTime = parseTimeOrNoon(time),
+            confirmLabel = s.ok,
+            onDismiss = { showTimePicker = false },
+            onTimeSelected = {
+                time = it.toStoredTime()
+                showTimePicker = false
             },
         )
     }
 
     if (showEndTimePicker) {
-        var picked by remember { mutableStateOf(LocalTime(12, 0)) }
-        AlertDialog(
-            onDismissRequest = { showEndTimePicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    endTime = "${picked.hour.toString().padStart(2, '0')}:${picked.minute.toString().padStart(2, '0')}"
-                    showEndTimePicker = false
-                }) { Text(s.ok) }
-            },
-            dismissButton = { TextButton(onClick = { showEndTimePicker = false }) { Text(s.cancel) } },
-            text = {
-                WheelTimePicker(timeFormatter = timeFormatter(timeFormat = TimeFormat.HOUR_24)) { picked = it }
+        TravelTimePickerSheet(
+            title = s.endTime,
+            initialTime = parseTimeOrNoon(endTime),
+            confirmLabel = s.ok,
+            onDismiss = { showEndTimePicker = false },
+            onTimeSelected = {
+                endTime = it.toStoredTime()
+                showEndTimePicker = false
             },
         )
     }

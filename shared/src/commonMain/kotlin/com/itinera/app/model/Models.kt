@@ -264,5 +264,7 @@ data class WalletTicket(
     val docTitle: String = "",
     val routeOverride: String = "",
     val timeOverride: String = "",
+    val travellerId: String = "",
     val travellerName: String = "",
+    val assignmentAmbiguous: Boolean = false,
 )

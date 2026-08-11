@@ -410,10 +410,16 @@ private fun AppContent(
                             is Screen.TripDetail -> {
                                 val trip = repository.tripById(screen.tripId)
                                 if (trip == null) navigator.back()
-                                else TripDetailScreen(
+                                else {
+                                    LaunchedEffect(screen.tripId) {
+                                        repository.ensureOwnerTraveller(screen.tripId)
+                                        repository.reconcileMembersToTravellers(screen.tripId)
+                                    }
+                                    TripDetailScreen(
                                     trip = trip,
                                     activities = repository.activitiesForTrip(screen.tripId),
                                     travellers = trip.travellers,
+                                    currentUid = repository.authService.currentUid ?: "",
                                     onBack = { navigator.back() },
                                     onTravellers = { navigator.push(Screen.Travellers(screen.tripId)) },
                                     onUploadPostcardPhoto = { slot, bytes -> repository.uploadPostcardPhoto(screen.tripId, slot, bytes) },
@@ -436,6 +442,7 @@ private fun AppContent(
                                     documents = repository.documents.filter { it.tripId == screen.tripId },
                                     onOpenDoc = { docId -> navigator.push(Screen.DocViewer(docId)) },
                                 )
+                                }
                             }
 
                             is Screen.AddPlace -> AddPlaceScreen(
@@ -529,7 +536,12 @@ private fun AppContent(
                             is Screen.TripDocuments -> {
                                 val trip = repository.tripById(screen.tripId)
                                 if (trip == null) navigator.back()
-                                else DocumentsScreen(
+                                else {
+                                    LaunchedEffect(screen.tripId) {
+                                        repository.ensureOwnerTraveller(screen.tripId)
+                                        repository.reconcileMembersToTravellers(screen.tripId)
+                                    }
+                                    DocumentsScreen(
                                     trip = trip,
                                     documents = repository.documentsForTrip(screen.tripId),
                                     isLoading = !repository.documentsSyncedOnce,
@@ -548,6 +560,7 @@ private fun AppContent(
                                     },
                                     canEdit = trip.canEdit(repository.authService.currentUid ?: "")
                                 )
+                                }
                             }
 
                             is Screen.DocViewer -> {
@@ -824,6 +837,10 @@ private fun AppContent(
                                         repository.worldClockStore.remove(entry)
                                         zones = repository.worldClockStore.all()
                                     },
+                                    onReorderZones = { reordered ->
+                                        repository.worldClockStore.saveOrder(reordered)
+                                        zones = repository.worldClockStore.all()
+                                    },
                                     onBack = { navigator.back() },
                                     tripCities = activeTripCities(repository.trips),
                                 )
@@ -845,6 +862,10 @@ private fun AppContent(
                                     cities = cities,
                                     onAddCity = { repository.weatherStore.add(it); cities = repository.weatherStore.all() },
                                     onRemoveCity = { repository.weatherStore.remove(it); cities = repository.weatherStore.all() },
+                                    onReorderCities = { reordered ->
+                                        repository.weatherStore.saveOrder(reordered)
+                                        cities = repository.weatherStore.all()
+                                    },
                                     onBack = { navigator.back() },
                                     tripCities = activeTripCities(repository.trips),
                                 )
@@ -1273,4 +1294,3 @@ private fun currentTripCountry(trips: List<Trip>): String? {
         .maxByOrNull { it.date }
         ?.country
 }
-

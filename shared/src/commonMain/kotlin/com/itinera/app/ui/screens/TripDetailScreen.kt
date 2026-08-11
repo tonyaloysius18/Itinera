@@ -157,6 +157,7 @@ fun TripDetailScreen(
     trip: Trip,
     activities: List<Activity>,
     travellers: List<Traveller> = emptyList(),
+    currentUid: String = "",
     expensesTotal: Double = 0.0,
     documents: List<DocItem> = emptyList(),
     onBack: () -> Unit,
@@ -229,13 +230,22 @@ fun TripDetailScreen(
     var walletLeg by remember { mutableStateOf<Leg?>(null) }
     var barcodeLoading by remember { mutableStateOf(false) }
     val legTicketCache = remember { mutableStateMapOf<String, List<WalletTicket>>() }
+    val myTravellerId = remember(currentUid, travellers, trip.ownerId) {
+        travellers.firstOrNull { currentUid.isNotBlank() && it.userId == currentUid }?.id
+            ?: travellers.firstOrNull { currentUid == trip.ownerId && it.isOwner }?.id
+            ?: ""
+    }
 
     fun openLegTickets(leg: Leg, legDocs: List<DocItem>) {
         if (legDocs.isEmpty()) return
         scope.launch {
             barcodeLoading = true
             try {
-                val tickets = legTicketCache.getOrPut(leg.id) {
+                val cacheKey = buildString {
+                    append(leg.id)
+                    legDocs.forEach { append('|').append(it.id).append(':').append(it.travellerId).append(':').append(it.fileUrl) }
+                }
+                val tickets = legTicketCache.getOrPut(cacheKey) {
                     legDocs.flatMap { d ->
                         val bytes = onLoadImageBytes?.invoke(d.fileUrl)
                         val codes = bytes?.let { extractAllBarcodes(it, d.mimeType) }.orEmpty()
@@ -250,10 +260,26 @@ fun TripDetailScreen(
                                     listOf(depTimes[si], arrTimes[si]).filter { it.isNotBlank() }.joinToString(" - ")
                         } else "" to ""
 
-                        val travName = travellers.firstOrNull { it.id == d.travellerId }
+                        // A document with several codes cannot safely use one document-level
+                        // traveller assignment for every code. Keep those codes group-only until
+                        // they are split into individually assigned documents.
+                        val assignmentAmbiguous = codes.size > 1
+                        val ticketTravellerId = d.travellerId.takeUnless { assignmentAmbiguous }.orEmpty()
+                        val travName = travellers.firstOrNull { it.id == ticketTravellerId }
                             ?.let { "${it.firstName} ${it.surname}".trim() } ?: ""
 
-                        codes.map { WalletTicket(it, d.id, d.title, routeOverride = route, timeOverride = time, travellerName = travName) }
+                        codes.map {
+                            WalletTicket(
+                                extraction = it,
+                                docId = d.id,
+                                docTitle = d.title,
+                                routeOverride = route,
+                                timeOverride = time,
+                                travellerId = ticketTravellerId,
+                                travellerName = travName,
+                                assignmentAmbiguous = assignmentAmbiguous,
+                            )
+                        }
                     }
                 }
                 if (tickets.isNotEmpty()) {
@@ -953,6 +979,13 @@ fun TripDetailScreen(
                     operator = leg.operator,
                     transport = leg.transport,
                     tickets = walletTickets,
+                    myTravellerId = myTravellerId,
+                    canManagePasses = canEdit,
+                    onManagePasses = {
+                        walletTickets = emptyList()
+                        walletLeg = null
+                        onDocuments()
+                    },
                     onOpenFullTicket = { docId -> onOpenDoc(docId) },
                     onDismiss = { walletTickets = emptyList(); walletLeg = null },
                 )
