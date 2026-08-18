@@ -19,8 +19,8 @@ data class MapRoute(
 )
 
 /**
- * Native map (Google Maps on Android, Apple MapKit on iOS) showing the trip's
- * cities and the lines between leg endpoints, auto-framed to fit all points.
+ * Native MapLibre map on Android and iOS showing the trip's cities and the
+ * lines between leg endpoints, automatically framed to fit every point.
  */
 @Composable
 expect fun TripMapView(

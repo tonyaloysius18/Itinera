@@ -18,28 +18,39 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,7 +61,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
@@ -468,6 +482,7 @@ internal fun TravellerAvatarImage(
     traveller: Traveller,
     size: Dp,
     modifier: Modifier = Modifier,
+    showPersonPlaceholder: Boolean = false,
 ) {
     val avatar = TravellerAvatar.fromId(traveller.avatarId)
     Box(
@@ -484,40 +499,23 @@ internal fun TravellerAvatarImage(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.matchParentSize(),
             )
+        } else if (
+            showPersonPlaceholder &&
+            traveller.firstName.isBlank() &&
+            traveller.surname.isBlank()
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Person,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.fillMaxSize(0.5f),
+            )
         } else {
             Text(
                 initials(traveller.firstName, traveller.surname),
                 color = Color.White,
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.SemiBold,
-            )
-        }
-    }
-}
-
-/** Avatar with an edit badge, for the traveller dialog. */
-@Composable
-private fun EditableAvatar(
-    traveller: Traveller,
-    onClick: () -> Unit,
-) {
-    val s = LocalStrings.current
-    Box(Modifier.size(84.dp).clickable { onClick() }) {
-        TravellerAvatarImage(traveller = traveller, size = 84.dp)
-        Box(
-            Modifier
-                .align(Alignment.BottomEnd)
-                .size(28.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-                .border(2.dp, MaterialTheme.colorScheme.surface, CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                Icons.Filled.Edit,
-                contentDescription = s.chooseAvatar,
-                tint = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.size(15.dp),
             )
         }
     }
@@ -595,6 +593,7 @@ private fun AvatarPickerDialog(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TravellerDialog(
     initial: Traveller?,
@@ -608,12 +607,18 @@ private fun TravellerDialog(
     ) -> Unit,
 ) {
     val s = LocalStrings.current
-    var firstName by remember { mutableStateOf(initial?.firstName ?: "") }
-    var surname by remember { mutableStateOf(initial?.surname ?: "") }
-    var email by remember { mutableStateOf(initial?.email ?: "") }
-    var phone by remember { mutableStateOf(initial?.phone ?: "") }
-    var avatarId by remember { mutableStateOf(initial?.avatarId ?: "") }
-    var showAvatarPicker by remember { mutableStateOf(false) }
+    val stateKey = initial?.id ?: "new"
+    var firstName by remember(stateKey) { mutableStateOf(initial?.firstName ?: "") }
+    var surname by remember(stateKey) { mutableStateOf(initial?.surname ?: "") }
+    var email by remember(stateKey) { mutableStateOf(initial?.email ?: "") }
+    var phone by remember(stateKey) { mutableStateOf(initial?.phone ?: "") }
+    var avatarId by remember(stateKey) { mutableStateOf(initial?.avatarId ?: "") }
+    var showAvatarPicker by remember(stateKey) { mutableStateOf(false) }
+    var showContactDetails by remember(stateKey) {
+        mutableStateOf(initial?.email?.isNotBlank() == true || initial?.phone?.isNotBlank() == true)
+    }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val focusManager = LocalFocusManager.current
 
     val canSave = firstName.isNotBlank() && surname.isNotBlank()
 
@@ -624,50 +629,184 @@ private fun TravellerDialog(
             }
         }
 
-    AlertDialog(
+    fun saveTraveller() {
+        if (canSave) {
+            focusManager.clearFocus()
+            onConfirm(
+                firstName.trim().toTitleCase(),
+                surname.trim().toTitleCase(),
+                email.trim(),
+                phone.trim(),
+                avatarId,
+            )
+        }
+    }
+
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = { Text(if (initial == null) s.addTraveller else s.editTraveller) },
-        shape = RoundedCornerShape(16.dp),
-        text = {
-            Column {
-                // ⬅ ADD — tap the avatar to choose an illustration.
-                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    EditableAvatar(
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .imePadding()
+                .navigationBarsPadding()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 20.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    if (initial == null) s.addTraveller else s.editTraveller,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.weight(1f),
+                )
+                IconButton(onClick = onDismiss) {
+                    Icon(Icons.Filled.Close, contentDescription = s.close)
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClickLabel = s.chooseAvatar) { showAvatarPicker = true },
+                shape = RoundedCornerShape(18.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.72f),
+            ) {
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    TravellerAvatarImage(
                         traveller = (initial ?: Traveller(id = "new", firstName = firstName)).copy(
                             firstName = firstName,
                             surname = surname,
                             avatarId = avatarId,
                         ),
-                        onClick = { showAvatarPicker = true },
+                        size = 64.dp,
+                        showPersonPlaceholder = true,
                     )
+                    Spacer(Modifier.width(12.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            s.profilePhoto,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Spacer(Modifier.height(3.dp))
+                        Text(
+                            "${s.optional} · ${s.chooseAvatar}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f),
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            Icons.Filled.Edit,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
                 }
-                Spacer(Modifier.height(16.dp))
+            }
+
+            Spacer(Modifier.height(18.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
                 OutlinedTextField(
                     value = firstName,
-                    onValueChange = { firstName = it },   // ⬅ CHANGED — cased on save
-                    label = { Text(s.name) },
+                    onValueChange = { firstName = it },
+                    label = { Text(s.firstName) },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(imeAction = ImeAction.Next),
+                    keyboardActions = androidx.compose.foundation.text.KeyboardActions(
+                        onNext = { focusManager.moveFocus(FocusDirection.Next) },
+                    ),
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(14.dp),
                 )
-                Spacer(Modifier.height(10.dp))
                 OutlinedTextField(
                     value = surname,
-                    onValueChange = { surname = it },     // ⬅ CHANGED — cased on save
+                    onValueChange = { surname = it },
                     label = { Text(s.surname) },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(imeAction = ImeAction.Next),
+                    keyboardActions = androidx.compose.foundation.text.KeyboardActions(
+                        onNext = { focusManager.moveFocus(FocusDirection.Next) },
+                    ),
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(14.dp),
                 )
-                Spacer(Modifier.height(10.dp))
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClickLabel = s.contact) {
+                        showContactDetails = !showContactDetails
+                    },
+                shape = RoundedCornerShape(14.dp),
+                color = Color.Transparent,
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        s.contact,
+                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Text(
+                        s.optional,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Icon(
+                        if (showContactDetails) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.62f),
+                    )
+                }
+            }
+
+            if (showContactDetails) {
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
                     label = { Text(s.email) },
                     singleLine = true,
-                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Email),
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next,
+                    ),
+                    keyboardActions = androidx.compose.foundation.text.KeyboardActions(
+                        onNext = { focusManager.moveFocus(FocusDirection.Next) },
+                    ),
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(14.dp),
                 )
                 Spacer(Modifier.height(10.dp))
                 OutlinedTextField(
@@ -675,30 +814,30 @@ private fun TravellerDialog(
                     onValueChange = { phone = it },
                     label = { Text(s.phone) },
                     singleLine = true,
-                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Phone),
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                        keyboardType = KeyboardType.Phone,
+                        imeAction = ImeAction.Done,
+                    ),
+                    keyboardActions = androidx.compose.foundation.text.KeyboardActions(
+                        onDone = { focusManager.clearFocus() },
+                    ),
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(14.dp),
                 )
             }
-        },
-        confirmButton = {
-            TextButton(
-                // ⬅ CHANGED — cased once here. Per keystroke it fought anyone
-                // typing "van der Berg" or "d'Souza".
-                onClick = {
-                    if (canSave) onConfirm(
-                        firstName.trim().toTitleCase(),
-                        surname.trim().toTitleCase(),
-                        email.trim(),
-                        phone.trim(),
-                        avatarId,
-                    )
-                },
+
+            Spacer(Modifier.height(18.dp))
+
+            Button(
+                onClick = { saveTraveller() },
                 enabled = canSave,
-            ) { Text(if (initial == null) s.add else s.save) }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(s.cancel) } },
-    )
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+                shape = RoundedCornerShape(16.dp),
+            ) {
+                Text(if (initial == null) s.addTraveller else s.saveChanges)
+            }
+        }
+    }
 
     if (showAvatarPicker) {
         AvatarPickerDialog(

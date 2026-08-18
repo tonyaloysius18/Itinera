@@ -14,6 +14,10 @@ struct iOSApp: App {
     init() {
         FirebaseApp.configure()
 
+        IosMapLibreTripMap.shared.provider = { payloadJSON in
+            MapLibreTripMapFactory.makeMap(payloadJSON: payloadJSON)
+        }
+
         // ===== Google Sign-In bridge =====
         IosGoogleSignIn.shared.provider = { onResult in
             guard let rootVC = UIApplication.shared.connectedScenes

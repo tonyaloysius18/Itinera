@@ -13,6 +13,7 @@
 		F51B27E02FE0EBCF00BD029C /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = F51B27DF2FE0EBCF00BD029C /* FirebaseStorage */; };
 		F51B27E32FE2336300BD029C /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = F51B27E22FE2336300BD029C /* GoogleSignIn */; };
 		F51B27E52FE2336300BD029C /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = F51B27E42FE2336300BD029C /* GoogleSignInSwift */; };
+		F51B27EA2FE3000000BD029C /* MapLibre in Frameworks */ = {isa = PBXBuildFile; productRef = F51B27E92FE3000000BD029C /* MapLibre */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -50,6 +51,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F51B27EA2FE3000000BD029C /* MapLibre in Frameworks */,
 				F51B27E32FE2336300BD029C /* GoogleSignIn in Frameworks */,
 				F51B27DB2FDE7E7E00BD029C /* FirebaseCore in Frameworks */,
 				F51B27E02FE0EBCF00BD029C /* FirebaseStorage in Frameworks */,
@@ -114,6 +116,7 @@
 				F51B27DF2FE0EBCF00BD029C /* FirebaseStorage */,
 				F51B27E22FE2336300BD029C /* GoogleSignIn */,
 				F51B27E42FE2336300BD029C /* GoogleSignInSwift */,
+				F51B27E92FE3000000BD029C /* MapLibre */,
 			);
 			productName = iosApp;
 			productReference = 3668C1612AA275C188E125B9 /* Itinera.app */;
@@ -146,6 +149,7 @@
 			packageReferences = (
 				F51B27D72FDE7E7E00BD029C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				F51B27E12FE2336300BD029C /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				F51B27E82FE3000000BD029C /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 050D516CB73550E5DD19C4E8 /* Products */;
@@ -429,6 +433,14 @@
 				minimumVersion = 9.2.0;
 			};
 		};
+		F51B27E82FE3000000BD029C /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/maplibre/maplibre-gl-native-distribution";
+			requirement = {
+				kind = exactVersion;
+				version = 6.28.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -461,6 +473,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = F51B27E12FE2336300BD029C /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
 			productName = GoogleSignInSwift;
+		};
+		F51B27E92FE3000000BD029C /* MapLibre */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F51B27E82FE3000000BD029C /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */;
+			productName = MapLibre;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -19,8 +19,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,7 +45,10 @@ import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.ui.components.TopBar
 
 @Composable
-fun HelpScreen(onBack: () -> Unit) {
+fun HelpScreen(
+    onBack: () -> Unit,
+    onSendFeedback: () -> Unit,
+) {
     val s = LocalStrings.current   // only used for the screen title
 
     var searching by remember { mutableStateOf(false) }
@@ -134,10 +139,62 @@ fun HelpScreen(onBack: () -> Unit) {
                 }
             }
 
+            if (!searching) {
+                item {
+                    Spacer(Modifier.height(18.dp))
+                    HelpFeedbackCard(onClick = onSendFeedback)
+                }
+            }
+
             item {
                 Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.safeDrawing))
                 Spacer(Modifier.height(24.dp))
             }
+        }
+    }
+}
+
+@Composable
+private fun HelpFeedbackCard(onClick: () -> Unit) {
+    val s = LocalStrings.current
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+        contentColor = MaterialTheme.colorScheme.onSurface,
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.16f),
+                contentColor = MaterialTheme.colorScheme.primary,
+            ) {
+                Icon(
+                    Icons.Filled.Feedback,
+                    contentDescription = null,
+                    modifier = Modifier.padding(10.dp),
+                )
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    s.stillNeedHelp,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    s.helpFeedbackSubtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Spacer(Modifier.width(8.dp))
+            Icon(Icons.Filled.ChevronRight, contentDescription = null)
         }
     }
 }

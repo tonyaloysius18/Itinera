@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
@@ -74,6 +75,7 @@ private val ColorArchive = Color(0xFF8E8E93)
 private val ColorExport = Color(0xFFFF9500)
 private val ColorBackup = Color(0xFF5AC8FA)
 private val ColorHelp = Color(0xFF5856D6)
+private val ColorFeedback = Color(0xFF34C759)
 private val ColorAbout = Color(0xFF8E8E93)
 
 @Composable
@@ -93,6 +95,7 @@ fun SettingsScreen(
     onExportTrips: () -> Unit,
     onBackupStatus: () -> Unit,
     onHelp: () -> Unit,
+    onFeedback: () -> Unit,
     onAbout: () -> Unit,
     /**
      * ⬅ ADD — current values shown at the end of their rows. A settings row
@@ -201,6 +204,8 @@ fun SettingsScreen(
             SectionLabel(s.support)
             SettingsCard {
                 SettingsRow(Icons.Filled.HelpOutline, s.help, ColorHelp, onClick = onHelp)
+                ThinDivider()
+                SettingsRow(Icons.Filled.Feedback, s.sendFeedback, ColorFeedback, onClick = onFeedback)
                 ThinDivider()
                 SettingsRow(Icons.Filled.Info, s.about, ColorAbout, onClick = onAbout)
             }

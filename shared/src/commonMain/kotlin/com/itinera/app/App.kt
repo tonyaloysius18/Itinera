@@ -6,6 +6,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -51,6 +52,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -115,12 +117,14 @@ import com.itinera.app.ui.screens.ChangePasswordScreen
 import com.itinera.app.ui.screens.TripPhase
 import kotlinx.datetime.LocalDate
 import com.itinera.app.ui.screens.HelpScreen
+import com.itinera.app.ui.screens.FeedbackScreen
 import com.itinera.app.ui.screens.LanguageScreen
 import com.itinera.app.ui.screens.LoginScreen
 import com.itinera.app.ui.screens.MembersScreen
 import com.itinera.app.ui.screens.NotificationsScreen
 import com.itinera.app.ui.screens.SettingsScreen
 import com.itinera.app.ui.screens.SplitScreen
+import com.itinera.app.ui.screens.StartupVideoScreen
 import com.itinera.app.ui.screens.TranslateScreen
 import com.itinera.app.ui.screens.TravellersScreen
 import com.itinera.app.ui.screens.TripDetailScreen
@@ -139,28 +143,54 @@ import kotlinx.datetime.todayIn
 import kotlin.math.abs
 import kotlin.time.Clock
 
+
 /**
  * App root. Owns the global state and routes the current screen.
  */
 @Composable
 fun App() {
     val repository = remember { TripRepository() }
-    var language by remember { mutableStateOf(Language.ENGLISH) }
-    var themeMode by remember { mutableStateOf(ThemeMode.SYSTEM) }
-    val navigator = rememberNavigator(Screen.Login)
-    var authChecked by remember { mutableStateOf(false) }
 
+    var language by remember {
+        mutableStateOf(Language.ENGLISH)
+    }
+
+    var themeMode by remember {
+        mutableStateOf(ThemeMode.SYSTEM)
+    }
+
+    val navigator = rememberNavigator(Screen.Login)
+
+    var authChecked by remember {
+        mutableStateOf(false)
+    }
+
+    var startupFinished by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    // Authentication check runs while startup video is playing
     LaunchedEffect(Unit) {
         val uid = repository.authService.currentUid
+
         if (uid != null) {
             var profile: com.itinera.app.model.UserProfile? = null
+
             try {
                 profile = repository.profileService.loadProfile(uid)
-                if (profile != null) repository.updateProfile(profile)
-            } catch (e: Exception) { }
+
+                if (profile != null) {
+                    repository.updateProfile(profile)
+                }
+            } catch (e: Exception) {
+                // Ignore profile loading failure here
+            }
+
             repository.migrateToSharedIfNeeded(uid)
             repository.migrateDocsExpensesIfNeeded(uid)
+
             repository.startSync()
+
             repository.accountStore.remember(
                 com.itinera.app.data.RememberedAccount(
                     uid = uid,
@@ -170,13 +200,22 @@ fun App() {
                     method = repository.authService.currentSignInMethod(),
                 )
             )
+
             repository.rescheduleAllReminders()
+
             navigator.resetTo(Screen.Home)
         }
+
         authChecked = true
     }
 
-    val activeStrings = stringsFor(if (language == Language.SYSTEM) systemLanguage() else language)
+    val activeStrings = stringsFor(
+        if (language == Language.SYSTEM) {
+            systemLanguage()
+        } else {
+            language
+        }
+    )
 
     val darkTheme = when (themeMode) {
         ThemeMode.SYSTEM -> isSystemInDarkTheme()
@@ -184,26 +223,52 @@ fun App() {
         ThemeMode.DARK -> true
     }
 
-    ItineraTheme(darkTheme = darkTheme) {
-        CompositionLocalProvider(LocalStrings provides activeStrings) {
-            if (!authChecked) {
-                Box(
-                    Modifier.fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    PlaneLoader(size = 130.dp)
+    // App is ready only after:
+    // 1. Startup video has finished
+    // 2. Authentication check has finished
+    val readyToEnterApp = startupFinished && authChecked
+
+    Crossfade(
+        targetState = readyToEnterApp,
+        animationSpec = tween(
+            durationMillis = 350
+        ),
+        label = "StartupToApp"
+    ) { appReady ->
+
+        if (!appReady) {
+
+            StartupVideoScreen(
+                onFinished = {
+                    startupFinished = true
                 }
-            } else {
-                AppContent(
-                    repository, navigator, language, themeMode,
-                    { language = it }, { themeMode = it }
-                )
+            )
+
+        } else {
+
+            ItineraTheme(
+                darkTheme = darkTheme
+            ) {
+                CompositionLocalProvider(
+                    LocalStrings provides activeStrings
+                ) {
+                    AppContent(
+                        repository = repository,
+                        navigator = navigator,
+                        language = language,
+                        themeMode = themeMode,
+                        onLanguageChange = {
+                            language = it
+                        },
+                        onThemeChange = {
+                            themeMode = it
+                        }
+                    )
+                }
             }
         }
     }
 }
-
 private data class NavItem(
     val icon: ImageVector,
     val label: String,
@@ -716,6 +781,7 @@ private fun AppContent(
                                 onExportTrips = { navigator.push(Screen.ExportTrips) },
                                 onBackupStatus = { navigator.push(Screen.BackupStatus) },
                                 onHelp = { navigator.push(Screen.Help) },
+                                onFeedback = { navigator.push(Screen.Feedback) },
                                 onAbout = { navigator.push(Screen.About) },
                                 appearanceValue = when (themeMode) {
                                     ThemeMode.SYSTEM -> if (isSystemInDarkTheme()) s.dark else s.light
@@ -809,6 +875,7 @@ private fun AppContent(
                             Screen.Notifications -> NotificationsScreen(
                                 offsetMinutes = repository.profile.reminderOffsetMinutes,
                                 hasPermission = scheduler.hasPermission(),
+                                trips = repository.trips,
                                 onChangeOffset = { newOffset ->
                                     val updated = repository.profile.copy(reminderOffsetMinutes = newOffset)
                                     repository.updateProfile(updated)
@@ -899,7 +966,14 @@ private fun AppContent(
                                 },
                                 onBack = { navigator.back() },
                             )
-                            Screen.Help -> HelpScreen(onBack = { navigator.back() })
+                            Screen.Help -> HelpScreen(
+                                onBack = { navigator.back() },
+                                onSendFeedback = { navigator.push(Screen.Feedback) },
+                            )
+
+                            Screen.Feedback -> FeedbackScreen(
+                                onBack = { navigator.back() },
+                            )
 
                             Screen.ExportTrips -> ExportTripsScreen(
                                 trips = repository.activeTrips(),

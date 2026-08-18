@@ -48,6 +48,8 @@ sealed interface Screen {
 
     data object Help : Screen
 
+    data object Feedback : Screen
+
     data object About : Screen
 
     data object ArchivedTrips : Screen

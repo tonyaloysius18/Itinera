@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -39,20 +41,26 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -69,6 +77,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -1293,6 +1303,7 @@ private fun SettledBanner(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 private fun CurrencyPickerDialog(
     current: String,
@@ -1300,43 +1311,241 @@ private fun CurrencyPickerDialog(
     onDismiss: () -> Unit,
 ) {
     val s = LocalStrings.current
-    AlertDialog(
+    var query by rememberSaveable { mutableStateOf("") }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val showPopularCurrencies = query.isBlank()
+    val popularCurrencies = remember {
+        POPULAR_CURRENCY_CODES.mapNotNull { code ->
+            ALL_CURRENCIES.firstOrNull { it.code == code }
+        }
+    }
+    val alphabeticalCurrencies = remember(query) {
+        val term = query.trim()
+        if (term.isEmpty()) {
+            ALL_CURRENCIES.filterNot { it.code in POPULAR_CURRENCY_CODES }
+        } else {
+            ALL_CURRENCIES.filter { currency ->
+                currency.code.contains(term, ignoreCase = true) ||
+                    currency.name.contains(term, ignoreCase = true)
+            }
+        }
+    }
+    val groupedCurrencies = remember(alphabeticalCurrencies) {
+        alphabeticalCurrencies.groupBy { currency ->
+            currency.name.firstOrNull()?.uppercaseChar() ?: '#'
+        }
+    }
+
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = { Text(s.tripCurrency) },
-        shape = RoundedCornerShape(16.dp),
-        text = {
-            LazyColumn(Modifier.heightIn(max = 360.dp)) {
-                items(COMMON_CURRENCIES) { code ->
-                    Row(
-                        Modifier.fillMaxWidth().clickable { onPick(code) }
-                            .padding(vertical = 12.dp, horizontal = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(code, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-                        val sym = currencySymbol(code)
-                        if (sym.isNotEmpty()) {
-                            Text(
-                                sym,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.90f)
+                .imePadding()
+                .navigationBarsPadding(),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, end = 12.dp, bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    s.tripCurrency,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.weight(1f),
+                )
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.size(48.dp),
+                ) {
+                    Icon(Icons.Filled.Close, contentDescription = s.close)
+                }
+            }
+
+            OutlinedTextField(
+                value = query,
+                onValueChange = { query = it },
+                label = { Text(s.searchCurrencies) },
+                singleLine = true,
+                leadingIcon = {
+                    Icon(Icons.Filled.Search, contentDescription = null)
+                },
+                trailingIcon = if (query.isNotEmpty()) {
+                    {
+                        IconButton(onClick = { query = "" }) {
+                            Icon(Icons.Filled.Close, contentDescription = s.clear)
+                        }
+                    }
+                } else {
+                    null
+                },
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+            )
+
+            Spacer(Modifier.height(12.dp))
+
+            if (alphabeticalCurrencies.isEmpty() && !showPopularCurrencies) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        s.noCurrenciesFound,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    contentPadding = PaddingValues(bottom = 20.dp),
+                ) {
+                    if (showPopularCurrencies) {
+                        stickyHeader(key = "popular-currencies-header") {
+                            //CurrencySectionHeader(s.popularCurrencies)
+                        }
+                        items(popularCurrencies, key = { "popular-${it.code}" }) { currency ->
+                            CurrencyPickerRow(
+                                currency = currency,
+                                current = current,
+                                onPick = onPick,
                             )
                         }
-                        if (code == current) {
-                            Spacer(Modifier.width(8.dp))
-                            // ⬅ CHANGED — was the "✓" text glyph.
-                            Icon(
-                                Icons.Filled.Check, null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(18.dp),
+                    }
+
+                    groupedCurrencies.forEach { (letter, currencies) ->
+                        stickyHeader(key = "currency-header-$letter") {
+                            CurrencySectionHeader(letter.toString())
+                        }
+
+                        items(currencies, key = { it.code }) { currency ->
+                            CurrencyPickerRow(
+                                currency = currency,
+                                current = current,
+                                onPick = onPick,
                             )
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun CurrencySectionHeader(label: String) {
+    Surface(color = MaterialTheme.colorScheme.surface) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 8.dp),
+        )
+    }
+}
+
+@Composable
+private fun CurrencyPickerRow(
+    currency: CurrencyOption,
+    current: String,
+    onPick: (String) -> Unit,
+) {
+    val isSelected = currency.code == current
+    val symbol = currencySymbol(currency.code)
+    Surface(
+        onClick = { onPick(currency.code) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 2.dp)
+            .semantics { selected = isSelected },
+        shape = RoundedCornerShape(16.dp),
+        color = if (isSelected) {
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+        } else {
+            Color.Transparent
         },
-        confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text(s.cancel) } },
-    )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 64.dp)
+                .padding(horizontal = 8.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = if (isSelected) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.surfaceVariant
+                },
+                contentColor = if (isSelected) {
+                    MaterialTheme.colorScheme.onPrimary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+            ) {
+                Box(
+                    modifier = Modifier.size(48.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        currency.code,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
+
+            Spacer(Modifier.width(12.dp))
+
+            Column(Modifier.weight(1f)) {
+                Text(
+                    currency.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                if (symbol.isNotEmpty()) {
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        symbol,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
+            if (isSelected) {
+                Box(
+                    modifier = Modifier.size(40.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        Icons.Filled.Check,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(22.dp),
+                    )
+                }
+            }
+        }
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -24,19 +24,19 @@ kotlinxCoroutinesPlayServices = "1.8.1"
 kotlinxDatetime = "0.8.0"
 kotlinxSerializationJson = "1.7.3"
 ktorClientCore = "3.0.3"
-mapsCompose = "8.3.0"
+maplibreAndroid = "13.4.1"
 material3 = "1.11.0-alpha07"
 coil = "3.0.4"
 googleServices = "4.4.2"
 gitliveFirebase = "2.4.0"
 firebaseBom = "33.7.0"
+media3Exoplayer = "1.11.0"
+media3Ui = "1.11.0"
 multiplatformSettings = "1.1.1"
 multiplatformSettingsNoArg = "1.1.1"
 multiplatformSettingsNoArgVersion = "1.3.0"
-osmdroidAndroid = "6.1.20"
 peekabooImagePicker = "0.5.2"
 peekabooUi = "0.5.2"
-playServicesMaps = "20.0.0"
 translate = "17.0.3"
 
 
@@ -49,6 +49,8 @@ androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
 androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentialsPlayServicesAuth" }
 androidx-graphics-path = { module = "androidx.graphics:graphics-path", version.ref = "graphicsPath" }
+androidx-media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3Exoplayer" }
+androidx-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3Ui" }
 barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "barcodeScanning" }
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -85,14 +87,12 @@ firebase-auth-android = { module = "com.google.firebase:firebase-auth" }
 firebase-firestore = { module = "dev.gitlive:firebase-firestore", version.ref = "gitliveFirebase" }
 firebase-firestore-android = { module = "com.google.firebase:firebase-firestore" }
 firebase-storage = { module = "dev.gitlive:firebase-storage", version.ref = "gitliveFirebase" }
-maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
+maplibre-android = { module = "org.maplibre.gl:android-sdk-opengl", version.ref = "maplibreAndroid" }
 multiplatform-settings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatformSettings" }
 multiplatform-settings-no-arg = { module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "multiplatformSettingsNoArg" }
 multiplatform-settings-no-arg-v130 = { module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "multiplatformSettingsNoArgVersion" }
-osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroidAndroid" }
 peekaboo-ui = { module = "io.github.onseok:peekaboo-ui", version.ref = "peekabooUi" }
 peekaboo-image-picker = { module = "io.github.onseok:peekaboo-image-picker", version.ref = "peekabooImagePicker" }
-play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
 translate = { module = "com.google.mlkit:translate", version.ref = "translate" }
 
 

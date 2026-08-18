@@ -65,10 +65,10 @@ kotlin {
 
             implementation(libs.translate)
             implementation(libs.barcode.scanning)
-            implementation(libs.maps.compose)
-            implementation(libs.play.services.maps)
-            implementation(libs.osmdroid.android)
+            implementation(libs.maplibre.android)
 
+            implementation(libs.androidx.media3.exoplayer)
+            implementation(libs.androidx.media3.ui)
 
         }
         commonMain.dependencies {

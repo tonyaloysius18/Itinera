@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "jack-3d-portfolio",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/tonyaloysius/Documents/jack-3d-portfolio && npm run dev"],
+      "port": 5173
+    }
+  ]
+}

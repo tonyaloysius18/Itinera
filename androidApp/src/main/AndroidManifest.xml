@@ -11,9 +11,6 @@
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <receiver android:name="com.itinera.app.AlarmReceiver" android:exported="false"/>
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="YOUR_KEY_HERE" />
         <receiver
             android:name="com.itinera.app.BootReceiver"
             android:exported="true"
