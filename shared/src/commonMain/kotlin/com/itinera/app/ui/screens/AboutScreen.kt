@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.resources.Res
 import com.itinera.app.resources.itinera_app_logo
@@ -46,8 +47,11 @@ import org.jetbrains.compose.resources.painterResource
 private const val APP_VERSION = "1.0.0"
 private const val GITHUB_URL = "https://github.com/tonyaloysius18"
 private const val LINKEDIN_URL = "https://www.linkedin.com/in/tony-ajay-aloysius-70195a1a4"
-private const val CONTACT_EMAIL = "tony.aloysius18@gmail.com"
+private const val CONTACT_EMAIL = "ynotlabs.dev@gmail.com"
 private const val AUTHOR_NAME = "Tony Aloysius"
+
+private const val STUDIO_NAME = "YNOT Labs"
+
 
 private data class Credit(val name: String, val purpose: String)
 
@@ -127,15 +131,23 @@ fun AboutScreen(onBack: () -> Unit) {
                 tonalElevation = 2.dp,
             ) {
                 Column {
-                    Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.fillMaxWidth().padding(16.dp)) {
                         Text(AUTHOR_NAME, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            text = "$STUDIO_NAME · Android & iOS",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
                     }
                     ThinDivider()
-                    LinkRow(Icons.Filled.Code, "GitHub") { uriHandler.openUri(GITHUB_URL) }
+                    LinkRow(Icons.Filled.Code, "GitHub", sublabel = "View projects and source") { uriHandler.openUri(GITHUB_URL) }
                     ThinDivider()
-                    LinkRow(Icons.Filled.Link, "LinkedIn") { uriHandler.openUri(LINKEDIN_URL) }
+                    LinkRow(Icons.Filled.Link, "LinkedIn", sublabel = "Connect with the developer") { uriHandler.openUri(LINKEDIN_URL) }
                     ThinDivider()
-                    LinkRow(Icons.Filled.Email, s.contact) { uriHandler.openUri("mailto:$CONTACT_EMAIL") }
+                    LinkRow(Icons.Filled.Email, s.contact, sublabel = CONTACT_EMAIL) { uriHandler.openUri("mailto:$CONTACT_EMAIL") }
                 }
             }
 
@@ -190,14 +202,21 @@ fun AboutScreen(onBack: () -> Unit) {
 }
 
 @Composable
-private fun LinkRow(icon: ImageVector, label: String, onClick: () -> Unit) {
+private fun LinkRow(icon: ImageVector, label: String, sublabel: String, onClick: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 16.dp),
+        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(icon, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
         Spacer(Modifier.width(14.dp))
-        Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(label, style = MaterialTheme.typography.bodyLarge)
+            Text(
+                sublabel,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+            )
+        }
         Icon(
             Icons.AutoMirrored.Filled.OpenInNew,
             null,
