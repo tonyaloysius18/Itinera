@@ -122,6 +122,7 @@ data class DocItem(
     val travellerId: String = "",
     val traveller: String = "",
     val thumbUrl: String = "",
+    val createdBy: String = "",        // uid of the member who added this — for block-filtering
 )
 
 @Serializable
@@ -138,6 +139,7 @@ data class Activity(
     val memberIds: List<String> = emptyList(),
     val lat: Double = 0.0,
     val lng: Double = 0.0,
+    val createdBy: String = "",        // uid of the member who added this — for block-filtering
 )
 
 @Serializable
@@ -209,6 +211,7 @@ data class Expense(
     val memberIds: List<String> = emptyList(),
     // Absent on existing documents, so they decode to OTHER. No migration.  ⬅ ADD
     val category: ExpenseCategory = ExpenseCategory.OTHER,
+    val createdBy: String = "",        // uid of the member who added this — for block-filtering
 )
 
 @Serializable
@@ -239,6 +242,7 @@ data class UserProfile(
     val migratedDocsExpenses: Boolean = false,
     val pinnedTripIds: List<String> = emptyList(),      // ⬅ ADD
     val archivedTripIds: List<String> = emptyList(),
+    val blockedUserIds: List<String> = emptyList(),     // uids this user has blocked — their content is hidden
     @Transient val photoBytes: ByteArray? = null,   // ⬅ excluded from Firestore
 )
 {
@@ -256,6 +260,23 @@ data class Invite(
     val createdBy: String = "",
     val status: String = "active",   // "active" | "revoked"
     val createdAt: Long = 0L,
+)
+
+/**
+ * An abuse/objectionable-content report a user files against another member of a
+ * shared trip. Written to the top-level `reports` collection for admin review.
+ * (Requires a Firestore rule allowing authenticated creates on `reports`.)
+ */
+@Serializable
+data class Report(
+    val id: String,
+    val reporterUid: String,
+    val reportedUid: String,
+    val tripId: String = "",
+    val reason: String,              // "spam" | "harassment" | "inappropriate" | "other"
+    val details: String = "",
+    val createdAt: Long = 0L,
+    val status: String = "open",     // "open" | "reviewed"
 )
 
 data class WalletTicket(

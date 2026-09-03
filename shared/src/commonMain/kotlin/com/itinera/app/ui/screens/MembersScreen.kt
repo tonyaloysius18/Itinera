@@ -1,6 +1,7 @@
 package com.itinera.app.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,8 +21,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.RemoveCircleOutline
 import androidx.compose.material.icons.filled.Share
@@ -34,6 +39,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -45,6 +52,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,6 +66,7 @@ import com.itinera.app.data.rememberFileSharer
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.Trip
 import com.itinera.app.ui.components.PlaneLoader
+import kotlinx.coroutines.launch
 
 /**
  * Shows everyone on a trip and (for the owner) lets them assign roles or remove members.
@@ -69,9 +78,14 @@ import com.itinera.app.ui.components.PlaneLoader
 fun MembersScreen(
     trip: Trip,
     currentUid: String,
+    blockedUserIds: Set<String> = emptySet(),
     onSetRole: (String, String) -> Unit,      // (memberUid, role)
     onRemoveMember: (String) -> Unit,          // (memberUid)
     onCreateInvite: suspend (String) -> String?,
+    onReport: suspend (String, String, String) -> Boolean = { _, _, _ -> false }, // (uid, reason, details)
+    onBlock: (String) -> Unit = {},            // (memberUid)
+    onUnblock: (String) -> Unit = {},          // (memberUid)
+    onMessage: (String) -> Unit = {},
     onLeaveTrip: () -> Unit,
     onBack: () -> Unit,
 ) {
@@ -79,6 +93,12 @@ fun MembersScreen(
     val isOwner = trip.ownerId == currentUid
     var showInvite by remember { mutableStateOf(false) }
     var confirmLeave by remember { mutableStateOf(false) }
+
+    // Moderation dialog targets (member uid being acted on), null when closed.
+    var reportTarget by remember { mutableStateOf<String?>(null) }
+    var blockTarget by remember { mutableStateOf<String?>(null) }
+    var unblockTarget by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
 
     // Order: owner first, then others by name.
     val ordered = remember(trip.members, trip.memberInfo) {
@@ -140,19 +160,29 @@ fun MembersScreen(
                     val uid = entry.key
                     val role = entry.value
                     val info = trip.memberInfo[uid]
-                    val displayName = info?.name?.takeIf { it.isNotBlank() }
-                        ?: info?.email?.takeIf { it.isNotBlank() }
-                        ?: uid.take(8)
                     val isThisOwner = role == "owner"
                     val isMe = uid == currentUid
+                    val isBlocked = uid in blockedUserIds
+
+                    // A blocked member's identity is hidden until they're unblocked.
+                    val displayName = if (isBlocked) s.blockedUser else (
+                        info?.name?.takeIf { it.isNotBlank() }
+                            ?: info?.email?.takeIf { it.isNotBlank() }
+                            ?: uid.take(8)
+                    )
 
                     MemberRow(
                         name = displayName + if (isMe) " (${s.you})" else "",
-                        email = info?.email ?: "",
+                        email = if (isBlocked) "" else (info?.email ?: ""),
                         role = role,
                         canEdit = isOwner && !isThisOwner,   // owner edits everyone except the owner row
+                        canModerate = !isMe,                 // report/block anyone but yourself
+                        isBlocked = isBlocked,
                         onSetRole = { newRole -> onSetRole(uid, newRole) },
                         onRemove = { onRemoveMember(uid) },
+                        onReport = { reportTarget = uid },
+                        onBlock = { blockTarget = uid },
+                        onUnblock = { unblockTarget = uid },
                     )
                 }
             }
@@ -211,7 +241,108 @@ fun MembersScreen(
                 onDismiss = { showInvite = false },
             )
         }
+
+        reportTarget?.let { uid ->
+            ReportDialog(
+                onDismiss = { reportTarget = null },
+                onSubmit = { reason, details ->
+                    val target = uid
+                    reportTarget = null
+                    scope.launch {
+                        val ok = onReport(target, reason, details)
+                        onMessage(if (ok) s.reportSubmitted else s.reportFailed)
+                    }
+                },
+            )
+        }
+
+        blockTarget?.let { uid ->
+            AlertDialog(
+                onDismissRequest = { blockTarget = null },
+                title = { Text(s.blockMemberQ) },
+                text = { Text(s.blockMemberDesc) },
+                confirmButton = {
+                    TextButton(onClick = { blockTarget = null; onBlock(uid) }) {
+                        Text(s.block, color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                dismissButton = { TextButton(onClick = { blockTarget = null }) { Text(s.cancel) } },
+            )
+        }
+
+        unblockTarget?.let { uid ->
+            AlertDialog(
+                onDismissRequest = { unblockTarget = null },
+                title = { Text(s.unblockMemberQ) },
+                text = { Text(s.unblockMemberDesc) },
+                confirmButton = {
+                    TextButton(onClick = { unblockTarget = null; onUnblock(uid) }) {
+                        Text(s.unblock)
+                    }
+                },
+                dismissButton = { TextButton(onClick = { unblockTarget = null }) { Text(s.cancel) } },
+            )
+        }
     }
+}
+
+@Composable
+private fun ReportDialog(
+    onDismiss: () -> Unit,
+    onSubmit: (reason: String, details: String) -> Unit,
+) {
+    val s = LocalStrings.current
+    val reasons = listOf(
+        "spam" to s.reportReasonSpam,
+        "harassment" to s.reportReasonHarassment,
+        "inappropriate" to s.reportReasonInappropriate,
+        "other" to s.reportReasonOther,
+    )
+    var selected by remember { mutableStateOf(reasons.first().first) }
+    var details by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(s.reportMember) },
+        text = {
+            Column(Modifier.fillMaxWidth()) {
+                Text(
+                    s.reportReason,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                )
+                Spacer(Modifier.height(8.dp))
+                reasons.forEach { (key, label) ->
+                    Row(
+                        Modifier.fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable { selected = key }
+                            .padding(vertical = 8.dp, horizontal = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(selected = selected == key, onClick = { selected = key })
+                        Spacer(Modifier.width(6.dp))
+                        Text(label, style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = details,
+                    onValueChange = { details = it },
+                    label = { Text(s.reportDetailsHint) },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 2,
+                    maxLines = 4,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onSubmit(selected, details) }) {
+                Text(s.reportSubmit, color = MaterialTheme.colorScheme.error)
+            }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(s.cancel) } },
+    )
 }
 
 @Composable
@@ -305,11 +436,17 @@ private fun MemberRow(
     email: String,
     role: String,
     canEdit: Boolean,
+    canModerate: Boolean,
+    isBlocked: Boolean,
     onSetRole: (String) -> Unit,
     onRemove: () -> Unit,
+    onReport: () -> Unit,
+    onBlock: () -> Unit,
+    onUnblock: () -> Unit,
 ) {
     val s = LocalStrings.current
     var menuOpen by remember { mutableStateOf(false) }
+    var moderateOpen by remember { mutableStateOf(false) }
     var confirmRemove by remember { mutableStateOf(false) }
 
     val roleLabel = when (role) {
@@ -382,6 +519,41 @@ private fun MemberRow(
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             )
+        }
+
+        // Moderation overflow menu: report / block any member but yourself.
+        if (canModerate) {
+            Box {
+                IconButton(onClick = { moderateOpen = true }) {
+                    Icon(Icons.Filled.MoreVert, contentDescription = s.report)
+                }
+                DropdownMenu(
+                    expanded = moderateOpen,
+                    onDismissRequest = { moderateOpen = false },
+                    shape = RoundedCornerShape(16.dp),
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(s.reportMember) },
+                        leadingIcon = { Icon(Icons.Filled.Flag, null) },
+                        onClick = { moderateOpen = false; onReport() },
+                    )
+                    if (isBlocked) {
+                        DropdownMenuItem(
+                            text = { Text(s.unblock) },
+                            leadingIcon = { Icon(Icons.Filled.LockOpen, null) },
+                            onClick = { moderateOpen = false; onUnblock() },
+                        )
+                    } else {
+                        DropdownMenuItem(
+                            text = { Text(s.block, color = MaterialTheme.colorScheme.error) },
+                            leadingIcon = {
+                                Icon(Icons.Filled.Block, null, tint = MaterialTheme.colorScheme.error)
+                            },
+                            onClick = { moderateOpen = false; onBlock() },
+                        )
+                    }
+                }
+            }
         }
     }
 

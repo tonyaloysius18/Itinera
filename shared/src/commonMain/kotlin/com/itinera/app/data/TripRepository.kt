@@ -68,6 +68,8 @@ class TripRepository {
 
     val inviteService = InviteService()
 
+    val reportService = ReportService()
+
     val checklistService = ChecklistService()
 
     val accountStore = AccountStore()
@@ -229,8 +231,16 @@ class TripRepository {
 
     fun tripById(id: String): Trip? = trips.firstOrNull { it.id == id }
 
+    /**
+     * True when [uid] is on the current user's blocklist. An empty [uid] (legacy
+     * items created before author-stamping) is never blocked, so existing content
+     * always remains visible.
+     */
+    private fun isBlocked(uid: String): Boolean =
+        uid.isNotEmpty() && uid in profile.blockedUserIds
+
     fun documentsForTrip(tripId: String): List<DocItem> =
-        documents.filter { it.tripId == tripId }
+        documents.filter { it.tripId == tripId && !isBlocked(it.createdBy) }
 
     fun checklistForTrip(tripId: String): List<ChecklistItem> =
         checklist.filter { it.tripId == tripId }
@@ -320,7 +330,7 @@ class TripRepository {
     // ===== activities (still in-memory) =====
     val activities = mutableStateListOf<Activity>()
     fun activitiesForTrip(tripId: String): List<Activity> =
-        activities.filter { it.tripId == tripId }
+        activities.filter { it.tripId == tripId && !isBlocked(it.createdBy) }
 
     fun addActivity(tripId: String, date: LocalDate, title: String, time: String, endTime: String, location: String, note:String) {
         val act = Activity(
@@ -333,6 +343,7 @@ class TripRepository {
             location = location.trim(),
             note = note.trim(),
             memberIds = memberIdsForTrip(tripId),
+            createdBy = authService.currentUid ?: "",
         )
         activities.add(act)
         ioScope.launch { runCatching { activityService.saveActivity(act) } }
@@ -379,6 +390,60 @@ class TripRepository {
         private set
 
     fun updateProfile(updated: UserProfile) { profile = updated }
+
+    // ===== moderation: block / unblock / report =====
+
+    /** uids the current user has blocked. Their contributed content is filtered out. */
+    val blockedUserIds: Set<String> get() = profile.blockedUserIds.toSet()
+
+    fun isUserBlocked(uid: String): Boolean = isBlocked(uid)
+
+    /** Add [uid] to the blocklist and persist the profile. No-op if already blocked or self. */
+    fun blockUser(uid: String) {
+        if (uid.isEmpty() || uid == authService.currentUid) return
+        if (uid in profile.blockedUserIds) return
+        val updated = profile.copy(blockedUserIds = profile.blockedUserIds + uid)
+        profile = updated
+        ioScope.launch {
+            runCatching { authService.currentUid?.let { profileService.saveProfile(it, updated) } }
+        }
+    }
+
+    /** Remove [uid] from the blocklist and persist the profile. */
+    fun unblockUser(uid: String) {
+        if (uid !in profile.blockedUserIds) return
+        val updated = profile.copy(blockedUserIds = profile.blockedUserIds - uid)
+        profile = updated
+        ioScope.launch {
+            runCatching { authService.currentUid?.let { profileService.saveProfile(it, updated) } }
+        }
+    }
+
+    /**
+     * File an abuse report against [reportedUid]. Returns true on success. Suspends so the
+     * UI can show a confirmation/failure state.
+     */
+    suspend fun reportMember(
+        reportedUid: String,
+        tripId: String,
+        reason: String,
+        details: String = "",
+    ): Boolean {
+        val reporter = authService.currentUid ?: return false
+        return runCatching {
+            reportService.submitReport(
+                com.itinera.app.model.Report(
+                    id = "rep_${kotlin.random.Random.nextLong()}",
+                    reporterUid = reporter,
+                    reportedUid = reportedUid,
+                    tripId = tripId,
+                    reason = reason,
+                    details = details.trim(),
+                    createdAt = nowMillis(),
+                )
+            )
+        }.isSuccess
+    }
 
     suspend fun uploadProfilePhoto(uid: String, bytes: ByteArray): String {
         return uploadBytesToStorage(uploadClient, bytes)
@@ -454,7 +519,10 @@ class TripRepository {
 
     // ===== documents (now under trips/{tripId}/documents) =====
     fun addDocument(doc: DocItem) {
-        val stamped = doc.copy(memberIds = memberIdsForTrip(doc.tripId))
+        val stamped = doc.copy(
+            memberIds = memberIdsForTrip(doc.tripId),
+            createdBy = doc.createdBy.ifEmpty { authService.currentUid ?: "" },
+        )
         documents.add(stamped)
         ioScope.launch { runCatching { docService.saveDocument(stamped) } }
     }
@@ -528,6 +596,7 @@ class TripRepository {
                 segmentIndex = segmentIndex,
                 travellerId = travellerId,
                 thumbUrl = thumb,                 // ⬅ ADD
+                createdBy = authService.currentUid ?: "",
             )
             documents.add(doc)
             docService.saveDocument(doc)
@@ -758,10 +827,13 @@ class TripRepository {
 
     // ===== expenses (now under trips/{tripId}/expenses) =====
     fun expensesForTrip(tripId: String): List<Expense> =
-        expenses.filter { it.tripId == tripId }
+        expenses.filter { it.tripId == tripId && !isBlocked(it.createdBy) }
 
     fun addExpense(expense: Expense) {
-        val stamped = expense.copy(memberIds = memberIdsForTrip(expense.tripId))
+        val stamped = expense.copy(
+            memberIds = memberIdsForTrip(expense.tripId),
+            createdBy = expense.createdBy.ifEmpty { authService.currentUid ?: "" },
+        )
         expenses.add(stamped)
         ioScope.launch { runCatching { expenseService.saveExpense(stamped) } }
     }
