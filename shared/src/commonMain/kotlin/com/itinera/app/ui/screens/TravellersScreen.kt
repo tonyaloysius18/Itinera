@@ -30,16 +30,22 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.MailOutline
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -47,6 +53,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -55,7 +62,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -119,11 +128,23 @@ fun TravellersScreen(
     currentUid: String = "",
     /** Opens the share/invite flow. Optional — omit and the prompt is hidden. */
     onInvite: (() -> Unit)? = null,
+    // Moderation (Apple UGC safety): report/block an app member on a shared trip.
+    blockedUserIds: Set<String> = emptySet(),
+    onReport: suspend (String, String, String) -> Boolean = { _, _, _ -> false },
+    onBlock: (String) -> Unit = {},
+    onUnblock: (String) -> Unit = {},
+    onMessage: (String) -> Unit = {},
 ) {
     val s = LocalStrings.current
     var showAdd by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf<Traveller?>(null) }
     var pendingDelete by remember { mutableStateOf<Traveller?>(null) }
+
+    // Moderation dialog targets (member uid being acted on), null when closed.
+    var reportTarget by remember { mutableStateOf<String?>(null) }
+    var blockTarget by remember { mutableStateOf<String?>(null) }
+    var unblockTarget by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
 
     // ⬅ ADD — someone with a userId has joined the trip: they see the plans and
     // their expenses sync. Someone without is a name for splitting. On screen
@@ -169,6 +190,12 @@ fun TravellersScreen(
                         canEdit = canEdit,
                         onEdit = { editing = it },
                         onLongPressDelete = { pendingDelete = it },
+                        // moderation only on real app members (they have a userId)
+                        moderatable = true,
+                        blockedUserIds = blockedUserIds,
+                        onReport = { uid -> reportTarget = uid },
+                        onBlock = { uid -> blockTarget = uid },
+                        onUnblock = { uid -> unblockTarget = uid },
                     )
                     Spacer(Modifier.height(18.dp))
                 }
@@ -282,6 +309,106 @@ fun TravellersScreen(
             dismissButton = { TextButton(onClick = { pendingDelete = null }) { Text(s.cancel) } },
         )
     }
+
+    reportTarget?.let { uid ->
+        ReportMemberDialog(
+            onDismiss = { reportTarget = null },
+            onSubmit = { reason, details ->
+                reportTarget = null
+                scope.launch {
+                    val ok = onReport(uid, reason, details)
+                    onMessage(if (ok) s.reportSubmitted else s.reportFailed)
+                }
+            },
+        )
+    }
+
+    blockTarget?.let { uid ->
+        AlertDialog(
+            onDismissRequest = { blockTarget = null },
+            title = { Text(s.blockMemberQ) },
+            text = { Text(s.blockMemberDesc) },
+            confirmButton = {
+                TextButton(onClick = { blockTarget = null; onBlock(uid); onMessage(s.memberBlocked) }) {
+                    Text(s.block, color = Color(0xFFE03131))
+                }
+            },
+            dismissButton = { TextButton(onClick = { blockTarget = null }) { Text(s.cancel) } },
+        )
+    }
+
+    unblockTarget?.let { uid ->
+        AlertDialog(
+            onDismissRequest = { unblockTarget = null },
+            title = { Text(s.unblockMemberQ) },
+            text = { Text(s.unblockMemberDesc) },
+            confirmButton = {
+                TextButton(onClick = { unblockTarget = null; onUnblock(uid); onMessage(s.memberUnblocked) }) {
+                    Text(s.unblock)
+                }
+            },
+            dismissButton = { TextButton(onClick = { unblockTarget = null }) { Text(s.cancel) } },
+        )
+    }
+}
+
+@Composable
+private fun ReportMemberDialog(
+    onDismiss: () -> Unit,
+    onSubmit: (reason: String, details: String) -> Unit,
+) {
+    val s = LocalStrings.current
+    val reasons = listOf(
+        "spam" to s.reportReasonSpam,
+        "harassment" to s.reportReasonHarassment,
+        "inappropriate" to s.reportReasonInappropriate,
+        "other" to s.reportReasonOther,
+    )
+    var selected by remember { mutableStateOf(reasons.first().first) }
+    var details by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(s.reportMember) },
+        text = {
+            Column(Modifier.fillMaxWidth()) {
+                Text(
+                    s.reportReason,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                )
+                Spacer(Modifier.height(8.dp))
+                reasons.forEach { (key, label) ->
+                    Row(
+                        Modifier.fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable { selected = key }
+                            .padding(vertical = 8.dp, horizontal = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(selected = selected == key, onClick = { selected = key })
+                        Spacer(Modifier.width(6.dp))
+                        Text(label, style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = details,
+                    onValueChange = { details = it },
+                    label = { Text(s.reportDetailsHint) },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 2,
+                    maxLines = 4,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onSubmit(selected, details) }) {
+                Text(s.reportSubmit, color = Color(0xFFE03131))
+            }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(s.cancel) } },
+    )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -317,6 +444,11 @@ private fun TravellerCard(
     canEdit: Boolean,
     onEdit: (Traveller) -> Unit,
     onLongPressDelete: (Traveller) -> Unit,
+    moderatable: Boolean = false,
+    blockedUserIds: Set<String> = emptySet(),
+    onReport: (String) -> Unit = {},
+    onBlock: (String) -> Unit = {},
+    onUnblock: (String) -> Unit = {},
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -325,12 +457,20 @@ private fun TravellerCard(
     ) {
         Column {
             travellers.forEachIndexed { index, t ->
+                val isMe = t.userId == currentUid && currentUid.isNotBlank()
+                // A member (has userId) that isn't me can be reported/blocked.
+                val canModerate = moderatable && !isMe && t.userId.isNotBlank()
                 TravellerRow(
                     traveller = t,
-                    isMe = t.userId == currentUid && currentUid.isNotBlank(),
+                    isMe = isMe,
                     canEdit = canEdit,
                     onEdit = { onEdit(t) },
                     onLongPressDelete = { onLongPressDelete(t) },
+                    canModerate = canModerate,
+                    isBlocked = t.userId in blockedUserIds,
+                    onReport = { onReport(t.userId) },
+                    onBlock = { onBlock(t.userId) },
+                    onUnblock = { onUnblock(t.userId) },
                 )
                 if (index < travellers.lastIndex) {
                     HorizontalDivider(
@@ -351,9 +491,15 @@ private fun TravellerRow(
     canEdit: Boolean,
     onEdit: () -> Unit,
     onLongPressDelete: () -> Unit,
+    canModerate: Boolean = false,
+    isBlocked: Boolean = false,
+    onReport: () -> Unit = {},
+    onBlock: () -> Unit = {},
+    onUnblock: () -> Unit = {},
 ) {
     val s = LocalStrings.current
     val onSurface = MaterialTheme.colorScheme.onSurface
+    var moderateOpen by remember { mutableStateOf(false) }
 
     Row(
         Modifier
@@ -447,6 +593,40 @@ private fun TravellerRow(
                     tint = onSurface.copy(alpha = 0.65f),
                     modifier = Modifier.size(20.dp),
                 )
+            }
+        }
+
+        // Moderation menu: report/block any app member but yourself (Apple UGC safety).
+        if (canModerate) {
+            Spacer(Modifier.width(4.dp))
+            Box {
+                IconButton(onClick = { moderateOpen = true }) {
+                    Icon(Icons.Filled.MoreVert, contentDescription = s.reportMember, tint = onSurface.copy(alpha = 0.65f))
+                }
+                DropdownMenu(
+                    expanded = moderateOpen,
+                    onDismissRequest = { moderateOpen = false },
+                    shape = RoundedCornerShape(16.dp),
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(s.reportMember) },
+                        leadingIcon = { Icon(Icons.Filled.Flag, null) },
+                        onClick = { moderateOpen = false; onReport() },
+                    )
+                    if (isBlocked) {
+                        DropdownMenuItem(
+                            text = { Text(s.unblock) },
+                            leadingIcon = { Icon(Icons.Filled.LockOpen, null) },
+                            onClick = { moderateOpen = false; onUnblock() },
+                        )
+                    } else {
+                        DropdownMenuItem(
+                            text = { Text(s.block, color = MaterialTheme.colorScheme.error) },
+                            leadingIcon = { Icon(Icons.Filled.Block, null, tint = MaterialTheme.colorScheme.error) },
+                            onClick = { moderateOpen = false; onBlock() },
+                        )
+                    }
+                }
             }
         }
     }

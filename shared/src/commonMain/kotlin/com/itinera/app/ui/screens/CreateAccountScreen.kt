@@ -64,6 +64,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -82,6 +83,13 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+
+/**
+ * Hosted Terms of Use / Community Guidelines (includes the zero-tolerance policy for
+ * objectionable content and abusive users, required by App Store Guideline 1.2).
+ * Confirm this URL is live before submitting; the content lives in docs/terms.html.
+ */
+private const val TERMS_URL = "https://tonyaloysius18.github.io/Itinera/terms.html"
 
 /*
  * ─── New string keys (EN + FR) ──────────────────────────────────────────────
@@ -137,6 +145,7 @@ fun CreateAccountScreen(
 ) {
     val s = LocalStrings.current
     val scope = rememberCoroutineScope()
+    val uriHandler = LocalUriHandler.current
 
 
     // step 1
@@ -194,7 +203,7 @@ fun CreateAccountScreen(
     fun buildProfile() = UserProfile(
         name = name.trim().toTitleCase(),
         surname = surname.trim().toTitleCase(),
-        email = email.trim(),
+        email = email.trim().lowercase(),
         mobile = if (mobile.isBlank()) "" else country.dialCode + mobile.trim(),
         dob = dob,
         street = street.trim().toTitleCase(),
@@ -204,22 +213,66 @@ fun CreateAccountScreen(
 
     fun attemptCreate() {
         triedSubmit = true
-        // ⬅ CHANGED — was a chain of `when` branches each calling onMessage and
-        // returning, so you learned about one problem per button press. The
-        // errors are on the fields now; this just stops the submit.
+        // Validation errors are shown inline under the relevant fields.
         if (!requiredValid) return
+
         loading = true
         scope.launch {
+            val normalizedEmail = email.trim().lowercase()
+
             try {
-                authService.signUp(email.trim(), password)
+                println("ITINERA_SIGNUP: Trying to create $normalizedEmail")
+
+                val user = authService.signUp(
+                    normalizedEmail,
+                    password,
+                )
+
+                println("====================================")
+                println("ITINERA_SIGNUP_SUCCESS")
+                println("UID: ${user?.uid}")
+                println("EMAIL: ${user?.email}")
+                println("====================================")
+
                 loading = false
-                onCreate(buildProfile())
+
+                onCreate(
+                    buildProfile().copy(
+                        email = normalizedEmail,
+                    )
+                )
             } catch (e: Exception) {
                 loading = false
-                // Email in use / weak password / network. Firebase's own text
-                // isn't for users, so the detail goes to the log.
-                onMessage(s.signupFailed)
-                println("ITINERA: SIGNUP FAILED — ${e.message}")
+
+                // Keep technical Firebase details in Logcat only.
+                println("====================================")
+                println("ITINERA_SIGNUP_ERROR")
+                println("TYPE: ${e::class.simpleName}")
+                println("MESSAGE: ${e.message}")
+                println("CAUSE: ${e.cause}")
+                println("====================================")
+
+                val errorText = e.message.orEmpty()
+
+                val userMessage = when {
+                    errorText.contains("ERROR_EMAIL_ALREADY_IN_USE", ignoreCase = true) ||
+                            errorText.contains("email address is already in use", ignoreCase = true) ->
+                        "An account already exists with this email. Try signing in instead."
+
+                    errorText.contains("WEAK_PASSWORD", ignoreCase = true) ->
+                        "Your password is too weak. Please choose a stronger password."
+
+                    errorText.contains("INVALID_EMAIL", ignoreCase = true) ->
+                        "Please enter a valid email address."
+
+                    errorText.contains("NETWORK", ignoreCase = true) ->
+                        "Unable to connect. Please check your internet connection and try again."
+
+                    else ->
+                        "Unable to create your account. Please try again."
+                }
+
+                onMessage(userMessage)
             }
         }
     }
@@ -433,36 +486,26 @@ fun CreateAccountScreen(
                 if (loading) PlaneLoader() else Text(s.createAccount)
             }
 
-//            // ⬅ ADD — Play Store review expects these reachable from signup.
-//            Spacer(Modifier.height(12.dp))
-//            Row(
-//                horizontalArrangement = Arrangement.Center,
-//                verticalAlignment = Alignment.CenterVertically,
-//            ) {
-//                Text(
-//                    s.termsPrefix + " ",
-//                    style = MaterialTheme.typography.labelSmall,
-//                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-//                    textAlign = TextAlign.Center,
-//                )
-//                Text(
-//                    s.termsLabel,
-//                    style = MaterialTheme.typography.labelSmall,
-//                    color = MaterialTheme.colorScheme.primary,
-//                    modifier = Modifier.clickable(enabled = onOpenTerms != null) { onOpenTerms?.invoke() },
-//                )
-//                Text(
-//                    " ${s.andLabel} ",
-//                    style = MaterialTheme.typography.labelSmall,
-//                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-//                )
-//                Text(
-//                    s.privacyLabel,
-//                    style = MaterialTheme.typography.labelSmall,
-//                    color = MaterialTheme.colorScheme.primary,
-//                    modifier = Modifier.clickable(enabled = onOpenPrivacy != null) { onOpenPrivacy?.invoke() },
-//                )
-//            }
+            // Zero-tolerance agreement — required by App Store Guideline 1.2 for
+            // apps with user-generated content shared between users (trip collaboration).
+            Spacer(Modifier.height(12.dp))
+            Text(
+                s.termsAgreement,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                s.termsLinkLabel,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable {
+                    (onOpenTerms ?: { uriHandler.openUri(TERMS_URL) }).invoke()
+                },
+            )
 
             if (onSignIn != null) {
                 Spacer(Modifier.height(10.dp))

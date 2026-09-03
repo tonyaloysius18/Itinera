@@ -575,6 +575,19 @@ private fun AppContent(
                                         onDelete = { repository.removeTraveller(screen.tripId, it) },
                                         canEdit = trip.canEdit(repository.authService.currentUid ?: ""),
                                         currentUid = repository.authService.currentUid ?: "",
+                                        blockedUserIds = repository.blockedUserIds,
+                                        onReport = { uid, reason, details ->
+                                            repository.reportMember(uid, screen.tripId, reason, details)
+                                        },
+                                        onBlock = { uid ->
+                                            repository.blockUser(uid)
+                                            pillMessage = s.memberBlocked
+                                        },
+                                        onUnblock = { uid ->
+                                            repository.unblockUser(uid)
+                                            pillMessage = s.memberUnblocked
+                                        },
+                                        onMessage = { pillMessage = it },
                                     )
                                 }
                             }
@@ -585,9 +598,22 @@ private fun AppContent(
                                 else MembersScreen(
                                     trip = trip,
                                     currentUid = repository.authService.currentUid ?: "",
+                                    blockedUserIds = repository.blockedUserIds,
                                     onSetRole = { uid, role -> repository.setMemberRole(screen.tripId, uid, role) },
                                     onRemoveMember = { uid -> repository.removeMember(screen.tripId, uid) },
                                     onCreateInvite = { repository.createTripInvite(it) },
+                                    onReport = { uid, reason, details ->
+                                        repository.reportMember(uid, screen.tripId, reason, details)
+                                    },
+                                    onBlock = { uid ->
+                                        repository.blockUser(uid)
+                                        pillMessage = s.memberBlocked
+                                    },
+                                    onUnblock = { uid ->
+                                        repository.unblockUser(uid)
+                                        pillMessage = s.memberUnblocked
+                                    },
+                                    onMessage = { pillMessage = it },
                                     onLeaveTrip = {
                                         scope.launch {
                                             val left = repository.leaveTrip(screen.tripId)

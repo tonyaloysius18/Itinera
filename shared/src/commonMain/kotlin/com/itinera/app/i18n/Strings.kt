@@ -162,6 +162,7 @@ class Strings {
     var continueApple: String = ""
     var googleSignInFailed: String = ""
     var appleSignInSoon: String = ""
+    var appleSignInFailed: String = ""
     var newHere: String = ""
     var createAccount: String = ""
     var calendar: String = ""
@@ -525,6 +526,31 @@ class Strings {
     var leaveTripQ: String = ""
     var leaveTripDesc: String = ""
 
+    // Moderation: report & block a trip member (Apple UGC safety)
+    var report: String = ""
+    var reportMember: String = ""
+    var block: String = ""
+    var unblock: String = ""
+    var blockMember: String = ""
+    var blockedUser: String = ""
+    var blockMemberQ: String = ""
+    var blockMemberDesc: String = ""
+    var unblockMemberQ: String = ""
+    var unblockMemberDesc: String = ""
+    var reportReason: String = ""
+    var reportReasonSpam: String = ""
+    var reportReasonHarassment: String = ""
+    var reportReasonInappropriate: String = ""
+    var reportReasonOther: String = ""
+    var reportDetailsHint: String = ""
+    var reportSubmit: String = ""
+    var reportSubmitted: String = ""
+    var reportFailed: String = ""
+    var memberBlocked: String = ""
+    var memberUnblocked: String = ""
+    var termsAgreement: String = ""
+    var termsLinkLabel: String = ""
+
     var removeAccount: String = ""
     var removeAccountConfirm: String = ""
 
@@ -779,6 +805,7 @@ class Strings {
         c.continueApple = this.continueApple
         c.googleSignInFailed = this.googleSignInFailed
         c.appleSignInSoon = this.appleSignInSoon
+        c.appleSignInFailed = this.appleSignInFailed
         c.newHere = this.newHere
         c.createAccount = this.createAccount
         c.requiredField = this.requiredField
@@ -1140,6 +1167,29 @@ class Strings {
         c.leaveTrip = this.leaveTrip
         c.leaveTripQ = this.leaveTripQ
         c.leaveTripDesc = this.leaveTripDesc
+        c.report = this.report
+        c.reportMember = this.reportMember
+        c.block = this.block
+        c.unblock = this.unblock
+        c.blockMember = this.blockMember
+        c.blockedUser = this.blockedUser
+        c.blockMemberQ = this.blockMemberQ
+        c.blockMemberDesc = this.blockMemberDesc
+        c.unblockMemberQ = this.unblockMemberQ
+        c.unblockMemberDesc = this.unblockMemberDesc
+        c.reportReason = this.reportReason
+        c.reportReasonSpam = this.reportReasonSpam
+        c.reportReasonHarassment = this.reportReasonHarassment
+        c.reportReasonInappropriate = this.reportReasonInappropriate
+        c.reportReasonOther = this.reportReasonOther
+        c.reportDetailsHint = this.reportDetailsHint
+        c.reportSubmit = this.reportSubmit
+        c.reportSubmitted = this.reportSubmitted
+        c.reportFailed = this.reportFailed
+        c.memberBlocked = this.memberBlocked
+        c.memberUnblocked = this.memberUnblocked
+        c.termsAgreement = this.termsAgreement
+        c.termsLinkLabel = this.termsLinkLabel
 
         c.removeAccount = this.removeAccount
         c.removeAccountConfirm = this.removeAccountConfirm
