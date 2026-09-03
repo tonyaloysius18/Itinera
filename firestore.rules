@@ -1,0 +1,107 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Profiles ──
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ── Invites ──
+    match /invites/{inviteId} {
+      // Anyone signed in can read an invite (needed to look up by code before joining)
+      allow read: if request.auth != null;
+      // Only the trip owner creates invites; createdBy must be them
+      allow create: if request.auth != null
+        && request.resource.data.createdBy == request.auth.uid;
+      // Creator can revoke/update their own invite
+      allow update, delete: if request.auth != null
+        && resource.data.createdBy == request.auth.uid;
+    }
+
+    match /reports/{reportId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if false;
+    }
+
+    // ── Trips ──
+    match /trips/{tripId} {
+      allow read: if request.auth != null
+        && request.auth.uid in resource.data.memberIds;
+
+      allow create: if request.auth != null
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.members[request.auth.uid] == 'owner';
+
+      // Update allowed if:
+      //  (A) editor/owner editing content (members & memberIds unchanged), or
+      //  (B) owner changing anything (incl. members), or
+      //  (C) a NEW user joining themselves as viewer via a valid invite (self-join)
+      allow update: if request.auth != null && (
+        // (A) editor/owner, membership unchanged
+        (
+          (resource.data.members[request.auth.uid] == 'owner'
+           || resource.data.members[request.auth.uid] == 'editor')
+          && request.resource.data.members == resource.data.members
+          && request.resource.data.memberIds == resource.data.memberIds
+        )
+        // (B) owner can change anything
+        || resource.data.members[request.auth.uid] == 'owner'
+        // (C) self-join: caller was NOT a member, is adding ONLY themselves as viewer
+        || (
+          !(request.auth.uid in resource.data.memberIds)
+          && request.resource.data.memberIds == resource.data.memberIds.concat([request.auth.uid])
+          && request.resource.data.members[request.auth.uid] == 'viewer'
+          // everything else about the trip stays the same:
+         && request.resource.data.diff(resource.data).affectedKeys()
+     			.hasOnly(['members', 'memberIds', 'memberInfo'])
+        )
+        // (D) self-leave: a non-owner removes ONLY themselves
+        || (
+          request.auth.uid in resource.data.memberIds
+          && resource.data.memberIds.removeAll(request.resource.data.memberIds).hasOnly([request.auth.uid])
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members', 'memberIds', 'memberInfo'])
+          && resource.data.members[request.auth.uid] != 'owner'
+        )
+      );
+
+      allow delete: if request.auth != null
+        && resource.data.members[request.auth.uid] == 'owner';
+
+      match /documents/{docId} {
+        allow read, write: if request.auth != null
+          && request.auth.uid in get(/databases/$(database)/documents/trips/$(tripId)).data.memberIds;
+      }
+      match /expenses/{expId} {
+        allow read, write: if request.auth != null
+          && request.auth.uid in get(/databases/$(database)/documents/trips/$(tripId)).data.memberIds;
+      }
+       match /payments/{payId} {
+        allow read, write: if request.auth != null
+          && request.auth.uid in get(/databases/$(database)/documents/trips/$(tripId)).data.memberIds;
+      }
+      match /activities/{actId} {
+        allow read, write: if request.auth != null
+          && request.auth.uid in get(/databases/$(database)/documents/trips/$(tripId)).data.memberIds;
+      }
+    }
+
+    // ── Collection-group reads ──
+    match /{path=**}/documents/{docId} {
+      allow read: if request.auth != null
+        && request.auth.uid in resource.data.memberIds;
+    }
+    match /{path=**}/expenses/{expId} {
+      allow read: if request.auth != null
+        && request.auth.uid in resource.data.memberIds;
+    }
+     match /{path=**}/payments/{payId} {
+      allow read: if request.auth != null
+        && request.auth.uid in resource.data.memberIds;
+    }
+    match /{path=**}/activities/{actId} {
+      allow read: if request.auth != null
+        && request.auth.uid in resource.data.memberIds;
+    }
+  }
+}
