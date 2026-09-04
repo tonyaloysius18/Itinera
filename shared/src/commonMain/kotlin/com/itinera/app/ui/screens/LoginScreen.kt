@@ -88,7 +88,10 @@ fun LoginScreen(
 ) {
     val s = LocalStrings.current
 
-    val isIos = remember { getPlatform().name.startsWith("iOS", ignoreCase = true) }
+    // Ask the platform directly. Matching on getPlatform().name is wrong: that
+    // string is UIDevice.systemName + version, which reads "iPadOS 26.5" on
+    // iPad, so the check failed there and hid the Sign in with Apple button.
+    val isIos = remember { getPlatform().isIos }
 
     var email by remember { mutableStateOf(prefillEmail) }
     var password by remember { mutableStateOf("") }
