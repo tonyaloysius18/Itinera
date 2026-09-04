@@ -5,6 +5,7 @@ import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.EmailAuthProvider
 import dev.gitlive.firebase.auth.FirebaseUser
 import dev.gitlive.firebase.auth.GoogleAuthProvider
+import dev.gitlive.firebase.auth.OAuthProvider
 import dev.gitlive.firebase.auth.auth
 
 /**
@@ -81,6 +82,21 @@ class AuthService {
 
         Firebase.auth.signInWithCredential(credential)
     }
+
+    /**
+     * Sign in with Apple. [idToken] is the identity token (JWT) returned by
+     * ASAuthorization, and [rawNonce] is the un-hashed nonce that was SHA256'd
+     * into the authorization request — Firebase re-hashes it to verify the token.
+     */
+    suspend fun signInWithApple(idToken: String, rawNonce: String) {
+        val credential = OAuthProvider.credential(
+            providerId = "apple.com",
+            idToken = idToken,
+            rawNonce = rawNonce,
+        )
+        Firebase.auth.signInWithCredential(credential)
+    }
+
     fun currentUserProfile(): UserProfile? {
         val user = Firebase.auth.currentUser ?: return null
         val fullName = user.displayName ?: ""
@@ -95,7 +111,11 @@ class AuthService {
 
     fun currentSignInMethod(): String {
         val providers = Firebase.auth.currentUser?.providerData?.map { it.providerId } ?: emptyList()
-        return if (providers.any { it.contains("google") }) "google" else "password"
+        return when {
+            providers.any { it.contains("google") } -> "google"
+            providers.any { it.contains("apple") } -> "apple"
+            else -> "password"
+        }
     }
 
 }

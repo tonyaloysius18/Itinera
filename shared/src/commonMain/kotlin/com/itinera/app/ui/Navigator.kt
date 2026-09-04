@@ -86,6 +86,8 @@ class Navigator(start: Screen) {
     fun push(screen: Screen) { stack.add(screen) }
     fun replace(screen: Screen) { stack[stack.lastIndex] = screen }
 
+    val canGoBack: Boolean get() = stack.size > 1
+
     /** Reset the whole stack to a single root (used for login / log out). */
     fun resetTo(screen: Screen) {
         stack.clear()

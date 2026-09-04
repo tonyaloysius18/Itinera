@@ -59,6 +59,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.itinera.app.data.AuthService
 import com.itinera.app.data.rememberGoogleSignInHelper
+import com.itinera.app.data.rememberAppleSignInHelper
 import com.itinera.app.getPlatform
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.resources.Res
@@ -97,6 +98,7 @@ fun LoginScreen(
     var loading by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val googleHelper = rememberGoogleSignInHelper()
+    val appleHelper = rememberAppleSignInHelper()
 
     val displayFont = FontFamily(Font(Res.font.arizonia_regular))
     val taglineFont = FontFamily(Font(Res.font.caudex_bold))
@@ -358,21 +360,31 @@ fun LoginScreen(
                             tintIcon = true,
                             modifier = Modifier.weight(1f),
                         ) {
-
-                            val handler = onAppleSignIn
-                            if (handler == null) {
-                                onMessage(s.appleSignInSoon)
-                            } else {
-                                scope.launch {
-                                    try {
+                            scope.launch {
+                                try {
+                                    // Prefer an injected handler (tests / overrides); otherwise
+                                    // run the native ASAuthorization flow via the helper.
+                                    val handler = onAppleSignIn
+                                    if (handler != null) {
                                         handler()
                                         onAuthed()
-                                    } catch (e: Exception) {
-                                        val msg = e.message.orEmpty()
-                                        if (!msg.contains("cancel", ignoreCase = true)) {
-                                            onMessage(s.appleSignInSoon)
-                                            println("ITINERA: APPLE SIGN-IN FAILED — $msg")
+                                    } else {
+                                        val cred = appleHelper.signIn()
+                                        if (cred != null) {
+                                            authService.signInWithApple(cred.idToken, cred.rawNonce)
+                                            onAuthed()
                                         }
+                                    }
+                                } catch (e: Exception) {
+                                    val msg = e.message.orEmpty()
+                                    // A cancelled sheet isn't a failure worth a pill.
+                                    if (!msg.contains("cancel", ignoreCase = true)) {
+                                        onMessage(s.appleSignInFailed)
+                                        println(
+                                            "ITINERA: APPLE SIGN-IN FAILED — " +
+                                                    "${e::class.simpleName}: $msg"
+                                        )
+                                        e.printStackTrace()
                                     }
                                 }
                             }
