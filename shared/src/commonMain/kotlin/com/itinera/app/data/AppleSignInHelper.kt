@@ -13,8 +13,19 @@ data class AppleCredential(
     val rawNonce: String,
 )
 
+/**
+ * Outcome of the native flow. Cancelling the sheet and failing outright are
+ * deliberately distinct: a cancel is the user's choice and stays silent, while
+ * a failure has to surface, or the button just looks dead.
+ */
+sealed interface AppleSignInResult {
+    data class Success(val credential: AppleCredential) : AppleSignInResult
+    data object Cancelled : AppleSignInResult
+    data class Failed(val reason: String) : AppleSignInResult
+}
+
 expect class AppleSignInHelper {
-    suspend fun signIn(): AppleCredential?
+    suspend fun signIn(): AppleSignInResult
 }
 
 @Composable

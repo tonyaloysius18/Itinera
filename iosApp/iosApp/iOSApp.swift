@@ -25,25 +25,32 @@ struct iOSApp: App {
             guard let rootVC = UIApplication.shared.connectedScenes
                 .compactMap({ ($0 as? UIWindowScene)?.keyWindow })
                 .first?.rootViewController else {
-                _ = onResult(nil, nil)
+                _ = onResult(nil, nil, "No root view controller to present Google sign-in from")
                 return
             }
             GIDSignIn.sharedInstance.signIn(withPresenting: rootVC) { result, error in
                 if let error = error {
+                    // A cancelled sheet is the user's choice, not a failure to report.
+                    if let signInError = error as? GIDSignInError, signInError.code == .canceled {
+                        _ = onResult(nil, nil, nil)
+                        return
+                    }
                     print("Google sign-in error: \(error.localizedDescription)")
-                    _ = onResult(nil, nil)
+                    _ = onResult(nil, nil, error.localizedDescription)
                     return
                 }
-                let idToken = result?.user.idToken?.tokenString
-                let accessToken = result?.user.accessToken.tokenString
-                _ = onResult(idToken, accessToken)
+                guard let idToken = result?.user.idToken?.tokenString else {
+                    _ = onResult(nil, nil, "Google returned a sign-in without an ID token")
+                    return
+                }
+                _ = onResult(idToken, result?.user.accessToken.tokenString, nil)
             }
         }
 
         // ===== Sign in with Apple bridge =====
         IosAppleSignIn.shared.provider = { onResult in
-            let coordinator = AppleSignInCoordinator { idToken, rawNonce in
-                _ = onResult(idToken, rawNonce)
+            let coordinator = AppleSignInCoordinator { idToken, rawNonce, error in
+                _ = onResult(idToken, rawNonce, error)
             }
             AppleSignInHolder.shared.coordinator = coordinator   // keep alive during the flow
             coordinator.start()
@@ -164,10 +171,13 @@ final class AppleSignInCoordinator: NSObject,
     ASAuthorizationControllerDelegate,
     ASAuthorizationControllerPresentationContextProviding {
 
-    private let onResult: (String?, String?) -> Void
+    /// (identityToken, rawNonce, failureReason) — exactly one shape per call:
+    /// success carries the first two, a cancel carries nothing, and a failure
+    /// carries only the reason.
+    private let onResult: (String?, String?, String?) -> Void
     private var currentNonce: String?
 
-    init(onResult: @escaping (String?, String?) -> Void) {
+    init(onResult: @escaping (String?, String?, String?) -> Void) {
         self.onResult = onResult
     }
 
@@ -199,17 +209,24 @@ final class AppleSignInCoordinator: NSObject,
             let idToken = String(data: tokenData, encoding: .utf8),
             let rawNonce = currentNonce
         else {
-            onResult(nil, nil)
+            onResult(nil, nil, "Apple returned an authorization without a usable identity token")
             return
         }
-        onResult(idToken, rawNonce)
+        onResult(idToken, rawNonce, nil)
     }
 
     func authorizationController(controller: ASAuthorizationController,
                                  didCompleteWithError error: Error) {
         defer { AppleSignInHolder.shared.coordinator = nil }
+
+        // A cancelled sheet is the user's choice, not a failure to report.
+        if let authError = error as? ASAuthorizationError, authError.code == .canceled {
+            onResult(nil, nil, nil)
+            return
+        }
+
         print("Apple sign-in error: \(error.localizedDescription)")
-        onResult(nil, nil)
+        onResult(nil, nil, error.localizedDescription)
     }
 
     // MARK: - Nonce helpers (per Firebase's Sign in with Apple guide)

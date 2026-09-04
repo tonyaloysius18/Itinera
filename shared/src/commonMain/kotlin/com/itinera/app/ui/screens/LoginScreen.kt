@@ -57,7 +57,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.itinera.app.data.AppleSignInResult
 import com.itinera.app.data.AuthService
+import com.itinera.app.data.GoogleSignInResult
 import com.itinera.app.data.rememberGoogleSignInHelper
 import com.itinera.app.data.rememberAppleSignInHelper
 import com.itinera.app.getPlatform
@@ -307,48 +309,35 @@ fun LoginScreen(
                         tintIcon = false,
                         modifier = Modifier.weight(1f),
                     ) {
-//                        scope.launch {
-//                            try {
-//                                val tokens = googleHelper.signIn()
-//                                if (tokens != null) {
-//                                    authService.signInWithGoogle(tokens.idToken, tokens.accessToken)
-//                                    onAuthed()
-//                                }
-//                            } catch (e: Exception) {
-//                                val msg = e.message.orEmpty()
-//                                // A cancelled sheet isn't a failure worth a pill.
-//                                if (!msg.contains("cancel", ignoreCase = true)) {
-//
-//                                    onMessage(s.googleSignInFailed)
-//                                    println("ITINERA: GOOGLE SIGN-IN FAILED — $msg")
-//                                }
-//                            }
-//                        }
                         scope.launch {
                             try {
-                                val tokens = googleHelper.signIn()
-
-                                if (tokens != null) {
-                                    authService.signInWithGoogle(
-                                        tokens.idToken,
-                                        tokens.accessToken
-                                    )
-
-                                    onAuthed()
+                                when (val result = googleHelper.signIn()) {
+                                    is GoogleSignInResult.Success -> {
+                                        authService.signInWithGoogle(
+                                            result.tokens.idToken,
+                                            result.tokens.accessToken,
+                                        )
+                                        onAuthed()
+                                    }
+                                    // The user backed out — nothing to report.
+                                    GoogleSignInResult.Cancelled -> Unit
+                                    is GoogleSignInResult.Failed -> {
+                                        onMessage(s.googleSignInFailed)
+                                        println(
+                                            "ITINERA: GOOGLE SIGN-IN FAILED — " +
+                                                    result.reason
+                                        )
+                                    }
                                 }
                             } catch (e: Exception) {
-                                val msg = e.message.orEmpty()
-
-                                if (!msg.contains("cancel", ignoreCase = true)) {
-                                    onMessage(s.googleSignInFailed)
-
-                                    println(
-                                        "ITINERA: GOOGLE SIGN-IN FAILED — " +
-                                                "${e::class.simpleName}: $msg"
-                                    )
-
-                                    e.printStackTrace()
-                                }
+                                // Reaching here means the Firebase credential
+                                // exchange threw, not the native sheet.
+                                onMessage(s.googleSignInFailed)
+                                println(
+                                    "ITINERA: GOOGLE SIGN-IN FAILED — " +
+                                            "${e::class.simpleName}: ${e.message.orEmpty()}"
+                                )
+                                e.printStackTrace()
                             }
                         }
                     }
@@ -369,23 +358,34 @@ fun LoginScreen(
                                         handler()
                                         onAuthed()
                                     } else {
-                                        val cred = appleHelper.signIn()
-                                        if (cred != null) {
-                                            authService.signInWithApple(cred.idToken, cred.rawNonce)
-                                            onAuthed()
+                                        when (val result = appleHelper.signIn()) {
+                                            is AppleSignInResult.Success -> {
+                                                authService.signInWithApple(
+                                                    result.credential.idToken,
+                                                    result.credential.rawNonce,
+                                                )
+                                                onAuthed()
+                                            }
+                                            // The user backed out — nothing to report.
+                                            AppleSignInResult.Cancelled -> Unit
+                                            is AppleSignInResult.Failed -> {
+                                                onMessage(s.appleSignInFailed)
+                                                println(
+                                                    "ITINERA: APPLE SIGN-IN FAILED — " +
+                                                            result.reason
+                                                )
+                                            }
                                         }
                                     }
                                 } catch (e: Exception) {
-                                    val msg = e.message.orEmpty()
-                                    // A cancelled sheet isn't a failure worth a pill.
-                                    if (!msg.contains("cancel", ignoreCase = true)) {
-                                        onMessage(s.appleSignInFailed)
-                                        println(
-                                            "ITINERA: APPLE SIGN-IN FAILED — " +
-                                                    "${e::class.simpleName}: $msg"
-                                        )
-                                        e.printStackTrace()
-                                    }
+                                    // Reaching here means the Firebase credential
+                                    // exchange threw, not the native sheet.
+                                    onMessage(s.appleSignInFailed)
+                                    println(
+                                        "ITINERA: APPLE SIGN-IN FAILED — " +
+                                                "${e::class.simpleName}: ${e.message.orEmpty()}"
+                                    )
+                                    e.printStackTrace()
                                 }
                             }
                         }
