@@ -87,6 +87,7 @@ import com.itinera.app.model.ExpenseCategory
 import com.itinera.app.model.Trip
 import com.itinera.app.model.canEdit
 import com.itinera.app.model.inferExpenseCategory
+import com.itinera.app.ui.BackHandler
 import com.itinera.app.ui.Navigator
 import com.itinera.app.ui.Screen
 import com.itinera.app.ui.components.PlaneLoader
@@ -288,6 +289,10 @@ private fun AppContent(
     val s = LocalStrings.current
     val current = navigator.current
     val focusManager = LocalFocusManager.current
+
+    BackHandler(enabled = navigator.canGoBack) {
+        navigator.back()
+    }
 
     val scope = rememberCoroutineScope()
     val topLevel = remember { setOf(Screen.Home, Screen.Calendar, Screen.Currency, Screen.Split, Screen.Settings) }

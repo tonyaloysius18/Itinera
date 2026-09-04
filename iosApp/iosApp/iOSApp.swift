@@ -6,6 +6,8 @@ import Translation
 import UniformTypeIdentifiers
 import Shared
 import UserNotifications
+import AuthenticationServices
+import CryptoKit
 
 @main
 struct iOSApp: App {
@@ -36,6 +38,15 @@ struct iOSApp: App {
                 let accessToken = result?.user.accessToken.tokenString
                 _ = onResult(idToken, accessToken)
             }
+        }
+
+        // ===== Sign in with Apple bridge =====
+        IosAppleSignIn.shared.provider = { onResult in
+            let coordinator = AppleSignInCoordinator { idToken, rawNonce in
+                _ = onResult(idToken, rawNonce)
+            }
+            AppleSignInHolder.shared.coordinator = coordinator   // keep alive during the flow
+            coordinator.start()
         }
 
         // ===== Calendar (EventKit) bridge =====
@@ -137,6 +148,88 @@ final class CalendarEditDelegate: NSObject, EKEventEditViewDelegate {
     func eventEditViewController(_ controller: EKEventEditViewController,
                                  didCompleteWith action: EKEventEditViewAction) {
         controller.dismiss(animated: true)
+    }
+}
+
+// Holds a strong reference to the active Apple sign-in coordinator so it isn't
+// deallocated while the system authorization sheet is up.
+final class AppleSignInHolder {
+    static let shared = AppleSignInHolder()
+    var coordinator: AppleSignInCoordinator?
+}
+
+/// Runs the native "Sign in with Apple" flow and hands Firebase what it needs:
+/// the identity token (JWT) and the *raw* nonce (Firebase re-hashes it to verify).
+final class AppleSignInCoordinator: NSObject,
+    ASAuthorizationControllerDelegate,
+    ASAuthorizationControllerPresentationContextProviding {
+
+    private let onResult: (String?, String?) -> Void
+    private var currentNonce: String?
+
+    init(onResult: @escaping (String?, String?) -> Void) {
+        self.onResult = onResult
+    }
+
+    func start() {
+        let nonce = Self.randomNonceString()
+        currentNonce = nonce
+        let request = ASAuthorizationAppleIDProvider().createRequest()
+        request.requestedScopes = [.fullName, .email]
+        request.nonce = Self.sha256(nonce)
+
+        let controller = ASAuthorizationController(authorizationRequests: [request])
+        controller.delegate = self
+        controller.presentationContextProvider = self
+        controller.performRequests()
+    }
+
+    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+        UIApplication.shared.connectedScenes
+            .compactMap { ($0 as? UIWindowScene)?.keyWindow }
+            .first ?? ASPresentationAnchor()
+    }
+
+    func authorizationController(controller: ASAuthorizationController,
+                                 didCompleteWithAuthorization authorization: ASAuthorization) {
+        defer { AppleSignInHolder.shared.coordinator = nil }
+        guard
+            let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
+            let tokenData = credential.identityToken,
+            let idToken = String(data: tokenData, encoding: .utf8),
+            let rawNonce = currentNonce
+        else {
+            onResult(nil, nil)
+            return
+        }
+        onResult(idToken, rawNonce)
+    }
+
+    func authorizationController(controller: ASAuthorizationController,
+                                 didCompleteWithError error: Error) {
+        defer { AppleSignInHolder.shared.coordinator = nil }
+        print("Apple sign-in error: \(error.localizedDescription)")
+        onResult(nil, nil)
+    }
+
+    // MARK: - Nonce helpers (per Firebase's Sign in with Apple guide)
+
+    private static func randomNonceString(length: Int = 32) -> String {
+        precondition(length > 0)
+        var randomBytes = [UInt8](repeating: 0, count: length)
+        let status = SecRandomCopyBytes(kSecRandomDefault, randomBytes.count, &randomBytes)
+        if status != errSecSuccess {
+            fatalError("Unable to generate nonce. SecRandomCopyBytes failed with \(status)")
+        }
+        let charset: [Character] =
+            Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
+        return String(randomBytes.map { charset[Int($0) % charset.count] })
+    }
+
+    private static func sha256(_ input: String) -> String {
+        SHA256.hash(data: Data(input.utf8))
+            .map { String(format: "%02x", $0) }
+            .joined()
     }
 }
 
