@@ -7,10 +7,17 @@ import androidx.compose.runtime.Composable
  * Result of a native "Sign in with Apple" flow: the identity token (a JWT) and
  * the *raw* nonce that was hashed into the request. Firebase needs both to build
  * an Apple OAuth credential.
+ *
+ * [fullName] and [email] come from the ASAuthorization credential rather than
+ * the token. Apple returns the name **only on the very first authorization** for
+ * a given Apple ID + app pair, and never puts it in the JWT — so if it isn't
+ * captured here it is lost for good, and the profile ends up nameless.
  */
 data class AppleCredential(
     val idToken: String,
     val rawNonce: String,
+    val fullName: String? = null,
+    val email: String? = null,
 )
 
 /**

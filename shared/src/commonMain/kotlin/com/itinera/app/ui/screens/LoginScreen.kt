@@ -361,8 +361,10 @@ fun LoginScreen(
                                         when (val result = appleHelper.signIn()) {
                                             is AppleSignInResult.Success -> {
                                                 authService.signInWithApple(
-                                                    result.credential.idToken,
-                                                    result.credential.rawNonce,
+                                                    idToken = result.credential.idToken,
+                                                    rawNonce = result.credential.rawNonce,
+                                                    fullName = result.credential.fullName,
+                                                    email = result.credential.email,
                                                 )
                                                 onAuthed()
                                             }

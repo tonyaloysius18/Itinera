@@ -49,8 +49,8 @@ struct iOSApp: App {
 
         // ===== Sign in with Apple bridge =====
         IosAppleSignIn.shared.provider = { onResult in
-            let coordinator = AppleSignInCoordinator { idToken, rawNonce, error in
-                _ = onResult(idToken, rawNonce, error)
+            let coordinator = AppleSignInCoordinator { idToken, rawNonce, fullName, email, error in
+                _ = onResult(idToken, rawNonce, fullName, email, error)
             }
             AppleSignInHolder.shared.coordinator = coordinator   // keep alive during the flow
             coordinator.start()
@@ -171,13 +171,14 @@ final class AppleSignInCoordinator: NSObject,
     ASAuthorizationControllerDelegate,
     ASAuthorizationControllerPresentationContextProviding {
 
-    /// (identityToken, rawNonce, failureReason) — exactly one shape per call:
-    /// success carries the first two, a cancel carries nothing, and a failure
-    /// carries only the reason.
-    private let onResult: (String?, String?, String?) -> Void
+    /// (identityToken, rawNonce, fullName, email, failureReason) — exactly one
+    /// shape per call: success carries the token, nonce and whatever profile
+    /// fields Apple supplied, a cancel carries nothing, and a failure carries
+    /// only the reason.
+    private let onResult: (String?, String?, String?, String?, String?) -> Void
     private var currentNonce: String?
 
-    init(onResult: @escaping (String?, String?, String?) -> Void) {
+    init(onResult: @escaping (String?, String?, String?, String?, String?) -> Void) {
         self.onResult = onResult
     }
 
@@ -209,10 +210,23 @@ final class AppleSignInCoordinator: NSObject,
             let idToken = String(data: tokenData, encoding: .utf8),
             let rawNonce = currentNonce
         else {
-            onResult(nil, nil, "Apple returned an authorization without a usable identity token")
+            onResult(nil, nil, nil, nil,
+                     "Apple returned an authorization without a usable identity token")
             return
         }
-        onResult(idToken, rawNonce, nil)
+
+        // Apple sends these ONLY on the first authorization for this Apple ID +
+        // app pair, and never inside the JWT. Whatever arrives here is the only
+        // chance to capture it.
+        let name = PersonNameComponentsFormatter()
+            .string(from: credential.fullName ?? PersonNameComponents())
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        onResult(idToken,
+                 rawNonce,
+                 name.isEmpty ? nil : name,
+                 credential.email,
+                 nil)
     }
 
     func authorizationController(controller: ASAuthorizationController,
@@ -221,12 +235,12 @@ final class AppleSignInCoordinator: NSObject,
 
         // A cancelled sheet is the user's choice, not a failure to report.
         if let authError = error as? ASAuthorizationError, authError.code == .canceled {
-            onResult(nil, nil, nil)
+            onResult(nil, nil, nil, nil, nil)
             return
         }
 
         print("Apple sign-in error: \(error.localizedDescription)")
-        onResult(nil, nil, error.localizedDescription)
+        onResult(nil, nil, nil, nil, error.localizedDescription)
     }
 
     // MARK: - Nonce helpers (per Firebase's Sign in with Apple guide)

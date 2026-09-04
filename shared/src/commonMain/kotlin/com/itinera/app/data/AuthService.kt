@@ -88,23 +88,50 @@ class AuthService {
      * ASAuthorization, and [rawNonce] is the un-hashed nonce that was SHA256'd
      * into the authorization request — Firebase re-hashes it to verify the token.
      */
-    suspend fun signInWithApple(idToken: String, rawNonce: String) {
+    // Apple hands over the name and email ONLY on the first authorization, and
+    // never in the JWT, so Firebase cannot recover them later. Hold on to what
+    // we were given for the profile that gets built moments after sign-in.
+    private var appleFullName: String? = null
+    private var appleEmail: String? = null
+
+    suspend fun signInWithApple(
+        idToken: String,
+        rawNonce: String,
+        fullName: String? = null,
+        email: String? = null,
+    ) {
         val credential = OAuthProvider.credential(
             providerId = "apple.com",
             idToken = idToken,
             rawNonce = rawNonce,
         )
         Firebase.auth.signInWithCredential(credential)
+
+        appleFullName = fullName?.takeIf { it.isNotBlank() }
+        appleEmail = email?.takeIf { it.isNotBlank() }
+
+        // Persist the name onto the Firebase user so later sign-ins — where
+        // Apple sends nothing — still have something to show.
+        val user = Firebase.auth.currentUser
+        if (user != null && user.displayName.isNullOrBlank() && !appleFullName.isNullOrBlank()) {
+            try {
+                user.updateProfile(displayName = appleFullName)
+            } catch (e: Exception) {
+                // Non-fatal: the local fallback below still fills the profile.
+                println("ITINERA: could not persist Apple display name — ${e.message}")
+            }
+        }
     }
 
     fun currentUserProfile(): UserProfile? {
         val user = Firebase.auth.currentUser ?: return null
-        val fullName = user.displayName ?: ""
-        val parts = fullName.split(" ")
+        val fullName = user.displayName?.takeIf { it.isNotBlank() }
+            ?: appleFullName.orEmpty()
+        val parts = fullName.split(" ").filter { it.isNotBlank() }
         return UserProfile(
             name = parts.firstOrNull() ?: "",
             surname = parts.drop(1).joinToString(" "),
-            email = user.email ?: "",
+            email = user.email?.takeIf { it.isNotBlank() } ?: appleEmail.orEmpty(),
             photoUrl = user.photoURL ?: "",          // ⬅ Google profile photo
         )
     }
