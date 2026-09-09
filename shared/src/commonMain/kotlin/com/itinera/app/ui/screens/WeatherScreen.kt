@@ -66,6 +66,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import com.itinera.app.ui.theme.itinera
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -505,7 +506,7 @@ private fun SwipeableWeatherCard(
             ) {
                 Column(Modifier.width(panelWidth).fillMaxHeight().padding(start = gap)) {
                     WeatherActionButton(
-                        Icons.Filled.Delete, s.delete, Color(0xFFB23B3B), progress,
+                        Icons.Filled.Delete, s.delete, MaterialTheme.itinera.actionDelete, progress,
                         Modifier.weight(1f),
                     ) { animateOutThenDelete() }
                 }
@@ -794,13 +795,14 @@ private fun TempRangeBar(
 }
 
 /** Cold blue through to hot orange, clamped either side of a comfortable range. */
+@Composable
 private fun tempColor(celsius: Double): Color = when {
-    celsius <= 0 -> Color(0xFF6EA8DC)
-    celsius <= 10 -> Color(0xFF5B9BD5)
-    celsius <= 18 -> Color(0xFF5DBFA6)
-    celsius <= 25 -> Color(0xFF8FBF4A)
-    celsius <= 31 -> Color(0xFFE0A93C)
-    else -> Color(0xFFD8703C)
+    celsius <= 0 -> MaterialTheme.itinera.tempFreezing
+    celsius <= 10 -> MaterialTheme.itinera.tempCold
+    celsius <= 18 -> MaterialTheme.itinera.tempMild
+    celsius <= 25 -> MaterialTheme.itinera.tempWarm
+    celsius <= 31 -> MaterialTheme.itinera.tempHot
+    else -> MaterialTheme.itinera.tempScorching
 }
 
 /** Subtle card wash keyed to the current condition — cool for wet, warm for clear. */
@@ -808,12 +810,12 @@ private fun tempColor(celsius: Double): Color = when {
 private fun conditionGradient(code: Int?): Brush {
     val tint = when (code) {
         null -> Color.Transparent
-        0, 1 -> Color(0xFFE0A93C)                       // clear / mainly clear
-        2, 3 -> Color(0xFF6E7C93)                       // partly cloudy / overcast
-        45, 48 -> Color(0xFF8A8F98)                     // fog
-        in 51..67, in 80..82 -> Color(0xFF5B9BD5)       // drizzle / rain
-        in 71..77, 85, 86 -> Color(0xFF9FC4DC)          // snow
-        in 95..99 -> Color(0xFF7C6BB5)                  // thunderstorm
+        0, 1 -> MaterialTheme.itinera.skyClear          // clear / mainly clear
+        2, 3 -> MaterialTheme.itinera.skyCloudy         // partly cloudy / overcast
+        45, 48 -> MaterialTheme.itinera.skyFog          // fog
+        in 51..67, in 80..82 -> MaterialTheme.itinera.skyRain   // drizzle / rain
+        in 71..77, 85, 86 -> MaterialTheme.itinera.skySnow      // snow
+        in 95..99 -> MaterialTheme.itinera.skyStorm     // thunderstorm
         else -> Color.Transparent
     }
     return Brush.linearGradient(listOf(tint.copy(alpha = 0.16f), Color.Transparent))

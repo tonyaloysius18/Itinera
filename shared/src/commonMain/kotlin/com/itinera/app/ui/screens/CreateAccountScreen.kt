@@ -83,6 +83,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import com.itinera.app.ui.theme.itinera
 
 /**
  * Hosted Terms of Use / Community Guidelines (includes the zero-tolerance policy for
@@ -732,7 +733,7 @@ private fun PasswordRequirementsDropdown(password: String) {
                             imageVector = if (met) Icons.Filled.CheckCircle
                             else Icons.Filled.RadioButtonUnchecked,
                             contentDescription = null,
-                            tint = if (met) Color(0xFF4CAF50)
+                            tint = if (met) MaterialTheme.itinera.success
                             else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
                             modifier = Modifier.size(16.dp),
                         )
@@ -740,7 +741,7 @@ private fun PasswordRequirementsDropdown(password: String) {
                         Text(
                             label,
                             style = MaterialTheme.typography.bodySmall,
-                            color = if (met) Color(0xFF4CAF50)
+                            color = if (met) MaterialTheme.itinera.success
                             else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                         )
                     }

@@ -92,6 +92,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
+import com.itinera.app.ui.theme.itinera
 
 private fun langName(code: String): String =
     translateLanguages.firstOrNull { it.code == code }?.name ?: code
@@ -427,7 +428,7 @@ fun TranslateScreen(
                         Icon(
                             Icons.Filled.Star,
                             contentDescription = null,
-                            tint = Color(0xFFE8B931),
+                            tint = MaterialTheme.itinera.star,
                             modifier = Modifier.size(15.dp),
                         )
                         Spacer(Modifier.width(6.dp))
@@ -606,7 +607,7 @@ private fun HistoryRow(
                 Icon(
                     if (entry.favorite) Icons.Filled.Star else Icons.Filled.StarBorder,
                     contentDescription = s.favorite,
-                    tint = if (entry.favorite) Color(0xFFE8B931) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                    tint = if (entry.favorite) MaterialTheme.itinera.star else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                     modifier = Modifier.size(20.dp),
                 )
             }
@@ -675,7 +676,7 @@ private fun SwipeableHistoryCard(
                             Modifier.size(52.dp)
                                 .graphicsLayer { scaleX = progress; scaleY = progress; alpha = progress }
                                 .clip(CircleShape)
-                                .background(Color(0xFFB23B3B)),
+                                .background(MaterialTheme.itinera.actionDelete),
                             contentAlignment = Alignment.Center,
                         ) {
                             Icon(Icons.Outlined.Delete, contentDescription = s.delete, tint = Color.White, modifier = Modifier.size(20.dp))

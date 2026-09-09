@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -66,6 +65,18 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.itinera.app.model.TransportType
 import com.itinera.app.model.WalletTicket
+import com.itinera.app.ui.theme.PassChipSurface
+import com.itinera.app.ui.theme.PassDivider
+import com.itinera.app.ui.theme.PassInk
+import com.itinera.app.ui.theme.PassInkFaint
+import com.itinera.app.ui.theme.PassInkMuted
+import com.itinera.app.ui.theme.PassInkStrong
+import com.itinera.app.ui.theme.PassNoticeInk
+import com.itinera.app.ui.theme.PassNoticeSurface
+import com.itinera.app.ui.theme.PassScrim
+import androidx.compose.material3.ButtonDefaults
+import com.itinera.app.i18n.LocalStrings
+import com.itinera.app.ui.theme.PassLink
 
 
 @Composable
@@ -83,7 +94,7 @@ fun TicketWalletDialog(
     onDismiss: () -> Unit,
 ) {
     if (tickets.isEmpty()) return
-    val s = com.itinera.app.i18n.LocalStrings.current
+    val s = LocalStrings.current
     val myTickets = remember(tickets, myTravellerId) {
         if (myTravellerId.isBlank()) emptyList()
         else tickets.filter { it.travellerId == myTravellerId && !it.assignmentAmbiguous }
@@ -103,16 +114,14 @@ fun TicketWalletDialog(
     ) {
         KeepMaxBrightness()
 
-        Box(Modifier.fillMaxSize().background(Color(0xF2101014))) {
+        Box(Modifier.fillMaxSize().background(PassScrim)) {
             Column(
                 Modifier
-                    .align(Alignment.Center)
-                    .widthIn(max = 560.dp)
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .statusBarsPadding()
                     .navigationBarsPadding()
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 20.dp, vertical = 24.dp),
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
@@ -134,7 +143,7 @@ fun TicketWalletDialog(
                     HorizontalPager(
                         state = pagerState,
                         modifier = Modifier.fillMaxWidth(),
-                        contentPadding = PaddingValues(horizontal = 48.dp),
+                        contentPadding = PaddingValues(horizontal = 24.dp),
                         pageSpacing = 12.dp,
                     ) { page ->
                         val ticket = visibleTickets[page]
@@ -220,7 +229,7 @@ private fun MissingPersonalPass(
     canManagePasses: Boolean,
     onManagePasses: () -> Unit,
 ) {
-    val s = com.itinera.app.i18n.LocalStrings.current
+    val s = LocalStrings.current
     Surface(
         color = Color.White.copy(alpha = 0.09f),
         shape = RoundedCornerShape(24.dp),
@@ -273,7 +282,7 @@ private fun WalletCard(
     onOpenFullTicket: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val s = com.itinera.app.i18n.LocalStrings.current
+    val s = LocalStrings.current
     Surface(
         color = Color.White,
         shape = RoundedCornerShape(24.dp),
@@ -287,17 +296,17 @@ private fun WalletCard(
             // header: transport + operator
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Box(
-                    Modifier.size(36.dp).clip(CircleShape).background(Color(0xFFF0F1F4)),
+                    Modifier.size(36.dp).clip(CircleShape).background(PassChipSurface),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(icon, null, tint = Color(0xFF37474F), modifier = Modifier.size(20.dp))
+                    Icon(icon, null, tint = PassInk, modifier = Modifier.size(20.dp))
                 }
                 Spacer(Modifier.width(10.dp))
                 Text(
                     operator.ifBlank { s.ticketSingular },
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF37474F),
+                    color = PassInk,
                 )
             }
 
@@ -308,7 +317,7 @@ private fun WalletCard(
                 ticket.routeOverride.ifBlank { legRoute },
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF111111),
+                color = PassInkStrong,
                 textAlign = TextAlign.Center,
                 maxLines = 2, overflow = TextOverflow.Ellipsis,
             )
@@ -317,7 +326,7 @@ private fun WalletCard(
                 listOf(legDateLabel, ticket.timeOverride.ifBlank { legTime })   // ⬅ CHANGED
                     .filter { it.isNotBlank() }.joinToString(" · "),
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFF6B7280),
+                color = PassInkMuted,
             )
 
             val assignmentMessage = when {
@@ -328,17 +337,17 @@ private fun WalletCard(
             if (ticket.travellerName.isNotBlank()) {
                 Spacer(Modifier.height(6.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.Person, null, tint = Color(0xFF6B7280), modifier = Modifier.size(16.dp))
+                    Icon(Icons.Filled.Person, null, tint = PassInkMuted, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(4.dp))
                     Text(ticket.travellerName, style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium, color = Color(0xFF37474F))
+                        fontWeight = FontWeight.Medium, color = PassInk)
                 }
             }
 
             if (assignmentMessage.isNotBlank()) {
                 Spacer(Modifier.height(10.dp))
                 Surface(
-                    color = Color(0xFFFFF3CD),
+                    color = PassNoticeSurface,
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
@@ -347,14 +356,14 @@ private fun WalletCard(
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp),
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF664D03),
+                        color = PassNoticeInk,
                         textAlign = TextAlign.Center,
                     )
                 }
             }
 
             Spacer(Modifier.height(16.dp))
-            HorizontalDivider(color = Color(0xFFE5E7EB))
+            HorizontalDivider(color = PassDivider)
             Spacer(Modifier.height(16.dp))
 
             // the real scannable code
@@ -364,7 +373,7 @@ private fun WalletCard(
                 bitmap = img,
                 contentDescription = s.ticketCode,
                 modifier = Modifier
-                    .fillMaxWidth(if (aspect > 2f) 0.98f else 0.78f)   // wide PDF417 vs square QR/Aztec
+                    .fillMaxWidth(if (aspect > 2f) 0.98f else 0.9f)   // wide PDF417 vs square QR/Aztec
                     .aspectRatio(aspect),
                 contentScale = ContentScale.Fit,
                 filterQuality = FilterQuality.None,
@@ -375,17 +384,20 @@ private fun WalletCard(
                 Text(
                     ticket.docTitle,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF9CA3AF),
+                    color = PassInkFaint,
                     maxLines = 1, overflow = TextOverflow.Ellipsis,
                 )
             }
 
             Spacer(Modifier.height(12.dp))
-            TextButton(onClick = onOpenFullTicket) {
+            TextButton(
+                onClick = onOpenFullTicket,
+                colors = ButtonDefaults.textButtonColors(contentColor = PassLink),
+            ) {
                 Icon(
                     Icons.AutoMirrored.Filled.InsertDriveFile, null,
                     modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = PassLink,
                 )
                 Spacer(Modifier.width(6.dp))
                 Text(s.viewFullTicket)

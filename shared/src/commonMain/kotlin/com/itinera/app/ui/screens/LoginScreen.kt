@@ -75,6 +75,7 @@ import com.itinera.app.ui.components.PlaneLoader
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.painterResource
+import com.itinera.app.ui.theme.PhotoOverlayScrim
 
 
 @Composable
@@ -181,7 +182,7 @@ fun LoginScreen(
                 Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(topStart = 26.dp, topEnd = 26.dp))
-                    .background(Color(0xFF121418).copy(alpha = 0.45f))
+                    .background(PhotoOverlayScrim.copy(alpha = 0.45f))
                     .navigationBarsPadding()
                     .imePadding()
                     .padding(horizontal = 20.dp, vertical = 20.dp),

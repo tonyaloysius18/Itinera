@@ -47,6 +47,8 @@ import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
+import com.itinera.app.ui.theme.PaperScrim
+import com.itinera.app.ui.theme.PaperInk
 
 // UPDATED - "From {country}" is now one live text line (same font/size/baseline/tilt)
 
@@ -130,7 +132,7 @@ fun PostcardFront(
             BasicText(
                 text = "From  $country",
                 style = TextStyle(
-                    color = Color(0xFF111111),
+                    color = PaperInk,
                     fontWeight = FontWeight.Normal,
                     fontFamily = PostcardFont,
                 ),
@@ -190,7 +192,7 @@ private fun BoxScope.PhotoSlot(
             if (photo != null) {
                 photo()
             } else {
-                Spacer(Modifier.matchParentSize().background(Color(0x22000000)))
+                Spacer(Modifier.matchParentSize().background(PaperScrim))
             }
         }
 
@@ -202,14 +204,14 @@ private fun BoxScope.PhotoSlot(
                 Icon(
                     Icons.Outlined.AddPhotoAlternate,
                     contentDescription = "Add photo",
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                    tint = PaperInk.copy(alpha = 0.5f),
                     modifier = Modifier.size(30.dp),
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
                     "Add photo",
                     fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                    color = PaperInk.copy(alpha = 0.55f),
                 )
             }
         }

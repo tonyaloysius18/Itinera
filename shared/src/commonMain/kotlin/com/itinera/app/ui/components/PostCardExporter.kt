@@ -52,6 +52,8 @@ import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.decodeToImageBitmap
 import org.jetbrains.compose.resources.imageResource
 import kotlin.math.roundToInt
+import com.itinera.app.ui.theme.PaperInkMuted
+import com.itinera.app.ui.theme.PaperInk
 
 /**
  * Builds a single tall PNG-able ImageBitmap of the postcard: front face on top,
@@ -92,8 +94,8 @@ private const val B_BLOCK_W = 0.370f
 
 private data class SlotR(val x: Float, val y: Float, val w: Float, val h: Float)
 
-private val INK = Color(0xFF111111)
-private val INK_SOFT = Color(0xFF333333)
+private val INK = PaperInk
+private val INK_SOFT = PaperInkMuted
 
 /**
  * Composable that gathers everything needed (layer bitmaps, fonts, a density-1 text

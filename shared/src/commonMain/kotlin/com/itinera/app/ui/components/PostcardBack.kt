@@ -50,6 +50,9 @@ import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
+import com.itinera.app.ui.theme.PaperScrim
+import com.itinera.app.ui.theme.PaperInkMuted
+import com.itinera.app.ui.theme.PaperInk
 
 private const val PB_RATIO = 1748f / 1240f
 
@@ -133,7 +136,7 @@ fun PostcardBack(
         ) {
             BasicText(
                 text = "From  $country",
-                style = TextStyle(color = Color(0xFF111111), fontWeight = FontWeight.Normal, fontFamily = PostcardBackTitle),
+                style = TextStyle(color = PaperInk, fontWeight = FontWeight.Normal, fontFamily = PostcardBackTitle),
                 maxLines = 1,
                 autoSize = TextAutoSize.StepBased(9.sp, (mw.value * PB_LINE_MAX_FONT).sp, 0.5.sp),
             )
@@ -148,22 +151,22 @@ fun PostcardBack(
                 .width(mw * PB_BLOCK_W),
         ) {
             // Date
-            Text(s.dateLabel, fontFamily = PostcardBackTitle, fontSize = labelSize, color = Color(0xFF111111))
+            Text(s.dateLabel, fontFamily = PostcardBackTitle, fontSize = labelSize, color = PaperInk)
             Spacer(Modifier.height(mh * 0.004f))
-            Text(dateRange, fontFamily = PostcardBack, fontSize = valueSize, color = Color(0xFF333333),
+            Text(dateRange, fontFamily = PostcardBack, fontSize = valueSize, color = PaperInkMuted,
                 maxLines = 1, overflow = TextOverflow.Ellipsis)
-            HorizontalDivider(color = Color(0xFF111111), thickness = 1.dp)
+            HorizontalDivider(color = PaperInk, thickness = 1.dp)
 
             Spacer(Modifier.height(mh * 0.009f))
 
             // Trip Stats — single auto-sized line (shrinks to fit, never truncates)
-            Text(s.tripStats, fontFamily = PostcardBackTitle, fontSize = labelSize, color = Color(0xFF111111))
+            Text(s.tripStats, fontFamily = PostcardBackTitle, fontSize = labelSize, color = PaperInk)
             Spacer(Modifier.height(mh * 0.004f))
             val cWord = if (countriesCount == 1) s.countriesSingular else s.countriesPlural
             val dWord = if (daysCount == 1) s.daysSingular else s.daysPlural
             BasicText(
                 text = "$countriesCount $cWord · ${if (distanceKm > 0) "$distanceKm ${s.km}" else "– ${s.km}"} · $daysCount $dWord · $expensesLabel ",
-                style = TextStyle(color = Color(0xFF333333), fontFamily = PostcardBack),
+                style = TextStyle(color = PaperInkMuted, fontFamily = PostcardBack),
                 maxLines = 1,
                 autoSize = TextAutoSize.StepBased(
                     minFontSize = 7.sp,
@@ -171,29 +174,29 @@ fun PostcardBack(
                     stepSize = 0.5.sp,
                 ),
             )
-            HorizontalDivider(color = Color(0xFF111111), thickness = 1.dp)
+            HorizontalDivider(color = PaperInk, thickness = 1.dp)
 
             Spacer(Modifier.height(mh * 0.009f))
 
             // Travellers — one line when short, two when long
-            Text(s.travellersLabel, fontFamily = PostcardBackTitle, fontSize = labelSize, color = Color(0xFF111111))
+            Text(s.travellersLabel, fontFamily = PostcardBackTitle, fontSize = labelSize, color = PaperInk)
             Spacer(Modifier.height(mh * 0.004f))
             val joined = travellers.joinToString(", ")
             if (joined.length <= 32) {
-                Text(joined, fontFamily = PostcardBack, fontSize = valueSize, color = Color(0xFF333333),
+                Text(joined, fontFamily = PostcardBack, fontSize = valueSize, color = PaperInkMuted,
                     maxLines = 1, overflow = TextOverflow.Ellipsis)
-                HorizontalDivider(color = Color(0xFF111111), thickness = 1.dp)
+                HorizontalDivider(color = PaperInk, thickness = 1.dp)
             } else {
                 val half = (travellers.size + 1) / 2
                 Text(travellers.take(half).joinToString(", "),
-                    fontFamily = PostcardBack, fontSize = valueSize, color = Color(0xFF333333),
+                    fontFamily = PostcardBack, fontSize = valueSize, color = PaperInkMuted,
                     maxLines = 1, overflow = TextOverflow.Ellipsis)
-                HorizontalDivider(color = Color(0xFF111111), thickness = 1.dp)
+                HorizontalDivider(color = PaperInk, thickness = 1.dp)
                 Spacer(Modifier.height(mh * 0.008f))
                 Text(travellers.drop(half).joinToString(", "),
-                    fontFamily = PostcardBack, fontSize = valueSize, color = Color(0xFF333333),
+                    fontFamily = PostcardBack, fontSize = valueSize, color = PaperInkMuted,
                     maxLines = 1, overflow = TextOverflow.Ellipsis)
-                HorizontalDivider(color = Color(0xFF111111), thickness = 1.dp)
+                HorizontalDivider(color = PaperInk, thickness = 1.dp)
             }
         }
     }
@@ -242,7 +245,7 @@ private fun BoxScope.PhotoSlot(
                 },
         ) {
             if (photo != null) photo()
-            else Spacer(Modifier.matchParentSize().background(Color(0x22000000)))
+            else Spacer(Modifier.matchParentSize().background(PaperScrim))
         }
 
         if (photo == null) {
@@ -253,11 +256,11 @@ private fun BoxScope.PhotoSlot(
                 Icon(
                     Icons.Outlined.AddPhotoAlternate,
                     contentDescription = s.addPhoto,
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                    tint = PaperInk.copy(alpha = 0.5f),
                     modifier = Modifier.size(30.dp),
                 )
                 Spacer(Modifier.height(4.dp))
-                Text(s.addPhoto, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f))
+                Text(s.addPhoto, fontSize = 12.sp, color = PaperInk.copy(alpha = 0.55f))
             }
         }
     }

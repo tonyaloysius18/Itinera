@@ -60,23 +60,38 @@ import com.itinera.app.ReminderOffset
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.UserProfile
 import com.itinera.app.ui.components.TopBar
+import com.itinera.app.ui.theme.ChipAccount
+import com.itinera.app.ui.theme.ChipAppearance
+import com.itinera.app.ui.theme.ChipLanguage
+import com.itinera.app.ui.theme.ChipNotifications
+import com.itinera.app.ui.theme.ChipWorldClock
+import com.itinera.app.ui.theme.ChipWeather
+import com.itinera.app.ui.theme.ChipTranslate
+import com.itinera.app.ui.theme.ChipEmergency
+import com.itinera.app.ui.theme.ChipCompass
+import com.itinera.app.ui.theme.ChipArchive
+import com.itinera.app.ui.theme.ChipExport
+import com.itinera.app.ui.theme.ChipBackup
+import com.itinera.app.ui.theme.ChipHelp
+import com.itinera.app.ui.theme.ChipFeedback
+import com.itinera.app.ui.theme.ChipAbout
 
 
-private val ColorAccount = Color(0xFF007AFF)
-private val ColorAppearance = Color(0xFF5856D6)
-private val ColorLanguage = Color(0xFF34C759)
-private val ColorNotifications = Color(0xFFFF3B30)
-private val ColorWorldClock = Color(0xFF32ADE6)
-private val ColorWeather = Color(0xFFFFCC00)
-private val ColorTranslate = Color(0xFF5856D6)
-private val ColorEmergency = Color(0xFFFF2D55) // Slightly different red
-private val ColorCompass = Color(0xFF30B0C7)
-private val ColorArchive = Color(0xFF8E8E93)
-private val ColorExport = Color(0xFFFF9500)
-private val ColorBackup = Color(0xFF5AC8FA)
-private val ColorHelp = Color(0xFF5856D6)
-private val ColorFeedback = Color(0xFF34C759)
-private val ColorAbout = Color(0xFF8E8E93)
+private val ColorAccount = ChipAccount
+private val ColorAppearance = ChipAppearance
+private val ColorLanguage = ChipLanguage
+private val ColorNotifications = ChipNotifications
+private val ColorWorldClock = ChipWorldClock
+private val ColorWeather = ChipWeather
+private val ColorTranslate = ChipTranslate
+private val ColorEmergency = ChipEmergency
+private val ColorCompass = ChipCompass
+private val ColorArchive = ChipArchive
+private val ColorExport = ChipExport
+private val ColorBackup = ChipBackup
+private val ColorHelp = ChipHelp
+private val ColorFeedback = ChipFeedback
+private val ColorAbout = ChipAbout
 
 @Composable
 fun SettingsScreen(

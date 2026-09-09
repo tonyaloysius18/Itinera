@@ -94,6 +94,7 @@ import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.time.Clock
 import kotlin.time.Instant
+import com.itinera.app.ui.theme.itinera
 
 /** "Europe/Paris" -> "Paris", "America/New_York" -> "New York". */
 private fun friendlyZone(id: String): String =
@@ -327,7 +328,7 @@ private fun SwipeableClockCard(
                         .padding(start = gap),
                 ) {
                     ActionButton(
-                        Icons.Filled.Delete, s.delete, Color(0xFFB23B3B), progress,
+                        Icons.Filled.Delete, s.delete, MaterialTheme.itinera.actionDelete, progress,
                         Modifier.weight(1f),
                     ) { animateOutThenDelete() }
                 }
@@ -377,8 +378,6 @@ private fun SwipeableClockCard(
 }
 
 /** Warm for day, cool for night — answers "can I call them?" without reading the clock. */
-private val DayTint = Color(0xFFE0A93C)
-private val NightTint = Color(0xFF9B92DD)
 
 /**
  * Signed offset in minutes between a zone and home. Positive = ahead.
@@ -624,13 +623,13 @@ private fun ClockRow(
                 Modifier
                     .size(36.dp)
                     .clip(CircleShape)
-                    .background((if (isDay) DayTint else NightTint).copy(alpha = 0.16f)),
+                    .background((if (isDay) MaterialTheme.itinera.dayTint else MaterialTheme.itinera.nightTint).copy(alpha = 0.16f)),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     if (isDay) Icons.Filled.WbSunny else Icons.Filled.NightlightRound,
                     contentDescription = null,
-                    tint = if (isDay) DayTint else NightTint,
+                    tint = if (isDay) MaterialTheme.itinera.dayTint else MaterialTheme.itinera.nightTint,
                     modifier = Modifier.size(18.dp),
                 )
             }
@@ -659,7 +658,7 @@ private fun ClockRow(
                         Text(
                             " · " + if (dayShift > 0) s.tomorrow else s.yesterday,
                             style = MaterialTheme.typography.labelSmall,
-                            color = if (dayShift > 0) DayTint else NightTint,
+                            color = if (dayShift > 0) MaterialTheme.itinera.dayTint else MaterialTheme.itinera.nightTint,
                         )
                     }
                 }

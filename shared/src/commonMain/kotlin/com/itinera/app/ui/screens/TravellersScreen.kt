@@ -87,12 +87,10 @@ import com.itinera.app.ui.components.TopBar
 import com.itinera.app.ui.components.TravellerAvatar
 import com.itinera.app.ui.components.painter
 import kotlin.random.Random
+import com.itinera.app.ui.theme.itinera
+import com.itinera.app.ui.theme.TravellerAvatarPalette
 
-private val AVATAR_COLORS = listOf(
-    Color(0xFF5C7CFA), Color(0xFF51CF66), Color(0xFFFF922B),
-    Color(0xFFE64980), Color(0xFF22B8CF), Color(0xFFBE4BDB),
-    Color(0xFFFAB005), Color(0xFF20C997),
-)
+private val AVATAR_COLORS = TravellerAvatarPalette
 
 /**
  * ⬅ CHANGED — was AVATAR_COLORS[colorIndex % size], but colorIndex is assigned
@@ -303,7 +301,7 @@ fun TravellersScreen(
             text = { Text(t.fullName) },
             confirmButton = {
                 TextButton(onClick = { onDelete(t.id); pendingDelete = null }) {
-                    Text(s.delete, color = Color(0xFFE03131))
+                    Text(s.delete, color = MaterialTheme.itinera.destructive)
                 }
             },
             dismissButton = { TextButton(onClick = { pendingDelete = null }) { Text(s.cancel) } },
@@ -330,7 +328,7 @@ fun TravellersScreen(
             text = { Text(s.blockMemberDesc) },
             confirmButton = {
                 TextButton(onClick = { blockTarget = null; onBlock(uid); onMessage(s.memberBlocked) }) {
-                    Text(s.block, color = Color(0xFFE03131))
+                    Text(s.block, color = MaterialTheme.itinera.destructive)
                 }
             },
             dismissButton = { TextButton(onClick = { blockTarget = null }) { Text(s.cancel) } },
@@ -404,7 +402,7 @@ private fun ReportMemberDialog(
         },
         confirmButton = {
             TextButton(onClick = { onSubmit(selected, details) }) {
-                Text(s.reportSubmit, color = Color(0xFFE03131))
+                Text(s.reportSubmit, color = MaterialTheme.itinera.destructive)
             }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(s.cancel) } },

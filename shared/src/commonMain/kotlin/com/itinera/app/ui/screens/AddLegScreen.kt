@@ -1,5 +1,6 @@
 package com.itinera.app.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -66,6 +67,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.painterResource
+
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.Leg
 import com.itinera.app.model.LegStop
@@ -119,10 +122,11 @@ fun AddLegScreen(
 
     val operatorLabel = when (transport) {
         TransportType.FLIGHT -> s.flightOperator
+        TransportType.CAR -> s.operatorGeneric
         TransportType.TRAIN -> s.trainOperator
         TransportType.BUS -> s.busOperator
         TransportType.FERRY -> s.ferryOperator
-        TransportType.CAR -> s.operatorGeneric
+
     }
 
     fun String.toTitleCase(): String =
@@ -162,6 +166,7 @@ fun AddLegScreen(
                         TransportType.TRAIN to s.trainLabel,
                         TransportType.BUS to s.busLabel,
                         TransportType.FERRY to s.ferryLabel,
+                        TransportType.CAR to s.carLabel,
                     ).forEach { (t, label) ->
                         val selected = transport == t
                         Column(
@@ -182,12 +187,10 @@ fun AddLegScreen(
                                 .padding(vertical = 9.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
-                            Icon(
-                                transportIcon(t),
+                            Image(
+                                painter = painterResource(transportResource(t)),
                                 contentDescription = null,
-                                tint = if (selected) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                                modifier = Modifier.size(20.dp),
+                                modifier = Modifier.size(32.dp),
                             )
                             Spacer(Modifier.height(3.dp))
                             Text(

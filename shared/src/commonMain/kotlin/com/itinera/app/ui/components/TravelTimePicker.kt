@@ -57,6 +57,25 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.math.roundToInt
 import kotlin.time.Clock
+import com.itinera.app.ui.theme.MoonDisc
+import com.itinera.app.ui.theme.SkyDaytimeEnd
+import com.itinera.app.ui.theme.SkyDaytimeForeground
+import com.itinera.app.ui.theme.SkyDaytimeMiddle
+import com.itinera.app.ui.theme.SkyDaytimeStart
+import com.itinera.app.ui.theme.SkyDuskEnd
+import com.itinera.app.ui.theme.SkyDuskForeground
+import com.itinera.app.ui.theme.SkyDuskMiddle
+import com.itinera.app.ui.theme.SkyDuskStart
+import com.itinera.app.ui.theme.SkyNightEnd
+import com.itinera.app.ui.theme.SkyNightForeground
+import com.itinera.app.ui.theme.SkyNightMiddle
+import com.itinera.app.ui.theme.SkyNightStart
+import com.itinera.app.ui.theme.SkySunriseEnd
+import com.itinera.app.ui.theme.SkySunriseForeground
+import com.itinera.app.ui.theme.SkySunriseMiddle
+import com.itinera.app.ui.theme.SkySunriseStart
+import com.itinera.app.ui.theme.SunDisc
+import com.itinera.app.ui.theme.SunRay
 
 private const val MinutesPerDay = 24 * 60
 private const val MinuteStep = 1
@@ -340,7 +359,7 @@ private fun TimeOfDayScene(
             val inner = sunRadius * 1.45f
             val outer = sunRadius * 1.85f
             drawLine(
-                color = Color(0xFFFFF3B0).copy(alpha = 0.72f * sunAlpha),
+                color = SunRay.copy(alpha = 0.72f * sunAlpha),
                 start = androidx.compose.ui.geometry.Offset(
                     sunCenter.x + kotlin.math.cos(angle) * inner,
                     sunCenter.y + kotlin.math.sin(angle) * inner,
@@ -354,7 +373,7 @@ private fun TimeOfDayScene(
             )
         }
         drawCircle(
-            color = Color(0xFFFFF1A8).copy(alpha = sunAlpha),
+            color = SunDisc.copy(alpha = sunAlpha),
             radius = sunRadius,
             center = sunCenter,
         )
@@ -368,7 +387,7 @@ private fun TimeOfDayScene(
         )
         val moonRadius = 11.dp.toPx()
         drawCircle(
-            color = Color(0xFFFFF5CC).copy(alpha = moonAlpha),
+            color = MoonDisc.copy(alpha = moonAlpha),
             radius = moonRadius,
             center = moonCenter,
         )
@@ -386,28 +405,28 @@ private fun TimeOfDayScene(
 @Composable
 private fun timeBasedTimelinePalette(dayMinutes: Int): TimelinePalette {
     val night = TimelinePalette(
-        start = Color(0xFF071426),
-        middle = Color(0xFF102E5C),
-        end = Color(0xFF1D467A),
-        foreground = Color(0xFFF8FAFC),
+        start = SkyNightStart,
+        middle = SkyNightMiddle,
+        end = SkyNightEnd,
+        foreground = SkyNightForeground,
     )
     val sunrise = TimelinePalette(
-        start = Color(0xFFF59E0B),
-        middle = Color(0xFFFFC83D),
-        end = Color(0xFFFFE8A3),
-        foreground = Color(0xFF3D2B00),
+        start = SkySunriseStart,
+        middle = SkySunriseMiddle,
+        end = SkySunriseEnd,
+        foreground = SkySunriseForeground,
     )
     val daytime = TimelinePalette(
-        start = Color(0xFFFBBF24),
-        middle = Color(0xFFFDE047),
-        end = Color(0xFFFFF3C4),
-        foreground = Color(0xFF352600),
+        start = SkyDaytimeStart,
+        middle = SkyDaytimeMiddle,
+        end = SkyDaytimeEnd,
+        foreground = SkyDaytimeForeground,
     )
     val dusk = TimelinePalette(
-        start = Color(0xFFF59E0B),
-        middle = Color(0xFFB453C6),
-        end = Color(0xFF243A78),
-        foreground = Color(0xFFF8FAFC),
+        start = SkyDuskStart,
+        middle = SkyDuskMiddle,
+        end = SkyDuskEnd,
+        foreground = SkyDuskForeground,
     )
     val keyframes = listOf(
         0 to night,

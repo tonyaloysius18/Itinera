@@ -52,9 +52,11 @@ import com.itinera.app.data.RememberedAccount
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.UserProfile
 import com.itinera.app.ui.components.TopBar
+import com.itinera.app.ui.theme.itinera
 
 
-private val AccentRed = Color(0xFFE03131)
+private val AccentRed: Color
+    @Composable get() = MaterialTheme.itinera.destructive
 
 @Composable
 fun AccountScreen(

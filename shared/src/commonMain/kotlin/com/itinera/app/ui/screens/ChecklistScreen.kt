@@ -86,6 +86,8 @@ import com.itinera.app.data.PackingSuggestion
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import com.itinera.app.ui.components.TopBar
+import com.itinera.app.ui.theme.itinera
+import com.itinera.app.ui.theme.SwipeDeleteFill
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -297,7 +299,7 @@ fun ChecklistScreen(
 @Composable
 private fun ProgressRing(fraction: Float, percentLabel: String, size: Dp = 48.dp) {
     val track = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-    val done = Color(0xFF1D9E75)
+    val done = MaterialTheme.itinera.success
     Box(Modifier.size(size), contentAlignment = Alignment.Center) {
         Canvas(Modifier.fillMaxSize()) {
             val stroke = 4.dp.toPx()
@@ -444,7 +446,7 @@ private fun ChecklistRow(
     Box(Modifier.fillMaxWidth()) {
         if (offsetX.value != 0f) {
             Row(
-                Modifier.matchParentSize().background(Color(0xFF7A2E2E)),
+                Modifier.matchParentSize().background(SwipeDeleteFill),
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -497,7 +499,7 @@ private fun ChecklistRow(
                 Modifier
                     .size(20.dp)
                     .clip(RoundedCornerShape(6.dp))
-                    .background(if (item.done) Color(0xFF1D9E75) else Color.Transparent)
+                    .background(if (item.done) MaterialTheme.itinera.success else Color.Transparent)
                     .border(
                         width = if (item.done) 0.dp else 1.5.dp,
                         color = if (item.done) Color.Transparent

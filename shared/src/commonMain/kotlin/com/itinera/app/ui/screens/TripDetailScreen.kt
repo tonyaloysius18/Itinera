@@ -149,6 +149,8 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.daysUntil
 import org.jetbrains.compose.resources.Font
 import kotlin.math.roundToInt
+import com.itinera.app.ui.theme.itinera
+import com.itinera.app.ui.theme.OverlayControlScrim
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -707,8 +709,8 @@ fun TripDetailScreen(
                                                                 onClick = { showMenu = false; onEditLeg(leg.id) },
                                                             )
                                                             DropdownMenuItem(
-                                                                text = { Text(s.delete, color = Color(0xFFE03131)) },
-                                                                leadingIcon = { Icon(Icons.Filled.Delete, null, tint = Color(0xFFE03131)) },
+                                                                text = { Text(s.delete, color = MaterialTheme.itinera.destructive) },
+                                                                leadingIcon = { Icon(Icons.Filled.Delete, null, tint = MaterialTheme.itinera.destructive) },
                                                                 onClick = { showMenu = false; pendingDeleteLegId = leg.id },
                                                             )
                                                         }
@@ -801,8 +803,8 @@ fun TripDetailScreen(
                                                                 onClick = { showMenu = false; onEditActivity(act.id) },
                                                             )
                                                             DropdownMenuItem(
-                                                                text = { Text(s.delete, color = Color(0xFFE03131)) },
-                                                                leadingIcon = { Icon(Icons.Filled.Delete, null, tint = Color(0xFFE03131)) },
+                                                                text = { Text(s.delete, color = MaterialTheme.itinera.destructive) },
+                                                                leadingIcon = { Icon(Icons.Filled.Delete, null, tint = MaterialTheme.itinera.destructive) },
                                                                 onClick = { showMenu = false; pendingDeleteActivityId = act.id },
                                                             )
                                                         }
@@ -948,7 +950,7 @@ fun TripDetailScreen(
                 text = { Text(s.cantBeUndone) },
                 confirmButton = {
                     TextButton(onClick = { onDeleteLeg(pendingDeleteLegId!!); pendingDeleteLegId = null }) {
-                        Text(s.delete, color = Color(0xFFE03131))
+                        Text(s.delete, color = MaterialTheme.itinera.destructive)
                     }
                 },
                 dismissButton = { TextButton(onClick = { pendingDeleteLegId = null }) { Text(s.cancel) } },
@@ -962,7 +964,7 @@ fun TripDetailScreen(
                 text = { Text(s.cantBeUndone) },
                 confirmButton = {
                     TextButton(onClick = { onDeleteActivity(pendingDeleteActivityId!!); pendingDeleteActivityId = null }) {
-                        Text(s.delete, color = Color(0xFFE03131))
+                        Text(s.delete, color = MaterialTheme.itinera.destructive)
                     }
                 },
                 dismissButton = { TextButton(onClick = { pendingDeleteActivityId = null }) { Text(s.cancel) } },
@@ -1102,7 +1104,7 @@ fun TripDetailScreen(
                                             }
                                         }
                                     },
-                                    modifier = Modifier.background(Color(0xFF333333).copy(alpha = 0.5f), CircleShape),
+                                    modifier = Modifier.background(OverlayControlScrim.copy(alpha = 0.5f), CircleShape),
                                 ) {
                                     if (exporting)
                                         CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = Color.White)
@@ -1111,7 +1113,7 @@ fun TripDetailScreen(
                                 }
                                 IconButton(
                                     onClick = { showPostcard = false },
-                                    modifier = Modifier.background(Color(0xFF333333).copy(alpha = 0.5f), CircleShape),
+                                    modifier = Modifier.background(OverlayControlScrim.copy(alpha = 0.5f), CircleShape),
                                 ) {
                                     Icon(Icons.Default.Close, contentDescription = s.close, tint = Color.White)
                                 }
@@ -1283,7 +1285,7 @@ private fun TimelineMarker(
     highlighted: Boolean,
     icon: ImageVector,
 ) {
-    val done = Color(0xFF1D9E75)
+    val done = MaterialTheme.itinera.success
     val primary = MaterialTheme.colorScheme.primary
     Box(
         Modifier

@@ -60,6 +60,7 @@ import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.ui.components.PlaneLoader
 import com.itinera.app.ui.components.TopBar
 import kotlinx.coroutines.launch
+import com.itinera.app.ui.theme.itinera
 
 /*
  * ─── New string keys (EN + FR) ──────────────────────────────────────────────
@@ -367,9 +368,8 @@ private fun PasswordField(
     }
 }
 
-private val StrengthWeak = Color(0xFFD8703C)
-private val StrengthFair = Color(0xFFE0A93C)
-private val StrengthStrong = Color(0xFF1D9E75)
+private val StrengthStrong: Color
+    @Composable get() = MaterialTheme.itinera.success
 
 /** Four segments, one per requirement met — no arbitrary scoring. */
 @Composable
@@ -377,9 +377,9 @@ private fun StrengthMeter(metCount: Int) {
     val s = LocalStrings.current
     val color = when (metCount) {
         4 -> StrengthStrong
-        3 -> StrengthFair
-        2 -> StrengthFair
-        else -> StrengthWeak
+        3 -> MaterialTheme.itinera.strengthFair
+        2 -> MaterialTheme.itinera.strengthFair
+        else -> MaterialTheme.itinera.strengthWeak
     }
     val label = when (metCount) {
         4 -> s.strengthStrong

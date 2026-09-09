@@ -47,8 +47,9 @@ import com.itinera.app.deviceRegion
 import com.itinera.app.dial
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.ui.components.TopBar
+import com.itinera.app.ui.theme.SosRedFill
 
-private val SosRed = Color(0xFFD32F2F)
+private val SosRed = SosRedFill
 
 @Composable
 fun EmergencyScreen(onBack: () -> Unit) {

@@ -281,6 +281,7 @@ class Strings {
     var trainLabel: String = ""
     var busLabel: String = ""
     var ferryLabel: String = ""
+    var carLabel: String = ""
     var country: String = ""
     var search: String = ""
     var searchCurrencies: String = ""
@@ -968,6 +969,7 @@ class Strings {
         c.trainLabel = this.trainLabel
         c.busLabel = this.busLabel
         c.ferryLabel = this.ferryLabel
+        c.carLabel = this.carLabel
         c.country = this.country
         c.search = this.search
         c.searchCurrencies = this.searchCurrencies

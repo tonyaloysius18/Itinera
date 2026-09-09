@@ -60,6 +60,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
+import com.itinera.app.ui.theme.itinera
 
 /*
  * ─── New string keys (EN + FR) ──────────────────────────────────────────────
@@ -510,7 +511,7 @@ private fun AgendaRow(
             Spacer(Modifier.width(8.dp))
             // ⬅ CHANGED — was a bare icon where dim meant "already added", which
             // reads as disabled. Now the state says what it is.
-            val green = Color(0xFF1D9E75)
+            val green = MaterialTheme.itinera.success
             Surface(
                 shape = RoundedCornerShape(20.dp),
                 color = if (added) green.copy(alpha = 0.14f) else Color.Transparent,

@@ -110,6 +110,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import com.itinera.app.ui.theme.itinera
 private enum class ExpenseLens { Timeline, Categories, Balances }
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
@@ -387,7 +388,7 @@ private fun SummaryHero(
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = CardShape,
-        color = MaterialTheme.colorScheme.surfaceVariant,
+        color = MaterialTheme.itinera.expenseCardSurface,
     ) {
         Column(Modifier.fillMaxWidth().padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -596,7 +597,7 @@ private fun CategoryBreakdownRow(
     Surface(
         modifier = modifier.fillMaxWidth().clickable { onClick() },
         shape = CardShape,
-        color = MaterialTheme.colorScheme.surface,
+        color = MaterialTheme.itinera.expenseCardSurface,
         border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
     ) {
         Column(Modifier.fillMaxWidth().padding(14.dp)) {
@@ -751,7 +752,7 @@ private fun ExpenseRow(
         Surface(
             modifier = Modifier.fillMaxWidth().animateContentSize(),
             shape = CardShape,
-            color = MaterialTheme.colorScheme.surface,
+            color = MaterialTheme.itinera.expenseCardSurface,
             border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
         ) {
             Column {
@@ -861,7 +862,7 @@ private fun LazyListScope.balancesLens(
 
         Surface(
             shape = CardShape,
-            color = MaterialTheme.colorScheme.surface,
+            color = MaterialTheme.itinera.expenseCardSurface,
             border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         ) {
@@ -1056,7 +1057,7 @@ private fun YourSettlementCard(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+        color = MaterialTheme.itinera.expenseCardSurface,
     ) {
         Column(Modifier.fillMaxWidth().padding(12.dp)) {
             Text(
@@ -1185,7 +1186,7 @@ private fun CollapsibleBalanceCard(
     var expanded by rememberSaveable { mutableStateOf(false) }
     Surface(
         shape = CardShape,
-        color = MaterialTheme.colorScheme.surface,
+        color = MaterialTheme.itinera.expenseCardSurface,
         border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
         modifier = modifier.fillMaxWidth().animateContentSize(),
     ) {
@@ -1266,8 +1267,7 @@ private fun SettledBanner(
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = CardShape,
-        color = if (owes) MaterialTheme.colorScheme.primaryContainer
-        else MaterialTheme.colorScheme.surfaceVariant,
+        color = MaterialTheme.itinera.expenseCardSurface,
     ) {
         Row(
             Modifier.fillMaxWidth().padding(16.dp),
@@ -1665,7 +1665,7 @@ private fun ExpenseDeleteButton(progress: Float, modifier: Modifier = Modifier, 
             Modifier.size(52.dp)
                 .graphicsLayer { scaleX = progress; scaleY = progress; alpha = progress }
                 .clip(CircleShape)
-                .background(Color(0xFFB23B3B)),
+                .background(MaterialTheme.itinera.actionDelete),
             contentAlignment = Alignment.Center,
         ) {
             Icon(

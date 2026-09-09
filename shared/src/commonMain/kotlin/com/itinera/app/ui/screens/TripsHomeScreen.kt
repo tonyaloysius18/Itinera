@@ -6,6 +6,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -63,9 +64,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import com.itinera.app.ui.theme.itinera
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
@@ -92,11 +96,12 @@ import kotlinx.coroutines.launch
 import kotlin.time.Clock
 import kotlin.math.roundToInt
 
+@Composable
 fun accentColor(accent: TripAccent): Color = when (accent) {
-    TripAccent.BLUE -> Color(0xFF378ADD)
-    TripAccent.GREEN -> Color(0xFF639922)
-    TripAccent.CORAL -> Color(0xFFD85A30)
-    TripAccent.PURPLE -> Color(0xFF7F77DD)
+    TripAccent.BLUE -> MaterialTheme.itinera.accentBlue
+    TripAccent.GREEN -> MaterialTheme.itinera.accentGreen
+    TripAccent.CORAL -> MaterialTheme.itinera.accentCoral
+    TripAccent.PURPLE -> MaterialTheme.itinera.accentPurple
 }
 
 @Composable
@@ -113,6 +118,8 @@ fun TripsHomeScreen(
     onArchiveTrip: (String) -> Unit,
     onDeleteTrip: (String) -> Unit,
     pinnedTripIds: Set<String> = emptySet(),
+    /** Incremented by the nav bar's search button; each change opens the search field. */
+    searchRequest: Int = 0,
 ) {
 
     val s = LocalStrings.current
@@ -126,6 +133,17 @@ fun TripsHomeScreen(
 
     var searchActive by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
+    val searchFocusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(searchRequest) {
+        if (searchRequest > 0) searchActive = true
+    }
+    // Opening the inline search from the floating nav button is a two-step
+    // composition: first the field becomes visible, then it can accept focus.
+    // Waiting for searchActive guarantees the requester is attached.
+    LaunchedEffect(searchActive) {
+        if (searchActive) searchFocusRequester.requestFocus()
+    }
 
     val visibleTrips = if (query.isBlank()) trips
     else trips.filter { it.title.contains(query.trim(), ignoreCase = true) }
@@ -145,22 +163,41 @@ fun TripsHomeScreen(
 
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
-            TopBar(s.myTrips.toTitleCase(), trailing = {
-                IconButton(onClick = { searchActive = !searchActive; if (!searchActive) query = "" }) {
-                    Icon(if (searchActive) Icons.Filled.Close else Icons.Filled.Search, contentDescription = s.search)
-                }
-            })
+            TopBar(s.myTrips.toTitleCase())
             if (searchActive) {
-                // ⬅ CHANGED — was an OutlinedTextField, visually heavier than
-                // everything around it. Matches the search pill on Documents.
-                TripSearchField(
-                    value = query,
-                    // ⬅ CHANGED — was query = it.toTitleCase(), which fought anyone
-                    // typing. The filter is already ignoreCase, so it bought nothing.
-                    onValueChange = { query = it },
-                    onClear = { query = "" },
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    TripSearchField(
+                        value = query,
+                        // Preserve exactly what the user types; matching is already
+                        // case-insensitive.
+                        onValueChange = { query = it },
+                        focusRequester = searchFocusRequester,
+                        modifier = Modifier.weight(1f),
+                    )
+                    IconButton(
+                        onClick = {
+                            query = ""
+                            searchActive = false
+                        },
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
+                                shape = CircleShape
+                            )
+                    ) {
+                        Icon(
+                            Icons.Filled.Close,
+                            contentDescription = s.close,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
             }
             Spacer(Modifier.height(12.dp))
 
@@ -275,7 +312,7 @@ fun TripsHomeScreen(
             text = { Text(s.cantBeUndone) },
             confirmButton = {
                 TextButton(onClick = { onDeleteTrip(pendingDeleteId!!); pendingDeleteId = null }) {
-                    Text(s.delete, color = Color(0xFFE03131))
+                    Text(s.delete, color = MaterialTheme.itinera.destructive)
                 }
             },
             dismissButton = { TextButton(onClick = { pendingDeleteId = null }) { Text(s.cancel) } },
@@ -462,16 +499,16 @@ private fun SwipeableTripCard(
             ) {
                 if (isOwner) {
                     Row(Modifier.weight(1f)) {
-                        ActionButton(Icons.Filled.PushPin, if (isPinned) s.unpin else s.pin, Color(0xFF4F7CC0), progress, Modifier.weight(1f), onPin)
-                        ActionButton(Icons.Filled.Edit, s.edit, Color(0xFF5B8A4B), progress, Modifier.weight(1f), onEdit)
+                        ActionButton(Icons.Filled.PushPin, if (isPinned) s.unpin else s.pin, MaterialTheme.itinera.actionPin, progress, Modifier.weight(1f), onPin)
+                        ActionButton(Icons.Filled.Edit, s.edit, MaterialTheme.itinera.actionEdit, progress, Modifier.weight(1f), onEdit)
                     }
                     Row(Modifier.weight(1f)) {
-                        ActionButton(Icons.Filled.Archive, s.archive, Color(0xFF8A7B3B), progress, Modifier.weight(1f)) { animateOutThen(onArchive) }
-                        ActionButton(Icons.Filled.Delete, s.delete, Color(0xFFB23B3B), progress, Modifier.weight(1f), onDelete)
+                        ActionButton(Icons.Filled.Archive, s.archive, MaterialTheme.itinera.actionArchive, progress, Modifier.weight(1f)) { animateOutThen(onArchive) }
+                        ActionButton(Icons.Filled.Delete, s.delete, MaterialTheme.itinera.actionDelete, progress, Modifier.weight(1f), onDelete)
                     }
                 } else {
-                    ActionButton(Icons.Filled.PushPin, if (isPinned) s.unpin else s.pin, Color(0xFF4F7CC0), progress, Modifier.weight(1f), onPin)
-                    ActionButton(Icons.Filled.Archive, s.archive, Color(0xFF8A7B3B), progress, Modifier.weight(1f)) { animateOutThen(onArchive) }
+                    ActionButton(Icons.Filled.PushPin, if (isPinned) s.unpin else s.pin, MaterialTheme.itinera.actionPin, progress, Modifier.weight(1f), onPin)
+                    ActionButton(Icons.Filled.Archive, s.archive, MaterialTheme.itinera.actionArchive, progress, Modifier.weight(1f)) { animateOutThen(onArchive) }
                 }
             }
         }
@@ -639,7 +676,7 @@ fun TripCardContent(
                 Icon(
                     Icons.Filled.CheckCircle,
                     contentDescription = null,
-                    tint = DoneGreen,
+                    tint = MaterialTheme.itinera.success,
                     modifier = Modifier.size(18.dp),
                 )
             }
@@ -684,20 +721,26 @@ fun TripCardContent(
                     )
                 }
 
-                Row(Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                    val labelColor = if (trip.imageUrl != null) Color.White else accent
-                    if (isPinned) {
-                        Icon(Icons.Filled.PushPin, null, tint = labelColor, modifier = Modifier.size(14.dp))
-                        Spacer(Modifier.width(6.dp))
+                Surface(
+                    shape = CircleShape,
+                    color = Color.Black.copy(alpha = 0.35f),
+                    modifier = Modifier.align(Alignment.BottomStart).padding(10.dp)
+                ) {
+                    Row(Modifier.padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                        val labelColor = Color.White
+                        if (isPinned) {
+                            Icon(Icons.Filled.PushPin, null, tint = labelColor, modifier = Modifier.size(12.dp))
+                            Spacer(Modifier.width(6.dp))
+                        }
+                        Icon(Icons.Filled.Place, null, tint = labelColor, modifier = Modifier.size(14.dp))
+                        Spacer(Modifier.width(4.dp))
+                        val countryCount = trip.legs
+                            .map { it.country }
+                            .filter { it.isNotBlank() }
+                            .distinct()
+                            .size
+                        Text("$countryCount $countriesWord", color = labelColor, style = MaterialTheme.typography.labelSmall)
                     }
-                    Icon(Icons.Filled.Place, null, tint = labelColor, modifier = Modifier.size(16.dp))
-                    Spacer(Modifier.width(4.dp))
-                    val countryCount = trip.legs
-                        .map { it.country }
-                        .filter { it.isNotBlank() }
-                        .distinct()
-                        .size
-                    Text("$countryCount $countriesWord", color = labelColor, style = MaterialTheme.typography.labelMedium)
                 }
 
                 Row(
@@ -764,7 +807,7 @@ fun TripCardContent(
                                 Modifier
                                     .fillMaxWidth(doneCount.toFloat() / trip.legs.size)
                                     .fillMaxHeight()
-                                    .background(if (doneCount == trip.legs.size) DoneGreen else accent),
+                                    .background(if (doneCount == trip.legs.size) MaterialTheme.itinera.success else accent),
                             )
                         }
                         Spacer(Modifier.width(9.dp))
@@ -827,8 +870,6 @@ fun TripNameDialog(
 // Trip phase, status, and the pieces the card and list are built from
 // ─────────────────────────────────────────────────────────────────────────────
 
-internal val DoneGreen = Color(0xFF1D9E75)
-
 enum class TripPhase { IN_PROGRESS, UPCOMING, PAST }
 
 /**
@@ -869,7 +910,7 @@ internal fun statusLabel(trip: Trip, today: LocalDate, phase: TripPhase): String
 
 @Composable
 private fun StatusBadge(label: String, inProgress: Boolean, modifier: Modifier = Modifier) {
-    val bg = if (inProgress) DoneGreen else MaterialTheme.colorScheme.primary
+    val bg = if (inProgress) MaterialTheme.itinera.success else MaterialTheme.colorScheme.primary
     Surface(shape = CircleShape, color = bg, modifier = modifier) {
         Row(
             Modifier.padding(horizontal = 9.dp, vertical = 3.dp),
@@ -889,11 +930,6 @@ private fun StatusBadge(label: String, inProgress: Boolean, modifier: Modifier =
     }
 }
 
-private val AvatarColors = listOf(
-    Color(0xFF85B7EB), Color(0xFFC9A0DC), Color(0xFF8FD1B6),
-    Color(0xFFE8B87A), Color(0xFFE49AAE), Color(0xFF9FB8E8),
-)
-
 /** Overlapping initials, capped at three plus an overflow count. */
 @Composable
 private fun AvatarStack(travellers: List<com.itinera.app.model.Traveller>, max: Int = 3) {
@@ -908,7 +944,12 @@ private fun AvatarStack(travellers: List<com.itinera.app.model.Traveller>, max: 
                     .offset(x = if (index == 0) 0.dp else (-8 * index).dp)
                     .size(26.dp)
                     .clip(CircleShape)
-                    .background(AvatarColors[t.colorIndex.mod(AvatarColors.size)]),
+                    .background(
+                        MaterialTheme.itinera.avatarPalette.let {
+                            it[t.colorIndex.mod(it.size)]
+                        }
+                    )
+                    .border(0.5.dp, Color.Black.copy(alpha = 0.1f), CircleShape),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
@@ -941,20 +982,27 @@ private fun AvatarStack(travellers: List<com.itinera.app.model.Traveller>, max: 
 private fun SectionHeader(label: String, count: Int) {
     Row(
         Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, top = 6.dp, bottom = 2.dp),
-        verticalAlignment = Alignment.Bottom,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             label,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
         )
-        Spacer(Modifier.width(9.dp))
-        Text(
-            "$count",
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-            modifier = Modifier.padding(bottom = 2.dp),
-        )
+        Spacer(Modifier.width(10.dp))
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+            border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)),
+        ) {
+            Text(
+                "$count",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+            )
+        }
     }
 }
 
@@ -962,7 +1010,7 @@ private fun SectionHeader(label: String, count: Int) {
 private fun TripSearchField(
     value: String,
     onValueChange: (String) -> Unit,
-    onClear: () -> Unit,
+    focusRequester: FocusRequester,
     modifier: Modifier = Modifier,
 ) {
     val s = LocalStrings.current
@@ -988,17 +1036,7 @@ private fun TripSearchField(
                     singleLine = true,
                     textStyle = MaterialTheme.typography.bodyMedium.copy(color = onSurface),
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
-            if (value.isNotEmpty()) {
-                Icon(
-                    Icons.Filled.Close, s.clear,
-                    tint = onSurface.copy(alpha = 0.5f),
-                    modifier = Modifier.size(18.dp).clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() },
-                    ) { onClear() },
+                    modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
                 )
             }
         }

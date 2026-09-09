@@ -142,7 +142,7 @@ fun DocumentViewerScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.InsertDriveFile, null, modifier = Modifier.size(96.dp), tint = Color(0xFF8A8A8A))
+                        Icon(Icons.AutoMirrored.Filled.InsertDriveFile, null, modifier = Modifier.size(96.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(Modifier.height(12.dp))
                         Text(doc.title, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
                         if (doc.fileName.isNotBlank()) {

@@ -26,6 +26,7 @@ import com.itinera.app.model.Expense
 import com.itinera.app.model.Trip
 import com.itinera.app.ui.components.CardShape
 import com.itinera.app.ui.components.TopBar
+import com.itinera.app.ui.theme.itinera
 
 @Composable
 fun SplitScreen(
@@ -85,6 +86,7 @@ fun SplitScreen(
                     Surface(
                         modifier = Modifier.fillMaxWidth().clickable { onOpenTrip(trip.id) },
                         shape = CardShape,
+                        color = MaterialTheme.itinera.expenseCardSurface,
                         border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
                     ) {
                         Row(

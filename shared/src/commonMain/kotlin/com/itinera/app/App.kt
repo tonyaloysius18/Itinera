@@ -60,6 +60,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.TransformOrigin
@@ -136,13 +137,20 @@ import com.itinera.app.ui.screens.WeatherScreen
 import com.itinera.app.ui.screens.WorldClockScreen
 import com.itinera.app.ui.screens.formatMoney
 import com.itinera.app.ui.screens.languageForCountry
+import com.itinera.app.ui.theme.ItineraTheme
 import com.itinera.app.ui.theme.ThemeMode
+import com.itinera.app.ui.theme.itinera
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlin.math.abs
 import kotlin.time.Clock
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.foundation.border
 
 
 /**
@@ -229,27 +237,30 @@ fun App() {
     // 2. Authentication check has finished
     val readyToEnterApp = startupFinished && authChecked
 
-    Crossfade(
-        targetState = readyToEnterApp,
-        animationSpec = tween(
-            durationMillis = 350
-        ),
-        label = "StartupToApp"
-    ) { appReady ->
+    // The theme wraps the crossfade, not just the app: the startup screen used to
+    // render outside it against a hardcoded white, which flashed white on launch
+    // for anyone in dark mode.
+    ItineraTheme(
+        darkTheme = darkTheme
+    ) {
+        Crossfade(
+            targetState = readyToEnterApp,
+            animationSpec = tween(
+                durationMillis = 350
+            ),
+            label = "StartupToApp"
+        ) { appReady ->
 
-        if (!appReady) {
+            if (!appReady) {
 
-            StartupVideoScreen(
-                onFinished = {
-                    startupFinished = true
-                }
-            )
+                StartupVideoScreen(
+                    onFinished = {
+                        startupFinished = true
+                    }
+                )
 
-        } else {
+            } else {
 
-            ItineraTheme(
-                darkTheme = darkTheme
-            ) {
                 CompositionLocalProvider(
                     LocalStrings provides activeStrings
                 ) {
@@ -296,6 +307,10 @@ private fun AppContent(
 
     val scope = rememberCoroutineScope()
     val topLevel = remember { setOf(Screen.Home, Screen.Calendar, Screen.Currency, Screen.Split, Screen.Settings) }
+
+    // Bumped by the nav bar's search button. Home watches it and opens its search
+    // field, so the button works from any tab rather than only on Home.
+    var searchRequest by remember { mutableStateOf(0) }
 
     var prefillEmail by remember { mutableStateOf("") }
 
@@ -451,6 +466,7 @@ private fun AppContent(
                             )
 
                             is Screen.Home -> TripsHomeScreen(
+                                searchRequest = searchRequest,
                                 trips = repository.activeTrips(),
                                 isLoading = !repository.tripsSyncedOnce,
                                 onOpenTrip = { navigator.push(Screen.TripDetail(it)) },
@@ -1076,7 +1092,14 @@ private fun AppContent(
                     },
                 contentAlignment = Alignment.BottomCenter,
             ) {
-                SlidingPillBar(current = current, items = items) { navigator.resetTo(it) }
+                SlidingPillBar(
+                    current = current,
+                    items = items,
+                    onSearch = {
+                        searchRequest++
+                        navigator.resetTo(Screen.Home)
+                    },
+                ) { navigator.resetTo(it) }
             }
         }
 
@@ -1099,66 +1122,32 @@ private fun AppContent(
     }
 }
 
-private val DarkColors = darkColorScheme(
-    primary = Color(0xFF85B7EB),
-    onPrimary = Color(0xFF042C53),
-    secondary = Color(0xFF5DCAA5),
-    background = Color(0xFF14130F),
-    surface = Color(0xFF1E1D18),
-    surfaceVariant = Color(0xFF2C2C2A),
-    onSurface = Color(0xFFEDEAE3),
-    error = Color(0xFFF09595),
-)
-
-private val LightColors = lightColorScheme(
-    primary = Color(0xFF185FA5),
-    onPrimary = Color.White,
-    secondary = Color(0xFF0F6E56),
-    background = Color(0xFFFBFAF7),
-    surface = Color.White,
-    surfaceVariant = Color(0xFFF1EFE8),
-    onSurface = Color(0xFF1A1A1A),
-    error = Color(0xFFA32D2D),
-)
-
-@Composable
-fun ItineraTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit,
-) {
-    MaterialTheme(
-        colorScheme = if (darkTheme) DarkColors else LightColors,
-        content = content,
-    )
-}
-
 @Composable
 private fun SlidingPillBar(
     current: Screen,
     items: List<NavItem>,
+    onSearch: () -> Unit,
     onSelect: (Screen) -> Unit,
 ) {
     val count = items.size
     val selectedIndex = items.indexOfFirst { it.screen == current }.coerceAtLeast(0)
 
-    val barBackgroundColor = MaterialTheme.colorScheme.surfaceVariant
-    val gapColor = MaterialTheme.colorScheme.background
+    val isDarkMode = MaterialTheme.itinera.isDark
+    val barBackgroundColor = MaterialTheme.itinera.navBarSurface
+    val barBorderColor = MaterialTheme.itinera.navBarBorder
+    // In light mode the raised selector is made from the exact same translucent
+    // material as the bar. Dark mode keeps its slightly raised surface token.
+    val activeCircleColor = if (isDarkMode) {
+        MaterialTheme.itinera.navPillSurface
+    } else {
+        barBackgroundColor
+    }
+    val selectedIconColor = MaterialTheme.itinera.navIconSelected
+    val unselectedIconColor = MaterialTheme.itinera.navIconUnselected
+    val lightControlOverlay = if (isDarkMode) Color.Transparent else selectedIconColor.copy(alpha = 0.08f)
 
-    // 🎨 DYNAMIC LUMINANCE CHECK: Determines whether the current layout context is light or dark
-    // by checking the red color channel component value of your surfaceVariant theme configuration.
-    val isLightModeColor = barBackgroundColor.red > 0.5f
-
-    // 🎯 FIX: Explicitly forces the circle color to mirror the main background surface variant
-    // when running in light mode, ensuring perfect color uniformity.
-    val activeCircleColor = if (isLightModeColor) barBackgroundColor else Color(0xFF3D3C3A)
-
-    // 🎯 FIX: Sets the selected icon color to match the clean unselected tone, avoiding any blue tints.
-    val selectedIconColor = if (isLightModeColor) Color(0xFF5A5957) else Color(0xFFDBDBDB)
-    val unselectedIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
-
-    val targetBias = if (count <= 1) 0f else -1f + 2f * selectedIndex / (count - 1)
     val bias by animateFloatAsState(
-        targetValue = targetBias,
+        targetValue = if (count <= 1) 0f else -1f + 2f * selectedIndex / (count - 1),
         animationSpec = spring(dampingRatio = 0.78f, stiffness = 350f),
         label = "pillSlide",
     )
@@ -1168,170 +1157,290 @@ private fun SlidingPillBar(
     LaunchedEffect(current) {
         barPulse.snapTo(1f)
         barPulse.animateTo(1.02f, animationSpec = tween(durationMillis = 80))
-        barPulse.animateTo(
-            targetValue = 1f,
-            animationSpec = spring(dampingRatio = 0.65f, stiffness = 400f),
-        )
+        barPulse.animateTo(1f, animationSpec = spring(dampingRatio = 0.65f, stiffness = 400f))
     }
 
-    val animatedIndexFloat = (bias + 1f) / 2f * (count - 1)
-    val sidePaddingPx = with(LocalDensity.current) { 32.dp.toPx() }
+    val density = LocalDensity.current
+    val sidePadding = 32.dp
+    val sidePaddingPx = with(density) { sidePadding.toPx() }
 
-    Box(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .height(96.dp)
-            .graphicsLayer {
-                scaleX = barPulse.value
-                scaleY = barPulse.value
-            },
-        contentAlignment = Alignment.BottomCenter
+            .height(96.dp),
+        verticalAlignment = Alignment.Bottom,
     ) {
-        Canvas(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
+                .weight(1f)
                 .height(96.dp)
+                .graphicsLayer {
+                    scaleX = barPulse.value
+                    scaleY = barPulse.value
+                },
+            contentAlignment = Alignment.BottomCenter,
         ) {
-            val width = size.width
-            val height = size.height
-            val cornerRadius = 28.dp.toPx()
+            Canvas(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(96.dp),
+            ) {
+                val width = size.width
+                val height = size.height
+                val cornerRadius = 28.dp.toPx()
+                val barHeightPx = 56.dp.toPx()
+                val barTopY = height - barHeightPx
 
-            val barHeightPx = 56.dp.toPx()
-            val barTopY = height - barHeightPx
+                val animatedIndexFloat = (bias + 1f) / 2f * (count - 1)
+                val centerX = sidePaddingPx + (width - 2 * sidePaddingPx) * (animatedIndexFloat + 0.5f) / count
 
-            val centerX = sidePaddingPx + (width - 2 * sidePaddingPx) * (animatedIndexFloat + 0.5f) / count
+                val dipWidth = 52.dp.toPx()
+                val dipDepth = 40.dp.toPx()
+                val bubbleRadius = 24.dp.toPx()
+                val bubbleCenterY = barTopY + 8.dp.toPx()
 
-            val dipWidth = 52.dp.toPx()
-            val dipDepth = 40.dp.toPx()
+                val path = Path().apply {
+                    val dipStart = centerX - dipWidth
+                    val dipEnd = centerX + dipWidth
 
-            val bubbleRadius = 24.dp.toPx()
-            val bubbleCenterY = barTopY + 8.dp.toPx()
+                    moveTo(0f, height - cornerRadius)
+                    quadraticTo(0f, height, cornerRadius, height)
+                    lineTo(width - cornerRadius, height)
+                    quadraticTo(width, height, width, height - cornerRadius)
 
-            // Base Pill Path Geometry
-            val path = Path().apply {
-                val dipStart = centerX - dipWidth
-                val dipEnd = centerX + dipWidth
-
-                // Start bottom-left
-                moveTo(0f, height - cornerRadius)
-                quadraticTo(0f, height, cornerRadius, height)
-                lineTo(width - cornerRadius, height)
-                quadraticTo(width, height, width, height - cornerRadius)
-
-                // Right Edge
-                lineTo(width, barTopY + cornerRadius)
-                if (dipEnd < width - cornerRadius) {
-                    quadraticTo(width, barTopY, width - cornerRadius, barTopY)
-                    lineTo(dipEnd, barTopY)
-                } else {
-                    lineTo(width, barTopY)
-                    lineTo(dipEnd, barTopY)
-                }
-
-                // The Dip (Right to Left)
-                cubicTo(
-                    x1 = dipEnd - (dipWidth * 0.42f), y1 = barTopY,
-                    x2 = centerX + (dipWidth * 0.52f), y2 = barTopY + dipDepth,
-                    x3 = centerX, y3 = barTopY + dipDepth
-                )
-                cubicTo(
-                    x1 = centerX - (dipWidth * 0.52f), y1 = barTopY + dipDepth,
-                    x2 = dipStart + (dipWidth * 0.42f), y2 = barTopY,
-                    x3 = dipStart, y3 = barTopY
-                )
-
-                // Left Edge
-                if (dipStart > cornerRadius) {
-                    lineTo(cornerRadius, barTopY)
-                    quadraticTo(0f, barTopY, 0f, barTopY + cornerRadius)
-                } else {
-                    lineTo(0f, barTopY)
-                    lineTo(0f, barTopY + cornerRadius)
-                }
-                close()
-            }
-
-            // Combined Shadow Path
-            val shadowPath = Path().apply {
-                addPath(path)
-                addOval(Rect(centerX - bubbleRadius - 6.dp.toPx(), bubbleCenterY - bubbleRadius - 6.dp.toPx(), centerX + bubbleRadius + 6.dp.toPx(), bubbleCenterY + bubbleRadius + 6.dp.toPx()))
-            }
-
-            // Native Drop Shadow Layer
-            drawPillShadow(
-                path = shadowPath,
-                radius = 14.dp.toPx(),
-                dy = 4.dp.toPx(),
-                isLightMode = isLightModeColor
-            )
-
-            // Draw Base Pill Fill
-            drawPath(path = path, color = barBackgroundColor)
-
-            // Draw Core Active Bubble Circle Surface
-            drawCircle(
-                color = activeCircleColor,
-                radius = bubbleRadius,
-                center = Offset(centerX, bubbleCenterY)
-            )
-        }
-
-        // Icons Row Layout
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp)
-                .height(56.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            items.forEachIndexed { index, item ->
-                val itemBias = if (count <= 1) 0f else -1f + 2f * index / (count - 1)
-                val selectedness = (1f - abs(bias - itemBias) / step).coerceIn(0f, 1f)
-                val tint = lerp(unselectedIconColor, selectedIconColor, selectedness)
-
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                        ) { onSelect(item.screen) },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    val verticalOffset = with(LocalDensity.current) { (-20.dp * selectedness).toPx() }
-
-                    if (item.photoModel != null) {
-                        // Profile photo tab — circular crop. Grows when selected.
-                        val photoScale = 1f + 0.45f * selectedness   // 1.0 → 1.45
-                        AsyncImage(
-                            model = item.photoModel,
-                            contentDescription = item.label,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .graphicsLayer {
-                                    translationY = verticalOffset
-                                    scaleX = photoScale
-                                    scaleY = photoScale
-                                }
-                                .size(26.dp)
-                                .clip(CircleShape),
-                        )
+                    lineTo(width, barTopY + cornerRadius)
+                    if (dipEnd < width - cornerRadius) {
+                        quadraticTo(width, barTopY, width - cornerRadius, barTopY)
+                        lineTo(dipEnd, barTopY)
                     } else {
+                        lineTo(width, barTopY)
+                        lineTo(dipEnd, barTopY)
+                    }
 
-                        Icon(
-                            imageVector = item.icon,
-                            contentDescription = item.label,
-                            tint = tint,
-                            modifier = Modifier
-                                .graphicsLayer { translationY = verticalOffset }
-                                .size(24.dp),
-                        )
+                    cubicTo(
+                        x1 = dipEnd - (dipWidth * 0.42f), y1 = barTopY,
+                        x2 = centerX + (dipWidth * 0.52f), y2 = barTopY + dipDepth,
+                        x3 = centerX, y3 = barTopY + dipDepth,
+                    )
+                    cubicTo(
+                        x1 = centerX - (dipWidth * 0.52f), y1 = barTopY + dipDepth,
+                        x2 = dipStart + (dipWidth * 0.42f), y2 = barTopY,
+                        x3 = dipStart, y3 = barTopY,
+                    )
+
+                    if (dipStart > cornerRadius) {
+                        lineTo(cornerRadius, barTopY)
+                        quadraticTo(0f, barTopY, 0f, barTopY + cornerRadius)
+                    } else {
+                        lineTo(0f, barTopY)
+                        lineTo(0f, barTopY + cornerRadius)
+                    }
+                    close()
+                }
+
+                val shadowPath = Path().apply {
+                    addPath(path)
+                    addOval(
+                        Rect(
+                            centerX - bubbleRadius - 6.dp.toPx(),
+                            bubbleCenterY - bubbleRadius - 6.dp.toPx(),
+                            centerX + bubbleRadius + 6.dp.toPx(),
+                            bubbleCenterY + bubbleRadius + 6.dp.toPx(),
+                        ),
+                    )
+                }
+
+                drawPillShadow(
+                    path = shadowPath,
+                    radius = 14.dp.toPx(),
+                    dy = 4.dp.toPx(),
+                    isLightMode = !isDarkMode,
+                )
+
+                // Cathopedia's layered ambience, expressed with Itinera's selected
+                // colour so the treatment stays on-brand in both themes.
+                drawPath(
+                    path = path,
+                    color = selectedIconColor.copy(alpha = 0.04f),
+                    style = Stroke(width = 12.dp.toPx()),
+                )
+                drawPath(
+                    path = path,
+                    color = selectedIconColor.copy(alpha = 0.07f),
+                    style = Stroke(width = 7.dp.toPx()),
+                )
+                drawPath(path = path, color = barBackgroundColor)
+                drawPath(
+                    path = path,
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(
+                            selectedIconColor.copy(alpha = 0.11f),
+                            selectedIconColor.copy(alpha = 0.045f),
+                            selectedIconColor.copy(alpha = 0.08f),
+                        ),
+                    ),
+                )
+                drawPath(
+                    path = path,
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            selectedIconColor.copy(alpha = 0.06f),
+                            Color.Transparent,
+                            selectedIconColor.copy(alpha = 0.03f),
+                        ),
+                    ),
+                )
+
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            selectedIconColor.copy(alpha = 0.64f),
+                            selectedIconColor.copy(alpha = 0.34f),
+                            selectedIconColor.copy(alpha = 0.13f),
+                            Color.Transparent,
+                        ),
+                        center = Offset(centerX, bubbleCenterY),
+                        radius = 39.dp.toPx(),
+                    ),
+                    radius = 39.dp.toPx(),
+                    center = Offset(centerX, bubbleCenterY),
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            selectedIconColor.copy(alpha = 0.52f),
+                            selectedIconColor.copy(alpha = 0.16f),
+                            Color.Transparent,
+                        ),
+                        center = Offset(centerX, bubbleCenterY),
+                        radius = 29.dp.toPx(),
+                    ),
+                    radius = 29.dp.toPx(),
+                    center = Offset(centerX, bubbleCenterY),
+                )
+
+                drawPath(
+                    path = path,
+                    color = barBorderColor,
+                    style = Stroke(width = 1.2.dp.toPx()),
+                )
+
+                drawCircle(
+                    color = activeCircleColor,
+                    radius = bubbleRadius,
+                    center = Offset(centerX, bubbleCenterY),
+                )
+                if (!isDarkMode) {
+                    drawCircle(
+                        color = lightControlOverlay,
+                        radius = bubbleRadius,
+                        center = Offset(centerX, bubbleCenterY),
+                    )
+                }
+                drawCircle(
+                    color = selectedIconColor.copy(alpha = 0.82f),
+                    radius = bubbleRadius + 1.5.dp.toPx(),
+                    center = Offset(centerX, bubbleCenterY),
+                    style = Stroke(width = 1.5.dp.toPx()),
+                )
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = sidePadding)
+                    .height(56.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                items.forEachIndexed { index, item ->
+                    val itemBias = if (count <= 1) 0f else -1f + 2f * index / (count - 1)
+                    val selectedness = (1f - abs(bias - itemBias) / step).coerceIn(0f, 1f)
+                    val tint = lerp(unselectedIconColor, selectedIconColor, selectedness)
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                            ) { onSelect(item.screen) },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        val verticalOffset = with(density) { (-20.dp * selectedness).toPx() }
+
+                        if (item.photoModel != null) {
+                            val photoScale = 1f + 0.45f * selectedness
+                            AsyncImage(
+                                model = item.photoModel,
+                                contentDescription = item.label,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .graphicsLayer {
+                                        translationY = verticalOffset
+                                        scaleX = photoScale
+                                        scaleY = photoScale
+                                    }
+                                    .size(26.dp)
+                                    .clip(CircleShape),
+                            )
+                        } else {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.label,
+                                tint = tint,
+                                modifier = Modifier
+                                    .graphicsLayer { translationY = verticalOffset }
+                                    .size(24.dp),
+                            )
+                        }
                     }
                 }
             }
         }
+
+        Spacer(Modifier.width(8.dp))
+
+        NavSearchButton(
+            surface = barBackgroundColor,
+            overlay = lightControlOverlay,
+            border = barBorderColor,
+            tint = unselectedIconColor,
+            onClick = onSearch,
+        )
+    }
+}
+
+/** Standalone circular search button that sits beside the pill bar. */
+@Composable
+private fun NavSearchButton(
+    surface: Color,
+    overlay: Color,
+    border: Color,
+    tint: Color,
+    onClick: () -> Unit,
+) {
+    val s = LocalStrings.current
+    Box(
+        modifier = Modifier
+            .size(56.dp)
+            .clip(CircleShape)
+            .background(surface)
+            .border(2.dp, border, CircleShape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (overlay != Color.Transparent) {
+            Canvas(Modifier.fillMaxSize()) {
+                drawCircle(color = overlay)
+            }
+        }
+        Icon(
+            imageVector = Icons.Filled.Search,
+            contentDescription = s.search,
+            tint = tint,
+            modifier = Modifier.size(24.dp),
+        )
     }
 }
 

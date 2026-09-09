@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.Color
 import com.itinera.app.resources.Res
 import com.itinera.app.ui.components.PlatformStartupVideo
 import org.jetbrains.compose.resources.ExperimentalResourceApi
+import androidx.compose.material3.MaterialTheme
 
 // Android Studio should auto-import your generated Res
 // Example:
@@ -28,7 +29,7 @@ fun StartupVideoScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
     ) {
 
         PlatformStartupVideo(

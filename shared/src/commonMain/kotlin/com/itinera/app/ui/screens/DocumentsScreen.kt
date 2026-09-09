@@ -91,6 +91,7 @@ import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import kotlinx.coroutines.launch
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
+import com.itinera.app.ui.theme.itinera
 
 private const val CAT_TRANSPORT = "TRANSPORT"
 private const val CAT_ACCOMMODATION = "ACCOMMODATION"
@@ -112,10 +113,11 @@ private fun docIcon(mimeType: String): ImageVector = when {
     else -> Icons.AutoMirrored.Filled.InsertDriveFile
 }
 
+@Composable
 private fun docColor(mimeType: String): Color = when {
-    mimeType.contains("pdf", ignoreCase = true) -> Color(0xFFA32D2D)
-    mimeType.startsWith("image", ignoreCase = true) -> Color(0xFF378ADD)
-    else -> Color(0xFF7A7A7A)
+    mimeType.contains("pdf", ignoreCase = true) -> MaterialTheme.itinera.docPdf
+    mimeType.startsWith("image", ignoreCase = true) -> MaterialTheme.itinera.docImage
+    else -> MaterialTheme.itinera.docOther
 }
 
 /** Sub-leg options for a leg with stops: index to "CityA → CityB" (whole journey = -1). */
@@ -332,8 +334,8 @@ fun DocumentsScreen(
                                                 },
                                             )
                                             DropdownMenuItem(
-                                                text = { Text(s.delete, color = Color(0xFFE03131)) },
-                                                leadingIcon = { Icon(Icons.Filled.Delete, null, tint = Color(0xFFE03131)) },
+                                                text = { Text(s.delete, color = MaterialTheme.itinera.destructive) },
+                                                leadingIcon = { Icon(Icons.Filled.Delete, null, tint = MaterialTheme.itinera.destructive) },
                                                 onClick = {
                                                     showMenu = false
                                                     pendingDeleteId = doc.id
@@ -464,7 +466,7 @@ fun DocumentsScreen(
             text = { Text(s.cantBeUndone) },
             confirmButton = {
                 TextButton(onClick = { onDeleteDocument(pendingDeleteId!!); pendingDeleteId = null }) {
-                    Text(s.delete, color = Color(0xFFE03131))
+                    Text(s.delete, color = MaterialTheme.itinera.destructive)
                 }
             },
             dismissButton = { TextButton(onClick = { pendingDeleteId = null }) { Text(s.cancel) } },
@@ -491,11 +493,12 @@ fun DocumentsScreen(
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Accent per category — replaces repeating the word "Transport" on every card. */
+@Composable
 private fun categoryColor(category: String): Color = when (category) {
-    CAT_TRANSPORT -> Color(0xFFBA7517)
-    CAT_ACCOMMODATION -> Color(0xFF7F77DD)
-    CAT_ATTRACTION -> Color(0xFFD85A30)
-    else -> Color(0xFF888780)
+    CAT_TRANSPORT -> MaterialTheme.itinera.categoryTransport
+    CAT_ACCOMMODATION -> MaterialTheme.itinera.categoryAccommodation
+    CAT_ATTRACTION -> MaterialTheme.itinera.categoryActivities
+    else -> MaterialTheme.itinera.categoryOther
 }
 
 /** "PDF" / "JPG" badge, since the file-type icon is hidden behind a thumbnail. */

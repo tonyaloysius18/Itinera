@@ -219,6 +219,7 @@ internal val EN: Strings by lazy { Strings().apply {
     trainLabel = "Train"
     busLabel = "Bus"
     ferryLabel = "Ferry"
+    carLabel = "Car"
     country = "Country"
     search = "Search"
     searchCurrencies = "Search currencies"

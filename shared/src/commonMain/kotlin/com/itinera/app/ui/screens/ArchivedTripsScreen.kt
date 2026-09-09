@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.Trip
 import com.itinera.app.ui.components.TopBar
+import com.itinera.app.ui.theme.itinera
 
 @Composable
 fun ArchivedTripsScreen(
@@ -103,9 +104,9 @@ fun ArchivedTripsScreen(
                             }
                             Spacer(Modifier.width(4.dp))
                             TextButton(onClick = { pendingDeleteId = trip.id }) {
-                                Icon(Icons.Filled.Delete, null, tint = Color(0xFFE03131), modifier = Modifier.size(18.dp))
+                                Icon(Icons.Filled.Delete, null, tint = MaterialTheme.itinera.destructive, modifier = Modifier.size(18.dp))
                                 Spacer(Modifier.width(6.dp))
-                                Text(s.delete, color = Color(0xFFE03131))
+                                Text(s.delete, color = MaterialTheme.itinera.destructive)
                             }
                         }
                     }
@@ -121,7 +122,7 @@ fun ArchivedTripsScreen(
             text = { Text(s.cantBeUndone) },
             confirmButton = {
                 TextButton(onClick = { onDelete(pendingDeleteId!!); pendingDeleteId = null }) {
-                    Text(s.delete, color = Color(0xFFE03131))
+                    Text(s.delete, color = MaterialTheme.itinera.destructive)
                 }
             },
             dismissButton = { TextButton(onClick = { pendingDeleteId = null }) { Text(s.cancel) } },

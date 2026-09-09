@@ -80,6 +80,7 @@ import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.round
 import kotlin.math.roundToInt
+import com.itinera.app.ui.theme.itinera
 
 /*
  * ─── New string keys (EN + FR) ──────────────────────────────────────────────
@@ -682,7 +683,8 @@ private fun RangeSelector(selected: Int, onSelect: (Int) -> Unit) {
     }
 }
 
-private val PositiveGreen = Color(0xFF1D9E75)
+private val PositiveGreen: Color
+    @Composable get() = MaterialTheme.itinera.success
 
 /**
  * Scrubbable rate chart. Press or drag to inspect any day in the range.
