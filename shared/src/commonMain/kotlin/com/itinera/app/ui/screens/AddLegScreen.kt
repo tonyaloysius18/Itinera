@@ -163,10 +163,10 @@ fun AddLegScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     listOf(
                         TransportType.FLIGHT to s.flightLabel,
+                        TransportType.CAR to s.carLabel,
                         TransportType.TRAIN to s.trainLabel,
                         TransportType.BUS to s.busLabel,
                         TransportType.FERRY to s.ferryLabel,
-                        TransportType.CAR to s.carLabel,
                     ).forEach { (t, label) ->
                         val selected = transport == t
                         Column(
@@ -601,12 +601,7 @@ fun AddLegScreen(
         } // End of Column
 
         // Save
-        // ⬅ CHANGED — was a dimmed button with no indication of what was missing.
-        val blocker = when {
-            from.isBlank() || to.isBlank() -> s.needFromAndTo
-            date == null -> s.needDate
-            else -> null
-        }
+        val canSave = from.isNotBlank() && to.isNotBlank() && date != null
         Column(
             Modifier.align(Alignment.BottomCenter).fillMaxWidth()
                 .background(
@@ -620,14 +615,6 @@ fun AddLegScreen(
                 .padding(top = 24.dp, bottom = 56.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            if (blocker != null) {
-                Text(
-                    blocker,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    modifier = Modifier.padding(bottom = 8.dp),
-                )
-            }
             Button(
                 onClick = {
                     onSave(
@@ -658,7 +645,7 @@ fun AddLegScreen(
                         )
                     )
                 },
-                enabled = blocker == null,
+                enabled = canSave,
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
                 shape = RoundedCornerShape(26.dp),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp),
