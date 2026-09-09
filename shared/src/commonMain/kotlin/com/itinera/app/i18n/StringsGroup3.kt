@@ -2190,7 +2190,7 @@ internal val MK: Strings by lazy { EN.copyApply {
     trainLabel = "Воз"
     busLabel = "Автобус"
     ferryLabel = "Фери"
-    carLabel = "Автомобил"
+    carLabel = "Кола"
     searchDocuments = "Пребарувајте документи"
     all = "Сите"
     needPlaceName = "Ве молиме внесете име на место"
