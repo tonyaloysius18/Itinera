@@ -60,7 +60,7 @@ https://ynotlabs.dev/privacy    <!-- TODO: must be live before submission -->
 - **Bundle ID:** dev.ynotlabs.itinera
 - **Primary Category:** Travel
 - **Secondary Category (optional):** Productivity
-- **Content Rights:** Does your app contain, show, or access third-party content? — Yes (Unsplash imagery, exchange-rate data)
+- **Content Rights:** Does your app contain, show, or access third-party content? — Yes (Unsplash imagery, exchange-rate data, AI-generated trip suggestions from Nera, Google Places and Open-Meteo data)
 
 ## Age Rating
 Expected 4+ (no objectionable content). Complete the questionnaire in App Store Connect — all "None" unless something changes.
@@ -69,7 +69,7 @@ Expected 4+ (no objectionable content). Complete the questionnaire in App Store 
 
 ## Privacy "Nutrition Label" — Data Collection
 
-Based on code audit (Firebase Auth + Google Sign-In, Firestore, Storage, camera).
+Based on code audit (Firebase Auth + Google Sign-In, Firestore, Storage, camera, Nera AI planner).
 NO Firebase Analytics / Crashlytics SDK is linked, so DO NOT declare Diagnostics/Usage Data.
 
 | Data type | Collected | Linked to user | Used for tracking | Purpose |
@@ -78,6 +78,7 @@ NO Firebase Analytics / Crashlytics SDK is linked, so DO NOT declare Diagnostics
 | Name | Yes | Yes | No | App Functionality (account) |
 | User Content (trips, docs, photos) | Yes | Yes | No | App Functionality |
 | User ID (Firebase UID) | Yes | Yes | No | App Functionality |
+| Other User Content (messages typed to Nera; sent to Anthropic to generate replies, not stored) | Yes | Yes | No | App Functionality |
 | Photos (camera) | Only if user takes a photo | No | No | App Functionality (trip postcard) |
 
 Tracking: NO (nothing shared with data brokers / used for cross-app tracking).

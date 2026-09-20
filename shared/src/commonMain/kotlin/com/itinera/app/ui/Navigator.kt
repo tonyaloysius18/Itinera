@@ -68,6 +68,8 @@ sealed interface Screen {
 
     data object Compass : Screen
 
+    data object Nera : Screen
+
     data class TripMap(val tripId: String) : Screen
 
     data object ChangePassword : Screen

@@ -125,6 +125,8 @@ dependencies {
 val generateSecrets by tasks.registering {
     val propsFile = rootProject.file("local.properties")
     val outputDir = layout.buildDirectory.dir("generated/secrets/kotlin")
+    // Rerun when local.properties changes; otherwise Gradle treats the task as up to date forever.
+    inputs.files(propsFile).optional()
     outputs.dir(outputDir)
 
     doLast {
@@ -132,6 +134,8 @@ val generateSecrets by tasks.registering {
             if (propsFile.exists()) propsFile.inputStream().use { load(it) }
         }
         val key = props.getProperty("unsplashAccessKey") ?: "YOUR_UNSPLASH_ACCESS_KEY"
+        // URL of the deployed `nera` Cloud Function; empty until you deploy it.
+        val neraEndpoint = props.getProperty("neraEndpoint") ?: ""
         val dir = outputDir.get().asFile
         dir.mkdirs()
         File(dir, "Secrets.kt").writeText(
@@ -140,6 +144,7 @@ val generateSecrets by tasks.registering {
 
             internal object Secrets {
                 const val UNSPLASH_ACCESS_KEY: String = "$key"
+                const val NERA_ENDPOINT: String = "$neraEndpoint"
             }
             """.trimIndent()
         )

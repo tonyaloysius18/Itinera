@@ -750,6 +750,33 @@ class Strings {
     var selectSomeone: String = ""
     var saveExpense: String = ""
 
+    // Nera (AI trip planner)
+    var planWithNera: String = ""
+    var neraWelcome: String = ""
+    var neraSuggest1: String = ""
+    var neraSuggest2: String = ""
+    var neraSuggest3: String = ""
+    var neraChangePrompt: String = ""
+    var neraChange1: String = ""
+    var neraChange2: String = ""
+    var neraChange3: String = ""
+    var neraChange4: String = ""
+    var neraInputHint: String = ""
+    var neraSend: String = ""
+    var neraApprove: String = ""
+    var neraMakeChanges: String = ""
+    var neraSuperseded: String = ""
+    var neraDaysDraft: String = ""
+    var neraDay: String = ""
+    var neraTripCreated: String = ""
+    var neraFree: String = ""
+    var neraErrNotSetUp: String = ""
+    var neraErrSignIn: String = ""
+    var neraErrNetwork: String = ""
+    var neraErrBadReply: String = ""
+    var neraErrQuota: String = ""
+    var neraErrGeneric: String = ""
+
     fun copyApply(block: Strings.() -> Unit): Strings {
 
         val c = Strings()
@@ -1377,6 +1404,31 @@ class Strings {
         c.enterDescription = this.enterDescription
         c.selectSomeone = this.selectSomeone
         c.saveExpense = this.saveExpense
+        c.planWithNera = this.planWithNera
+        c.neraWelcome = this.neraWelcome
+        c.neraSuggest1 = this.neraSuggest1
+        c.neraSuggest2 = this.neraSuggest2
+        c.neraSuggest3 = this.neraSuggest3
+        c.neraChangePrompt = this.neraChangePrompt
+        c.neraChange1 = this.neraChange1
+        c.neraChange2 = this.neraChange2
+        c.neraChange3 = this.neraChange3
+        c.neraChange4 = this.neraChange4
+        c.neraInputHint = this.neraInputHint
+        c.neraSend = this.neraSend
+        c.neraApprove = this.neraApprove
+        c.neraMakeChanges = this.neraMakeChanges
+        c.neraSuperseded = this.neraSuperseded
+        c.neraDaysDraft = this.neraDaysDraft
+        c.neraDay = this.neraDay
+        c.neraTripCreated = this.neraTripCreated
+        c.neraFree = this.neraFree
+        c.neraErrNotSetUp = this.neraErrNotSetUp
+        c.neraErrSignIn = this.neraErrSignIn
+        c.neraErrNetwork = this.neraErrNetwork
+        c.neraErrBadReply = this.neraErrBadReply
+        c.neraErrQuota = this.neraErrQuota
+        c.neraErrGeneric = this.neraErrGeneric
 
         c.block()
         return c

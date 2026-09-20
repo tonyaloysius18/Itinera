@@ -82,7 +82,7 @@ private data class SelectedFeedbackImage(
 @Composable
 fun FeedbackScreen(
     onBack: () -> Unit,
-    appVersion: String = "1.0.0",
+    appVersion: String = "1.1.0",
 ) {
     val s = LocalStrings.current
     val scope = rememberCoroutineScope()

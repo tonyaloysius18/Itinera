@@ -17,6 +17,7 @@ import com.itinera.app.model.Trip
 import com.itinera.app.model.TripAccent
 import com.itinera.app.model.UserProfile
 import com.itinera.app.model.isOwnedBy
+import com.itinera.app.model.label
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -53,6 +54,8 @@ class TripRepository {
     val authService = AuthService()
     val profileService = ProfileService()
     val tripService = TripService()
+
+    val neraService = NeraService()
 
     val activityService = ActivityService()
 
@@ -177,6 +180,41 @@ class TripRepository {
         )
         trips.add(trip)
         persist(trip)
+        return id
+    }
+
+    /**
+     * Turns a Nera draft the traveller approved into a real trip: creates it, records the
+     * date range and any co-travellers, then adds each planned stop as an activity.
+     * Returns the new trip id. Activities keep the coordinates Nera got from place search.
+     */
+    fun createTripFromItinerary(draft: NeraItinerary): String {
+        val id = addTrip(draft.title)
+        val days = draft.days.mapNotNull { day ->
+            runCatching { LocalDate.parse(day.date) }.getOrNull()?.let { it to day }
+        }.sortedBy { it.first }
+
+        val myName = profile.name.trim().lowercase()
+        val others = draft.travellers
+            .map { it.trim() }
+            .filter { it.isNotBlank() && it.lowercase() != myName }
+            .mapIndexed { n, name ->
+                Traveller(id = "trav_${kotlin.random.Random.nextLong()}", firstName = name, colorIndex = n + 1)
+            }
+        val i = trips.indexOfFirst { it.id == id }
+        if (i >= 0) {
+            trips[i] = trips[i].copy(
+                dateRange = if (days.isNotEmpty()) "${days.first().first.label()} – ${days.last().first.label()}" else "",
+                travellers = trips[i].travellers + others,
+            )
+            persist(trips[i])
+        }
+
+        for ((date, day) in days) {
+            for (a in day.activities) {
+                addActivity(id, date, a.title, a.time, a.endTime, a.location, a.note, a.lat, a.lng)
+            }
+        }
         return id
     }
 
@@ -332,7 +370,7 @@ class TripRepository {
     fun activitiesForTrip(tripId: String): List<Activity> =
         activities.filter { it.tripId == tripId && !isBlocked(it.createdBy) }
 
-    fun addActivity(tripId: String, date: LocalDate, title: String, time: String, endTime: String, location: String, note:String) {
+    fun addActivity(tripId: String, date: LocalDate, title: String, time: String, endTime: String, location: String, note:String, lat: Double = 0.0, lng: Double = 0.0) {
         val act = Activity(
             id = "a_${kotlin.random.Random.nextLong()}",
             tripId = tripId,
@@ -342,6 +380,8 @@ class TripRepository {
             endTime = endTime.trim(),
             location = location.trim(),
             note = note.trim(),
+            lat = lat,
+            lng = lng,
             memberIds = memberIdsForTrip(tripId),
             createdBy = authService.currentUid ?: "",
         )

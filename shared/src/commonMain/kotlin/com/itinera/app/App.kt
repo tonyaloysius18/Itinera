@@ -111,6 +111,7 @@ import com.itinera.app.ui.screens.DocumentViewerScreen
 import com.itinera.app.ui.screens.DocumentsScreen
 import com.itinera.app.ui.screens.EditProfileScreen
 import com.itinera.app.ui.screens.EmergencyScreen
+import com.itinera.app.ui.screens.NeraChatScreen
 import com.itinera.app.ui.screens.ExportTripsScreen
 import com.itinera.app.ui.screens.tripPhase
 import com.itinera.app.ui.screens.statusLabel
@@ -484,6 +485,7 @@ private fun AppContent(
                                 onPinTrip = { repository.togglePin(it) },
                                 onArchiveTrip = { repository.toggleArchive(it) },
                                 onDeleteTrip = { repository.deleteTrip(it) },
+                                onPlanWithNera = { navigator.push(Screen.Nera) },
                                 currentUid = repository.authService.currentUid ?: "",
                                 onOpenMembers = { navigator.push(Screen.Members(it)) },
                                 onJoinByCode = { repository.joinTripByCode(it) },
@@ -963,6 +965,23 @@ private fun AppContent(
                             }
 
                             Screen.Emergency -> EmergencyScreen(onBack = { navigator.back() })
+
+                            Screen.Nera -> NeraChatScreen(
+                                service = repository.neraService,
+                                onBack = { navigator.back() },
+                                onApprove = { draft ->
+                                    val id = repository.createTripFromItinerary(draft)
+                                    scope.launch {
+                                        val trip = repository.tripById(id)
+                                        if (trip != null) {
+                                            val url = repository.unsplashApi.fetchImage(imageQueryForTrip(trip))
+                                            if (url != null) repository.updateTripImage(id, url)
+                                        }
+                                    }
+                                    navigator.replace(Screen.TripDetail(id))
+                                    pillMessage = s.neraTripCreated
+                                },
+                            )
 
                             Screen.Translate -> TranslateScreen(translator = repository.translator, onBack = { navigator.back() })
 

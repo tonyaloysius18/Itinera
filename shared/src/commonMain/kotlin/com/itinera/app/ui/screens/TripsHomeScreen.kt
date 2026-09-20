@@ -31,6 +31,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
@@ -117,6 +118,7 @@ fun TripsHomeScreen(
     onPinTrip: (String) -> Unit,
     onArchiveTrip: (String) -> Unit,
     onDeleteTrip: (String) -> Unit,
+    onPlanWithNera: () -> Unit = {},
     pinnedTripIds: Set<String> = emptySet(),
     /** Incremented by the nav bar's search button; each change opens the search field. */
     searchRequest: Int = 0,
@@ -333,6 +335,11 @@ fun TripsHomeScreen(
                     text = { Text(s.createTripOption) },
                     leadingIcon = { Icon(Icons.Filled.Add, null) },
                     onClick = { fabMenuOpen = false; showAddDialog = true },
+                )
+                DropdownMenuItem(
+                    text = { Text(s.planWithNera) },
+                    leadingIcon = { Icon(Icons.Filled.AutoAwesome, null) },
+                    onClick = { fabMenuOpen = false; onPlanWithNera() },
                 )
                 DropdownMenuItem(
                     text = { Text(s.joinTripOption) },

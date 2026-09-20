@@ -44,7 +44,7 @@ import com.itinera.app.ui.components.TopBar
 import org.jetbrains.compose.resources.painterResource
 
 // ── Edit these to your own details ───────────────────────────────────
-private const val APP_VERSION = "1.0.0"
+private const val APP_VERSION = "1.1.0"
 private const val GITHUB_URL = "https://github.com/tonyaloysius18"
 private const val LINKEDIN_URL = "https://www.linkedin.com/in/tony-ajay-aloysius-70195a1a4"
 private const val CONTACT_EMAIL = "ynotlabs.dev@gmail.com"
