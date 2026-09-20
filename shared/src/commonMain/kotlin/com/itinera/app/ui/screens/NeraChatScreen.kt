@@ -1,5 +1,6 @@
 package com.itinera.app.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -54,10 +56,13 @@ import com.itinera.app.data.NeraTurn
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.i18n.Strings
 import com.itinera.app.model.label
-import com.itinera.app.ui.components.PlaneLoader
+import com.itinera.app.resources.Res
+import com.itinera.app.resources.nera_head
+import com.itinera.app.ui.components.NeraThinking
 import com.itinera.app.ui.components.TopBar
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
+import org.jetbrains.compose.resources.painterResource
 
 /** One row in the Nera conversation. */
 private sealed interface NeraItem {
@@ -180,7 +185,7 @@ fun NeraChatScreen(
                 }
             }
             if (sending) {
-                item { Box(Modifier.padding(start = 8.dp)) { PlaneLoader(size = 48.dp) } }
+                item { NeraThinking() }
             }
         }
 
@@ -210,6 +215,13 @@ fun NeraChatScreen(
 @Composable
 private fun Bubble(text: String, fromUser: Boolean, isError: Boolean = false) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = if (fromUser) Arrangement.End else Arrangement.Start) {
+        if (!fromUser) {
+            Image(
+                painter = painterResource(Res.drawable.nera_head),
+                contentDescription = null,
+                modifier = Modifier.padding(end = 8.dp, top = 2.dp).size(32.dp),
+            )
+        }
         Surface(
             shape = RoundedCornerShape(18.dp),
             color = when {
@@ -217,7 +229,7 @@ private fun Bubble(text: String, fromUser: Boolean, isError: Boolean = false) {
                 isError -> MaterialTheme.colorScheme.errorContainer
                 else -> MaterialTheme.colorScheme.surfaceVariant
             },
-            modifier = Modifier.widthIn(max = 320.dp),
+            modifier = Modifier.widthIn(max = if (fromUser) 320.dp else 280.dp),
         ) {
             Text(
                 text,
@@ -236,7 +248,11 @@ private fun Bubble(text: String, fromUser: Boolean, isError: Boolean = false) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun QuickReplies(options: List<String>, onPick: (String) -> Unit) {
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    FlowRow(
+        modifier = Modifier.padding(start = 40.dp),   // line up under the message text, past the avatar
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
         options.forEach { option ->
             SuggestionChip(onClick = { onPick(option) }, label = { Text(option) })
         }

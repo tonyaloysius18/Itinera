@@ -6,6 +6,7 @@ import platform.Foundation.currentLocale
 import platform.Foundation.countryCode
 import platform.Foundation.preferredLanguages
 import platform.UIKit.UIApplication
+import platform.UIKit.UIAccessibilityIsReduceMotionEnabled
 import platform.UIKit.UIDevice
 
 class IOSPlatform: Platform {
@@ -19,6 +20,8 @@ actual fun getPlatform(): Platform = IOSPlatform()
 
 actual fun deviceRegion(): String =
     NSLocale.currentLocale.countryCode ?: ""
+
+actual fun prefersReducedMotion(): Boolean = UIAccessibilityIsReduceMotionEnabled()
 
 actual fun dial(number: String) {
     // tel: (not tel://) is the correct phone-URL scheme; strip spaces so the URL parses

@@ -31,7 +31,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
@@ -89,6 +88,7 @@ import com.itinera.app.model.label
 import com.itinera.app.ui.components.CardShape
 import com.itinera.app.ui.components.PlaneLoader
 import androidx.compose.ui.text.style.TextOverflow
+import com.itinera.app.ui.components.NeraMascotButton
 import com.itinera.app.ui.components.TopBar
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -175,7 +175,10 @@ fun TripsHomeScreen(
 
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
-            TopBar(s.myTrips.toTitleCase())
+            TopBar(
+                s.myTrips.toTitleCase(),
+                trailing = { NeraMascotButton(label = s.planWithNera, onClick = onPlanWithNera) },
+            )
             if (searchActive) {
                 Row(
                     modifier = Modifier
@@ -336,11 +339,6 @@ fun TripsHomeScreen(
                     text = { Text(s.createTripOption) },
                     leadingIcon = { Icon(Icons.Filled.Add, null) },
                     onClick = { fabMenuOpen = false; showAddDialog = true },
-                )
-                DropdownMenuItem(
-                    text = { Text(s.planWithNera) },
-                    leadingIcon = { Icon(Icons.Filled.AutoAwesome, null) },
-                    onClick = { fabMenuOpen = false; onPlanWithNera() },
                 )
                 DropdownMenuItem(
                     text = { Text(s.joinTripOption) },
