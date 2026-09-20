@@ -254,10 +254,9 @@ internal val ExpenseCardDark = NeutralDarkSurfaceVariant
 // draw them directly.
 // ---------------------------------------------------------------------------
 
-// Tinted toward the brand blue rather than plain white/grey. The light value stays
-// deliberately *lighter* than surfaceVariant (#E8F1F8) — tinting it down to the cards'
-// own value is what made the bar vanish into them in the first place.
-internal val NavBarLight = Color(0xC2F1F7FF)
+// Light mode uses the theme's white surface rather than carrying the brand-blue tint.
+// Its high opacity keeps the floating bar distinct from cards scrolling beneath it.
+internal val NavBarLight = Color(0xF5FFFFFF)
 internal val NavBarDark = Color(0xCC1F3049)
 internal val NavPillLight = Color(0xF5F7FBFF)
 internal val NavPillDark = Color(0xF22C3E56)

@@ -86,18 +86,12 @@ fun AboutScreen(onBack: () -> Unit) {
                 Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Surface(
+                Image(
+                    painter = painterResource(Res.drawable.itinera_app_logo),
+                    contentDescription = null,
                     modifier = Modifier.size(72.dp),
-                    shape = RoundedCornerShape(40.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                ) {
-                    Image(
-                        painter = painterResource(Res.drawable.itinera_app_logo),
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop,
-                    )
-                }
+                    contentScale = ContentScale.Fit,
+                )
                 Spacer(Modifier.height(12.dp))
                 Text("Itinera", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
                 Text(

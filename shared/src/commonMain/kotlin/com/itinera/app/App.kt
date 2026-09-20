@@ -1145,7 +1145,8 @@ private fun SlidingPillBar(
     }
     val selectedIconColor = MaterialTheme.itinera.navIconSelected
     val unselectedIconColor = MaterialTheme.itinera.navIconUnselected
-    val lightControlOverlay = if (isDarkMode) Color.Transparent else selectedIconColor.copy(alpha = 0.08f)
+    val barDecorationColor = if (isDarkMode) selectedIconColor else MaterialTheme.colorScheme.onSurface
+    val lightControlOverlay = if (isDarkMode) Color.Transparent else barDecorationColor.copy(alpha = 0.03f)
 
     val bias by animateFloatAsState(
         targetValue = if (count <= 1) 0f else -1f + 2f * selectedIndex / (count - 1),
@@ -1258,16 +1259,16 @@ private fun SlidingPillBar(
                     isLightMode = !isDarkMode,
                 )
 
-                // Cathopedia's layered ambience, expressed with Itinera's selected
-                // colour so the treatment stays on-brand in both themes.
+                // Keep the layered ambience neutral in light mode; dark mode retains
+                // the brand tint for contrast against its deeper surface.
                 drawPath(
                     path = path,
-                    color = selectedIconColor.copy(alpha = 0.04f),
+                    color = barDecorationColor.copy(alpha = 0.04f),
                     style = Stroke(width = 12.dp.toPx()),
                 )
                 drawPath(
                     path = path,
-                    color = selectedIconColor.copy(alpha = 0.07f),
+                    color = barDecorationColor.copy(alpha = 0.07f),
                     style = Stroke(width = 7.dp.toPx()),
                 )
                 drawPath(path = path, color = barBackgroundColor)
@@ -1275,9 +1276,9 @@ private fun SlidingPillBar(
                     path = path,
                     brush = Brush.horizontalGradient(
                         colors = listOf(
-                            selectedIconColor.copy(alpha = 0.11f),
-                            selectedIconColor.copy(alpha = 0.045f),
-                            selectedIconColor.copy(alpha = 0.08f),
+                            barDecorationColor.copy(alpha = 0.11f),
+                            barDecorationColor.copy(alpha = 0.045f),
+                            barDecorationColor.copy(alpha = 0.08f),
                         ),
                     ),
                 )
@@ -1285,9 +1286,9 @@ private fun SlidingPillBar(
                     path = path,
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            selectedIconColor.copy(alpha = 0.06f),
+                            barDecorationColor.copy(alpha = 0.06f),
                             Color.Transparent,
-                            selectedIconColor.copy(alpha = 0.03f),
+                            barDecorationColor.copy(alpha = 0.03f),
                         ),
                     ),
                 )

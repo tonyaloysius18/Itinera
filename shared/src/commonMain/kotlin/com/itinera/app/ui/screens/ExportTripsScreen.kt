@@ -76,12 +76,8 @@ fun ExportTripsScreen(
     val sharer = rememberFileSharer()
     val scope = rememberCoroutineScope()
 
-    // selection state — default: only the FIRST trip is selected
-    val selected = remember {
-        mutableStateMapOf<String, Boolean>().apply {
-            trips.forEachIndexed { index, t -> put(t.id, index == 0) }
-        }
-    }
+    // Start with no trips selected; the user explicitly chooses what to export.
+    val selected = remember { mutableStateMapOf<String, Boolean>() }
     val selectedTrips = trips.filter { selected[it.id] == true }
     val anySelected = selectedTrips.isNotEmpty()
     val allSelected = trips.isNotEmpty() && trips.all { selected[it.id] == true }
