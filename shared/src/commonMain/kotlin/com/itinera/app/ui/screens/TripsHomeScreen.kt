@@ -84,6 +84,7 @@ import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.Trip
 import com.itinera.app.model.TripAccent
 import com.itinera.app.model.isOwnedBy
+import com.itinera.app.model.scheduleDates
 import com.itinera.app.model.label
 import com.itinera.app.ui.components.CardShape
 import com.itinera.app.ui.components.PlaneLoader
@@ -670,7 +671,7 @@ fun TripCardContent(
     val doneCount = trip.legs.count { it.completed }
     val s = LocalStrings.current
 
-    val dates = trip.legs.map { it.date }.sorted()
+    val dates = trip.scheduleDates()
     val rangeShown = if (dates.isEmpty()) noDatesWord
     else if (dates.first() == dates.last()) dates.first().label()
     else "${dates.first().label()} – ${dates.last().label()}"
@@ -925,7 +926,7 @@ enum class TripPhase { IN_PROGRESS, UPCOMING, PAST }
  * available. A trip with no legs has no dates, so it sits under Upcoming.
  */
 internal fun tripPhase(trip: Trip, today: LocalDate): TripPhase {
-    val dates = trip.legs.map { it.date }.sorted()
+    val dates = trip.scheduleDates()
     val first = dates.firstOrNull() ?: return TripPhase.UPCOMING
     return when {
         dates.last() < today -> TripPhase.PAST
@@ -937,7 +938,7 @@ internal fun tripPhase(trip: Trip, today: LocalDate): TripPhase {
 @Composable
 internal fun statusLabel(trip: Trip, today: LocalDate, phase: TripPhase): String {
     val s = LocalStrings.current
-    val dates = trip.legs.map { it.date }.sorted()
+    val dates = trip.scheduleDates()
     val first = dates.firstOrNull() ?: return s.noDatesYet
     return when (phase) {
         TripPhase.PAST -> s.completed

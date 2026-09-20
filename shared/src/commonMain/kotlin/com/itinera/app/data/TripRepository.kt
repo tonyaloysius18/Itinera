@@ -205,6 +205,8 @@ class TripRepository {
         if (i >= 0) {
             trips[i] = trips[i].copy(
                 dateRange = if (days.isNotEmpty()) "${days.first().first.label()} – ${days.last().first.label()}" else "",
+                startDate = days.firstOrNull()?.first,
+                endDate = days.lastOrNull()?.first,
                 travellers = trips[i].travellers + others,
             )
             persist(trips[i])
@@ -263,9 +265,19 @@ class TripRepository {
     }
 
     fun activeTrips(): List<Trip> =
-        trips.filter { !isArchived(it.id) }.sortedByDescending { isPinned(it.id) }
+        trips.filter { !isArchived(it.id) }.map { it.withDatesFromActivities() }.sortedByDescending { isPinned(it.id) }
 
-    fun archivedTrips(): List<Trip> = trips.filter { isArchived(it.id) }
+    fun archivedTrips(): List<Trip> = trips.filter { isArchived(it.id) }.map { it.withDatesFromActivities() }
+
+    /**
+     * Trips created from activities alone (Nera) before start/end dates were stored have no legs and no dates,
+     * so the home screen showed "No Dates Yet". Derive them from the trip's activities without rewriting the trip.
+     */
+    private fun Trip.withDatesFromActivities(): Trip {
+        if (legs.isNotEmpty() || startDate != null) return this
+        val dates = activities.filter { it.tripId == id }.map { it.date }.sorted()
+        return if (dates.isEmpty()) this else copy(startDate = dates.first(), endDate = dates.last())
+    }
 
     fun tripById(id: String): Trip? = trips.firstOrNull { it.id == id }
 

@@ -78,7 +78,20 @@ data class Trip(
     // Optional trip budget. Leave at 0.0 to hide the budget bar on the expenses
     // screen; set it and the hero draws spend-against-budget.  ⬅ ADD (optional)
     val budget: Double = 0.0,
+    // Planned first/last day, for trips without transport legs (e.g. created by Nera from activities).
+    // Absent on existing documents, so they decode to null. Legs win when present.
+    val startDate: LocalDate? = null,
+    val endDate: LocalDate? = null,
 )
+
+/**
+ * The dates that say when a trip happens: its transport legs, or, for a trip without legs, its planned
+ * start/end. Sorted; empty when the trip has no dates at all.
+ */
+fun Trip.scheduleDates(): List<LocalDate> {
+    val legDates = legs.map { it.date }.sorted()
+    return legDates.ifEmpty { listOfNotNull(startDate, endDate).sorted() }
+}
 
 @Serializable
 data class MemberInfo(
