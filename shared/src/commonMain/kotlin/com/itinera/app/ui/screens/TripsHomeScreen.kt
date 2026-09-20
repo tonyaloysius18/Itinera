@@ -149,7 +149,16 @@ fun TripsHomeScreen(
     else trips.filter { it.title.contains(query.trim(), ignoreCase = true) }
 
     val today = remember { Clock.System.todayIn(TimeZone.currentSystemDefault()) }
-    val grouped = remember(visibleTrips, today) { visibleTrips.groupBy { tripPhase(it, today) } }
+
+    // ⬅ ADD — separate pinned trips from others so they can sit in their own
+    // section at the very top, regardless of their dates.
+    val pinnedTrips = remember(visibleTrips, pinnedTripIds) {
+        visibleTrips.filter { it.id in pinnedTripIds }
+    }
+    val otherTrips = remember(visibleTrips, pinnedTripIds) {
+        visibleTrips.filter { it.id !in pinnedTripIds }
+    }
+    val grouped = remember(otherTrips, today) { otherTrips.groupBy { tripPhase(it, today) } }
 
     val listState = androidx.compose.foundation.lazy.rememberLazyListState()
     LaunchedEffect(query) { if (query.isNotBlank()) listState.scrollToItem(0) }
@@ -229,6 +238,34 @@ fun TripsHomeScreen(
                     // ⬅ ADD — the phase was already computed by tripStartsIn and
                     // spent on a line of grey text. Sectioning the list is what
                     // puts the trip you're on at the top.
+                    if (pinnedTrips.isNotEmpty()) {
+                        item(key = "hdr-pinned") {
+                            SectionHeader(label = s.pinned, count = pinnedTrips.size)
+                        }
+                        items(pinnedTrips, key = { it.id }) { trip ->
+                            SwipeableTripCard(
+                                trip = trip,
+                                phase = tripPhase(trip, today),
+                                today = today,
+                                countriesWord = s.countries,
+                                legsWord = s.legs,
+                                doneWord = s.done,
+                                isOpen = openCardId == trip.id,
+                                canShare = trip.ownerId == currentUid && currentUid.isNotBlank(),
+                                onShare = { onOpenMembers(trip.id) },
+                                onOpenChange = { open -> openCardId = if (open) trip.id else null },
+                                onClick = { onOpenTrip(trip.id) },
+                                modifier = Modifier.animateItem(),
+                                onPin = { onPinTrip(trip.id); openCardId = null },
+                                onEdit = { editingTrip = trip; openCardId = null },
+                                onArchive = { onArchiveTrip(trip.id); openCardId = null },
+                                onDelete = { pendingDeleteId = trip.id; openCardId = null },
+                                isOwner = trip.isOwnedBy(currentUid),
+                                isPinned = trip.id in pinnedTripIds,
+                            )
+                        }
+                    }
+
                     fun cardsFor(phase: TripPhase) {
                         val group = grouped[phase].orEmpty()
                         if (group.isEmpty()) return

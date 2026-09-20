@@ -476,6 +476,7 @@ class Strings {
     var daysAgoRelative: String = ""
     var storedInCloud: String = ""
     var tripsLabel: String = ""
+    var pinned: String = ""
     var upcoming: String = ""
     var tomorrow: String = ""
     var inDays: String = ""
@@ -1126,6 +1127,7 @@ class Strings {
         c.daysAgoRelative = this.daysAgoRelative
         c.storedInCloud = this.storedInCloud
         c.tripsLabel = this.tripsLabel
+        c.pinned = this.pinned
         c.upcoming = this.upcoming
         c.tomorrow = this.tomorrow
         c.inDays = this.inDays

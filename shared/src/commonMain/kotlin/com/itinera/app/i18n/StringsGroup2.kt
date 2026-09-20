@@ -44,6 +44,8 @@ internal val RU: Strings by lazy { EN.copyApply {
     continueApple = "Продолжить с Apple"
     newHere = "Новый?"
     createAccount = "Создать аккаунт"
+    pinned = "Закрепленные"
+
     calendar = "Календарь"
     documents = "Документы"
     nextUp = "Следующий"

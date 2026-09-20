@@ -46,6 +46,8 @@ internal val CZ: Strings by lazy { EN.copyApply {
     continueApple = "Pokračovat přes Apple"
     newHere = "Jste zde poprvé?"
     createAccount = "Vytvořit účet"
+    pinned = "Připnuto"
+
     calendar = "Kalendář"
     documents = "Dokumenty"
     nextUp = "Co nás čeká"

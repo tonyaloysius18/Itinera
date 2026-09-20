@@ -487,6 +487,7 @@ private fun AppContent(
                                 currentUid = repository.authService.currentUid ?: "",
                                 onOpenMembers = { navigator.push(Screen.Members(it)) },
                                 onJoinByCode = { repository.joinTripByCode(it) },
+                                pinnedTripIds = repository.profile.pinnedTripIds.toSet(),
                             )
 
                             Screen.Currency -> CurrencyScreen(

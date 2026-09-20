@@ -52,6 +52,8 @@ internal val FR: Strings by lazy { EN.copyApply {
     appleSignInSoon = "La connexion avec Apple n'est pas encore disponible"
     newHere = "Nouveau ?"
     createAccount = "Créer un compte"
+    pinned = "Épinglés"
+
 
     currentPassword = "Mot de passe actuel"
     confirmPassword = "Confirmer le mot de passe"
@@ -615,6 +617,8 @@ internal val ES: Strings by lazy { EN.copyApply {
     continueApple = "Continuar con Apple"
     newHere = "¿Nuevo aquí?"
     createAccount = "Crear cuenta"
+    pinned = "Fijados"
+
     calendar = "Calendario"
     documents = "Documentos"
     nextUp = "siguiente"

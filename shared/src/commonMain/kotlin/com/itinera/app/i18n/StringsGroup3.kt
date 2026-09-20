@@ -46,6 +46,8 @@ internal val SL: Strings by lazy { EN.copyApply {
     continueApple = "Nadaljuj z Applom"
     newHere = "Ste novi?"
     createAccount = "Ustvari račun"
+    pinned = "Pripeto"
+
     calendar = "Koledar"
     documents = "Dokumenti"
     nextUp = "Naslednje na vrsti"

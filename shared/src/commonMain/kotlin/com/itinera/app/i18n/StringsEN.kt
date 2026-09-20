@@ -374,6 +374,7 @@ internal val EN: Strings by lazy { Strings().apply {
     daysAgoRelative = "%s days ago"
     storedInCloud = "Stored in cloud"
     tripsLabel = "Trips"
+    pinned = "Pinned"
     upcoming = "Upcoming"
     tomorrow = "Tomorrow"
     inDays = "In %s days"
