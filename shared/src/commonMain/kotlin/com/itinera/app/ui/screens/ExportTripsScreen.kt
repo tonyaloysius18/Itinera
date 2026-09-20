@@ -41,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,12 +50,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.itinera.app.data.TripExporter
-import com.itinera.app.data.buildItineraryPdf
+import com.itinera.app.data.pdf.PdfAssets
+import com.itinera.app.data.pdf.TripPdf
 import com.itinera.app.data.rememberFileSharer
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.Activity
 import com.itinera.app.model.Expense
 import com.itinera.app.model.Trip
+import com.itinera.app.resources.Res
+import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
+import kotlin.time.Clock
 import com.itinera.app.ui.components.CardShape
 import com.itinera.app.ui.components.TopBar
 
@@ -67,6 +74,7 @@ fun ExportTripsScreen(
 ) {
     val s = LocalStrings.current
     val sharer = rememberFileSharer()
+    val scope = rememberCoroutineScope()
 
     // selection state — default: only the FIRST trip is selected
     val selected = remember {
@@ -101,10 +109,17 @@ fun ExportTripsScreen(
     }
 
     fun sharePdf() {
-        val text = TripExporter.toText(bundles())
-        val title = if (selectedTrips.size == 1) selectedTrips.first().title else "Itinera — Trips"
-        val pdf = buildItineraryPdf(title, text.split("\n"))
-        sharer.share(pdf, safeName("pdf"), "application/pdf")
+        scope.launch {
+            val assets = PdfAssets(
+                logoTile = Res.readBytes("drawable/itinera_app_logo.png"),
+                plane = Res.readBytes("drawable/itinera_logo.png"),
+                wordmarkFont = Res.readBytes("font/arizonia_regular.ttf"),
+                taglineFont = Res.readBytes("font/caudex_bold.ttf"),
+            )
+            val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+            val pdf = TripPdf.build(bundles(), assets, s.appTagline, today)
+            sharer.share(pdf, safeName("pdf"), "application/pdf")
+        }
     }
 
     Column(Modifier.fillMaxSize()) {
