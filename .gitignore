@@ -34,3 +34,12 @@ keystore.properties
 *.aab
 *.dm
 **/output-metadata.json
+
+# Function config (may hold optional keys)
+functions/.env
+functions/.env.*
+
+# Cloudflare worker
+worker/node_modules/
+worker/.wrangler/
+worker/.dev.vars

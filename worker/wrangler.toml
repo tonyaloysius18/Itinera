@@ -1,0 +1,16 @@
+name = "nera"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+# Nera's shared logic (../functions/tools.js) uses node:crypto for its cache keys.
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+FIREBASE_PROJECT_ID = "itinera-ae020"
+
+# Daily quota + place-search cache. Run `npx wrangler d1 create nera`, then paste the printed
+# database_id below and apply migrations (see worker/README.md).
+[[d1_databases]]
+binding = "DB"
+database_name = "nera"
+database_id = "f259701c-e388-4520-9996-44cadc650d97"
+migrations_dir = "migrations"
