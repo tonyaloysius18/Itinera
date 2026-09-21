@@ -92,6 +92,7 @@ fun NeraChatScreen(
     var input by remember { mutableStateOf("") }
     var sending by remember { mutableStateOf(false) }
     var approved by remember { mutableStateOf(false) }
+    var trialDaysLeft by remember { mutableStateOf<Int?>(null) }   // null = no trial info (not enforced, or paid)
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
 
@@ -122,6 +123,8 @@ fun NeraChatScreen(
         scope.launch {
             try {
                 val reply = service.send(history, currentDraft)
+                val trial = reply.entitlement
+                trialDaysLeft = if (trial?.status == "trial") trial.daysLeft else null
                 val itinerary = reply.itinerary
                 if (reply.type == "itinerary" && itinerary != null) {
                     items.add(NeraItem.Draft(reply.message, itinerary))
@@ -129,12 +132,16 @@ fun NeraChatScreen(
                     items.add(NeraItem.FromNera(reply.message, reply.quickReplies))
                 }
             } catch (e: NeraException) {
-                items.add(NeraItem.Problem(when (e.failure) {
+                // The trial ending is not a fault: show it as an ordinary message from Nera, not a red error.
+                if (e.failure == NeraFailure.TRIAL_ENDED) {
+                    items.add(NeraItem.FromNera(s.neraErrTrialEnded))
+                } else items.add(NeraItem.Problem(when (e.failure) {
                     NeraFailure.NOT_CONFIGURED -> s.neraErrNotSetUp
                     NeraFailure.SIGN_IN -> s.neraErrSignIn
                     NeraFailure.NETWORK -> s.neraErrNetwork
                     NeraFailure.BAD_REPLY -> s.neraErrBadReply
                     NeraFailure.QUOTA -> s.neraErrQuota
+                    NeraFailure.TRIAL_ENDED -> s.neraErrTrialEnded   // handled above; keeps the when exhaustive
                     NeraFailure.GENERIC -> s.neraErrGeneric
                 }))
             } finally {
@@ -145,6 +152,14 @@ fun NeraChatScreen(
 
     Column(Modifier.fillMaxSize().imePadding()) {
         TopBar("Nera", onBack = onBack)
+        trialDaysLeft?.let { days ->
+            Text(
+                s.neraTrialDaysLeft.replace("%s", days.toString()),
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 4.dp),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
 
         LazyColumn(
             state = listState,

@@ -776,6 +776,8 @@ class Strings {
     var neraErrBadReply: String = ""
     var neraErrQuota: String = ""
     var neraErrGeneric: String = ""
+    var neraTrialDaysLeft: String = ""
+    var neraErrTrialEnded: String = ""
 
     fun copyApply(block: Strings.() -> Unit): Strings {
 
@@ -1429,6 +1431,8 @@ class Strings {
         c.neraErrBadReply = this.neraErrBadReply
         c.neraErrQuota = this.neraErrQuota
         c.neraErrGeneric = this.neraErrGeneric
+        c.neraTrialDaysLeft = this.neraTrialDaysLeft
+        c.neraErrTrialEnded = this.neraErrTrialEnded
 
         c.block()
         return c

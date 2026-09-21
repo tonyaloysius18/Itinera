@@ -22,6 +22,17 @@ and a D1 database for the per-user daily limit and place-search cache.
   (gitignored) can point `JWKS_URL` / `ANTHROPIC_URL` at local mocks; never set those in production.
   After changing `database_id`, run `npx wrangler d1 migrations apply nera --local` again: local state is keyed by it.
 
+## Free trial and paid unlock
+
+- Every user's trial starts at their **first Nera request** and lasts `TRIAL_DAYS` (default 7, in `wrangler.toml`).
+  The start is recorded in D1 (`nera_entitlements`) whether or not it is enforced.
+- **Enforcement is off by default** (`PAYWALL_ENABLED = "false"`). Turn it on only once an in-app purchase exists to
+  unlock Nera, otherwise expired users would have no way to pay. When on, expired users get HTTP 402 `trial_ended`
+  (before any quota is used) and the app shows a friendly message; trial users see "Days left" in the chat.
+- Grant a paid unlock by hand (this is what a purchase webhook will write):
+  `npx wrangler d1 execute nera --remote --command "UPDATE nera_entitlements SET paid_until = 9999999999999 WHERE uid = '<firebase uid>'"`
+- Reset someone's trial: `DELETE FROM nera_entitlements WHERE uid = '<firebase uid>'`.
+
 ## Notes
 
 - Model is set in `../functions/nera.js` (`MODEL`). Daily limit is `DAILY_LIMIT` in `src/index.js`.

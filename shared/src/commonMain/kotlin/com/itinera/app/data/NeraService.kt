@@ -52,6 +52,13 @@ data class NeraItinerary(
     val days: List<NeraDay> = emptyList(),
 )
 
+/** Where the user stands with the free trial. Only sent when the server enforces the trial. */
+@Serializable
+data class NeraEntitlement(
+    val status: String,             // "trial" | "paid"
+    val daysLeft: Int? = null,      // whole days of trial left, when status == "trial"
+)
+
 /** Nera's answer: either a plain message (type "say") or a draft (type "itinerary"). */
 @Serializable
 data class NeraReply(
@@ -59,6 +66,7 @@ data class NeraReply(
     val message: String = "",
     val quickReplies: List<String> = emptyList(),
     val itinerary: NeraItinerary? = null,
+    val entitlement: NeraEntitlement? = null,
 )
 
 @Serializable
@@ -68,7 +76,7 @@ private data class NeraRequest(val messages: List<NeraTurn>, val currentItinerar
 private data class NeraError(val error: String = "")
 
 /** Why a Nera request failed. The UI maps each to a localized message. */
-enum class NeraFailure { NOT_CONFIGURED, SIGN_IN, NETWORK, BAD_REPLY, QUOTA, GENERIC }
+enum class NeraFailure { NOT_CONFIGURED, SIGN_IN, NETWORK, BAD_REPLY, QUOTA, TRIAL_ENDED, GENERIC }
 
 class NeraException(val failure: NeraFailure) : Exception(failure.name)
 
@@ -114,6 +122,12 @@ class NeraService {
             }
         }
         val code = runCatching { json.decodeFromString(NeraError.serializer(), body).error }.getOrDefault("")
-        throw NeraException(if (response.status.value == 429 || code == "quota") NeraFailure.QUOTA else NeraFailure.GENERIC)
+        throw NeraException(
+            when {
+                response.status.value == 402 || code == "trial_ended" -> NeraFailure.TRIAL_ENDED
+                response.status.value == 429 || code == "quota" -> NeraFailure.QUOTA
+                else -> NeraFailure.GENERIC
+            },
+        )
     }
 }

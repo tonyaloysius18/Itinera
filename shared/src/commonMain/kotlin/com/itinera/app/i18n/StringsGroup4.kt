@@ -591,6 +591,8 @@ internal val CZ: Strings by lazy { EN.copyApply {
     neraErrBadReply = "Nera poslala něco, co jsem nedokázala přečíst. Zkus to znovu."
     neraErrQuota = "Dosáhl jsi denního limitu pro Neru. Zkus to zítra."
     neraErrGeneric = "Nera má právě potíže. Zkus to znovu."
+    neraTrialDaysLeft = "Bezplatná zkušební doba · Zbývá dní: %s"
+    neraErrTrialEnded = "Tvoje bezplatná zkušební doba s Nerou skončila. Děkujeme, že jsi ji vyzkoušel!"
 } }
 internal val LV: Strings by lazy { EN.copyApply {
     name = "Vārds"
@@ -1181,6 +1183,8 @@ internal val LV: Strings by lazy { EN.copyApply {
     neraErrBadReply = "Nera nosūtīja kaut ko, ko nespēju nolasīt. Mēģini vēlreiz."
     neraErrQuota = "Sasniegts Neras dienas limits. Mēģini vēlreiz rīt."
     neraErrGeneric = "Nerai pašlaik ir problēmas. Mēģini vēlreiz."
+    neraTrialDaysLeft = "Bezmaksas izmēģinājums · Atlikušās dienas: %s"
+    neraErrTrialEnded = "Tavs bezmaksas izmēģinājums ar Neru ir beidzies. Paldies, ka izmēģināji!"
 } }
 
 internal val LT: Strings by lazy { EN.copyApply {
@@ -1772,6 +1776,8 @@ internal val LT: Strings by lazy { EN.copyApply {
     neraErrBadReply = "Nera atsiuntė kažką, ko negalėjau perskaityti. Bandyk dar kartą."
     neraErrQuota = "Pasiekei Neros dienos limitą. Bandyk rytoj."
     neraErrGeneric = "Nerai dabar kilo problemų. Bandyk dar kartą."
+    neraTrialDaysLeft = "Nemokamas bandomasis laikotarpis · Liko dienų: %s"
+    neraErrTrialEnded = "Tavo nemokamas bandomasis laikotarpis su Nera baigėsi. Ačiū, kad išbandei!"
 } }
 
 internal val AR: Strings by lazy { EN.copyApply {
@@ -2363,6 +2369,8 @@ internal val AR: Strings by lazy { EN.copyApply {
     neraErrBadReply = "أرسلت Nera شيئًا لم أستطع قراءته. حاول مرة أخرى."
     neraErrQuota = "وصلت إلى الحد اليومي لـ Nera. حاول مرة أخرى غدًا."
     neraErrGeneric = "تواجه Nera مشكلة حاليًا. حاول مرة أخرى."
+    neraTrialDaysLeft = "تجربة مجانية · الأيام المتبقية: %s"
+    neraErrTrialEnded = "انتهت تجربتك المجانية مع Nera. شكرًا لتجربتها!"
 } }
 
 internal val TR: Strings by lazy { EN.copyApply {
@@ -2954,6 +2962,8 @@ internal val TR: Strings by lazy { EN.copyApply {
     neraErrBadReply = "Nera okuyamadığım bir şey gönderdi. Tekrar dene."
     neraErrQuota = "Nera'nın günlük sınırına ulaştın. Yarın tekrar dene."
     neraErrGeneric = "Nera şu anda sorun yaşıyor. Tekrar dene."
+    neraTrialDaysLeft = "Ücretsiz deneme · Kalan gün: %s"
+    neraErrTrialEnded = "Nera ile ücretsiz deneme süren sona erdi. Denediğin için teşekkürler!"
 } }
 
 internal val VI: Strings by lazy { EN.copyApply {
@@ -3545,6 +3555,8 @@ internal val VI: Strings by lazy { EN.copyApply {
     neraErrBadReply = "Nera gửi thứ mình không đọc được. Vui lòng thử lại."
     neraErrQuota = "Bạn đã đạt giới hạn hằng ngày của Nera. Vui lòng thử lại vào ngày mai."
     neraErrGeneric = "Nera đang gặp sự cố. Vui lòng thử lại."
+    neraTrialDaysLeft = "Dùng thử miễn phí · Số ngày còn lại: %s"
+    neraErrTrialEnded = "Bản dùng thử miễn phí Nera của bạn đã kết thúc. Cảm ơn bạn đã thử!"
 } }
 
 internal val ID: Strings by lazy { EN.copyApply {
@@ -4136,6 +4148,8 @@ internal val ID: Strings by lazy { EN.copyApply {
     neraErrBadReply = "Nera mengirim sesuatu yang tidak bisa saya baca. Coba lagi."
     neraErrQuota = "Kamu sudah mencapai batas harian Nera. Coba lagi besok."
     neraErrGeneric = "Nera sedang bermasalah. Coba lagi."
+    neraTrialDaysLeft = "Uji coba gratis · Sisa hari: %s"
+    neraErrTrialEnded = "Uji coba gratis Nera-mu telah berakhir. Terima kasih sudah mencoba!"
 } }
 
 internal val TH: Strings by lazy { EN.copyApply {
@@ -4727,6 +4741,8 @@ internal val TH: Strings by lazy { EN.copyApply {
     neraErrBadReply = "Nera ส่งข้อมูลที่ฉันอ่านไม่ได้ โปรดลองอีกครั้ง"
     neraErrQuota = "คุณใช้ Nera ครบขีดจำกัดของวันนี้แล้ว โปรดลองใหม่พรุ่งนี้"
     neraErrGeneric = "ตอนนี้ Nera มีปัญหา โปรดลองอีกครั้ง"
+    neraTrialDaysLeft = "ทดลองใช้ฟรี · จำนวนวันที่เหลือ: %s"
+    neraErrTrialEnded = "การทดลองใช้ Nera ฟรีของคุณสิ้นสุดแล้ว ขอบคุณที่ลองใช้!"
 } }
 
 internal val HE: Strings by lazy { EN.copyApply {
@@ -5318,6 +5334,8 @@ internal val HE: Strings by lazy { EN.copyApply {
     neraErrBadReply = "Nera שלחה משהו שלא הצלחתי לקרוא. נסה שוב."
     neraErrQuota = "הגעת למגבלה היומית של Nera. נסה שוב מחר."
     neraErrGeneric = "ל-Nera יש בעיה כרגע. נסה שוב."
+    neraTrialDaysLeft = "ניסיון חינם · ימים שנותרו: %s"
+    neraErrTrialEnded = "תקופת הניסיון החינמית שלך עם Nera הסתיימה. תודה שניסית!"
 } }
 
 internal val BN: Strings by lazy { EN.copyApply {
@@ -5909,6 +5927,8 @@ internal val BN: Strings by lazy { EN.copyApply {
     neraErrBadReply = "Nera এমন কিছু পাঠিয়েছে যা আমি পড়তে পারিনি। আবার চেষ্টা করুন।"
     neraErrQuota = "আপনি আজকের Nera-র সীমায় পৌঁছে গেছেন। আগামীকাল আবার চেষ্টা করুন।"
     neraErrGeneric = "Nera-র এখন সমস্যা হচ্ছে। আবার চেষ্টা করুন।"
+    neraTrialDaysLeft = "বিনামূল্যে ট্রায়াল · বাকি দিন: %s"
+    neraErrTrialEnded = "Nera-র সঙ্গে আপনার বিনামূল্যে ট্রায়াল শেষ হয়েছে। চেষ্টা করার জন্য ধন্যবাদ!"
 } }
 
 internal val TG: Strings by lazy { EN.copyApply {
@@ -6500,6 +6520,8 @@ internal val TG: Strings by lazy { EN.copyApply {
     neraErrBadReply = "Nera чизе фиристод, ки хонда натавонистам. Бори дигар кӯшиш кунед."
     neraErrQuota = "Ба маҳдудияти рӯзонаи Nera расидед. Пагоҳ бори дигар кӯшиш кунед."
     neraErrGeneric = "Nera ҳоло мушкилӣ дорад. Бори дигар кӯшиш кунед."
+    neraTrialDaysLeft = "Озмоиши ройгон · Рӯзҳои боқимонда: %s"
+    neraErrTrialEnded = "Озмоиши ройгони шумо бо Nera ба поён расид. Ташаккур барои санҷиш!"
 } }
 
 internal val SI: Strings by lazy { EN.copyApply {
@@ -7091,5 +7113,7 @@ internal val SI: Strings by lazy { EN.copyApply {
     neraErrBadReply = "Nera මට කියවිය නොහැකි දෙයක් එවා ඇත. නැවත උත්සාහ කරන්න."
     neraErrQuota = "ඔබ අද Nera සීමාවට ළඟා වී ඇත. හෙට නැවත උත්සාහ කරන්න."
     neraErrGeneric = "Nera හට දැන් ගැටලුවක් ඇත. නැවත උත්සාහ කරන්න."
+    neraTrialDaysLeft = "නොමිලේ අත්හදා බැලීම · ඉතිරි දින: %s"
+    neraErrTrialEnded = "Nera සමඟ ඔබේ නොමිලේ අත්හදා බැලීම අවසන් විය. උත්සාහ කිරීමට ස්තූතියි!"
 } }
 

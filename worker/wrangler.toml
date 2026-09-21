@@ -6,6 +6,10 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 FIREBASE_PROJECT_ID = "itinera-ae020"
+# Free trial (days from a user's first Nera request) and whether it is enforced. Leave enforcement off until an
+# in-app purchase exists to unlock Nera; the trial start is recorded either way.
+TRIAL_DAYS = "7"
+PAYWALL_ENABLED = "false"
 
 # Daily quota + place-search cache. Run `npx wrangler d1 create nera`, then paste the printed
 # database_id below and apply migrations (see worker/README.md).

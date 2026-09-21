@@ -6,6 +6,7 @@
 import { MODEL, buildSystem, cleanMessages, runAgent } from "../../functions/nera.js";
 import { DATA_TOOLS, getWeather, searchPlaces } from "../../functions/tools.js";
 import { verifyFirebaseToken } from "./firebaseAuth.js";
+import { getEntitlement } from "./entitlement.js";
 
 const DAILY_LIMIT = 40;            // Nera requests per user per UTC day
 const MAX_BODY_BYTES = 100_000;
@@ -74,7 +75,14 @@ export default {
     const messages = cleanMessages(body?.messages);
     if (!messages) return json({ error: "bad_messages" }, 400);
 
-    // 3. Rate limit
+    // 3. Trial / paid entitlement. The trial start is always recorded; it is only enforced when PAYWALL_ENABLED="true"
+    //    (keep it off until a way to unlock exists, or expired users would be locked out with no route to pay).
+    const paywall = env.PAYWALL_ENABLED === "true";
+    const trialDays = Number(env.TRIAL_DAYS) > 0 ? Number(env.TRIAL_DAYS) : 7;
+    const entitlement = await getEntitlement(env.DB, uid, Date.now(), trialDays);
+    if (paywall && entitlement.status === "expired") return json({ error: "trial_ended" }, 402);
+
+    // 4. Rate limit
     const today = new Date().toISOString().slice(0, 10);
     if (!(await consumeQuota(env.DB, uid, today))) {
       return json({ error: "quota", message: "You've reached today's limit for Nera. Please try again tomorrow." }, 429);
@@ -84,7 +92,7 @@ export default {
       ctx.waitUntil(env.DB.prepare("DELETE FROM nera_usage WHERE day < ?1").bind(cutoff).run());
     }
 
-    // 4. Run Nera
+    // 5. Run Nera
     try {
       const places = Boolean(env.GOOGLE_PLACES_API_KEY && env.GOOGLE_PLACES_API_KEY.trim());
       const system = buildSystem(today, body?.currentItinerary, { places });
@@ -96,7 +104,8 @@ export default {
         return { error: `Unknown tool ${name}` };
       };
       const reply = await runAgent({ callModel: (args) => callModel(env, system, args), runTool, messages, dataTools });
-      return json(reply);
+      // Tell the app where the user stands (only when enforcing), so it can show "days left".
+      return json(paywall ? { ...reply, entitlement: { status: entitlement.status, daysLeft: entitlement.daysLeft } } : reply);
     } catch (e) {
       console.error("nera failed", e);
       return json({ error: e instanceof UpstreamError ? "upstream" : "internal" }, e instanceof UpstreamError ? 502 : 500);

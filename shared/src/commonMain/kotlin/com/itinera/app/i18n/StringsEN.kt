@@ -658,4 +658,6 @@ internal val EN: Strings by lazy { Strings().apply {
     neraErrBadReply = "Nera sent something I couldn't read. Please try again."
     neraErrQuota = "You've reached today's limit for Nera. Please try again tomorrow."
     neraErrGeneric = "Nera is having trouble right now. Please try again."
+    neraTrialDaysLeft = "Free trial · Days left: %s"
+    neraErrTrialEnded = "Your free trial of Nera has ended. Thanks for trying her!"
 } }
