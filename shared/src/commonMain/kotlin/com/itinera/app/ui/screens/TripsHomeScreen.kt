@@ -79,6 +79,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import coil3.compose.AsyncImage
+import com.itinera.app.data.countriesCovered
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.Trip
 import com.itinera.app.model.TripAccent
@@ -777,11 +778,7 @@ fun TripCardContent(
                         }
                         Icon(Icons.Filled.Place, null, tint = labelColor, modifier = Modifier.size(14.dp))
                         Spacer(Modifier.width(4.dp))
-                        val countryCount = trip.legs
-                            .map { it.country }
-                            .filter { it.isNotBlank() }
-                            .distinct()
-                            .size
+                        val countryCount = trip.countriesCovered()
                         Text("$countryCount $countriesWord", color = labelColor, style = MaterialTheme.typography.labelSmall)
                     }
                 }

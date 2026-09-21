@@ -82,6 +82,8 @@ data class Trip(
     // Absent on existing documents, so they decode to null. Legs win when present.
     val startDate: LocalDate? = null,
     val endDate: LocalDate? = null,
+    // Countries the trip visits, for trips without transport legs (Nera). Legs win when present.
+    val destinationCountries: List<String> = emptyList(),
 )
 
 /**

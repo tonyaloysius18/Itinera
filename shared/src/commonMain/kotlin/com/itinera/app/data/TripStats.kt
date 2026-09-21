@@ -23,14 +23,20 @@ fun Trip.primaryCountry(): String {
     val countries = legs
         .sortedWith(compareBy({ it.date }, { it.timeLabel }))
         .mapNotNull { it.country.trim().ifBlank { null } }
-    if (countries.isEmpty()) return ""
+    if (countries.isEmpty()) return destinationCountries.firstOrNull { it.isNotBlank() }?.trim().orEmpty()
     val weighted = if (countries.size > 1) countries.dropLast(1) else countries
     return weighted.groupingBy { it }.eachCount().maxByOrNull { it.value }?.key ?: ""
 }
 
-/** Distinct countries across the trip's legs (blank = not yet geocoded, skipped). */
-fun Trip.countriesCovered(): Int =
-    legs.map { it.country.trim().lowercase() }.filter { it.isNotBlank() }.distinct().size
+/**
+ * Distinct countries across the trip's legs (blank = not yet geocoded, skipped). A trip without any geocoded
+ * legs, such as one planned by Nera, falls back to its stored destination countries.
+ */
+fun Trip.countriesCovered(): Int {
+    val fromLegs = legs.map { it.country.trim().lowercase() }.filter { it.isNotBlank() }.distinct().size
+    if (fromLegs > 0) return fromLegs
+    return destinationCountries.map { it.trim().lowercase() }.filter { it.isNotBlank() }.distinct().size
+}
 
 /** Total km across legs whose both endpoints are geocoded. */
 fun Trip.distanceTravelledKm(): Int =

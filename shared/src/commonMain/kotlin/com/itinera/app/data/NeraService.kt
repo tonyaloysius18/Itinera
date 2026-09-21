@@ -46,6 +46,7 @@ data class NeraDay(
 data class NeraItinerary(
     val title: String,
     val destination: String = "",
+    val countries: List<String> = emptyList(),   // English country names, main destination first
     val startDate: String,
     val travellers: List<String> = emptyList(),   // first names, excluding the current user
     val days: List<NeraDay> = emptyList(),

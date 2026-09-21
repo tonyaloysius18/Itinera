@@ -43,6 +43,7 @@ ITINERARY RULES
 - "note" is one short, useful sentence: why go, a booking tip, or what to order. No hedging.
 - Do not invent opening hours, prices or phone numbers. If unsure, say "check opening hours".
 - Account for the season/weather for the travel dates.
+- Fill "countries" with the English name of every country the trip visits (e.g. "United Kingdom"), main destination first.
 - Fill "travellers" with the first names of everyone travelling EXCEPT the person chatting with you (omit if travelling solo or names not given).
 
 EDITING
@@ -82,6 +83,11 @@ const FINAL_TOOLS = [
         message: { type: "string", description: "One or two sentences introducing the draft or describing what changed." },
         title: { type: "string", description: "Trip title, e.g. 'London in 5 days'." },
         destination: { type: "string" },
+        countries: {
+          type: "array",
+          items: { type: "string" },
+          description: "English names of the countries visited, main destination first, e.g. ['United Kingdom'].",
+        },
         start_date: { type: "string", description: "ISO date YYYY-MM-DD of day 1." },
         travellers: {
           type: "array",
@@ -161,6 +167,9 @@ function cleanItinerary(input) {
   return {
     title: str(input.title, 80) || "New trip",
     destination: str(input.destination, 80),
+    countries: Array.isArray(input.countries)
+      ? [...new Set(input.countries.map((c) => str(c, 60)).filter(Boolean))].slice(0, 8)
+      : [],
     startDate: str(input.start_date, 10),
     travellers: Array.isArray(input.travellers)
       ? input.travellers.map((t) => str(t, 40)).filter(Boolean).slice(0, 12)
@@ -234,6 +243,7 @@ function buildSystem(today, currentItinerary, { places = true } = {}) {
     start_date: currentItinerary.startDate,
     title: currentItinerary.title,
     destination: currentItinerary.destination,
+    countries: currentItinerary.countries,
     travellers: currentItinerary.travellers,
     days: (currentItinerary.days || []).map((d) => ({
       date: d.date,

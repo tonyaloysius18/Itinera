@@ -207,6 +207,7 @@ class TripRepository {
                 dateRange = if (days.isNotEmpty()) "${days.first().first.label()} – ${days.last().first.label()}" else "",
                 startDate = days.firstOrNull()?.first,
                 endDate = days.lastOrNull()?.first,
+                destinationCountries = draft.countries.map { it.trim() }.filter { it.isNotBlank() }.distinct(),
                 travellers = trips[i].travellers + others,
             )
             persist(trips[i])
