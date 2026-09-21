@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "test": "node --test test/auth.test.mjs test/entitlement.test.mjs"
+    "test": "node --test test/auth.test.mjs test/entitlement.test.mjs test/revenuecat.test.mjs",
+    "friend": "node scripts/friends.mjs"
   },
   "devDependencies": {
     "wrangler": "^4.0.0"

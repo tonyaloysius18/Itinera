@@ -266,11 +266,12 @@ const FINAL_NAMES = new Set(FINAL_TOOLS.map((t) => t.name));
  *   callModel({ tools, messages }) -> Anthropic response
  *   runTool(name, input)           -> JSON-serialisable result
  */
-async function runAgent({ callModel, runTool, messages, dataTools = DATA_TOOLS }) {
+async function runAgent({ callModel, runTool, messages, dataTools = DATA_TOOLS, onUsage }) {
   const convo = [...messages];
   for (let round = 0; ; round++) {
     const lastRound = round >= MAX_TOOL_ROUNDS;
     const response = await callModel({ tools: lastRound ? FINAL_TOOLS : [...dataTools, ...FINAL_TOOLS], messages: convo });
+    if (onUsage && response.usage) onUsage(response.usage);
     const uses = (response.content || []).filter((b) => b.type === "tool_use");
     const final = uses.find((b) => FINAL_NAMES.has(b.name));
     if (final || lastRound || uses.length === 0) return shapeReply(response);

@@ -33,6 +33,45 @@ and a D1 database for the per-user daily limit and place-search cache.
   `npx wrangler d1 execute nera --remote --command "UPDATE nera_entitlements SET paid_until = 9999999999999 WHERE uid = '<firebase uid>'"`
 - Reset someone's trial: `DELETE FROM nera_entitlements WHERE uid = '<firebase uid>'`.
 
+## Friends & family (free access by email)
+
+Emails on this list get Nera free, with no trial and no purchase. Only a **verified** email counts (Google sign-in
+always is), so nobody can sign up with someone else's address.
+
+```
+npm run friend -- add mum@example.com "Mum"
+npm run friend -- remove mum@example.com
+npm run friend -- list
+```
+
+(Add `--local` to use the test database.) Friends still have the monthly fair-use cap below. Apple's "Hide My Email"
+addresses will not match, so ask friends to use Google sign-in or their real email.
+
+## Subscription (RevenueCat)
+
+RevenueCat tells the Worker about purchases at `POST /revenuecat`. Setup:
+
+1. Choose a long random string and store it: `openssl rand -hex 32`, then
+   `npx wrangler secret put REVENUECAT_WEBHOOK_AUTH` and paste it.
+2. In RevenueCat, Project settings, Integrations, Webhooks, add
+   `https://nera.<your-subdomain>.workers.dev/revenuecat` and put the **same string** in "Authorization header value".
+3. The app must log in to RevenueCat with the **Firebase uid** as the app user id (it does), and the entitlement
+   must be named `nera`.
+
+Events set `paid_until`: renewals extend it, a cancellation keeps access until the period ends, a refund revokes it
+immediately, and an older event can never overwrite a newer one. Until step 1 is done the endpoint answers 503.
+
+## Fair use and cost
+
+- Everyone: `DAILY_LIMIT` (40) requests a day. Paying and friend users also get `PAID_MONTHLY_LIMIT` (150) a month
+  (`wrangler.toml`); over it the app shows "monthly limit reached".
+- Real token usage per day is recorded in `nera_cost`. Estimated spend (Haiku 4.5 at $1 / $5 per million tokens,
+  check current pricing):
+
+```
+npx wrangler d1 execute nera --remote --command "SELECT day, requests, model_calls, input_tokens, output_tokens, ROUND(input_tokens/1e6*1.0 + output_tokens/1e6*5.0, 3) AS est_usd FROM nera_cost ORDER BY day DESC LIMIT 14"
+```
+
 ## Notes
 
 - Model is set in `../functions/nera.js` (`MODEL`). Daily limit is `DAILY_LIMIT` in `src/index.js`.

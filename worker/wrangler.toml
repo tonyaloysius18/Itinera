@@ -10,6 +10,8 @@ FIREBASE_PROJECT_ID = "itinera-ae020"
 # in-app purchase exists to unlock Nera; the trial start is recorded either way.
 TRIAL_DAYS = "7"
 PAYWALL_ENABLED = "false"
+# Fair-use cap: Nera requests per month for paying and friends-and-family users.
+PAID_MONTHLY_LIMIT = "150"
 
 # Daily quota + place-search cache. Run `npx wrangler d1 create nera`, then paste the printed
 # database_id below and apply migrations (see worker/README.md).

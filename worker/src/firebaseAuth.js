@@ -36,8 +36,8 @@ async function keyFor(kid, jwksUrl, fetchImpl, now) {
   return keyCache.keys.get(kid) || null;
 }
 
-/** Returns the Firebase uid, or throws. Any failure means "reject the request". */
-export async function verifyFirebaseToken(token, { projectId, jwksUrl = GOOGLE_JWKS, fetchImpl = fetch, now = Date.now() }) {
+/** Verifies the token and returns its claims { uid, email, emailVerified }, or throws. */
+export async function verifyFirebaseClaims(token, { projectId, jwksUrl = GOOGLE_JWKS, fetchImpl = fetch, now = Date.now() }) {
   if (!projectId) throw new Error("no_project");
   const parts = typeof token === "string" ? token.split(".") : [];
   if (parts.length !== 3) throw new Error("malformed");
@@ -59,7 +59,16 @@ export async function verifyFirebaseToken(token, { projectId, jwksUrl = GOOGLE_J
   if (typeof p.iat !== "number" || p.iat > nowS + SKEW_S) throw new Error("bad_iat");
   if (typeof p.auth_time === "number" && p.auth_time > nowS + SKEW_S) throw new Error("bad_auth_time");
   if (typeof p.sub !== "string" || !p.sub || p.sub.length > 128) throw new Error("bad_subject");
-  return p.sub;
+  return {
+    uid: p.sub,
+    email: typeof p.email === "string" ? p.email.trim().toLowerCase() : "",
+    emailVerified: p.email_verified === true,
+  };
+}
+
+/** Returns the Firebase uid, or throws. Any failure means "reject the request". */
+export async function verifyFirebaseToken(token, options) {
+  return (await verifyFirebaseClaims(token, options)).uid;
 }
 
 /** Test hook: forget cached signing keys. */
