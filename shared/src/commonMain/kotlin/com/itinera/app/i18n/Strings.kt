@@ -776,8 +776,8 @@ class Strings {
     var neraErrBadReply: String = ""
     var neraErrQuota: String = ""
     var neraErrGeneric: String = ""
-    var neraTrialDaysLeft: String = ""
-    var neraErrTrialEnded: String = ""
+    var neraFreeTripsLeft: String = ""
+    var neraFreeTripsUsed: String = ""
     var neraPaywallTitle: String = ""
     var neraPaywallSubtitle: String = ""
     var neraBenefit1: String = ""
@@ -1447,8 +1447,8 @@ class Strings {
         c.neraErrBadReply = this.neraErrBadReply
         c.neraErrQuota = this.neraErrQuota
         c.neraErrGeneric = this.neraErrGeneric
-        c.neraTrialDaysLeft = this.neraTrialDaysLeft
-        c.neraErrTrialEnded = this.neraErrTrialEnded
+        c.neraFreeTripsLeft = this.neraFreeTripsLeft
+        c.neraFreeTripsUsed = this.neraFreeTripsUsed
         c.neraPaywallTitle = this.neraPaywallTitle
         c.neraPaywallSubtitle = this.neraPaywallSubtitle
         c.neraBenefit1 = this.neraBenefit1

@@ -50,6 +50,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import com.itinera.app.data.NeraActivity
+import com.itinera.app.data.NeraEntitlement
 import com.itinera.app.data.NeraItinerary
 import com.itinera.app.data.NeraOffer
 import com.itinera.app.data.PurchaseOutcome
@@ -103,7 +104,8 @@ fun NeraChatScreen(
     var input by remember { mutableStateOf("") }
     var sending by remember { mutableStateOf(false) }
     var approved by remember { mutableStateOf(false) }
-    var trialDaysLeft by remember { mutableStateOf<Int?>(null) }   // null = no trial info (not enforced, or paid)
+    // Where a non-paying user stands with the free trips; null = no info (paywall not enforced, or already paid).
+    var freeTier by remember { mutableStateOf<NeraEntitlement?>(null) }
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val uriHandler = LocalUriHandler.current
@@ -126,11 +128,10 @@ fun NeraChatScreen(
         }
     }
 
-    // Opening the chat also starts the trial and tells us how many days are left, before the first message.
+    // Opening the chat tells us how many free trips are left, before the first message.
     LaunchedEffect(Unit) {
         val status = service.status()
-        val trial = status?.entitlement
-        trialDaysLeft = if (status?.enforced == true && trial?.status == "trial") trial.daysLeft else null
+        freeTier = if (status?.enforced == true) status.entitlement?.takeIf { it.status != "paid" } else null
     }
 
     /** Asks the server (which asks RevenueCat) whether the purchase has registered; a few tries, then gives up. */
@@ -146,7 +147,7 @@ fun NeraChatScreen(
     /** Finishes a successful purchase or restore: close the paywall and tell the user where they stand. */
     suspend fun finishUnlock() {
         if (serverConfirmsUnlock()) {
-            trialDaysLeft = null
+            freeTier = null
             showPaywall = false
             items.add(NeraItem.FromNera(s.neraUnlocked))
         } else {
@@ -181,8 +182,7 @@ fun NeraChatScreen(
         scope.launch {
             try {
                 val reply = service.send(history, currentDraft)
-                val trial = reply.entitlement
-                trialDaysLeft = if (trial?.status == "trial") trial.daysLeft else null
+                freeTier = reply.entitlement?.takeIf { it.status != "paid" }
                 val itinerary = reply.itinerary
                 if (reply.type == "itinerary" && itinerary != null) {
                     items.add(NeraItem.Draft(reply.message, itinerary))
@@ -190,18 +190,13 @@ fun NeraChatScreen(
                     items.add(NeraItem.FromNera(reply.message, reply.quickReplies))
                 }
             } catch (e: NeraException) {
-                // The trial ending is not a fault: show it as an ordinary message from Nera, not a red error.
-                if (e.failure == NeraFailure.TRIAL_ENDED) {
-                    items.add(NeraItem.FromNera(s.neraErrTrialEnded))
-                    openPaywall()
-                } else items.add(NeraItem.Problem(when (e.failure) {
+                items.add(NeraItem.Problem(when (e.failure) {
                     NeraFailure.NOT_CONFIGURED -> s.neraErrNotSetUp
                     NeraFailure.SIGN_IN -> s.neraErrSignIn
                     NeraFailure.NETWORK -> s.neraErrNetwork
                     NeraFailure.BAD_REPLY -> s.neraErrBadReply
                     NeraFailure.QUOTA -> s.neraErrQuota
                     NeraFailure.MONTHLY_QUOTA -> s.neraErrMonthlyQuota
-                    NeraFailure.TRIAL_ENDED -> s.neraErrTrialEnded   // handled above; keeps the when exhaustive
                     NeraFailure.GENERIC -> s.neraErrGeneric
                 }))
             } finally {
@@ -215,11 +210,14 @@ fun NeraChatScreen(
     Box(Modifier.fillMaxSize()) {
     Column(Modifier.fillMaxSize().imePadding()) {
         TopBar("Nera", onBack = onBack)
-        trialDaysLeft?.let { days ->
+        freeTier?.let { tier ->
             Text(
-                s.neraTrialDaysLeft.replace("%s", days.toString()),
+                if (tier.status == "limit") s.neraFreeTripsUsed
+                else s.neraFreeTripsLeft
+                    .replaceFirst("%s", (tier.tripsLeft ?: 0).toString())
+                    .replaceFirst("%s", (tier.freeTrips ?: 0).toString()),
                 modifier = Modifier
-                    .clickable(enabled = purchases.isAvailable) { openPaywall() }   // tap to subscribe early
+                    .clickable(enabled = purchases.isAvailable) { openPaywall() }   // tap to subscribe
                     .padding(start = 16.dp, end = 16.dp, bottom = 4.dp),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
@@ -251,7 +249,11 @@ fun NeraChatScreen(
                                 s = s,
                                 isLatest = index == latestDraftIndex,
                                 actionsEnabled = !sending && !approved,
-                                onApprove = { approved = true; onApprove(item.itinerary) },
+                                onApprove = {
+                                    // Free trips used up: approving a draft needs the subscription (when it can be bought here).
+                                    if (freeTier?.status == "limit" && purchases.isAvailable) openPaywall()
+                                    else { approved = true; onApprove(item.itinerary) }
+                                },
                                 onChange = {
                                     items.add(NeraItem.FromNera(
                                         s.neraChangePrompt,

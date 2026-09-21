@@ -973,6 +973,7 @@ private fun AppContent(
                                 onBack = { navigator.back() },
                                 onApprove = { draft ->
                                     val id = repository.createTripFromItinerary(draft)
+                                    scope.launch { repository.neraService.tripCreated(id) }   // uses up one free trip
                                     scope.launch {
                                         val trip = repository.tripById(id)
                                         if (trip != null) {

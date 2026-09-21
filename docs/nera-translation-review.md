@@ -1,6 +1,6 @@
 # Nera translations: native-speaker review
 
-The Nera text (the chat, buttons, errors and the free-trial messages) is translated into 42 languages. These
+The Nera text (the chat, buttons, errors and the free-trips messages) is translated into 42 languages. These
 translations were written by an AI and **have not been reviewed by native speakers**. Please have a fluent speaker
 check the languages they know, especially the lower-resource ones (Tajik, Sinhala, Georgian, Macedonian,
 Albanian, Estonian, Moldovan).

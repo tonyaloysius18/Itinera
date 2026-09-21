@@ -22,20 +22,29 @@ and a D1 database for the per-user daily limit and place-search cache.
   (gitignored) can point `JWKS_URL` / `ANTHROPIC_URL` at local mocks; never set those in production.
   After changing `database_id`, run `npx wrangler d1 migrations apply nera --local` again: local state is keyed by it.
 
-## Free trial and paid unlock
+## Free trips and paid unlock
 
-- Every user's trial starts at their **first visit to Nera** (opening the chat)  and lasts `TRIAL_DAYS` (default 7, in `wrangler.toml`).
-  The start is recorded in D1 (`nera_entitlements`) whether or not it is enforced.
-- **Enforcement is off by default** (`PAYWALL_ENABLED = "false"`). Turn it on only once an in-app purchase exists to
-  unlock Nera, otherwise expired users would have no way to pay. When on, expired users get HTTP 402 `trial_ended`
-  (before any quota is used) and the app shows a friendly message; trial users see "Days left" in the chat.
-- Grant a paid unlock by hand (this is what a purchase webhook will write):
+- Every user can create **`FREE_TRIPS` trips with Nera for free** (default 3, in `wrangler.toml`). A trip counts when the
+  user approves a draft: the app calls `POST /trip { tripId }`, and each `(uid, tripId)` is stored once in `nera_trips`,
+  so a retry never uses up a second trip. There is no time limit.
+- After the last free trip the user is at the **limit**: chat keeps working (weather, food, questions), but Nera is only
+  offered the `say` tool, so she cannot draft or change itineraries, and the app asks them to subscribe before approving
+  any older draft. A subscription (or a friends-and-family email) lifts the limit.
+- Free users get `FREE_MONTHLY_LIMIT` requests a month (default 60) so people who never subscribe cannot run up cost;
+  paying and friend users get `PAID_MONTHLY_LIMIT` (default 150). The counter is per calendar month, whatever the tier.
+- Trips are counted whether or not the paywall is enforced. **Enforcement is `PAYWALL_ENABLED`.** Turn it on only once an
+  in-app purchase exists, otherwise users at the limit would have no way to pay.
+- `POST /entitlement` (no model call, no quota) returns `{ enforced, entitlement: { status, tripsLeft, tripsUsed, freeTrips } }`
+  with `status` one of `free`, `limit`, `paid`. Chat replies carry the same `entitlement` when the paywall is enforced.
+- Grant a paid unlock by hand (this is what the purchase webhook writes):
   `npx wrangler d1 execute nera --remote --command "UPDATE nera_entitlements SET paid_until = 9999999999999 WHERE uid = '<firebase uid>'"`
-- Reset someone's trial: `DELETE FROM nera_entitlements WHERE uid = '<firebase uid>'`.
+- Reset someone's free trips: `DELETE FROM nera_trips WHERE uid = '<firebase uid>'`.
+- **Apply migrations before deploying** a version that needs a new table: `npx wrangler d1 migrations apply nera --remote`,
+  then `npx wrangler deploy`.
 
 ## Friends & family (free access by email)
 
-Emails on this list get Nera free, with no trial and no purchase. Only a **verified** email counts (Google sign-in
+Emails on this list get Nera free, with no trip limit and no purchase. Only a **verified** email counts (Google sign-in
 always is), so nobody can sign up with someone else's address.
 
 ```

@@ -235,10 +235,25 @@ function monthStartCalendar(today) {
   return out.join(", ");
 }
 
-function buildSystem(today, currentItinerary, { places = true } = {}) {
+const LIMIT_NOTE = `IMPORTANT, this overrides all the planning instructions above: the traveller has used all of their free trips, so you cannot draft or change itineraries for them now. Do NOT ask planning questions (dates, days, budget, who is travelling). If they ask to plan a trip or change a draft, reply right away, in their language, in one or two friendly sentences: planning more trips needs the Nera Plus subscription, and they can subscribe by tapping the banner above the chat. You may still answer travel, weather, food and place questions, and help with trips they have already created.`;
+
+// Repeated at the end of the traveller's latest message, where the model pays most attention (a long system prompt
+// full of planning rules otherwise wins over the note above).
+const LIMIT_REMINDER = `[App notice, not written by the traveller: they have no free trips left. Do not ask planning questions and do not draft anything. If they want to plan or change a trip, reply right away in their language, in one or two friendly sentences, that planning more trips needs the Nera Plus subscription and that they can subscribe by tapping the banner above the chat. If they only ask a general question (weather, food, places, a trip they already made), answer that instead.]`;
+
+/** Adds the limit reminder to the last message (the traveller's). Returns a new array; the input is untouched. */
+function withLimitReminder(messages) {
+  const out = messages.map((m) => ({ ...m }));
+  const last = out[out.length - 1];
+  if (last && last.role === "user" && typeof last.content === "string") last.content = `${last.content}\n\n${LIMIT_REMINDER}`;
+  return out;
+}
+
+function buildSystem(today, currentItinerary, { places = true, limited = false } = {}) {
   const weekday = WEEKDAYS[new Date(today + "T00:00:00Z").getUTCDay()];
   let system = `${SYSTEM_PROMPT}\n\nToday's date is ${today} (${weekday}).\nCalendar (first day of each month): ${monthStartCalendar(today)}.`;
   if (!places) system += `\n\n${NO_PLACES_NOTE}`;
+  if (limited) system += `\n\n${LIMIT_NOTE}`;
   const draft = cleanItinerary(currentItinerary && {
     start_date: currentItinerary.startDate,
     title: currentItinerary.title,
@@ -257,8 +272,6 @@ function buildSystem(today, currentItinerary, { places = true } = {}) {
   return system;
 }
 
-const FINAL_NAMES = new Set(FINAL_TOOLS.map((t) => t.name));
-
 /**
  * Run one Nera turn. Claude may call data tools for a few rounds; each round's results are fed
  * back until it calls a final tool ("say" / "propose_itinerary"). On the last round only the
@@ -266,14 +279,15 @@ const FINAL_NAMES = new Set(FINAL_TOOLS.map((t) => t.name));
  *   callModel({ tools, messages }) -> Anthropic response
  *   runTool(name, input)           -> JSON-serialisable result
  */
-async function runAgent({ callModel, runTool, messages, dataTools = DATA_TOOLS, onUsage }) {
+async function runAgent({ callModel, runTool, messages, dataTools = DATA_TOOLS, finalTools = FINAL_TOOLS, onUsage }) {
+  const finalNames = new Set(finalTools.map((t) => t.name));
   const convo = [...messages];
   for (let round = 0; ; round++) {
     const lastRound = round >= MAX_TOOL_ROUNDS;
-    const response = await callModel({ tools: lastRound ? FINAL_TOOLS : [...dataTools, ...FINAL_TOOLS], messages: convo });
+    const response = await callModel({ tools: lastRound ? finalTools : [...dataTools, ...finalTools], messages: convo });
     if (onUsage && response.usage) onUsage(response.usage);
     const uses = (response.content || []).filter((b) => b.type === "tool_use");
-    const final = uses.find((b) => FINAL_NAMES.has(b.name));
+    const final = uses.find((b) => finalNames.has(b.name));
     if (final || lastRound || uses.length === 0) return shapeReply(response);
 
     convo.push({ role: "assistant", content: response.content });
@@ -286,4 +300,4 @@ async function runAgent({ callModel, runTool, messages, dataTools = DATA_TOOLS, 
   }
 }
 
-module.exports = { MODEL, FINAL_TOOLS, monthStartCalendar, buildSystem, cleanMessages, shapeReply, cleanItinerary, runAgent };
+module.exports = { MODEL, FINAL_TOOLS, monthStartCalendar, buildSystem, withLimitReminder, cleanMessages, shapeReply, cleanItinerary, runAgent };

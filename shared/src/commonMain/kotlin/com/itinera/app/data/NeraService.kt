@@ -52,14 +52,15 @@ data class NeraItinerary(
     val days: List<NeraDay> = emptyList(),
 )
 
-/** Where the user stands with the free trial. Only sent when the server enforces the trial. */
+/** Where the user stands with the free trips. Only sent when the server enforces the paywall. */
 @Serializable
 data class NeraEntitlement(
-    val status: String,             // "trial" | "paid"
-    val daysLeft: Int? = null,      // whole days of trial left, when status == "trial"
+    val status: String,             // "free" (trips left) | "limit" (free trips used up) | "paid"
+    val tripsLeft: Int? = null,     // free trips still available, when status is "free" or "limit"
+    val freeTrips: Int? = null,     // how many trips are free in total
 )
 
-/** Answer of the status endpoint: whether the trial is enforced, and where this user stands. */
+/** Answer of the status endpoint: whether the paywall is enforced, and where this user stands. */
 @Serializable
 data class NeraStatus(
     val enforced: Boolean = false,
@@ -80,10 +81,13 @@ data class NeraReply(
 private data class NeraRequest(val messages: List<NeraTurn>, val currentItinerary: NeraItinerary? = null)
 
 @Serializable
+private data class NeraTripRequest(val tripId: String)
+
+@Serializable
 private data class NeraError(val error: String = "")
 
 /** Why a Nera request failed. The UI maps each to a localized message. */
-enum class NeraFailure { NOT_CONFIGURED, SIGN_IN, NETWORK, BAD_REPLY, QUOTA, MONTHLY_QUOTA, TRIAL_ENDED, GENERIC }
+enum class NeraFailure { NOT_CONFIGURED, SIGN_IN, NETWORK, BAD_REPLY, QUOTA, MONTHLY_QUOTA, GENERIC }
 
 class NeraException(val failure: NeraFailure) : Exception(failure.name)
 
@@ -107,7 +111,7 @@ class NeraService {
     val isConfigured: Boolean get() = Secrets.NERA_ENDPOINT.startsWith("https://")
 
     /**
-     * Where the user stands (trial days left, paid, ...). Uses no Nera quota. With [refresh] the server first asks
+     * Where the user stands (free trips left, paid, ...). Uses no Nera quota. With [refresh] the server first asks
      * RevenueCat directly, so a purchase or restore takes effect immediately. Null on any failure.
      */
     suspend fun status(refresh: Boolean = false): NeraStatus? {
@@ -118,6 +122,28 @@ class NeraService {
                 header(HttpHeaders.Authorization, "Bearer $token")
                 contentType(ContentType.Application.Json)
                 setBody(if (refresh) """{"refresh":true}""" else "{}")
+            }
+            if (response.status != HttpStatusCode.OK) null
+            else json.decodeFromString(NeraStatus.serializer(), response.bodyAsText())
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /**
+     * Tells the server the user approved a Nera draft and it became the trip [tripId], which uses up one free trip.
+     * Best effort: a failure only means that trip is not counted. Returns where the user stands now, or null.
+     */
+    suspend fun tripCreated(tripId: String): NeraStatus? {
+        if (!isConfigured) return null
+        val token = Firebase.auth.currentUser?.getIdToken(false) ?: return null
+        return try {
+            val response = client.post(Secrets.NERA_ENDPOINT.trimEnd('/') + "/trip") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                contentType(ContentType.Application.Json)
+                setBody(json.encodeToString(NeraTripRequest.serializer(), NeraTripRequest(tripId)))
             }
             if (response.status != HttpStatusCode.OK) null
             else json.decodeFromString(NeraStatus.serializer(), response.bodyAsText())
@@ -153,7 +179,6 @@ class NeraService {
         val code = runCatching { json.decodeFromString(NeraError.serializer(), body).error }.getOrDefault("")
         throw NeraException(
             when {
-                response.status.value == 402 || code == "trial_ended" -> NeraFailure.TRIAL_ENDED
                 code == "monthly_quota" -> NeraFailure.MONTHLY_QUOTA
                 response.status.value == 429 || code == "quota" -> NeraFailure.QUOTA
                 else -> NeraFailure.GENERIC

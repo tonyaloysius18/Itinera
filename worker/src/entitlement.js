@@ -1,21 +1,18 @@
 // Who may use Nera right now. Pure function so it is trivially testable.
 
-const DAY_MS = 86_400_000;
-
 /**
- * @param row  { trial_started_at, paid_until } from nera_entitlements (epoch millis)
- * @returns { status: "paid" }
- *        | { status: "trial", trialEndsAt, daysLeft }
- *        | { status: "expired", trialEndsAt }
+ * @param row        { paid_until } from nera_entitlements (epoch millis)
+ * @param tripsUsed  how many trips this user has created with Nera (approved drafts)
+ * @param freeTrips  how many trips are free before the subscription is needed
+ * @returns { status: "paid", source }
+ *        | { status: "free", tripsUsed, tripsLeft, freeTrips }    free trips remain
+ *        | { status: "limit", tripsUsed, tripsLeft: 0, freeTrips } free trips used up: new trips need the subscription
  */
-export function evaluateEntitlement(row, now, trialDays, { friend = false } = {}) {
+export function evaluateEntitlement(row, now, tripsUsed, freeTrips, { friend = false } = {}) {
   if (friend) return { status: "paid", source: "friend" };
   if (row.paid_until > now) return { status: "paid", source: "subscription" };
-  const trialEndsAt = row.trial_started_at + trialDays * DAY_MS;
-  if (now < trialEndsAt) {
-    return { status: "trial", trialEndsAt, daysLeft: Math.max(1, Math.ceil((trialEndsAt - now) / DAY_MS)) };
-  }
-  return { status: "expired", trialEndsAt };
+  const tripsLeft = Math.max(0, freeTrips - tripsUsed);
+  return { status: tripsLeft > 0 ? "free" : "limit", tripsUsed, tripsLeft, freeTrips };
 }
 
 /**
@@ -28,15 +25,21 @@ export async function isFriend(db, email, emailVerified) {
   return row !== null;
 }
 
-/** Reads/creates the user's entitlement row (the trial starts at the first ever request) and evaluates it. */
-export async function getEntitlement(db, uid, now, trialDays, { friend = false } = {}) {
+/** Reads/creates the user's entitlement row and counts their Nera trips, then evaluates where they stand. */
+export async function getEntitlement(db, uid, now, freeTrips, { friend = false } = {}) {
   await db
     .prepare("INSERT OR IGNORE INTO nera_entitlements (uid, trial_started_at, paid_until) VALUES (?1, ?2, 0)")
     .bind(uid, now)
     .run();
-  const row = await db
-    .prepare("SELECT trial_started_at, paid_until FROM nera_entitlements WHERE uid = ?1")
-    .bind(uid)
-    .first();
-  return evaluateEntitlement(row, now, trialDays, { friend });
+  const row = await db.prepare("SELECT paid_until FROM nera_entitlements WHERE uid = ?1").bind(uid).first();
+  const used = await db.prepare("SELECT COUNT(*) AS n FROM nera_trips WHERE uid = ?1").bind(uid).first();
+  return evaluateEntitlement(row, now, used ? used.n : 0, freeTrips, { friend });
+}
+
+/** Remembers that this user created a trip with Nera. Idempotent per trip id, so a retry never counts twice. */
+export async function recordTrip(db, uid, tripId, now) {
+  await db
+    .prepare("INSERT OR IGNORE INTO nera_trips (uid, trip_id, created_at) VALUES (?1, ?2, ?3)")
+    .bind(uid, tripId, now)
+    .run();
 }

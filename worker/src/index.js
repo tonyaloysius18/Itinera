@@ -3,14 +3,19 @@
 //   -> { type: "say" | "itinerary", message, quickReplies?, itinerary? }
 // Prompt, tools and response shaping are shared with the Firebase version via ../../functions.
 
-import { MODEL, buildSystem, cleanMessages, runAgent } from "../../functions/nera.js";
+import { FINAL_TOOLS, MODEL, buildSystem, cleanMessages, runAgent, withLimitReminder } from "../../functions/nera.js";
 import { DATA_TOOLS, getWeather, searchPlaces } from "../../functions/tools.js";
 import { verifyFirebaseClaims } from "./firebaseAuth.js";
-import { getEntitlement, isFriend } from "./entitlement.js";
+import { getEntitlement, isFriend, recordTrip } from "./entitlement.js";
 import { applyUpdate, eventToUpdate, fetchSubscriberExpiry, safeEqual } from "./revenuecat.js";
 
 const DAILY_LIMIT = 40;            // Nera requests per user per UTC day
 const DEFAULT_PAID_MONTHLY_LIMIT = 150;   // fair-use cap per paying/friend user per UTC month
+const DEFAULT_FREE_MONTHLY_LIMIT = 60;    // messages per month for users on the free trips (keeps cost bounded)
+const DEFAULT_FREE_TRIPS = 3;             // trips created with Nera before the subscription is needed
+const MAX_TRIP_ID = 128;
+const positiveInt = (v, fallback) => (Number(v) > 0 ? Math.floor(Number(v)) : fallback);
+const entitlementBody = (e) => ({ status: e.status, tripsLeft: e.tripsLeft, tripsUsed: e.tripsUsed, freeTrips: e.freeTrips, source: e.source });
 const MAX_BODY_BYTES = 100_000;
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 
@@ -111,9 +116,11 @@ export default {
       return json({ error: "unauthenticated" }, 401);
     }
 
-    // POST /entitlement: where does this user stand? No model call and no quota used. Opening the chat calls it,
-    // so the free trial starts at the user's first visit to Nera.
-    if (new URL(request.url).pathname === "/entitlement") {
+    const path = new URL(request.url).pathname;
+    const freeTrips = positiveInt(env.FREE_TRIPS, DEFAULT_FREE_TRIPS);
+
+    // POST /entitlement: where does this user stand? No model call and no quota used.
+    if (path === "/entitlement") {
       // { refresh: true } (sent by the app right after a purchase or restore) checks RevenueCat directly, so the user is
       // unlocked immediately instead of waiting for the webhook.
       let refresh = false;
@@ -122,10 +129,20 @@ export default {
         const expiry = await fetchSubscriberExpiry(uid, env.REVENUECAT_SECRET_KEY, { baseUrl: env.REVENUECAT_API_URL || undefined });
         if (expiry) await applyUpdate(env.DB, { uid, paidUntil: expiry, eventAt: Date.now() });
       }
-      const trialDays = Number(env.TRIAL_DAYS) > 0 ? Number(env.TRIAL_DAYS) : 7;
       const friend = await isFriend(env.DB, email, emailVerified);
-      const e = await getEntitlement(env.DB, uid, Date.now(), trialDays, { friend });
-      return json({ enforced: env.PAYWALL_ENABLED === "true", entitlement: { status: e.status, daysLeft: e.daysLeft, source: e.source } });
+      const e = await getEntitlement(env.DB, uid, Date.now(), freeTrips, { friend });
+      return json({ enforced: env.PAYWALL_ENABLED === "true", entitlement: entitlementBody(e) });
+    }
+
+    // POST /trip { tripId }: the app tells us the user approved a Nera draft and it became a trip. Counted once per id.
+    if (path === "/trip") {
+      let tripId = "";
+      try { tripId = String(JSON.parse((await request.text()) || "{}").tripId ?? ""); } catch { /* fall through */ }
+      if (!tripId || tripId.length > MAX_TRIP_ID) return json({ error: "bad_trip" }, 400);
+      await recordTrip(env.DB, uid, tripId, Date.now());
+      const friend = await isFriend(env.DB, email, emailVerified);
+      const e = await getEntitlement(env.DB, uid, Date.now(), freeTrips, { friend });
+      return json({ enforced: env.PAYWALL_ENABLED === "true", entitlement: entitlementBody(e) });
     }
 
     // 2. Validate input
@@ -136,24 +153,24 @@ export default {
     const messages = cleanMessages(body?.messages);
     if (!messages) return json({ error: "bad_messages" }, 400);
 
-    // 3. Trial / paid entitlement. The trial start is always recorded; it is only enforced when PAYWALL_ENABLED="true"
-    //    (keep it off until a way to unlock exists, or expired users would be locked out with no route to pay).
+    // 3. Where does the user stand? Free trips are always counted; they are only enforced when PAYWALL_ENABLED="true"
+    //    (keep it off until a way to subscribe exists, or users past their free trips would have no way to pay).
     const paywall = env.PAYWALL_ENABLED === "true";
-    const trialDays = Number(env.TRIAL_DAYS) > 0 ? Number(env.TRIAL_DAYS) : 7;
     const friend = await isFriend(env.DB, email, emailVerified);
-    const entitlement = await getEntitlement(env.DB, uid, Date.now(), trialDays, { friend });
-    if (paywall && entitlement.status === "expired") return json({ error: "trial_ended" }, 402);
+    const entitlement = await getEntitlement(env.DB, uid, Date.now(), freeTrips, { friend });
+    const limited = paywall && entitlement.status === "limit";   // free trips used up: chat still works, new trips do not
 
-    // 4. Rate limits: a daily cap for everyone, plus a monthly fair-use cap for paying and friend users.
+    // 4. Rate limits: a daily cap for everyone, plus a monthly cap (higher for paying and friend users).
     const today = new Date().toISOString().slice(0, 10);
     const month = today.slice(0, 7);
-    const monthlyLimit = Number(env.PAID_MONTHLY_LIMIT) > 0 ? Number(env.PAID_MONTHLY_LIMIT) : DEFAULT_PAID_MONTHLY_LIMIT;
-    const capMonthly = entitlement.status === "paid";
-    if (capMonthly && !(await consumeMonthly(env.DB, uid, month, monthlyLimit))) {
+    const monthlyLimit = entitlement.status === "paid"
+      ? positiveInt(env.PAID_MONTHLY_LIMIT, DEFAULT_PAID_MONTHLY_LIMIT)
+      : positiveInt(env.FREE_MONTHLY_LIMIT, DEFAULT_FREE_MONTHLY_LIMIT);
+    if (!(await consumeMonthly(env.DB, uid, month, monthlyLimit))) {
       return json({ error: "monthly_quota" }, 429);
     }
     if (!(await consumeQuota(env.DB, uid, today))) {
-      if (capMonthly) await refundMonthly(env.DB, uid, month);
+      await refundMonthly(env.DB, uid, month);
       return json({ error: "quota", message: "You've reached today's limit for Nera. Please try again tomorrow." }, 429);
     }
     if (Math.random() < 0.01) { // housekeeping: drop counters older than 3 days
@@ -165,7 +182,7 @@ export default {
     // 5. Run Nera
     try {
       const places = Boolean(env.GOOGLE_PLACES_API_KEY && env.GOOGLE_PLACES_API_KEY.trim());
-      const system = buildSystem(today, body?.currentItinerary, { places });
+      const system = buildSystem(today, body?.currentItinerary, { places, limited });
       const dataTools = places ? DATA_TOOLS : DATA_TOOLS.filter((t) => t.name !== "search_places");
       const cache = placesCache(env.DB);
       const runTool = async (name, input) => {
@@ -175,10 +192,12 @@ export default {
       };
       const usage = { calls: 0, input: 0, output: 0 };
       const onUsage = (u) => { usage.calls++; usage.input += u.input_tokens || 0; usage.output += u.output_tokens || 0; };
-      const reply = await runAgent({ callModel: (args) => callModel(env, system, args), runTool, messages, dataTools, onUsage });
+      // Free trips used up: Nera may chat but not draft, so only the "say" tool is offered.
+      const finalTools = limited ? FINAL_TOOLS.filter((t) => t.name === "say") : FINAL_TOOLS;
+      const reply = await runAgent({ callModel: (args) => callModel(env, system, args), runTool, messages: limited ? withLimitReminder(messages) : messages, dataTools, finalTools, onUsage });
       ctx.waitUntil(recordCost(env.DB, today, usage));
-      // Tell the app where the user stands (only when enforcing), so it can show "days left".
-      return json(paywall ? { ...reply, entitlement: { status: entitlement.status, daysLeft: entitlement.daysLeft, source: entitlement.source } } : reply);
+      // Tell the app where the user stands (only when enforcing), so it can show "free trips left".
+      return json(paywall ? { ...reply, entitlement: entitlementBody(entitlement) } : reply);
     } catch (e) {
       console.error("nera failed", e);
       return json({ error: e instanceof UpstreamError ? "upstream" : "internal" }, e instanceof UpstreamError ? 502 : 500);

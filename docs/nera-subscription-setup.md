@@ -3,8 +3,9 @@
 Everything in the app and the server is built and tested. What is left is **your accounts**: creating the two store
 products, connecting RevenueCat, and pasting a few keys. Do the steps in order; each one says what you get out of it.
 
-**The plan:** €4.99 a month, auto-renewing, cancel any time, 7-day free trial (handled by Nera's server, no card
-needed), 150 messages a month fair-use cap, friends and family free by email.
+**The plan:** the first 3 trips created with Nera are free (counted by Nera's server, no card needed). After that Nera
+needs the subscription: €4.99 a month, auto-renewing, cancel any time, 150 messages a month fair-use cap. Friends and
+family are free by email.
 
 ## Names to use (they must match exactly)
 
@@ -36,8 +37,8 @@ Product IDs cannot be changed after creation, so double-check them.
    - **Subscription prices:** add a price, choose the base country (for example Ireland or Germany), pick
      **€4.99**. Apple converts it for other countries; review the list.
    - **Localization:** display name `Nera Plus`, description `Your AI travel planner`. Add other languages later.
-   - Do **not** add an Apple introductory offer. The free trial is handled by Nera's server.
-   - **Review information:** a screenshot of the paywall (open the trial banner in the chat) and a short note.
+   - Do **not** add an Apple introductory offer. The 3 free trips are handled by Nera's server.
+   - **Review information:** a screenshot of the paywall (tap the free-trips banner in the chat) and a short note.
 5. **Offer codes** (optional, for gifting): the subscription, **Offer Codes**, create an offer (for example free for
    1 month) and generate codes. Friends and family are easier by email; see the end of this guide.
 6. **Key for RevenueCat:** Users and Access, **Integrations**, **In-App Purchase**, generate a key. Download the
@@ -90,10 +91,10 @@ account. Nothing to configure for that.
 ## Step 4: Turn it on and test
 
 1. Rebuild the app (the keys are baked in at build time).
-2. Test with a sandbox tester (Apple) or a license tester (Google): open Nera, tap the trial banner, subscribe.
+2. Test with a sandbox tester (Apple) or a license tester (Google): open Nera, tap the free-trips banner, subscribe.
    The paywall should close with "Nera is unlocked".
 3. Test **Restore purchases**, and cancelling from the store's subscription settings.
-4. When it all works, enforce the trial: in `worker/wrangler.toml` set `PAYWALL_ENABLED = "true"` and run
+4. When it all works, enforce the free-trip limit: in `worker/wrangler.toml` set `PAYWALL_ENABLED = "true"` and run
    `npx wrangler deploy`. **Do not do this before step 3 works**, or expired users would have no way to pay.
 5. Watch real cost with the query in `worker/README.md` (table `nera_cost`).
 

@@ -6,12 +6,14 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 FIREBASE_PROJECT_ID = "itinera-ae020"
-# Free trial (days from a user's first Nera request) and whether it is enforced. Leave enforcement off until an
-# in-app purchase exists to unlock Nera; the trial start is recorded either way.
-TRIAL_DAYS = "7"
+# Free tier: this many trips can be created with Nera before the subscription is needed, and whether that is
+# enforced. Leave enforcement off until an in-app purchase exists to unlock Nera; trips are counted either way.
+FREE_TRIPS = "3"
 PAYWALL_ENABLED = "true"
-# Fair-use cap: Nera requests per month for paying and friends-and-family users.
+# Fair-use caps: Nera requests per month. Paying and friends-and-family users get the higher one; the free tier's
+# lower cap keeps the cost of users who never subscribe bounded.
 PAID_MONTHLY_LIMIT = "150"
+FREE_MONTHLY_LIMIT = "60"
 
 # Daily quota + place-search cache. Run `npx wrangler d1 create nera`, then paste the printed
 # database_id below and apply migrations (see worker/README.md).
