@@ -778,6 +778,22 @@ class Strings {
     var neraErrGeneric: String = ""
     var neraTrialDaysLeft: String = ""
     var neraErrTrialEnded: String = ""
+    var neraPaywallTitle: String = ""
+    var neraPaywallSubtitle: String = ""
+    var neraBenefit1: String = ""
+    var neraBenefit2: String = ""
+    var neraBenefit3: String = ""
+    var neraSubscribeFor: String = ""
+    var neraAutoRenewNote: String = ""
+    var neraRestore: String = ""
+    var neraManage: String = ""
+    var neraPurchaseFailed: String = ""
+    var neraPurchaseUnavailable: String = ""
+    var neraRestoreNone: String = ""
+    var neraUnlocked: String = ""
+    var neraErrMonthlyQuota: String = ""
+    var neraPrivacyLabel: String = ""
+    var neraConfirming: String = ""
 
     fun copyApply(block: Strings.() -> Unit): Strings {
 
@@ -1433,6 +1449,22 @@ class Strings {
         c.neraErrGeneric = this.neraErrGeneric
         c.neraTrialDaysLeft = this.neraTrialDaysLeft
         c.neraErrTrialEnded = this.neraErrTrialEnded
+        c.neraPaywallTitle = this.neraPaywallTitle
+        c.neraPaywallSubtitle = this.neraPaywallSubtitle
+        c.neraBenefit1 = this.neraBenefit1
+        c.neraBenefit2 = this.neraBenefit2
+        c.neraBenefit3 = this.neraBenefit3
+        c.neraSubscribeFor = this.neraSubscribeFor
+        c.neraAutoRenewNote = this.neraAutoRenewNote
+        c.neraRestore = this.neraRestore
+        c.neraManage = this.neraManage
+        c.neraPurchaseFailed = this.neraPurchaseFailed
+        c.neraPurchaseUnavailable = this.neraPurchaseUnavailable
+        c.neraRestoreNone = this.neraRestoreNone
+        c.neraUnlocked = this.neraUnlocked
+        c.neraErrMonthlyQuota = this.neraErrMonthlyQuota
+        c.neraPrivacyLabel = this.neraPrivacyLabel
+        c.neraConfirming = this.neraConfirming
 
         c.block()
         return c

@@ -24,7 +24,7 @@ and a D1 database for the per-user daily limit and place-search cache.
 
 ## Free trial and paid unlock
 
-- Every user's trial starts at their **first Nera request** and lasts `TRIAL_DAYS` (default 7, in `wrangler.toml`).
+- Every user's trial starts at their **first visit to Nera** (opening the chat)  and lasts `TRIAL_DAYS` (default 7, in `wrangler.toml`).
   The start is recorded in D1 (`nera_entitlements`) whether or not it is enforced.
 - **Enforcement is off by default** (`PAYWALL_ENABLED = "false"`). Turn it on only once an in-app purchase exists to
   unlock Nera, otherwise expired users would have no way to pay. When on, expired users get HTTP 402 `trial_ended`
@@ -57,6 +57,11 @@ RevenueCat tells the Worker about purchases at `POST /revenuecat`. Setup:
    `https://nera.<your-subdomain>.workers.dev/revenuecat` and put the **same string** in "Authorization header value".
 3. The app must log in to RevenueCat with the **Firebase uid** as the app user id (it does), and the entitlement
    must be named `nera`.
+
+Right after a purchase or restore the app also calls `POST /entitlement {"refresh": true}`, which makes the Worker ask
+RevenueCat directly (needs `npx wrangler secret put REVENUECAT_SECRET_KEY`, the RevenueCat **secret** API key), so the
+user is unlocked immediately even if the webhook is slow. The step-by-step store and RevenueCat setup is in
+`docs/nera-subscription-setup.md`.
 
 Events set `paid_until`: renewals extend it, a cancellation keeps access until the period ends, a refund revokes it
 immediately, and an older event can never overwrite a newer one. Until step 1 is done the endpoint answers 503.

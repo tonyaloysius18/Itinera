@@ -59,6 +59,13 @@ data class NeraEntitlement(
     val daysLeft: Int? = null,      // whole days of trial left, when status == "trial"
 )
 
+/** Answer of the status endpoint: whether the trial is enforced, and where this user stands. */
+@Serializable
+data class NeraStatus(
+    val enforced: Boolean = false,
+    val entitlement: NeraEntitlement? = null,
+)
+
 /** Nera's answer: either a plain message (type "say") or a draft (type "itinerary"). */
 @Serializable
 data class NeraReply(
@@ -76,7 +83,7 @@ private data class NeraRequest(val messages: List<NeraTurn>, val currentItinerar
 private data class NeraError(val error: String = "")
 
 /** Why a Nera request failed. The UI maps each to a localized message. */
-enum class NeraFailure { NOT_CONFIGURED, SIGN_IN, NETWORK, BAD_REPLY, QUOTA, TRIAL_ENDED, GENERIC }
+enum class NeraFailure { NOT_CONFIGURED, SIGN_IN, NETWORK, BAD_REPLY, QUOTA, MONTHLY_QUOTA, TRIAL_ENDED, GENERIC }
 
 class NeraException(val failure: NeraFailure) : Exception(failure.name)
 
@@ -98,6 +105,28 @@ class NeraService {
     private val json = Json { ignoreUnknownKeys = true; explicitNulls = false }
 
     val isConfigured: Boolean get() = Secrets.NERA_ENDPOINT.startsWith("https://")
+
+    /**
+     * Where the user stands (trial days left, paid, ...). Uses no Nera quota. With [refresh] the server first asks
+     * RevenueCat directly, so a purchase or restore takes effect immediately. Null on any failure.
+     */
+    suspend fun status(refresh: Boolean = false): NeraStatus? {
+        if (!isConfigured) return null
+        val token = Firebase.auth.currentUser?.getIdToken(false) ?: return null
+        return try {
+            val response = client.post(Secrets.NERA_ENDPOINT.trimEnd('/') + "/entitlement") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                contentType(ContentType.Application.Json)
+                setBody(if (refresh) """{"refresh":true}""" else "{}")
+            }
+            if (response.status != HttpStatusCode.OK) null
+            else json.decodeFromString(NeraStatus.serializer(), response.bodyAsText())
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            null
+        }
+    }
 
     /** Throws [NeraException] on any failure. */
     suspend fun send(messages: List<NeraTurn>, currentItinerary: NeraItinerary?): NeraReply {
@@ -125,6 +154,7 @@ class NeraService {
         throw NeraException(
             when {
                 response.status.value == 402 || code == "trial_ended" -> NeraFailure.TRIAL_ENDED
+                code == "monthly_quota" -> NeraFailure.MONTHLY_QUOTA
                 response.status.value == 429 || code == "quota" -> NeraFailure.QUOTA
                 else -> NeraFailure.GENERIC
             },

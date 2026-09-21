@@ -19,6 +19,7 @@ googleid = "1.1.1"
 graphicsPath = "1.0.1"
 junit = "4.13.2"
 kotlin = "2.3.21"
+purchasesKmp = "3.9.0"
 kotlinxCoroutinesCore = "1.9.0"
 kotlinxCoroutinesPlayServices = "1.8.1"
 kotlinxDatetime = "0.8.0"
@@ -88,6 +89,7 @@ firebase-firestore = { module = "dev.gitlive:firebase-firestore", version.ref = 
 firebase-firestore-android = { module = "com.google.firebase:firebase-firestore" }
 firebase-storage = { module = "dev.gitlive:firebase-storage", version.ref = "gitliveFirebase" }
 maplibre-android = { module = "org.maplibre.gl:android-sdk-opengl", version.ref = "maplibreAndroid" }
+purchases-core = { module = "com.revenuecat.purchases:purchases-kmp-core", version.ref = "purchasesKmp" }
 multiplatform-settings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatformSettings" }
 multiplatform-settings-no-arg = { module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "multiplatformSettingsNoArg" }
 multiplatform-settings-no-arg-v130 = { module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "multiplatformSettingsNoArgVersion" }

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { eventToUpdate, safeEqual } from "../src/revenuecat.js";
+import { eventToUpdate, expiryFromSubscriber, fetchSubscriberExpiry, LIFETIME, safeEqual } from "../src/revenuecat.js";
 
 const NOW = 1_800_000_000_000, DAY = 86_400_000;
 const base = { type: "RENEWAL", app_user_id: "uid1", entitlement_ids: ["nera"], expiration_at_ms: NOW + 30 * DAY, event_timestamp_ms: NOW - 5 };
@@ -39,4 +39,24 @@ test("safeEqual compares secrets exactly", () => {
   assert.equal(safeEqual("abc", "abd"), false);
   assert.equal(safeEqual("abc", "abcd"), false);
   assert.equal(safeEqual("abc", undefined), false);
+});
+
+test("REST subscriber payload: expiry, lifetime, none, garbage", () => {
+  const sub = (e) => ({ subscriber: { entitlements: { nera: e } } });
+  assert.equal(expiryFromSubscriber(sub({ expires_date: "2026-10-21T10:00:00Z" })), Date.parse("2026-10-21T10:00:00Z"));
+  assert.equal(expiryFromSubscriber(sub({ expires_date: null })), LIFETIME);
+  assert.equal(expiryFromSubscriber({ subscriber: { entitlements: {} } }), null);
+  assert.equal(expiryFromSubscriber({ subscriber: { entitlements: { other: { expires_date: "2030-01-01T00:00:00Z" } } } }), null);
+  assert.equal(expiryFromSubscriber(sub({ expires_date: "not a date" })), null);
+  for (const g of [null, undefined, {}, "x"]) assert.equal(expiryFromSubscriber(g), null);
+});
+
+test("fetchSubscriberExpiry sends the secret key, encodes the uid, and fails safe", async () => {
+  let seen;
+  const ok = async (url, init) => { seen = { url, auth: init.headers.Authorization }; return { ok: true, json: async () => ({ subscriber: { entitlements: { nera: { expires_date: "2026-10-21T10:00:00Z" } } } }) }; };
+  assert.equal(await fetchSubscriberExpiry("a/b c", "sk_test", { fetchImpl: ok }), Date.parse("2026-10-21T10:00:00Z"));
+  assert.equal(seen.url, "https://api.revenuecat.com/v1/subscribers/a%2Fb%20c");
+  assert.equal(seen.auth, "Bearer sk_test");
+  assert.equal(await fetchSubscriberExpiry("u", "k", { fetchImpl: async () => ({ ok: false, status: 401 }) }), null);
+  assert.equal(await fetchSubscriberExpiry("u", "k", { fetchImpl: async () => { throw new Error("network"); } }), null);
 });

@@ -7,7 +7,7 @@ import { MODEL, buildSystem, cleanMessages, runAgent } from "../../functions/ner
 import { DATA_TOOLS, getWeather, searchPlaces } from "../../functions/tools.js";
 import { verifyFirebaseClaims } from "./firebaseAuth.js";
 import { getEntitlement, isFriend } from "./entitlement.js";
-import { applyUpdate, eventToUpdate, safeEqual } from "./revenuecat.js";
+import { applyUpdate, eventToUpdate, fetchSubscriberExpiry, safeEqual } from "./revenuecat.js";
 
 const DAILY_LIMIT = 40;            // Nera requests per user per UTC day
 const DEFAULT_PAID_MONTHLY_LIMIT = 150;   // fair-use cap per paying/friend user per UTC month
@@ -109,6 +109,23 @@ export default {
         projectId: env.FIREBASE_PROJECT_ID, jwksUrl: env.JWKS_URL || undefined }));
     } catch {
       return json({ error: "unauthenticated" }, 401);
+    }
+
+    // POST /entitlement: where does this user stand? No model call and no quota used. Opening the chat calls it,
+    // so the free trial starts at the user's first visit to Nera.
+    if (new URL(request.url).pathname === "/entitlement") {
+      // { refresh: true } (sent by the app right after a purchase or restore) checks RevenueCat directly, so the user is
+      // unlocked immediately instead of waiting for the webhook.
+      let refresh = false;
+      try { refresh = JSON.parse((await request.text()) || "{}").refresh === true; } catch { /* no body */ }
+      if (refresh && env.REVENUECAT_SECRET_KEY) {
+        const expiry = await fetchSubscriberExpiry(uid, env.REVENUECAT_SECRET_KEY, { baseUrl: env.REVENUECAT_API_URL || undefined });
+        if (expiry) await applyUpdate(env.DB, { uid, paidUntil: expiry, eventAt: Date.now() });
+      }
+      const trialDays = Number(env.TRIAL_DAYS) > 0 ? Number(env.TRIAL_DAYS) : 7;
+      const friend = await isFriend(env.DB, email, emailVerified);
+      const e = await getEntitlement(env.DB, uid, Date.now(), trialDays, { friend });
+      return json({ enforced: env.PAYWALL_ENABLED === "true", entitlement: { status: e.status, daysLeft: e.daysLeft, source: e.source } });
     }
 
     // 2. Validate input

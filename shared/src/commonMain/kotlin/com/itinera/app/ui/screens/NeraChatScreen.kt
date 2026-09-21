@@ -1,6 +1,7 @@
 package com.itinera.app.ui.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,12 +44,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import com.itinera.app.data.NeraActivity
 import com.itinera.app.data.NeraItinerary
+import com.itinera.app.data.NeraOffer
+import com.itinera.app.data.PurchaseOutcome
+import com.itinera.app.data.PurchaseService
 import com.itinera.app.data.NeraService
 import com.itinera.app.data.NeraException
 import com.itinera.app.data.NeraFailure
@@ -58,8 +63,12 @@ import com.itinera.app.i18n.Strings
 import com.itinera.app.model.label
 import com.itinera.app.resources.Res
 import com.itinera.app.resources.nera_head
+import com.itinera.app.getPlatform
+import com.itinera.app.ui.BackHandler
+import com.itinera.app.ui.components.NeraPaywall
 import com.itinera.app.ui.components.NeraThinking
 import com.itinera.app.ui.components.TopBar
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.painterResource
@@ -80,6 +89,8 @@ private sealed interface NeraItem {
 @Composable
 fun NeraChatScreen(
     service: NeraService,
+    purchases: PurchaseService,
+    uid: String,
     onBack: () -> Unit,
     onApprove: (NeraItinerary) -> Unit,
 ) {
@@ -95,6 +106,53 @@ fun NeraChatScreen(
     var trialDaysLeft by remember { mutableStateOf<Int?>(null) }   // null = no trial info (not enforced, or paid)
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
+    val uriHandler = LocalUriHandler.current
+
+    // Paywall (only ever shown when the RevenueCat key for this platform is configured).
+    var showPaywall by remember { mutableStateOf(false) }
+    var offer by remember { mutableStateOf<NeraOffer?>(null) }
+    var offerLoading by remember { mutableStateOf(false) }
+    var paywallBusy by remember { mutableStateOf(false) }
+    var paywallMessage by remember { mutableStateOf<String?>(null) }
+
+    fun openPaywall() {
+        if (!purchases.isAvailable) return
+        paywallMessage = null
+        showPaywall = true
+        if (offer == null) scope.launch {
+            offerLoading = true
+            offer = purchases.loadOffer(uid)
+            offerLoading = false
+        }
+    }
+
+    // Opening the chat also starts the trial and tells us how many days are left, before the first message.
+    LaunchedEffect(Unit) {
+        val status = service.status()
+        val trial = status?.entitlement
+        trialDaysLeft = if (status?.enforced == true && trial?.status == "trial") trial.daysLeft else null
+    }
+
+    /** Asks the server (which asks RevenueCat) whether the purchase has registered; a few tries, then gives up. */
+    suspend fun serverConfirmsUnlock(): Boolean {
+        repeat(3) {
+            val status = service.status(refresh = true)
+            if (status != null && (!status.enforced || status.entitlement?.status == "paid")) return true
+            delay(1500)
+        }
+        return false
+    }
+
+    /** Finishes a successful purchase or restore: close the paywall and tell the user where they stand. */
+    suspend fun finishUnlock() {
+        if (serverConfirmsUnlock()) {
+            trialDaysLeft = null
+            showPaywall = false
+            items.add(NeraItem.FromNera(s.neraUnlocked))
+        } else {
+            paywallMessage = s.neraConfirming
+        }
+    }
 
     val latestDraftIndex = items.indexOfLast { it is NeraItem.Draft }
     val currentDraft = (items.getOrNull(latestDraftIndex) as? NeraItem.Draft)?.itinerary
@@ -135,12 +193,14 @@ fun NeraChatScreen(
                 // The trial ending is not a fault: show it as an ordinary message from Nera, not a red error.
                 if (e.failure == NeraFailure.TRIAL_ENDED) {
                     items.add(NeraItem.FromNera(s.neraErrTrialEnded))
+                    openPaywall()
                 } else items.add(NeraItem.Problem(when (e.failure) {
                     NeraFailure.NOT_CONFIGURED -> s.neraErrNotSetUp
                     NeraFailure.SIGN_IN -> s.neraErrSignIn
                     NeraFailure.NETWORK -> s.neraErrNetwork
                     NeraFailure.BAD_REPLY -> s.neraErrBadReply
                     NeraFailure.QUOTA -> s.neraErrQuota
+                    NeraFailure.MONTHLY_QUOTA -> s.neraErrMonthlyQuota
                     NeraFailure.TRIAL_ENDED -> s.neraErrTrialEnded   // handled above; keeps the when exhaustive
                     NeraFailure.GENERIC -> s.neraErrGeneric
                 }))
@@ -150,12 +210,17 @@ fun NeraChatScreen(
         }
     }
 
+    BackHandler(enabled = showPaywall) { showPaywall = false }
+
+    Box(Modifier.fillMaxSize()) {
     Column(Modifier.fillMaxSize().imePadding()) {
         TopBar("Nera", onBack = onBack)
         trialDaysLeft?.let { days ->
             Text(
                 s.neraTrialDaysLeft.replace("%s", days.toString()),
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 4.dp),
+                modifier = Modifier
+                    .clickable(enabled = purchases.isAvailable) { openPaywall() }   // tap to subscribe early
+                    .padding(start = 16.dp, end = 16.dp, bottom = 4.dp),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -225,7 +290,51 @@ fun NeraChatScreen(
             }
         }
     }
+
+    if (showPaywall) {
+        NeraPaywall(
+            offer = offer,
+            loading = offerLoading,
+            busy = paywallBusy,
+            message = paywallMessage,
+            onSubscribe = {
+                val chosen = offer
+                if (chosen != null && !paywallBusy) scope.launch {
+                    paywallBusy = true
+                    paywallMessage = null
+                    when (purchases.purchase(chosen)) {
+                        PurchaseOutcome.SUCCESS -> finishUnlock()
+                        PurchaseOutcome.CANCELLED -> Unit
+                        PurchaseOutcome.FAILED -> paywallMessage = s.neraPurchaseFailed
+                    }
+                    paywallBusy = false
+                }
+            },
+            onRestore = {
+                if (!paywallBusy) scope.launch {
+                    paywallBusy = true
+                    paywallMessage = null
+                    if (purchases.restore(uid)) finishUnlock() else paywallMessage = s.neraRestoreNone
+                    paywallBusy = false
+                }
+            },
+            onManage = {
+                uriHandler.openUri(
+                    if (getPlatform().isIos) "https://apps.apple.com/account/subscriptions"
+                    else "https://play.google.com/store/account/subscriptions",
+                )
+            },
+            onTerms = { uriHandler.openUri(TERMS_URL) },
+            onPrivacy = { uriHandler.openUri(PRIVACY_URL) },
+            onClose = { showPaywall = false },
+        )
+    }
+    }
 }
+
+// Same site as the Terms link on the sign-up screen (GitHub Pages, served from docs/).
+private const val TERMS_URL = "https://tonyaloysius18.github.io/Itinera/terms.html"
+private const val PRIVACY_URL = "https://tonyaloysius18.github.io/Itinera/privacy-policy.html"
 
 @Composable
 private fun Bubble(text: String, fromUser: Boolean, isError: Boolean = false) {

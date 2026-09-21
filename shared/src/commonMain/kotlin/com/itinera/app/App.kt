@@ -968,6 +968,8 @@ private fun AppContent(
 
                             Screen.Nera -> NeraChatScreen(
                                 service = repository.neraService,
+                                purchases = repository.purchaseService,
+                                uid = repository.authService.currentUid ?: "",
                                 onBack = { navigator.back() },
                                 onApprove = { draft ->
                                     val id = repository.createTripFromItinerary(draft)

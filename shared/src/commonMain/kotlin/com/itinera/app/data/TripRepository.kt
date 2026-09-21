@@ -57,6 +57,8 @@ class TripRepository {
 
     val neraService = NeraService()
 
+    val purchaseService = PurchaseService()
+
     val activityService = ActivityService()
 
     val expenseService = ExpenseService()

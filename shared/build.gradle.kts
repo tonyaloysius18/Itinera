@@ -95,6 +95,9 @@ kotlin {
             implementation(libs.firebase.auth)
             implementation(libs.firebase.firestore)
 
+            // Subscriptions (RevenueCat). iOS is linked through Gradle, nothing to add in Xcode.
+            implementation(libs.purchases.core)
+
             // Image picking (KMP — Android + iOS)
             implementation(libs.peekaboo.ui)
             implementation(libs.peekaboo.image.picker)
@@ -136,6 +139,9 @@ val generateSecrets by tasks.registering {
         val key = props.getProperty("unsplashAccessKey") ?: "YOUR_UNSPLASH_ACCESS_KEY"
         // URL of the deployed `nera` Cloud Function; empty until you deploy it.
         val neraEndpoint = props.getProperty("neraEndpoint") ?: ""
+        // RevenueCat public SDK keys (one per platform); empty until subscriptions are set up.
+        val revenueCatIosKey = props.getProperty("revenueCatIosKey") ?: ""
+        val revenueCatAndroidKey = props.getProperty("revenueCatAndroidKey") ?: ""
         val dir = outputDir.get().asFile
         dir.mkdirs()
         File(dir, "Secrets.kt").writeText(
@@ -145,6 +151,8 @@ val generateSecrets by tasks.registering {
             internal object Secrets {
                 const val UNSPLASH_ACCESS_KEY: String = "$key"
                 const val NERA_ENDPOINT: String = "$neraEndpoint"
+                const val REVENUECAT_IOS_KEY: String = "$revenueCatIosKey"
+                const val REVENUECAT_ANDROID_KEY: String = "$revenueCatAndroidKey"
             }
             """.trimIndent()
         )

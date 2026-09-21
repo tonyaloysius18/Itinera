@@ -48,3 +48,30 @@ export async function applyUpdate(db, update, now = Date.now()) {
     .run();
   return (res.meta?.changes ?? 0) > 0;
 }
+
+/**
+ * Pure: when does the "nera" entitlement in a RevenueCat REST subscriber payload end?
+ * Returns epoch millis, LIFETIME for a non-expiring entitlement, or null when there is none.
+ */
+export const LIFETIME = 9_999_999_999_999;
+export function expiryFromSubscriber(payload, entitlement = ENTITLEMENT_ID) {
+  const e = payload?.subscriber?.entitlements?.[entitlement];
+  if (!e) return null;
+  if (e.expires_date === null) return LIFETIME;
+  const t = Date.parse(e.expires_date);
+  return isFinite(t) ? t : null;
+}
+
+/** Asks RevenueCat directly (REST API, secret key) how long this user's Nera access lasts. null on any failure. */
+export async function fetchSubscriberExpiry(uid, secretKey, { baseUrl = "https://api.revenuecat.com", fetchImpl = fetch } = {}) {
+  try {
+    const res = await fetchImpl(`${baseUrl}/v1/subscribers/${encodeURIComponent(uid)}`, {
+      headers: { Authorization: `Bearer ${secretKey}`, "content-type": "application/json" },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return null;
+    return expiryFromSubscriber(await res.json());
+  } catch {
+    return null;
+  }
+}
