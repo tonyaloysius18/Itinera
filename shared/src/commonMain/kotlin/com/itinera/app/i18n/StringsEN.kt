@@ -635,6 +635,7 @@ internal val EN: Strings by lazy { Strings().apply {
     saveExpense = "Save expense"
     planWithNera = "Plan with Nera"
     neraWelcome = "Hi, I'm Nera, your Itinera trip planner. Tell me where you'd like to go and for how long, and I'll draft an itinerary for you to review."
+    neraWelcomeNamed = "Hi %s! I'm Nera, your Itinera trip planner. Tell me where you'd like to go and for how long, and I'll draft an itinerary for you to review."
     neraSuggest1 = "5 days in London"
     neraSuggest2 = "Weekend in Paris"
     neraSuggest3 = "A week in Tokyo"

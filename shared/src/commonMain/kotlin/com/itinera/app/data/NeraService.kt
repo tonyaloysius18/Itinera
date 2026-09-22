@@ -41,6 +41,17 @@ data class NeraDay(
     val activities: List<NeraActivity> = emptyList(),
 )
 
+/** The outbound/return journey Nera drafts when the traveller's home city is known — a real [Leg], not an activity. */
+@Serializable
+data class NeraLeg(
+    val fromCity: String,
+    val toCity: String,
+    val transport: String = "flight",   // "flight" | "train" | "bus" | "ferry" | "car"
+    val date: String,                   // ISO "2026-10-01"
+    val time: String = "",
+    val endTime: String = "",
+)
+
 /** A draft itinerary proposed by Nera. Nothing is saved until the traveller approves it. */
 @Serializable
 data class NeraItinerary(
@@ -49,7 +60,25 @@ data class NeraItinerary(
     val countries: List<String> = emptyList(),   // English country names, main destination first
     val startDate: String,
     val travellers: List<String> = emptyList(),   // first names, excluding the current user
+    val legs: List<NeraLeg> = emptyList(),
     val days: List<NeraDay> = emptyList(),
+)
+
+/**
+ * One turn of a Nera conversation, persisted under trips/{tripId}/neraMessages so reopening
+ * Nera for a trip restores the exchange instead of starting over. [seq] orders the turns
+ * since Firestore doesn't guarantee document order; [approved] marks a draft that was already
+ * turned into (or merged into) the trip, so its Approve/Make changes buttons don't reappear.
+ */
+@Serializable
+data class StoredNeraMessage(
+    val id: String = "",
+    val role: String = "",                  // "user" | "assistant"
+    val text: String = "",
+    val quickReplies: List<String> = emptyList(),
+    val itinerary: NeraItinerary? = null,    // set when this assistant turn proposed a draft
+    val approved: Boolean = false,
+    val seq: Int = 0,
 )
 
 /** Where the user stands with the free trips. Only sent when the server enforces the paywall. */
@@ -78,7 +107,11 @@ data class NeraReply(
 )
 
 @Serializable
-private data class NeraRequest(val messages: List<NeraTurn>, val currentItinerary: NeraItinerary? = null)
+private data class NeraRequest(
+    val messages: List<NeraTurn>,
+    val currentItinerary: NeraItinerary? = null,
+    val homeCity: String? = null,   // the traveller's home city, from their profile; blank/null if not set
+)
 
 @Serializable
 private data class NeraTripRequest(val tripId: String)
@@ -155,7 +188,7 @@ class NeraService {
     }
 
     /** Throws [NeraException] on any failure. */
-    suspend fun send(messages: List<NeraTurn>, currentItinerary: NeraItinerary?): NeraReply {
+    suspend fun send(messages: List<NeraTurn>, currentItinerary: NeraItinerary?, homeCity: String? = null): NeraReply {
         if (!isConfigured) throw NeraException(NeraFailure.NOT_CONFIGURED)
         val token = Firebase.auth.currentUser?.getIdToken(false)
             ?: throw NeraException(NeraFailure.SIGN_IN)
@@ -163,7 +196,7 @@ class NeraService {
             client.post(Secrets.NERA_ENDPOINT) {
                 header(HttpHeaders.Authorization, "Bearer $token")
                 contentType(ContentType.Application.Json)
-                setBody(json.encodeToString(NeraRequest.serializer(), NeraRequest(messages, currentItinerary)))
+                setBody(json.encodeToString(NeraRequest.serializer(), NeraRequest(messages, currentItinerary, homeCity?.takeIf { it.isNotBlank() })))
             }
         } catch (e: Exception) {
             throw NeraException(NeraFailure.NETWORK)

@@ -753,6 +753,7 @@ class Strings {
     // Nera (AI trip planner)
     var planWithNera: String = ""
     var neraWelcome: String = ""
+    var neraWelcomeNamed: String = ""
     var neraSuggest1: String = ""
     var neraSuggest2: String = ""
     var neraSuggest3: String = ""
@@ -1423,6 +1424,7 @@ class Strings {
         c.saveExpense = this.saveExpense
         c.planWithNera = this.planWithNera
         c.neraWelcome = this.neraWelcome
+        c.neraWelcomeNamed = this.neraWelcomeNamed
         c.neraSuggest1 = this.neraSuggest1
         c.neraSuggest2 = this.neraSuggest2
         c.neraSuggest3 = this.neraSuggest3

@@ -68,7 +68,8 @@ sealed interface Screen {
 
     data object Compass : Screen
 
-    data object Nera : Screen
+    /** Chat with Nera. [tripId] null starts a fresh trip; set, it continues that trip's saved conversation. */
+    data class Nera(val tripId: String? = null) : Screen
 
     data class TripMap(val tripId: String) : Screen
 

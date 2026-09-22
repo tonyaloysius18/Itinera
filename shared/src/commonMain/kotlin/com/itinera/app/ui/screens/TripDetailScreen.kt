@@ -41,6 +41,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
@@ -169,6 +170,7 @@ fun TripDetailScreen(
     onLoadImageBytes: (suspend (url: String) -> ByteArray?)? = null,
     onDocuments: () -> Unit,
     onOpenDoc: (String) -> Unit = {},
+    onAskNera: () -> Unit = {},
     onAddLeg: () -> Unit,
     onAddPlace: () -> Unit,
     onChecklist: () -> Unit,
@@ -382,6 +384,9 @@ fun TripDetailScreen(
                 onBack = onBack,
                 trailing = {
                     Row {
+                        IconButton(onClick = onAskNera) {
+                            Icon(Icons.Filled.AutoAwesome, contentDescription = s.planWithNera, tint = MaterialTheme.colorScheme.primary)
+                        }
                         IconButton(onClick = onTravellers) {
                             Icon(Icons.Filled.People, contentDescription = s.travellers, tint = MaterialTheme.colorScheme.primary)
                         }

@@ -50,8 +50,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import com.itinera.app.data.NeraActivity
+import com.itinera.app.data.NeraChatService
+import com.itinera.app.data.StoredNeraMessage
 import com.itinera.app.data.NeraEntitlement
 import com.itinera.app.data.NeraItinerary
+import com.itinera.app.data.NeraLeg
 import com.itinera.app.data.NeraOffer
 import com.itinera.app.data.PurchaseOutcome
 import com.itinera.app.data.PurchaseService
@@ -61,6 +64,7 @@ import com.itinera.app.data.NeraFailure
 import com.itinera.app.data.NeraTurn
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.i18n.Strings
+import com.itinera.app.model.TransportType
 import com.itinera.app.model.label
 import com.itinera.app.resources.Res
 import com.itinera.app.resources.nera_head
@@ -73,12 +77,31 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.painterResource
 
-/** One row in the Nera conversation. */
+/** One row in the Nera conversation. [id] is stable per item, used as the Firestore doc id when persisted. */
 private sealed interface NeraItem {
-    data class FromUser(val text: String) : NeraItem
-    data class FromNera(val text: String, val quickReplies: List<String> = emptyList()) : NeraItem
-    data class Draft(val message: String, val itinerary: NeraItinerary) : NeraItem
-    data class Problem(val text: String) : NeraItem
+    val id: String
+    data class FromUser(val text: String, override val id: String = "msg_${kotlin.random.Random.nextLong()}") : NeraItem
+    data class FromNera(val text: String, val quickReplies: List<String> = emptyList(), override val id: String = "msg_${kotlin.random.Random.nextLong()}") : NeraItem
+    data class Draft(val message: String, val itinerary: NeraItinerary, val approved: Boolean = false, override val id: String = "msg_${kotlin.random.Random.nextLong()}") : NeraItem
+    data class Problem(val text: String, override val id: String = "msg_${kotlin.random.Random.nextLong()}") : NeraItem
+}
+
+/** Turns a persisted turn back into a chat row when restoring a trip's Nera history. */
+private fun StoredNeraMessage.toNeraItem(): NeraItem {
+    val itin = itinerary
+    return when {
+        itin != null -> NeraItem.Draft(text, itin, approved, id)
+        role == "user" -> NeraItem.FromUser(text, id)
+        else -> NeraItem.FromNera(text, quickReplies, id)
+    }
+}
+
+/** The other direction: what to persist for a chat row, or null for rows that never get saved (local errors). */
+private fun NeraItem.toStored(seq: Int): StoredNeraMessage? = when (this) {
+    is NeraItem.FromUser -> StoredNeraMessage(id = id, role = "user", text = text, seq = seq)
+    is NeraItem.FromNera -> StoredNeraMessage(id = id, role = "assistant", text = text, quickReplies = quickReplies, seq = seq)
+    is NeraItem.Draft -> StoredNeraMessage(id = id, role = "assistant", text = message, itinerary = itinerary, approved = approved, seq = seq)
+    is NeraItem.Problem -> null
 }
 
 /**
@@ -89,20 +112,33 @@ private sealed interface NeraItem {
 @Composable
 fun NeraChatScreen(
     service: NeraService,
+    chatService: NeraChatService,
     purchases: PurchaseService,
     uid: String,
+    tripId: String? = null,       // null starts a fresh trip; set, restores and continues that trip's saved chat
+    travellerName: String = "",   // first name from the profile, for a personal greeting; blank if unknown
+    homeCity: String = "",        // home city from the profile, used for travel legs; blank if unknown
     onBack: () -> Unit,
-    onApprove: (NeraItinerary) -> Unit,
+    // Creates (tripId null) or updates (tripId set) the trip and returns its id; pending is every
+    // turn not yet persisted (only non-empty for a brand-new trip, whose chat wasn't saved as it went).
+    onApprove: (NeraItinerary, pending: List<StoredNeraMessage>) -> String,
 ) {
     val s = LocalStrings.current
+    val welcomeText = travellerName.takeIf { it.isNotBlank() }
+        ?.let { s.neraWelcomeNamed.replace("%s", it) }
+        ?: s.neraWelcome
     val items = remember {
-        mutableStateListOf<NeraItem>(
-            NeraItem.FromNera(s.neraWelcome, listOf(s.neraSuggest1, s.neraSuggest2, s.neraSuggest3)),
-        )
+        mutableStateListOf<NeraItem>().apply {
+            // A fresh trip has no history to restore, so greet right away; an existing trip's
+            // history (or lack of it) is loaded below, once we know whether there's anything to show.
+            if (tripId == null) add(NeraItem.FromNera(welcomeText, listOf(s.neraSuggest1, s.neraSuggest2, s.neraSuggest3)))
+        }
     }
+    var boundTripId by remember { mutableStateOf(tripId) }   // set once a brand-new trip gets created on Approve
+    var historyLoading by remember { mutableStateOf(tripId != null) }
     var input by remember { mutableStateOf("") }
     var sending by remember { mutableStateOf(false) }
-    var approved by remember { mutableStateOf(false) }
+    var approving by remember { mutableStateOf(false) }   // debounces Approve while it's being applied
     // Where a non-paying user stands with the free trips; null = no info (paywall not enforced, or already paid).
     var freeTier by remember { mutableStateOf<NeraEntitlement?>(null) }
     val listState = rememberLazyListState()
@@ -131,6 +167,19 @@ fun NeraChatScreen(
     LaunchedEffect(Unit) {
         val status = service.status()
         freeTier = if (status?.enforced == true) status.entitlement?.takeIf { it.status != "paid" } else null
+    }
+
+    // Continuing an existing trip: restore its saved conversation instead of starting over.
+    LaunchedEffect(Unit) {
+        if (tripId != null) {
+            val stored = runCatching { chatService.loadHistory(tripId) }.getOrDefault(emptyList())
+            if (stored.isEmpty()) {
+                items.add(NeraItem.FromNera(welcomeText, listOf(s.neraSuggest1, s.neraSuggest2, s.neraSuggest3)))
+            } else {
+                items.addAll(stored.map { it.toNeraItem() })
+            }
+            historyLoading = false
+        }
     }
 
     /** Asks the server (which asks RevenueCat) whether the purchase has registered; a few tries, then gives up. */
@@ -163,10 +212,18 @@ fun NeraChatScreen(
         if (last >= 0) listState.animateScrollToItem(last)
     }
 
+    // Best-effort: save one turn to the trip's chat history. No-op until a trip exists (boundTripId null).
+    fun persist(item: NeraItem) {
+        val tid = boundTripId ?: return
+        val stored = item.toStored(items.indexOf(item)) ?: return
+        scope.launch { runCatching { chatService.appendMessage(tid, stored) } }
+    }
+
     fun send(text: String) {
         val message = text.trim()
-        if (message.isEmpty() || sending) return
+        if (message.isEmpty() || sending || historyLoading) return
         items.add(NeraItem.FromUser(message))
+        persist(items.last())
         input = ""
         sending = true
         // Draft cards are sent as their intro text; the draft itself travels separately.
@@ -180,7 +237,7 @@ fun NeraChatScreen(
         }
         scope.launch {
             try {
-                val reply = service.send(history, currentDraft)
+                val reply = service.send(history, currentDraft, homeCity)
                 freeTier = reply.entitlement?.takeIf { it.status != "paid" }
                 val itinerary = reply.itinerary
                 if (reply.type == "itinerary" && itinerary != null) {
@@ -188,6 +245,7 @@ fun NeraChatScreen(
                 } else {
                     items.add(NeraItem.FromNera(reply.message, reply.quickReplies))
                 }
+                persist(items.last())
             } catch (e: NeraException) {
                 items.add(NeraItem.Problem(when (e.failure) {
                     NeraFailure.NOT_CONFIGURED -> s.neraErrNotSetUp
@@ -247,11 +305,22 @@ fun NeraChatScreen(
                                 itinerary = item.itinerary,
                                 s = s,
                                 isLatest = index == latestDraftIndex,
-                                actionsEnabled = !sending && !approved,
+                                actionsEnabled = !sending && !approving && !item.approved,
                                 onApprove = {
                                     // Free trips used up: approving a draft needs the one-time unlock (when it can be bought here).
                                     if (freeTier?.status == "limit" && purchases.isAvailable) openPaywall()
-                                    else { approved = true; onApprove(item.itinerary) }
+                                    else if (!approving) {
+                                        approving = true
+                                        val idx = items.indexOfFirst { it.id == item.id }
+                                        if (idx >= 0) items[idx] = item.copy(approved = true)
+                                        val tidBefore = boundTripId
+                                        // A trip that already existed had its turns saved as they happened; only a
+                                        // brand-new one needs its whole (so-far unsaved) chat written in one go.
+                                        val pending = if (tidBefore == null) items.mapIndexedNotNull { i, it -> it.toStored(i) } else emptyList()
+                                        boundTripId = onApprove(item.itinerary, pending)
+                                        if (tidBefore != null) scope.launch { runCatching { chatService.markApproved(tidBefore, item.id) } }
+                                        approving = false
+                                    }
                                 },
                                 onChange = {
                                     items.add(NeraItem.FromNera(
@@ -265,7 +334,7 @@ fun NeraChatScreen(
                     is NeraItem.Problem -> Bubble(item.text, fromUser = false, isError = true)
                 }
             }
-            if (sending) {
+            if (sending || historyLoading) {
                 item { NeraThinking() }
             }
         }
@@ -286,7 +355,7 @@ fun NeraChatScreen(
                 keyboardActions = KeyboardActions(onSend = { send(input) }),
             )
             Spacer(Modifier.padding(start = 8.dp))
-            FilledIconButton(onClick = { send(input) }, enabled = input.isNotBlank() && !sending) {
+            FilledIconButton(onClick = { send(input) }, enabled = input.isNotBlank() && !sending && !historyLoading) {
                 Icon(Icons.AutoMirrored.Filled.Send, contentDescription = s.neraSend)
             }
         }
@@ -393,6 +462,21 @@ private fun ratingLine(a: NeraActivity, s: Strings): String? {
 private fun Int.withThousands(): String =
     toString().reversed().chunked(3).joinToString(",").reversed()
 
+/** A day's activities and travel legs, merged so they can be shown in one time-ordered list. */
+private sealed interface DraftEntry {
+    val sortTime: String   // blank sorts last, so an unset time never jumps ahead of timed entries
+    data class Act(val activity: NeraActivity) : DraftEntry { override val sortTime get() = activity.time.ifBlank { "99:99" } }
+    data class Leg(val leg: NeraLeg) : DraftEntry { override val sortTime get() = leg.time.ifBlank { "99:99" } }
+}
+
+private fun transportTypeOf(value: String): TransportType = when (value.lowercase()) {
+    "train" -> TransportType.TRAIN
+    "bus" -> TransportType.BUS
+    "ferry" -> TransportType.FERRY
+    "car" -> TransportType.CAR
+    else -> TransportType.FLIGHT
+}
+
 @Composable
 private fun DraftCard(
     itinerary: NeraItinerary,
@@ -422,6 +506,12 @@ private fun DraftCard(
 
             itinerary.days.forEachIndexed { n, day ->
                 val date = runCatching { LocalDate.parse(day.date) }.getOrNull()
+                // Legs (flights/trains) for this date, merged in among the day's activities by time — same
+                // convention as the trip detail screen, so the outbound flight sits before sightseeing and the
+                // return one after it, rather than always first or last.
+                val legsToday = itinerary.legs.filter { it.date == day.date }
+                val entries = (legsToday.map { DraftEntry.Leg(it) } + day.activities.map { DraftEntry.Act(it) })
+                    .sortedBy { it.sortTime }
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(
                         buildString {
@@ -433,7 +523,31 @@ private fun DraftCard(
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.primary,
                     )
-                    day.activities.forEach { a ->
+                    entries.forEach { entry ->
+                        if (entry is DraftEntry.Leg) {
+                            val l = entry.leg
+                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Top) {
+                                Text(
+                                    l.time.ifBlank { "—" },
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                    modifier = Modifier.widthIn(min = 44.dp),
+                                )
+                                Icon(
+                                    transportIcon(transportTypeOf(l.transport)),
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp).padding(top = 2.dp),
+                                )
+                                Text(
+                                    "${l.fromCity} → ${l.toCity}",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Medium,
+                                )
+                            }
+                            return@forEach
+                        }
+                        val a = (entry as DraftEntry.Act).activity
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             Text(
                                 a.time.ifBlank { "—" },

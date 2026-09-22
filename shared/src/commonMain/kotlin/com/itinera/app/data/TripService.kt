@@ -47,7 +47,7 @@ class TripService {
      */
     suspend fun deleteTripCascade(tripId: String) {
         val tripRef = tripsRef().document(tripId)
-        for (sub in listOf("documents", "expenses", "activities", "payments")) {
+        for (sub in listOf("documents", "expenses", "activities", "payments", "neraMessages")) {
             val snapshot = tripRef.collection(sub).get()
             for (doc in snapshot.documents) {
                 tripRef.collection(sub).document(doc.id).delete()

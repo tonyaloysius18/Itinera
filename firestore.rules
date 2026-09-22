@@ -84,6 +84,10 @@ service cloud.firestore {
         allow read, write: if request.auth != null
           && request.auth.uid in get(/databases/$(database)/documents/trips/$(tripId)).data.memberIds;
       }
+      match /neraMessages/{msgId} {
+        allow read, write: if request.auth != null
+          && request.auth.uid in get(/databases/$(database)/documents/trips/$(tripId)).data.memberIds;
+      }
     }
 
     // ── Collection-group reads ──

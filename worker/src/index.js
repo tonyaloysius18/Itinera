@@ -152,6 +152,7 @@ export default {
     try { body = JSON.parse(raw); } catch { return json({ error: "bad_json" }, 400); }
     const messages = cleanMessages(body?.messages);
     if (!messages) return json({ error: "bad_messages" }, 400);
+    const homeCity = typeof body?.homeCity === "string" ? body.homeCity.trim().slice(0, 80) : "";
 
     // 3. Where does the user stand? Free trips are always counted; they are only enforced when PAYWALL_ENABLED="true"
     //    (keep it off until a way to subscribe exists, or users past their free trips would have no way to pay).
@@ -182,7 +183,7 @@ export default {
     // 5. Run Nera
     try {
       const places = Boolean(env.GOOGLE_PLACES_API_KEY && env.GOOGLE_PLACES_API_KEY.trim());
-      const system = buildSystem(today, body?.currentItinerary, { places, limited });
+      const system = buildSystem(today, body?.currentItinerary, { places, limited, homeCity });
       const dataTools = places ? DATA_TOOLS : DATA_TOOLS.filter((t) => t.name !== "search_places");
       const cache = placesCache(env.DB);
       const runTool = async (name, input) => {

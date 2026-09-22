@@ -13,6 +13,7 @@ import com.itinera.app.model.DocItem
 import com.itinera.app.model.Expense
 import com.itinera.app.model.Leg
 import com.itinera.app.model.Traveller
+import com.itinera.app.model.TransportType
 import com.itinera.app.model.Trip
 import com.itinera.app.model.TripAccent
 import com.itinera.app.model.UserProfile
@@ -56,6 +57,7 @@ class TripRepository {
     val tripService = TripService()
 
     val neraService = NeraService()
+    val neraChatService = NeraChatService()
 
     val purchaseService = PurchaseService()
 
@@ -220,7 +222,86 @@ class TripRepository {
                 addActivity(id, date, a.title, a.time, a.endTime, a.location, a.note, a.lat, a.lng)
             }
         }
+        for (l in draft.legs) {
+            val legDate = runCatching { LocalDate.parse(l.date) }.getOrNull() ?: continue
+            addLeg(
+                id,
+                Leg(
+                    id = "leg_${kotlin.random.Random.nextLong()}",
+                    fromCity = l.fromCity,
+                    toCity = l.toCity,
+                    transport = transportTypeOf(l.transport),
+                    date = legDate,
+                    timeLabel = l.time,
+                    endTimeLabel = l.endTime,
+                ),
+            )
+        }
         return id
+    }
+
+    /**
+     * Applies a revised Nera draft to an EXISTING trip: adds any activity or leg the draft has
+     * that the trip doesn't already have, and any new co-traveller name. Additive only — never
+     * removes or overwrites anything, so it's safe to run again on the same draft (idempotent)
+     * and never destroys something the traveller added by hand outside Nera.
+     */
+    fun mergeItineraryIntoTrip(tripId: String, draft: NeraItinerary) {
+        val trip = trips.firstOrNull { it.id == tripId } ?: return
+        val existingActs = activitiesForTrip(tripId)
+        for (day in draft.days) {
+            val date = runCatching { LocalDate.parse(day.date) }.getOrNull() ?: continue
+            for (a in day.activities) {
+                val already = existingActs.any {
+                    it.date == date && it.title.trim().equals(a.title.trim(), ignoreCase = true) &&
+                        (it.time == a.time || a.time.isBlank())
+                }
+                if (!already) addActivity(tripId, date, a.title, a.time, a.endTime, a.location, a.note, a.lat, a.lng)
+            }
+        }
+        for (l in draft.legs) {
+            val legDate = runCatching { LocalDate.parse(l.date) }.getOrNull() ?: continue
+            val already = trip.legs.any {
+                it.date == legDate && it.fromCity.trim().equals(l.fromCity.trim(), ignoreCase = true) &&
+                    it.toCity.trim().equals(l.toCity.trim(), ignoreCase = true)
+            }
+            if (!already) {
+                addLeg(
+                    tripId,
+                    Leg(
+                        id = "leg_${kotlin.random.Random.nextLong()}",
+                        fromCity = l.fromCity,
+                        toCity = l.toCity,
+                        transport = transportTypeOf(l.transport),
+                        date = legDate,
+                        timeLabel = l.time,
+                        endTimeLabel = l.endTime,
+                    ),
+                )
+            }
+        }
+        val myName = profile.name.trim().lowercase()
+        val existingNames = trip.travellers.map { it.firstName.trim().lowercase() }.toSet()
+        val newTravellers = draft.travellers
+            .map { it.trim() }
+            .filter { it.isNotBlank() && it.lowercase() != myName && it.lowercase() !in existingNames }
+            .distinctBy { it.lowercase() }
+            .mapIndexed { n, name -> Traveller(id = "trav_${kotlin.random.Random.nextLong()}", firstName = name, colorIndex = trip.travellers.size + n + 1) }
+        if (newTravellers.isNotEmpty()) {
+            val i = trips.indexOfFirst { it.id == tripId }
+            if (i >= 0) {
+                trips[i] = trips[i].copy(travellers = trips[i].travellers + newTravellers)
+                persist(trips[i])
+            }
+        }
+    }
+
+    private fun transportTypeOf(value: String): TransportType = when (value.lowercase()) {
+        "train" -> TransportType.TRAIN
+        "bus" -> TransportType.BUS
+        "ferry" -> TransportType.FERRY
+        "car" -> TransportType.CAR
+        else -> TransportType.FLIGHT   // Nera's default, and the safe fallback for an unrecognised value
     }
 
     fun updateTripImage(id: String, url: String) {

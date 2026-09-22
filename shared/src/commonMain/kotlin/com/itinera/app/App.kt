@@ -485,7 +485,7 @@ private fun AppContent(
                                 onPinTrip = { repository.togglePin(it) },
                                 onArchiveTrip = { repository.toggleArchive(it) },
                                 onDeleteTrip = { repository.deleteTrip(it) },
-                                onPlanWithNera = { navigator.push(Screen.Nera) },
+                                onPlanWithNera = { navigator.push(Screen.Nera()) },
                                 currentUid = repository.authService.currentUid ?: "",
                                 onOpenMembers = { navigator.push(Screen.Members(it)) },
                                 onJoinByCode = { repository.joinTripByCode(it) },
@@ -515,6 +515,7 @@ private fun AppContent(
                                     onRemovePostcardPhoto = { slot -> repository.removePostcardPhoto(screen.tripId, slot) },
                                     onLoadImageBytes = { url -> repository.loadBytes(url) },
                                     onDocuments = { navigator.push(Screen.TripDocuments(screen.tripId)) },
+                                    onAskNera = { navigator.push(Screen.Nera(screen.tripId)) },
                                     onAddLeg = { navigator.push(Screen.AddLeg(screen.tripId)) },
                                     onAddPlace = { navigator.push(Screen.AddPlace(screen.tripId)) },
                                     onEditActivity = { actId -> navigator.push(Screen.EditPlace(screen.tripId, actId)) },
@@ -966,15 +967,26 @@ private fun AppContent(
 
                             Screen.Emergency -> EmergencyScreen(onBack = { navigator.back() })
 
-                            Screen.Nera -> NeraChatScreen(
+                            is Screen.Nera -> NeraChatScreen(
                                 service = repository.neraService,
+                                chatService = repository.neraChatService,
                                 purchases = repository.purchaseService,
                                 uid = repository.authService.currentUid ?: "",
+                                tripId = screen.tripId,
+                                travellerName = repository.profile.name,
+                                homeCity = repository.profile.city,
                                 onBack = { navigator.back() },
-                                onApprove = { draft ->
-                                    val id = repository.createTripFromItinerary(draft)
-                                    scope.launch { repository.neraService.tripCreated(id) }   // uses up one free trip
-                                    scope.launch {
+                                onApprove = { draft, pending ->
+                                    val existingId = screen.tripId
+                                    val id = if (existingId != null) {
+                                        repository.mergeItineraryIntoTrip(existingId, draft)   // additive — never overwrites
+                                        existingId
+                                    } else {
+                                        repository.createTripFromItinerary(draft)
+                                    }
+                                    scope.launch { repository.neraService.tripCreated(id) }   // uses up one free trip (idempotent per trip)
+                                    if (pending.isNotEmpty()) scope.launch { repository.neraChatService.appendMessages(id, pending) }
+                                    if (existingId == null) scope.launch {
                                         val trip = repository.tripById(id)
                                         if (trip != null) {
                                             val url = repository.unsplashApi.fetchImage(imageQueryForTrip(trip))
@@ -982,7 +994,8 @@ private fun AppContent(
                                         }
                                     }
                                     navigator.replace(Screen.TripDetail(id))
-                                    pillMessage = s.neraTripCreated
+                                    pillMessage = if (existingId == null) s.neraTripCreated else s.changesSaved
+                                    id
                                 },
                             )
 
