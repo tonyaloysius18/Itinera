@@ -116,6 +116,7 @@ fun NeraChatScreen(
     purchases: PurchaseService,
     uid: String,
     tripId: String? = null,       // null starts a fresh trip; set, restores and continues that trip's saved chat
+    seed: NeraItinerary? = null,  // the trip's current real activities/legs, so Nera knows what's already there
     travellerName: String = "",   // first name from the profile, for a personal greeting; blank if unknown
     homeCity: String = "",        // home city from the profile, used for travel legs; blank if unknown
     onBack: () -> Unit,
@@ -204,7 +205,9 @@ fun NeraChatScreen(
     }
 
     val latestDraftIndex = items.indexOfLast { it is NeraItem.Draft }
-    val currentDraft = (items.getOrNull(latestDraftIndex) as? NeraItem.Draft)?.itinerary
+    // Once the chat itself has proposed a draft, that supersedes the trip's on-open snapshot —
+    // otherwise Nera would keep reverting to what the trip looked like before this conversation.
+    val currentDraft = (items.getOrNull(latestDraftIndex) as? NeraItem.Draft)?.itinerary ?: seed
 
     // Keep the newest message in view as the conversation grows.
     LaunchedEffect(items.size, sending) {

@@ -973,6 +973,7 @@ private fun AppContent(
                                 purchases = repository.purchaseService,
                                 uid = repository.authService.currentUid ?: "",
                                 tripId = screen.tripId,
+                                seed = screen.tripId?.let { repository.seedItineraryFor(it) },
                                 travellerName = repository.profile.name,
                                 homeCity = repository.profile.city,
                                 onBack = { navigator.back() },

@@ -241,6 +241,58 @@ class TripRepository {
     }
 
     /**
+     * Rebuilds a NeraItinerary from a trip's CURRENT real state (its activities and legs —
+     * however they got there, by hand or from a past Nera draft), so opening Nera for an
+     * existing trip lets it see what's already planned instead of starting blind. Passed to
+     * NeraChatScreen as the starting "currentItinerary" context. Null if the trip has nothing yet.
+     */
+    fun seedItineraryFor(tripId: String): NeraItinerary? {
+        val trip = trips.firstOrNull { it.id == tripId } ?: return null
+        val acts = activitiesForTrip(tripId)
+        if (acts.isEmpty() && trip.legs.isEmpty()) return null
+        // Every date with an activity or a leg gets a day entry, even if it turns out empty of
+        // activities — otherwise a leg with no matching day would have nowhere to render.
+        val dates = (acts.map { it.date } + trip.legs.map { it.date }).distinct().sorted()
+        val startDate = dates.firstOrNull() ?: return null
+        val myName = profile.name.trim().lowercase()
+        return NeraItinerary(
+            title = trip.title,
+            countries = trip.destinationCountries.ifEmpty {
+                trip.legs.map { it.country.trim() }.filter { it.isNotBlank() }.distinct()
+            },
+            startDate = startDate.toString(),
+            travellers = trip.travellers.map { it.firstName.trim() }
+                .filter { it.isNotBlank() && it.lowercase() != myName },
+            legs = trip.legs.map {
+                NeraLeg(
+                    fromCity = it.fromCity,
+                    toCity = it.toCity,
+                    transport = it.transport.name.lowercase(),
+                    date = it.date.toString(),
+                    time = it.timeLabel,
+                    endTime = it.endTimeLabel,
+                )
+            },
+            days = dates.map { date ->
+                NeraDay(
+                    date = date.toString(),
+                    activities = acts.filter { it.date == date }.sortedBy { it.time }.map {
+                        NeraActivity(
+                            title = it.title,
+                            time = it.time,
+                            endTime = it.endTime,
+                            location = it.location,
+                            note = it.note,
+                            lat = it.lat,
+                            lng = it.lng,
+                        )
+                    },
+                )
+            },
+        )
+    }
+
+    /**
      * Applies a revised Nera draft to an EXISTING trip: adds any activity or leg the draft has
      * that the trip doesn't already have, and any new co-traveller name. Additive only — never
      * removes or overwrites anything, so it's safe to run again on the same draft (idempotent)
