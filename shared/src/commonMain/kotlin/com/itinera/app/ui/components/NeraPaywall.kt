@@ -39,8 +39,8 @@ import com.itinera.app.resources.nera_wave_a
 import org.jetbrains.compose.resources.painterResource
 
 /**
- * The subscription screen. It shows what both stores require: the price and period, that it renews automatically
- * and can be cancelled any time, links to the Terms and Privacy Policy, and a Restore Purchases button.
+ * The unlock screen for Nera's one-time purchase. It shows what both stores require: the price, that it is a one-time
+ * purchase, links to the Terms and Privacy Policy, and a Restore Purchases button.
  * The price text comes from the store, so it is always localized and correct.
  */
 @Composable
@@ -49,9 +49,8 @@ fun NeraPaywall(
     loading: Boolean,
     busy: Boolean,
     message: String?,
-    onSubscribe: () -> Unit,
+    onPurchase: () -> Unit,
     onRestore: () -> Unit,
-    onManage: () -> Unit,
     onTerms: () -> Unit,
     onPrivacy: () -> Unit,
     onClose: () -> Unit,
@@ -94,9 +93,9 @@ fun NeraPaywall(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                         textAlign = TextAlign.Center,
                     )
-                    else -> Button(onClick = onSubscribe, enabled = !busy, modifier = Modifier.fillMaxWidth().height(52.dp)) {
+                    else -> Button(onClick = onPurchase, enabled = !busy, modifier = Modifier.fillMaxWidth().height(52.dp)) {
                         if (busy) CircularProgressIndicator(Modifier.size(22.dp), strokeWidth = 2.dp)
-                        else Text(s.neraSubscribeFor.replace("%s", offer.priceText), fontWeight = FontWeight.SemiBold)
+                        else Text(s.neraUnlockFor.replace("%s", offer.priceText), fontWeight = FontWeight.SemiBold)
                     }
                 }
                 message?.let {
@@ -106,7 +105,7 @@ fun NeraPaywall(
 
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    s.neraAutoRenewNote,
+                    s.neraOneTimeNote,
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     textAlign = TextAlign.Center,
@@ -114,7 +113,6 @@ fun NeraPaywall(
                 Spacer(Modifier.height(8.dp))
                 Row(horizontalArrangement = Arrangement.Center) {
                     TextButton(onClick = onRestore, enabled = !busy) { Text(s.neraRestore) }
-                    TextButton(onClick = onManage) { Text(s.neraManage) }
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     LinkText(s.termsLinkLabel, onTerms)

@@ -19,9 +19,9 @@ class NeraOffer internal constructor(val priceText: String, internal val pkg: Pa
 enum class PurchaseOutcome { SUCCESS, CANCELLED, FAILED }
 
 /**
- * Nera subscriptions through RevenueCat. The user is identified to RevenueCat by their Firebase uid, which is how
- * the server maps purchases back to accounts. Does nothing until the platform's RevenueCat key is in
- * local.properties, so builds without subscriptions set up behave exactly as before.
+ * Nera's one-time "lifetime" purchase through RevenueCat. The user is identified to RevenueCat by their Firebase uid,
+ * which is how the server maps purchases back to accounts. Does nothing until the platform's RevenueCat key is in
+ * local.properties, so builds without purchases set up behave exactly as before.
  */
 class PurchaseService {
 
@@ -43,13 +43,14 @@ class PurchaseService {
         identifiedUid = uid
     }
 
-    /** The monthly plan as the store prices it, or null when it can't be loaded. */
+    /** The lifetime purchase as the store prices it, or null when it can't be loaded. */
     suspend fun loadOffer(uid: String): NeraOffer? {
         if (!isAvailable || uid.isBlank()) return null
         return try {
             identify(uid)
             val offering = Purchases.sharedInstance.awaitOfferings().current ?: return null
-            val pkg = offering.monthly ?: offering.availablePackages.firstOrNull() ?: return null
+            // Only the lifetime package: falling back to another package would charge something the paywall doesn't say.
+            val pkg = offering.lifetime ?: return null
             NeraOffer(pkg.storeProduct.price.formatted, pkg)
         } catch (e: CancellationException) {
             throw e
@@ -69,7 +70,7 @@ class PurchaseService {
         PurchaseOutcome.FAILED
     }
 
-    /** Re-checks purchases with the store. True when the user has an active Nera subscription. */
+    /** Re-checks purchases with the store. True when the user has the Nera entitlement. */
     suspend fun restore(uid: String): Boolean = try {
         identify(uid)
         hasNera(Purchases.sharedInstance.awaitRestore())

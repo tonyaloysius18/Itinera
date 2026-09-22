@@ -31,6 +31,29 @@ test("ignores other entitlements; falls back to the product id only when no enti
 test("ignores events without a usable expiry", () => {
   for (const exp of [undefined, null, 0, -1, "soon", NaN]) assert.equal(eventToUpdate({ ...base, expiration_at_ms: exp }, NOW), null);
 });
+// One-time (lifetime) purchase: RevenueCat sends NON_RENEWING_PURCHASE with no expiry date.
+const lifetime = { type: "NON_RENEWING_PURCHASE", app_user_id: "uid1", entitlement_ids: ["nera"], expiration_at_ms: null, event_timestamp_ms: NOW - 5, product_id: "dev.ynotlabs.itinera.nera.lifetime" };
+test("a one-time purchase grants lifetime access", () => {
+  assert.deepEqual(eventToUpdate(lifetime, NOW), { uid: "uid1", paidUntil: LIFETIME, eventAt: NOW - 5 });
+  assert.equal(eventToUpdate({ ...lifetime, expiration_at_ms: undefined }, NOW).paidUntil, LIFETIME);
+});
+test("a one-time purchase that does carry an expiry uses it", () => {
+  assert.equal(eventToUpdate({ ...lifetime, expiration_at_ms: NOW + 10 * DAY }, NOW).paidUntil, NOW + 10 * DAY);
+});
+test("a refund of a lifetime purchase revokes immediately, with no expiry to compare against", () => {
+  assert.equal(eventToUpdate({ ...lifetime, type: "CANCELLATION", cancel_reason: "CUSTOMER_SUPPORT" }, NOW).paidUntil, NOW);
+});
+test("lifetime events for other entitlements, anonymous users or the wrong type are ignored", () => {
+  assert.equal(eventToUpdate({ ...lifetime, entitlement_ids: ["other"] }, NOW), null);
+  assert.equal(eventToUpdate({ ...lifetime, app_user_id: "$RCAnonymousID:x" }, NOW), null);
+  // only a real one-time purchase may grant lifetime access from a missing expiry
+  for (const type of ["RENEWAL", "INITIAL_PURCHASE", "EXPIRATION", "CANCELLATION", "PRODUCT_CHANGE"]) {
+    assert.equal(eventToUpdate({ ...lifetime, type }, NOW), null, type);
+  }
+});
+test("lifetime access outlasts any real date", () => {
+  assert.ok(LIFETIME > Date.UTC(2100, 0, 1));
+});
 test("garbage input is safe", () => {
   for (const ev of [null, undefined, 42, "x", []]) assert.equal(eventToUpdate(ev, NOW), null);
 });

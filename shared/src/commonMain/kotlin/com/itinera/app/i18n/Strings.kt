@@ -783,10 +783,9 @@ class Strings {
     var neraBenefit1: String = ""
     var neraBenefit2: String = ""
     var neraBenefit3: String = ""
-    var neraSubscribeFor: String = ""
-    var neraAutoRenewNote: String = ""
+    var neraUnlockFor: String = ""
+    var neraOneTimeNote: String = ""
     var neraRestore: String = ""
-    var neraManage: String = ""
     var neraPurchaseFailed: String = ""
     var neraPurchaseUnavailable: String = ""
     var neraRestoreNone: String = ""
@@ -1454,10 +1453,9 @@ class Strings {
         c.neraBenefit1 = this.neraBenefit1
         c.neraBenefit2 = this.neraBenefit2
         c.neraBenefit3 = this.neraBenefit3
-        c.neraSubscribeFor = this.neraSubscribeFor
-        c.neraAutoRenewNote = this.neraAutoRenewNote
+        c.neraUnlockFor = this.neraUnlockFor
+        c.neraOneTimeNote = this.neraOneTimeNote
         c.neraRestore = this.neraRestore
-        c.neraManage = this.neraManage
         c.neraPurchaseFailed = this.neraPurchaseFailed
         c.neraPurchaseUnavailable = this.neraPurchaseUnavailable
         c.neraRestoreNone = this.neraRestoreNone

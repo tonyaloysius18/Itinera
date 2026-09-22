@@ -64,7 +64,6 @@ import com.itinera.app.i18n.Strings
 import com.itinera.app.model.label
 import com.itinera.app.resources.Res
 import com.itinera.app.resources.nera_head
-import com.itinera.app.getPlatform
 import com.itinera.app.ui.BackHandler
 import com.itinera.app.ui.components.NeraPaywall
 import com.itinera.app.ui.components.NeraThinking
@@ -217,7 +216,7 @@ fun NeraChatScreen(
                     .replaceFirst("%s", (tier.tripsLeft ?: 0).toString())
                     .replaceFirst("%s", (tier.freeTrips ?: 0).toString()),
                 modifier = Modifier
-                    .clickable(enabled = purchases.isAvailable) { openPaywall() }   // tap to subscribe
+                    .clickable(enabled = purchases.isAvailable) { openPaywall() }   // tap to unlock
                     .padding(start = 16.dp, end = 16.dp, bottom = 4.dp),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
@@ -250,7 +249,7 @@ fun NeraChatScreen(
                                 isLatest = index == latestDraftIndex,
                                 actionsEnabled = !sending && !approved,
                                 onApprove = {
-                                    // Free trips used up: approving a draft needs the subscription (when it can be bought here).
+                                    // Free trips used up: approving a draft needs the one-time unlock (when it can be bought here).
                                     if (freeTier?.status == "limit" && purchases.isAvailable) openPaywall()
                                     else { approved = true; onApprove(item.itinerary) }
                                 },
@@ -299,7 +298,7 @@ fun NeraChatScreen(
             loading = offerLoading,
             busy = paywallBusy,
             message = paywallMessage,
-            onSubscribe = {
+            onPurchase = {
                 val chosen = offer
                 if (chosen != null && !paywallBusy) scope.launch {
                     paywallBusy = true
@@ -319,12 +318,6 @@ fun NeraChatScreen(
                     if (purchases.restore(uid)) finishUnlock() else paywallMessage = s.neraRestoreNone
                     paywallBusy = false
                 }
-            },
-            onManage = {
-                uriHandler.openUri(
-                    if (getPlatform().isIos) "https://apps.apple.com/account/subscriptions"
-                    else "https://play.google.com/store/account/subscriptions",
-                )
             },
             onTerms = { uriHandler.openUri(TERMS_URL) },
             onPrivacy = { uriHandler.openUri(PRIVACY_URL) },

@@ -28,9 +28,9 @@ and a D1 database for the per-user daily limit and place-search cache.
   user approves a draft: the app calls `POST /trip { tripId }`, and each `(uid, tripId)` is stored once in `nera_trips`,
   so a retry never uses up a second trip. There is no time limit.
 - After the last free trip the user is at the **limit**: chat keeps working (weather, food, questions), but Nera is only
-  offered the `say` tool, so she cannot draft or change itineraries, and the app asks them to subscribe before approving
-  any older draft. A subscription (or a friends-and-family email) lifts the limit.
-- Free users get `FREE_MONTHLY_LIMIT` requests a month (default 60) so people who never subscribe cannot run up cost;
+  offered the `say` tool, so she cannot draft or change itineraries, and the app asks them to unlock Nera Plus before approving
+  any older draft. The one-time purchase (or a friends-and-family email) lifts the limit.
+- Free users get `FREE_MONTHLY_LIMIT` requests a month (default 60) so people who never buy cannot run up cost;
   paying and friend users get `PAID_MONTHLY_LIMIT` (default 150). The counter is per calendar month, whatever the tier.
 - Trips are counted whether or not the paywall is enforced. **Enforcement is `PAYWALL_ENABLED`.** Turn it on only once an
   in-app purchase exists, otherwise users at the limit would have no way to pay.
@@ -56,7 +56,7 @@ npm run friend -- list
 (Add `--local` to use the test database.) Friends still have the monthly fair-use cap below. Apple's "Hide My Email"
 addresses will not match, so ask friends to use Google sign-in or their real email.
 
-## Subscription (RevenueCat)
+## Nera Plus purchase (RevenueCat)
 
 RevenueCat tells the Worker about purchases at `POST /revenuecat`. Setup:
 
@@ -70,10 +70,12 @@ RevenueCat tells the Worker about purchases at `POST /revenuecat`. Setup:
 Right after a purchase or restore the app also calls `POST /entitlement {"refresh": true}`, which makes the Worker ask
 RevenueCat directly (needs `npx wrangler secret put REVENUECAT_SECRET_KEY`, the RevenueCat **secret** API key), so the
 user is unlocked immediately even if the webhook is slow. The step-by-step store and RevenueCat setup is in
-`docs/nera-subscription-setup.md`.
+`docs/nera-purchase-setup.md`.
 
-Events set `paid_until`: renewals extend it, a cancellation keeps access until the period ends, a refund revokes it
-immediately, and an older event can never overwrite a newer one. Until step 1 is done the endpoint answers 503.
+Events set `paid_until`. The Nera Plus purchase is one-time: RevenueCat sends `NON_RENEWING_PURCHASE` with no expiry date,
+which the Worker stores as lifetime access (`paid_until` = 9999999999999). A refund revokes access immediately, and an
+older event can never overwrite a newer one. Events that do carry an expiry (renewals, cancellations) still work, which
+keeps the RevenueCat Test Store's subscription-style products usable for testing. Until step 1 is done the endpoint answers 503.
 
 ## Fair use and cost
 

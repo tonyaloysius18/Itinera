@@ -4,6 +4,9 @@
 
 export const ENTITLEMENT_ID = "nera";
 
+/** paid_until value meaning "never expires" (a lifetime purchase). Year 2286 in epoch millis. */
+export const LIFETIME = 9_999_999_999_999;
+
 /** Constant-time string comparison (for the shared webhook secret). */
 export function safeEqual(a, b) {
   if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length) return false;
@@ -27,11 +30,20 @@ export function eventToUpdate(event, now = Date.now()) {
   if (!forNera) return null;
 
   const exp = event.expiration_at_ms;
-  if (typeof exp !== "number" || !isFinite(exp) || exp <= 0) return null;
+  const hasExpiry = typeof exp === "number" && isFinite(exp) && exp > 0;
+  const refund = event.type === "CANCELLATION" && event.cancel_reason === "CUSTOMER_SUPPORT";
 
-  let paidUntil = exp;
-  // A refund revokes access immediately, even though the paid period had time left.
-  if (event.type === "CANCELLATION" && event.cancel_reason === "CUSTOMER_SUPPORT") paidUntil = Math.min(exp, now);
+  let paidUntil;
+  if (refund) {
+    // A refund revokes access immediately, even though the paid period had time left (or, for a lifetime purchase, no end).
+    paidUntil = hasExpiry ? Math.min(exp, now) : now;
+  } else if (hasExpiry) {
+    paidUntil = exp;
+  } else if (event.type === "NON_RENEWING_PURCHASE") {
+    paidUntil = LIFETIME;             // one-time purchase: the store sends no expiry date
+  } else {
+    return null;
+  }
 
   const eventAt = typeof event.event_timestamp_ms === "number" ? event.event_timestamp_ms : now;
   return { uid, paidUntil, eventAt };
@@ -53,7 +65,6 @@ export async function applyUpdate(db, update, now = Date.now()) {
  * Pure: when does the "nera" entitlement in a RevenueCat REST subscriber payload end?
  * Returns epoch millis, LIFETIME for a non-expiring entitlement, or null when there is none.
  */
-export const LIFETIME = 9_999_999_999_999;
 export function expiryFromSubscriber(payload, entitlement = ENTITLEMENT_ID) {
   const e = payload?.subscriber?.entitlements?.[entitlement];
   if (!e) return null;
