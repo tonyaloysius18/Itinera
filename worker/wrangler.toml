@@ -14,6 +14,10 @@ PAYWALL_ENABLED = "true"
 # lower cap keeps the cost of users who never subscribe bounded.
 PAID_MONTHLY_LIMIT = "150"
 FREE_MONTHLY_LIMIT = "60"
+# Nera requests per user per UTC day. Applies to everyone except OWNER_UIDS (comma-separated Firebase uids),
+# who have no daily cap at all — the monthly cap above still applies to them.
+DAILY_LIMIT = "80"
+OWNER_UIDS = "vD1Gv5iqM2Wxug3zwPQOvNFplEq1"
 
 # Daily quota + place-search cache. Run `npx wrangler d1 create nera`, then paste the printed
 # database_id below and apply migrations (see worker/README.md).

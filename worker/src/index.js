@@ -9,7 +9,7 @@ import { verifyFirebaseClaims } from "./firebaseAuth.js";
 import { getEntitlement, isFriend, recordTrip } from "./entitlement.js";
 import { applyUpdate, eventToUpdate, fetchSubscriberExpiry, safeEqual } from "./revenuecat.js";
 
-const DAILY_LIMIT = 40;            // Nera requests per user per UTC day
+const DEFAULT_DAILY_LIMIT = 80;    // Nera requests per user per UTC day, for everyone except OWNER_UIDS
 const DEFAULT_PAID_MONTHLY_LIMIT = 150;   // fair-use cap per paying/friend user per UTC month
 const DEFAULT_FREE_MONTHLY_LIMIT = 60;    // messages per month for users on the free trips (keeps cost bounded)
 const DEFAULT_FREE_TRIPS = 3;             // trips created with Nera before the subscription is needed
@@ -19,16 +19,19 @@ const entitlementBody = (e) => ({ status: e.status, tripsLeft: e.tripsLeft, trip
 const MAX_BODY_BYTES = 100_000;
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 
+/** Firebase uids with no daily cap at all (still subject to the monthly fair-use cap). Comma-separated env var. */
+const isOwnerUid = (env, uid) => (env.OWNER_UIDS || "").split(",").map((s) => s.trim()).filter(Boolean).includes(uid);
+
 const json = (body, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
 
 /** Count this request against the user's daily quota; false when over the limit. Atomic in one statement. */
-async function consumeQuota(db, uid, day) {
+async function consumeQuota(db, uid, day, limit) {
   const row = await db
     .prepare(
       "INSERT INTO nera_usage (uid, day, count) VALUES (?1, ?2, 1) " +
       "ON CONFLICT(uid, day) DO UPDATE SET count = count + 1 WHERE count < ?3 RETURNING count")
-    .bind(uid, day, DAILY_LIMIT)
+    .bind(uid, day, limit)
     .first();
   return row !== null;
 }
@@ -161,16 +164,19 @@ export default {
     const entitlement = await getEntitlement(env.DB, uid, Date.now(), freeTrips, { friend });
     const limited = paywall && entitlement.status === "limit";   // free trips used up: chat still works, new trips do not
 
-    // 4. Rate limits: a daily cap for everyone, plus a monthly cap (higher for paying and friend users).
+    // 4. Rate limits: a daily cap for everyone except OWNER_UIDS (unlimited), plus a monthly cap
+    //    (higher for paying and friend users) that still applies even to owners.
     const today = new Date().toISOString().slice(0, 10);
     const month = today.slice(0, 7);
+    const owner = isOwnerUid(env, uid);
     const monthlyLimit = entitlement.status === "paid"
       ? positiveInt(env.PAID_MONTHLY_LIMIT, DEFAULT_PAID_MONTHLY_LIMIT)
       : positiveInt(env.FREE_MONTHLY_LIMIT, DEFAULT_FREE_MONTHLY_LIMIT);
     if (!(await consumeMonthly(env.DB, uid, month, monthlyLimit))) {
       return json({ error: "monthly_quota" }, 429);
     }
-    if (!(await consumeQuota(env.DB, uid, today))) {
+    const dailyLimit = positiveInt(env.DAILY_LIMIT, DEFAULT_DAILY_LIMIT);
+    if (!owner && !(await consumeQuota(env.DB, uid, today, dailyLimit))) {
       await refundMonthly(env.DB, uid, month);
       return json({ error: "quota", message: "You've reached today's limit for Nera. Please try again tomorrow." }, 429);
     }
