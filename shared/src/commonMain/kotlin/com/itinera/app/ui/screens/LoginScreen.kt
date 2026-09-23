@@ -37,6 +37,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,6 +46,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -82,6 +85,11 @@ import com.itinera.app.ui.theme.PhotoOverlayScrim
 fun LoginScreen(
     authService: AuthService,
     prefillEmail: String = "",
+    // Set when the traveller tapped "Switch account" on a remembered Google/Apple account:
+    // skips the form entirely and re-triggers that provider's own (password-free) sign-in
+    // sheet as soon as this screen appears. Null for an ordinary login, or a remembered
+    // password account — see the LaunchedEffect below for the password-account case.
+    quickSwitchMethod: String? = null,
     onAuthed: () -> Unit,
     onCreateAccount: () -> Unit,
     onMessage: (String) -> Unit,
@@ -127,6 +135,78 @@ fun LoginScreen(
                 loading = false
                 onMessage(s.invalidCredentials)
             }
+        }
+    }
+
+    // Shared by the Google button and the "switch account" auto-trigger below, so both take
+    // the exact same path (native picker sheet, no typing — nothing is stored to make this work).
+    suspend fun doGoogleSignIn() {
+        try {
+            when (val result = googleHelper.signIn()) {
+                is GoogleSignInResult.Success -> {
+                    authService.signInWithGoogle(result.tokens.idToken, result.tokens.accessToken)
+                    onAuthed()
+                }
+                // The user backed out — nothing to report.
+                GoogleSignInResult.Cancelled -> Unit
+                is GoogleSignInResult.Failed -> {
+                    onMessage(s.googleSignInFailed)
+                    println("ITINERA: GOOGLE SIGN-IN FAILED — ${result.reason}")
+                }
+            }
+        } catch (e: Exception) {
+            // Reaching here means the Firebase credential exchange threw, not the native sheet.
+            onMessage(s.googleSignInFailed)
+            println("ITINERA: GOOGLE SIGN-IN FAILED — ${e::class.simpleName}: ${e.message.orEmpty()}")
+            e.printStackTrace()
+        }
+    }
+
+    // Shared by the Apple button and the "switch account" auto-trigger below.
+    suspend fun doAppleSignIn() {
+        try {
+            // Prefer an injected handler (tests / overrides); otherwise run the native
+            // ASAuthorization flow via the helper.
+            val handler = onAppleSignIn
+            if (handler != null) {
+                handler()
+                onAuthed()
+            } else {
+                when (val result = appleHelper.signIn()) {
+                    is AppleSignInResult.Success -> {
+                        authService.signInWithApple(
+                            idToken = result.credential.idToken,
+                            rawNonce = result.credential.rawNonce,
+                            fullName = result.credential.fullName,
+                            email = result.credential.email,
+                        )
+                        onAuthed()
+                    }
+                    // The user backed out — nothing to report.
+                    AppleSignInResult.Cancelled -> Unit
+                    is AppleSignInResult.Failed -> {
+                        onMessage(s.appleSignInFailed)
+                        println("ITINERA: APPLE SIGN-IN FAILED — ${result.reason}")
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            // Reaching here means the Firebase credential exchange threw, not the native sheet.
+            onMessage(s.appleSignInFailed)
+            println("ITINERA: APPLE SIGN-IN FAILED — ${e::class.simpleName}: ${e.message.orEmpty()}")
+            e.printStackTrace()
+        }
+    }
+
+    val passwordFocusRequester = remember { FocusRequester() }
+    // "Switch account" landed here for a Google/Apple account: skip the form and go straight
+    // to that provider's own sheet. For a remembered password account, just focus the password
+    // field (the email is already pre-filled) — there is nothing safe to auto-submit.
+    LaunchedEffect(quickSwitchMethod) {
+        when (quickSwitchMethod) {
+            "google" -> doGoogleSignIn()
+            "apple" -> doAppleSignIn()
+            "password" -> passwordFocusRequester.requestFocus()
         }
     }
 
@@ -227,7 +307,7 @@ fun LoginScreen(
                                 visualTransformation = if (passwordVisible) VisualTransformation.None
                                 else PasswordVisualTransformation(),
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth().focusRequester(passwordFocusRequester),
                             )
                         }
                         Icon(
@@ -313,37 +393,7 @@ fun LoginScreen(
                         tintIcon = false,
                         modifier = Modifier.weight(1f),
                     ) {
-                        scope.launch {
-                            try {
-                                when (val result = googleHelper.signIn()) {
-                                    is GoogleSignInResult.Success -> {
-                                        authService.signInWithGoogle(
-                                            result.tokens.idToken,
-                                            result.tokens.accessToken,
-                                        )
-                                        onAuthed()
-                                    }
-                                    // The user backed out — nothing to report.
-                                    GoogleSignInResult.Cancelled -> Unit
-                                    is GoogleSignInResult.Failed -> {
-                                        onMessage(s.googleSignInFailed)
-                                        println(
-                                            "ITINERA: GOOGLE SIGN-IN FAILED — " +
-                                                    result.reason
-                                        )
-                                    }
-                                }
-                            } catch (e: Exception) {
-                                // Reaching here means the Firebase credential
-                                // exchange threw, not the native sheet.
-                                onMessage(s.googleSignInFailed)
-                                println(
-                                    "ITINERA: GOOGLE SIGN-IN FAILED — " +
-                                            "${e::class.simpleName}: ${e.message.orEmpty()}"
-                                )
-                                e.printStackTrace()
-                            }
-                        }
+                        scope.launch { doGoogleSignIn() }
                     }
 
                     if (isIos) {
@@ -353,47 +403,7 @@ fun LoginScreen(
                             tintIcon = true,
                             modifier = Modifier.weight(1f),
                         ) {
-                            scope.launch {
-                                try {
-                                    // Prefer an injected handler (tests / overrides); otherwise
-                                    // run the native ASAuthorization flow via the helper.
-                                    val handler = onAppleSignIn
-                                    if (handler != null) {
-                                        handler()
-                                        onAuthed()
-                                    } else {
-                                        when (val result = appleHelper.signIn()) {
-                                            is AppleSignInResult.Success -> {
-                                                authService.signInWithApple(
-                                                    idToken = result.credential.idToken,
-                                                    rawNonce = result.credential.rawNonce,
-                                                    fullName = result.credential.fullName,
-                                                    email = result.credential.email,
-                                                )
-                                                onAuthed()
-                                            }
-                                            // The user backed out — nothing to report.
-                                            AppleSignInResult.Cancelled -> Unit
-                                            is AppleSignInResult.Failed -> {
-                                                onMessage(s.appleSignInFailed)
-                                                println(
-                                                    "ITINERA: APPLE SIGN-IN FAILED — " +
-                                                            result.reason
-                                                )
-                                            }
-                                        }
-                                    }
-                                } catch (e: Exception) {
-                                    // Reaching here means the Firebase credential
-                                    // exchange threw, not the native sheet.
-                                    onMessage(s.appleSignInFailed)
-                                    println(
-                                        "ITINERA: APPLE SIGN-IN FAILED — " +
-                                                "${e::class.simpleName}: ${e.message.orEmpty()}"
-                                    )
-                                    e.printStackTrace()
-                                }
-                            }
+                            scope.launch { doAppleSignIn() }
                         }
                     }
                 }

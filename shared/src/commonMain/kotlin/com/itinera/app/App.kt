@@ -314,6 +314,9 @@ private fun AppContent(
     var searchRequest by remember { mutableStateOf(0) }
 
     var prefillEmail by remember { mutableStateOf("") }
+    // Set when "Switch account" targets a remembered Google/Apple account, so Login
+    // re-triggers that provider's own sign-in sheet instead of showing the form.
+    var quickSwitchMethod by remember { mutableStateOf<String?>(null) }
 
     // Scroll-to-shrink logic
     var barScale by remember { mutableStateOf(1f) }
@@ -388,6 +391,7 @@ private fun AppContent(
                 Screen.Login -> LoginScreen(
                     authService = repository.authService,
                     prefillEmail = prefillEmail,
+                    quickSwitchMethod = quickSwitchMethod,
                     onAuthed = {
                         scope.launch {
                             val uid = repository.authService.currentUid
@@ -422,6 +426,7 @@ private fun AppContent(
                             }
                             navigator.resetTo(Screen.Home)
                             prefillEmail = ""
+                            quickSwitchMethod = null
                         }
                     },
                     onCreateAccount = { navigator.push(Screen.CreateAccount) },
@@ -461,6 +466,7 @@ private fun AppContent(
                                             } catch (e: Exception) {}
                                         }
                                     }
+                                    quickSwitchMethod = null
                                     navigator.resetTo(Screen.Login)
                                     pillMessage = s.accountCreated
                                 },
@@ -862,6 +868,10 @@ private fun AppContent(
                                     onSwitchAccount = { account ->
                                         scope.launch {
                                             prefillEmail = account.email
+                                            // Google/Apple: Login re-triggers that provider's own
+                                            // sheet immediately, no form. Password: just pre-filled
+                                            // + focused — see LoginScreen's quickSwitchMethod handling.
+                                            quickSwitchMethod = account.method
                                             repository.clearLocal()
                                             repository.authService.signOut()
                                             navigator.resetTo(Screen.Login)
@@ -880,6 +890,7 @@ private fun AppContent(
                                             // LaunchedEffect at line 153 signs the old
                                             // user straight back in on next launch.
                                             repository.authService.signOut()
+                                            quickSwitchMethod = null
                                             navigator.resetTo(Screen.Login)
                                         }
                                     },
@@ -887,6 +898,7 @@ private fun AppContent(
                                         scope.launch {
                                             repository.clearLocal()
                                             repository.authService.signOut()   // ⬅ FIX — same
+                                            quickSwitchMethod = null
                                             navigator.resetTo(Screen.Login)
                                         }
                                     },
@@ -905,6 +917,7 @@ private fun AppContent(
                                                 // as a row with nothing in it.
                                                 if (uid != null) repository.accountStore.forget(uid)
                                                 repository.clearLocal()
+                                                quickSwitchMethod = null
                                                 navigator.resetTo(Screen.Login)
                                                 pillMessage = s.accountDeleted
                                             } catch (e: Exception) {
