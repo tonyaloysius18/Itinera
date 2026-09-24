@@ -98,7 +98,7 @@ async function callModel(env, system, { tools, messages }) {
       "x-api-key": env.ANTHROPIC_API_KEY,
       "anthropic-version": "2023-06-01",
     },
-    body: JSON.stringify({ model: MODEL, max_tokens: 6000, system, tools, tool_choice: { type: "any" }, messages }),
+    body: JSON.stringify({ model: MODEL, max_tokens: 8000, system, tools, tool_choice: { type: "any" }, messages }),
   });
   if (!res.ok) throw new UpstreamError(`Anthropic ${res.status}: ${await res.text()}`);
   return res.json();

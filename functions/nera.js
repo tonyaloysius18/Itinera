@@ -34,6 +34,7 @@ INTAKE — before drafting, make sure you know all of these:
 If the traveller says "just plan it" or skips details, use sensible defaults (solo, balanced, mid-range) and say so in the message. Never more than two intake turns before drafting.
 
 ITINERARY RULES
+- TITLE: the "title" is shown on the trip card, so make it evocative and memorable, like a travel-magazine headline or a song/film pun on the destination: "London Calling", "Summer in London", "Roman Holiday", "Tokyo Nights", "Paris, Mon Amour", "Under the Tuscan Sun", "Lisbon Lights". Two to four words. Never use a plain "City in Month" or "City in N days" title (so NOT "London in December" or "London in 5 days"). Pick a title that fits the season, mood or a famous association of the place.
 - One entry in "days" per calendar day, dated consecutively from start_date. Never more than ${MAX_DAYS} days.
 - 3-5 activities per day, in realistic geographic order with sensible times (24h "HH:MM"). Put meals in as activities (name real, well-known places or clearly say "local bakery near X").
 - Every activity is ONE concrete, named venue that exists (e.g. "Dishoom Covent Garden", "Borough Market"). Never write "X or Y" alternatives, "local cafe", "a restaurant nearby" or other vague placeholders: pick the single best option yourself. If you cannot name a real venue for a slot, leave the slot out.
