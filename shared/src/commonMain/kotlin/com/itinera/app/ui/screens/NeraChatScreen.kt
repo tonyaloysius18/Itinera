@@ -1,6 +1,7 @@
 package com.itinera.app.ui.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,12 +10,14 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -22,15 +25,19 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.Icon
@@ -44,10 +51,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.itinera.app.data.NeraActivity
 import com.itinera.app.data.NeraChatService
@@ -71,7 +83,6 @@ import com.itinera.app.resources.nera_head
 import com.itinera.app.ui.BackHandler
 import com.itinera.app.ui.components.NeraPaywall
 import com.itinera.app.ui.components.NeraThinking
-import com.itinera.app.ui.components.TopBar
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
@@ -267,28 +278,39 @@ fun NeraChatScreen(
 
     BackHandler(enabled = showPaywall) { showPaywall = false }
 
-    Box(Modifier.fillMaxSize()) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surfaceContainerLow),
+    ) {
     Column(Modifier.fillMaxSize().imePadding()) {
-        TopBar("Nera", onBack = onBack)
+        NeraChatHeader(s = s, onBack = onBack)
         freeTier?.let { tier ->
-            Text(
-                if (tier.status == "limit") s.neraFreeTripsUsed
+            FreeTierBanner(
+                text = if (tier.status == "limit") s.neraFreeTripsUsed
                 else s.neraFreeTripsLeft
                     .replaceFirst("%s", (tier.tripsLeft ?: 0).toString())
                     .replaceFirst("%s", (tier.freeTrips ?: 0).toString()),
-                modifier = Modifier
-                    .clickable(enabled = purchases.isAvailable) { openPaywall() }   // tap to unlock
-                    .padding(start = 16.dp, end = 16.dp, bottom = 4.dp),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
+                canUnlock = purchases.isAvailable,
+                onClick = ::openPaywall,
+                modifier = Modifier.align(Alignment.CenterHorizontally),
             )
         }
 
         LazyColumn(
             state = listState,
-            modifier = Modifier.weight(1f).fillMaxWidth(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .widthIn(max = 720.dp)
+                .align(Alignment.CenterHorizontally),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                start = 16.dp,
+                top = 16.dp,
+                end = 16.dp,
+                bottom = 20.dp,
+            ),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             itemsIndexed(items) { index, item ->
                 when (item) {
@@ -338,28 +360,56 @@ fun NeraChatScreen(
                 }
             }
             if (sending || historyLoading) {
-                item { NeraThinking() }
+                item {
+                    NeraThinking(
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .semantics { liveRegion = LiveRegionMode.Polite },
+                        size = 42.dp,
+                    )
+                }
             }
         }
 
-        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-        Row(
-            Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            shadowElevation = 10.dp,
+            tonalElevation = 2.dp,
         ) {
-            OutlinedTextField(
-                value = input,
-                onValueChange = { input = it.take(2000) },
-                modifier = Modifier.weight(1f),
-                placeholder = { Text(s.neraInputHint) },
-                shape = RoundedCornerShape(24.dp),
-                maxLines = 4,
-                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Send),
-                keyboardActions = KeyboardActions(onSend = { send(input) }),
-            )
-            Spacer(Modifier.padding(start = 8.dp))
-            FilledIconButton(onClick = { send(input) }, enabled = input.isNotBlank() && !sending && !historyLoading) {
-                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = s.neraSend)
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .widthIn(max = 720.dp)
+                    .align(Alignment.CenterHorizontally)
+                    .navigationBarsPadding()
+                    .padding(horizontal = 12.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                OutlinedTextField(
+                    value = input,
+                    onValueChange = { input = it.take(2000) },
+                    modifier = Modifier.weight(1f),
+                    placeholder = {
+                        Text(
+                            s.neraInputHint,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    },
+                    shape = RoundedCornerShape(24.dp),
+                    minLines = 1,
+                    maxLines = 4,
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Send),
+                    keyboardActions = KeyboardActions(onSend = { send(input) }),
+                )
+                FilledIconButton(
+                    onClick = { send(input) },
+                    enabled = input.isNotBlank() && !sending && !historyLoading,
+                    modifier = Modifier.size(52.dp),
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = s.neraSend)
+                }
             }
         }
     }
@@ -399,37 +449,154 @@ fun NeraChatScreen(
     }
 }
 
+@Composable
+private fun NeraChatHeader(s: Strings, onBack: () -> Unit) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 2.dp,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 68.dp)
+                .padding(horizontal = 6.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = s.back,
+                    tint = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+            Image(
+                painter = painterResource(Res.drawable.nera_head),
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(start = 2.dp)
+                    .size(44.dp),
+            )
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text(
+                    "Nera",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Icon(
+                        Icons.Filled.AutoAwesome,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(14.dp),
+                    )
+                    Text(
+                        s.planWithNera,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FreeTierBanner(
+    text: String,
+    canUnlock: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .fillMaxWidth()
+            .widthIn(max = 688.dp)
+            .clickable(enabled = canUnlock, onClick = onClick),
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 48.dp)
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Icon(Icons.Filled.Lock, contentDescription = null, modifier = Modifier.size(18.dp))
+            Text(
+                text,
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.labelLarge,
+            )
+        }
+    }
+}
+
 // Same site as the Terms link on the sign-up screen (GitHub Pages, served from docs/).
 private const val TERMS_URL = "https://tonyaloysius18.github.io/Itinera/terms.html"
 private const val PRIVACY_URL = "https://tonyaloysius18.github.io/Itinera/privacy-policy.html"
 
 @Composable
 private fun Bubble(text: String, fromUser: Boolean, isError: Boolean = false) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = if (fromUser) Arrangement.End else Arrangement.Start) {
+    val bubbleShape = if (fromUser) {
+        RoundedCornerShape(topStart = 22.dp, topEnd = 6.dp, bottomStart = 22.dp, bottomEnd = 22.dp)
+    } else {
+        RoundedCornerShape(topStart = 6.dp, topEnd = 22.dp, bottomStart = 22.dp, bottomEnd = 22.dp)
+    }
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .then(if (isError) Modifier.semantics { liveRegion = LiveRegionMode.Assertive } else Modifier),
+        horizontalArrangement = if (fromUser) Arrangement.End else Arrangement.Start,
+        verticalAlignment = Alignment.Top,
+    ) {
         if (!fromUser) {
             Image(
                 painter = painterResource(Res.drawable.nera_head),
                 contentDescription = null,
-                modifier = Modifier.padding(end = 8.dp, top = 2.dp).size(32.dp),
+                modifier = Modifier
+                    .padding(end = 8.dp)
+                    .size(32.dp),
             )
         }
         Surface(
-            shape = RoundedCornerShape(18.dp),
+            shape = bubbleShape,
             color = when {
                 fromUser -> MaterialTheme.colorScheme.primary
                 isError -> MaterialTheme.colorScheme.errorContainer
-                else -> MaterialTheme.colorScheme.surfaceVariant
+                else -> MaterialTheme.colorScheme.surface
             },
-            modifier = Modifier.widthIn(max = if (fromUser) 320.dp else 280.dp),
+            border = if (!fromUser && !isError) androidx.compose.foundation.BorderStroke(
+                1.dp,
+                MaterialTheme.colorScheme.outlineVariant,
+            ) else null,
+            shadowElevation = if (!fromUser && !isError) 1.dp else 0.dp,
+            modifier = Modifier.widthIn(max = if (fromUser) 328.dp else 560.dp),
         ) {
             Text(
                 text,
-                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
                 style = MaterialTheme.typography.bodyLarge,
                 color = when {
                     fromUser -> MaterialTheme.colorScheme.onPrimary
                     isError -> MaterialTheme.colorScheme.onErrorContainer
-                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                    else -> MaterialTheme.colorScheme.onSurface
                 },
             )
         }
@@ -440,12 +607,18 @@ private fun Bubble(text: String, fromUser: Boolean, isError: Boolean = false) {
 @Composable
 private fun QuickReplies(options: List<String>, onPick: (String) -> Unit) {
     FlowRow(
-        modifier = Modifier.padding(start = 40.dp),   // line up under the message text, past the avatar
+        modifier = Modifier.padding(start = 44.dp),   // line up under the message text, past the avatar
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         options.forEach { option ->
-            SuggestionChip(onClick = { onPick(option) }, label = { Text(option) })
+            OutlinedButton(
+                onClick = { onPick(option) },
+                modifier = Modifier.heightIn(min = 48.dp),
+                shape = RoundedCornerShape(16.dp),
+            ) {
+                Text(option)
+            }
         }
     }
 }
@@ -490,21 +663,60 @@ private fun DraftCard(
     onChange: () -> Unit,
 ) {
     Surface(
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(24.dp),
         color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 2.dp,
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        shadowElevation = 2.dp,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Column {
-                Text(itinerary.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
-                val dates = itinerary.days.mapNotNull { runCatching { LocalDate.parse(it.date) }.getOrNull() }
-                val range = if (dates.isNotEmpty()) "${dates.first().label()} – ${dates.last().label()} · " else ""
-                Text(
-                    "$range${s.neraDaysDraft.replace("%s", itinerary.days.size.toString())}",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                )
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        Icons.Filled.AutoAwesome,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.size(22.dp),
+                    )
+                }
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Text(
+                        itinerary.title,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    val dates = itinerary.days.mapNotNull { runCatching { LocalDate.parse(it.date) }.getOrNull() }
+                    val range = if (dates.isNotEmpty()) "${dates.first().label()} – ${dates.last().label()} · " else ""
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        Icon(
+                            Icons.Filled.CalendarMonth,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp),
+                        )
+                        Text(
+                            "$range${s.neraDaysDraft.replace("%s", itinerary.days.size.toString())}",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
             }
 
             itinerary.days.forEachIndexed { n, day ->
@@ -515,68 +727,94 @@ private fun DraftCard(
                 val legsToday = itinerary.legs.filter { it.date == day.date }
                 val entries = (legsToday.map { DraftEntry.Leg(it) } + day.activities.map { DraftEntry.Act(it) })
                     .sortedBy { it.sortTime }
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(
-                        buildString {
-                            append(s.neraDay.replace("%s", (n + 1).toString()))
-                            if (date != null) append(" · ${date.label()}")
-                            if (day.theme.isNotBlank()) append(" · ${day.theme}")
-                        },
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                    entries.forEach { entry ->
-                        if (entry is DraftEntry.Leg) {
-                            val l = entry.leg
-                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Top) {
-                                Text(
-                                    l.time.ifBlank { "—" },
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                    modifier = Modifier.widthIn(min = 44.dp),
-                                )
-                                Icon(
-                                    transportIcon(transportTypeOf(l.transport)),
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(20.dp).padding(top = 2.dp),
-                                )
-                                Text(
-                                    "${l.fromCity} → ${l.toCity}",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Medium,
-                                )
-                            }
-                            return@forEach
-                        }
-                        val a = (entry as DraftEntry.Act).activity
-                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            Text(
-                                a.time.ifBlank { "—" },
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                modifier = Modifier.widthIn(min = 44.dp),
-                            )
-                            Column {
-                                Text(a.title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
-                                ratingLine(a, s)?.let {
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    shape = RoundedCornerShape(18.dp),
+                ) {
+                    Column(
+                        modifier = Modifier.padding(14.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Text(
+                            buildString {
+                                append(s.neraDay.replace("%s", (n + 1).toString()))
+                                if (date != null) append(" · ${date.label()}")
+                                if (day.theme.isNotBlank()) append(" · ${day.theme}")
+                            },
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                        entries.forEach { entry ->
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                verticalAlignment = Alignment.Top,
+                            ) {
+                                Surface(
+                                    shape = RoundedCornerShape(10.dp),
+                                    color = MaterialTheme.colorScheme.surface,
+                                    border = androidx.compose.foundation.BorderStroke(
+                                        1.dp,
+                                        MaterialTheme.colorScheme.outlineVariant,
+                                    ),
+                                ) {
                                     Text(
-                                        it,
+                                        entry.sortTime.takeUnless { it == "99:99" } ?: "—",
+                                        modifier = Modifier
+                                            .widthIn(min = 48.dp)
+                                            .padding(horizontal = 8.dp, vertical = 6.dp),
                                         style = MaterialTheme.typography.labelMedium,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = MaterialTheme.colorScheme.primary,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
                                 }
-                                if (a.location.isNotBlank()) {
+                                if (entry is DraftEntry.Leg) {
+                                    val l = entry.leg
+                                    Icon(
+                                        transportIcon(transportTypeOf(l.transport)),
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(top = 5.dp).size(20.dp),
+                                    )
                                     Text(
-                                        a.location,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                        "${l.fromCity} → ${l.toCity}",
+                                        modifier = Modifier.weight(1f).padding(top = 5.dp),
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = FontWeight.Medium,
                                     )
-                                }
-                                if (a.note.isNotBlank()) {
-                                    Text(a.note, style = MaterialTheme.typography.bodySmall)
+                                } else {
+                                    val a = (entry as DraftEntry.Act).activity
+                                    Column(
+                                        modifier = Modifier.weight(1f).padding(top = 4.dp),
+                                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                                    ) {
+                                        Text(
+                                            a.title,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = FontWeight.Medium,
+                                        )
+                                        ratingLine(a, s)?.let {
+                                            Text(
+                                                it,
+                                                style = MaterialTheme.typography.labelMedium,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = MaterialTheme.colorScheme.primary,
+                                            )
+                                        }
+                                        if (a.location.isNotBlank()) {
+                                            Text(
+                                                a.location,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            )
+                                        }
+                                        if (a.note.isNotBlank()) {
+                                            Text(
+                                                a.note,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurface,
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -585,19 +823,35 @@ private fun DraftCard(
             }
 
             if (isLatest) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    OutlinedButton(onClick = onChange, enabled = actionsEnabled, modifier = Modifier.weight(1f)) {
-                        Text(s.neraMakeChanges)
-                    }
-                    Button(onClick = onApprove, enabled = actionsEnabled, modifier = Modifier.weight(1f)) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = onApprove,
+                        enabled = actionsEnabled,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+                        shape = RoundedCornerShape(16.dp),
+                    ) {
+                        Icon(
+                            Icons.Filled.CheckCircle,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                        )
+                        Spacer(Modifier.width(8.dp))
                         Text(s.neraApprove)
+                    }
+                    OutlinedButton(
+                        onClick = onChange,
+                        enabled = actionsEnabled,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+                        shape = RoundedCornerShape(16.dp),
+                    ) {
+                        Text(s.neraMakeChanges)
                     }
                 }
             } else {
                 Text(
                     s.neraSuperseded,
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }

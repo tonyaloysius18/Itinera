@@ -81,6 +81,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -821,10 +822,11 @@ fun TripDetailScreen(
                                 }
                             }
                         }
-                        // Souvenir appears at the END of the itinerary, after the last leg,
-                        // once every leg is checked. It scrolls; the buttons are pinned below.
-                        androidx.compose.animation.AnimatedVisibility(
-                            visible = allComplete,
+                        // Souvenir appears at the END of the itinerary once legs or places are added.
+                        // It remains visible but disabled until all legs are checked as completed.
+                        val hasContent = trip.legs.isNotEmpty() || activities.isNotEmpty()
+                        AnimatedVisibility(
+                            visible = hasContent,
                             enter = fadeIn() + slideInVertically { it / 2 },
                             exit = fadeOut(),
                         ) {
@@ -832,25 +834,37 @@ fun TripDetailScreen(
                                 Modifier.fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
-                                Spacer(Modifier.height(20.dp))
-                                Box(
-                                    Modifier
-                                        .size(64.dp)
-                                        .clip(CircleShape)
-                                        .background(Color.Gray.copy(alpha = 0.18f))
-                                        .clickable { showPostcard = true },
-                                    contentAlignment = Alignment.Center,
+                                Spacer(Modifier.height(16.dp))
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier
+                                        .alpha(if (allComplete) 1f else 0.45f)
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .clickable(enabled = allComplete) { showPostcard = true }
+                                        .padding(12.dp),
                                 ) {
-                                    Text("💌", fontSize = 30.sp)
+                                    Box(
+                                        Modifier
+                                            .size(64.dp)
+                                            .clip(CircleShape)
+                                            .background(
+                                                if (allComplete) MaterialTheme.colorScheme.primaryContainer
+                                                else Color.Gray.copy(alpha = 0.18f)
+                                            ),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Text("💌", fontSize = 30.sp)
+                                    }
+                                    Spacer(Modifier.height(6.dp))
+                                    Text(
+                                        s.souvenir,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontFamily = souvenirFont,
+                                        fontStyle = FontStyle.Italic,
+                                        color = if (allComplete) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
                                 }
-                                Spacer(Modifier.height(6.dp))
-                                Text(
-                                    s.souvenir,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontFamily = souvenirFont,
-                                    fontStyle = FontStyle.Italic,
-                                )
                             }
                         }
 

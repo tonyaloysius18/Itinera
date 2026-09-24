@@ -90,6 +90,7 @@ import com.itinera.app.ui.components.CardShape
 import com.itinera.app.ui.components.PlaneLoader
 import androidx.compose.ui.text.style.TextOverflow
 import com.itinera.app.ui.components.NeraMascotButton
+import com.itinera.app.ui.components.BubblePosition
 import com.itinera.app.ui.components.TopBar
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -178,7 +179,15 @@ fun TripsHomeScreen(
         Column(Modifier.fillMaxSize()) {
             TopBar(
                 s.myTrips.toTitleCase(),
-                trailing = { NeraMascotButton(label = s.planWithNera, onClick = onPlanWithNera) },
+                trailing = {
+                    NeraMascotButton(
+                        label = s.planWithNera,
+                        onClick = onPlanWithNera,
+                        modifier = Modifier.padding(end = 16.dp),
+                        mascotSize = 72.dp,
+                        bubblePosition = BubblePosition.LEFT,
+                    )
+                },
             )
             if (searchActive) {
                 Row(
