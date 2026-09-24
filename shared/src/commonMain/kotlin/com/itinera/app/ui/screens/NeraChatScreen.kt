@@ -1,5 +1,9 @@
 package com.itinera.app.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,6 +29,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -48,6 +53,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,6 +67,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.itinera.app.data.NeraActivity
 import com.itinera.app.data.NeraChatService
 import com.itinera.app.data.StoredNeraMessage
@@ -78,6 +85,7 @@ import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.i18n.Strings
 import com.itinera.app.model.TransportType
 import com.itinera.app.model.label
+import com.itinera.app.prefersReducedMotion
 import com.itinera.app.resources.Res
 import com.itinera.app.resources.nera_head
 import com.itinera.app.ui.BackHandler
@@ -312,51 +320,57 @@ fun NeraChatScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            itemsIndexed(items) { index, item ->
+            itemsIndexed(items, key = { _, item -> item.id }) { index, item ->
                 when (item) {
                     is NeraItem.FromUser -> Bubble(item.text, fromUser = true)
                     is NeraItem.FromNera -> {
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Bubble(item.text, fromUser = false)
-                            if (index == items.lastIndex && !sending && item.quickReplies.isNotEmpty()) {
-                                QuickReplies(item.quickReplies, onPick = ::send)
+                        AnimatedNeraResponse(item.id) {
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Bubble(item.text, fromUser = false)
+                                if (index == items.lastIndex && !sending && item.quickReplies.isNotEmpty()) {
+                                    QuickReplies(item.quickReplies, onPick = ::send)
+                                }
                             }
                         }
                     }
                     is NeraItem.Draft -> {
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            if (item.message.isNotBlank()) Bubble(item.message, fromUser = false)
-                            DraftCard(
-                                itinerary = item.itinerary,
-                                s = s,
-                                isLatest = index == latestDraftIndex,
-                                actionsEnabled = !sending && !approving && !item.approved,
-                                onApprove = {
-                                    // Free trips used up: approving a draft needs the one-time unlock (when it can be bought here).
-                                    if (freeTier?.status == "limit" && purchases.isAvailable) openPaywall()
-                                    else if (!approving) {
-                                        approving = true
-                                        val idx = items.indexOfFirst { it.id == item.id }
-                                        if (idx >= 0) items[idx] = item.copy(approved = true)
-                                        val tidBefore = boundTripId
-                                        // A trip that already existed had its turns saved as they happened; only a
-                                        // brand-new one needs its whole (so-far unsaved) chat written in one go.
-                                        val pending = if (tidBefore == null) items.mapIndexedNotNull { i, it -> it.toStored(i) } else emptyList()
-                                        boundTripId = onApprove(item.itinerary, pending)
-                                        if (tidBefore != null) scope.launch { runCatching { chatService.markApproved(tidBefore, item.id) } }
-                                        approving = false
-                                    }
-                                },
-                                onChange = {
-                                    items.add(NeraItem.FromNera(
-                                        s.neraChangePrompt,
-                                        listOf(s.neraChange1, s.neraChange2, s.neraChange3, s.neraChange4),
-                                    ))
-                                },
-                            )
+                        AnimatedNeraResponse(item.id) {
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                if (item.message.isNotBlank()) Bubble(item.message, fromUser = false)
+                                DraftCard(
+                                    itinerary = item.itinerary,
+                                    s = s,
+                                    isLatest = index == latestDraftIndex,
+                                    actionsEnabled = !sending && !approving && !item.approved,
+                                    onApprove = {
+                                        // Free trips used up: approving a draft needs the one-time unlock (when it can be bought here).
+                                        if (freeTier?.status == "limit" && purchases.isAvailable) openPaywall()
+                                        else if (!approving) {
+                                            approving = true
+                                            val idx = items.indexOfFirst { it.id == item.id }
+                                            if (idx >= 0) items[idx] = item.copy(approved = true)
+                                            val tidBefore = boundTripId
+                                            // A trip that already existed had its turns saved as they happened; only a
+                                            // brand-new one needs its whole (so-far unsaved) chat written in one go.
+                                            val pending = if (tidBefore == null) items.mapIndexedNotNull { i, it -> it.toStored(i) } else emptyList()
+                                            boundTripId = onApprove(item.itinerary, pending)
+                                            if (tidBefore != null) scope.launch { runCatching { chatService.markApproved(tidBefore, item.id) } }
+                                            approving = false
+                                        }
+                                    },
+                                    onChange = {
+                                        items.add(NeraItem.FromNera(
+                                            s.neraChangePrompt,
+                                            listOf(s.neraChange1, s.neraChange2, s.neraChange3, s.neraChange4),
+                                        ))
+                                    },
+                                )
+                            }
                         }
                     }
-                    is NeraItem.Problem -> Bubble(item.text, fromUser = false, isError = true)
+                    is NeraItem.Problem -> AnimatedNeraResponse(item.id) {
+                        Bubble(item.text, fromUser = false, isError = true)
+                    }
                 }
             }
             if (sending || historyLoading) {
@@ -365,7 +379,7 @@ fun NeraChatScreen(
                         modifier = Modifier
                             .padding(end = 8.dp)
                             .semantics { liveRegion = LiveRegionMode.Polite },
-                        size = 42.dp,
+                        size = 50.dp,
                     )
                 }
             }
@@ -393,7 +407,13 @@ fun NeraChatScreen(
                     placeholder = {
                         Text(
                             s.neraInputHint,
-                            maxLines = 2,
+                            autoSize = TextAutoSize.StepBased(
+                                minFontSize = 12.sp,
+                                maxFontSize = 16.sp,
+                                stepSize = 0.5.sp,
+                            ),
+                            maxLines = 1,
+                            softWrap = false,
                             overflow = TextOverflow.Ellipsis,
                         )
                     },
@@ -446,6 +466,30 @@ fun NeraChatScreen(
             onClose = { showPaywall = false },
         )
     }
+}
+}
+
+@Composable
+private fun AnimatedNeraResponse(
+    itemId: String,
+    content: @Composable () -> Unit,
+) {
+    val reduceMotion = remember { prefersReducedMotion() }
+    var visible by rememberSaveable(itemId) { mutableStateOf(false) }
+    LaunchedEffect(itemId) { visible = true }
+
+    AnimatedVisibility(
+        visible = visible,
+        enter = if (reduceMotion) {
+            fadeIn(animationSpec = tween(0))
+        } else {
+            fadeIn(animationSpec = tween(240)) +
+                slideInVertically(animationSpec = tween(280)) { fullHeight ->
+                    (fullHeight / 10).coerceAtMost(40)
+                }
+        },
+    ) {
+        content()
     }
 }
 

@@ -85,7 +85,15 @@ const FINAL_TOOLS = [
       type: "object",
       properties: {
         message: { type: "string", description: "One or two sentences introducing the draft or describing what changed." },
-        title: { type: "string", description: "Trip title, e.g. 'London in 5 days'." },
+        title: {
+          type: "string",
+          description:
+            "A short, evocative trip title for the trip card — never a generic 'City in N days' format. " +
+            "Think travel-magazine or postcard style: 'Summer in London', 'London Calling', 'Roman Holiday', " +
+            "'Tokyo Nights', 'Under the Tuscan Sun'. Nod to the season, a defining theme, or a bit of wordplay " +
+            "on the destination when a good one exists; otherwise keep it simple and warm. Two to four words, " +
+            "no day counts, no punctuation beyond the words themselves.",
+        },
         destination: { type: "string" },
         countries: {
           type: "array",

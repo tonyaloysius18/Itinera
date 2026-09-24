@@ -19,6 +19,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
@@ -230,21 +231,67 @@ private fun NeraBubble(
     }
 }
 
-/** Nera "thinking" while a reply is on its way (chat screen). Bobs gently unless reduce motion is on. */
+/** Nera "thinking" while a reply is on its way (chat screen), with a familiar typing indicator. */
 @Composable
 fun NeraThinking(modifier: Modifier = Modifier, size: Dp = 42.dp) {
     val reduceMotion = remember { prefersReducedMotion() }
-    val bob = if (reduceMotion) 0f else rememberInfiniteTransition(label = "nera-think").animateFloat(
+    val transition = rememberInfiniteTransition(label = "nera-thinking")
+    val bob = if (reduceMotion) 0f else transition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(tween(1100, easing = FastOutSlowInEasing), RepeatMode.Reverse),
         label = "nera-think-y",
     ).value
-    Image(
-        painter = painterResource(Res.drawable.nera_thinking),
-        contentDescription = null,
-        modifier = modifier
-            .size(size)
-            .graphicsLayer { translationY = -bob * 4f * density },
-    )
+    val dotScales = List(3) { index ->
+        if (reduceMotion) 0.72f else transition.animateFloat(
+            initialValue = 0.55f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 360, delayMillis = index * 120),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "nera-dot-$index",
+        ).value
+    }
+
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Image(
+            painter = painterResource(Res.drawable.nera_thinking),
+            contentDescription = null,
+            modifier = Modifier
+                .size(size)
+                .graphicsLayer { translationY = -bob * 4f * density },
+        )
+        Surface(
+            shape = RoundedCornerShape(18.dp),
+            color = MaterialTheme.colorScheme.surface,
+            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+            shadowElevation = 1.dp,
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                val dotColor = MaterialTheme.colorScheme.primary
+                dotScales.forEach { scale ->
+                    Canvas(
+                        Modifier
+                            .size(7.dp)
+                            .graphicsLayer {
+                                scaleX = scale
+                                scaleY = scale
+                                alpha = scale
+                            }
+                    ) {
+                        drawCircle(color = dotColor)
+                    }
+                }
+            }
+        }
+    }
 }
