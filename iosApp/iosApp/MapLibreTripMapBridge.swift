@@ -91,7 +91,7 @@ private final class MapLibreTripMapView: UIView, MLNMapViewDelegate {
         _ mapView: MLNMapView,
         strokeColorForShapeAnnotation annotation: MLNShape
     ) -> UIColor {
-        UIColor(red: 45 / 255, green: 127 / 255, blue: 249 / 255, alpha: 1)
+        UIColor(red: 78 / 255, green: 156 / 255, blue: 232 / 255, alpha: 1) // theme blue #4E9CE8
     }
 
     func mapView(

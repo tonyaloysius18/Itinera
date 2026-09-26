@@ -364,6 +364,19 @@ class TripRepository {
         }
     }
 
+    /**
+     * Retries the cover photo for trips of mine that have none (e.g. the search found nothing when the trip was
+     * created). At most [limit] per call so a launch never burns through Unsplash's hourly quota.
+     */
+    suspend fun backfillMissingTripImages(limit: Int = 3) {
+        val uid = authService.currentUid ?: return
+        val missing = trips.filter { it.imageUrl.isNullOrBlank() && it.ownerId == uid && it.title.isNotBlank() }.take(limit)
+        for (trip in missing) {
+            val url = unsplashApi.fetchImage(imageQueryForTrip(trip)) ?: continue
+            updateTripImage(trip.id, url)
+        }
+    }
+
     fun updateTrip(id: String, title: String) {
         val i = trips.indexOfFirst { it.id == id }
         if (i >= 0) {

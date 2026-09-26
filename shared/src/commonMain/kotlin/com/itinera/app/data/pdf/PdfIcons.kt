@@ -90,19 +90,19 @@ internal fun PdfCanvas.icon(kind: PdfIcon, cx: Float, cy: Float, size: Float, co
     restore()
 }
 
-/** Shared palette, ARGB. Brand ramp comes from the app's blue palette. */
+/** Shared palette, ARGB. Brand ramp comes from the app's indigo-to-blue palette. */
 internal object Pdf {
-    val B1 = argb(0xA3DAF6); val B2 = argb(0x7AB4DB); val B3 = argb(0x5291C0); val B4 = argb(0x2B6EA8); val B5 = argb(0x004B92)
-    val Navy = argb(0x06264A)
+    val B1 = argb(0xA9CCF6); val B2 = argb(0x4E9CE8); val B3 = argb(0x6E73D0); val B4 = argb(0x4D52B4); val B5 = argb(0x3A3E93)
+    val Navy = argb(0x14174A)
     val Teal = argb(0x6FBF9F)
     val TealDeep = argb(0x2F8F6B)
     val TealTint = argb(0xE4F4EC)
-    val Ink = argb(0x0D1620)
-    val Muted = argb(0x5B6B7B)
-    val Faint = argb(0x8A98A6)
-    val Line = argb(0xDCE6EE)
-    val Tint = argb(0xF7FAFC)
-    val Tint2 = argb(0xEAF3FA)
+    val Ink = argb(0x0E1024)
+    val Muted = argb(0x5B5F7B)
+    val Faint = argb(0x8A8EAC)
+    val Line = argb(0xDDE0EE)
+    val Tint = argb(0xF7F8FC)
+    val Tint2 = argb(0xEBEDF8)
     val White = argb(0xFFFFFF)
-    val Shadow = argb(0x0B3568)
+    val Shadow = argb(0x1C2070)
 }

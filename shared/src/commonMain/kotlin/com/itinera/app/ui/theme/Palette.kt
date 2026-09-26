@@ -13,54 +13,63 @@ import androidx.compose.ui.graphics.Color
  */
 
 // ---------------------------------------------------------------------------
-// Brand ramp — the source palette, light end to dark end.
+// Brand ramp — indigo/blue palette (#4D52B4, #4E9CE8), light end to dark end.
 // ---------------------------------------------------------------------------
 
-internal val Brand100 = Color(0xFFA3DAF6)
-internal val Brand200 = Color(0xFF7AB4DB)
-internal val Brand300 = Color(0xFF5291C0)
-internal val Brand400 = Color(0xFF2B6EA8)
-internal val Brand500 = Color(0xFF004B92)
+internal val Brand100 = Color(0xFFA9CCF6)
+internal val Brand200 = Color(0xFF4E9CE8)
+internal val Brand300 = Color(0xFF6E73D0)
+internal val Brand400 = Color(0xFF4D52B4)
+internal val Brand500 = Color(0xFF3A3E93)
+
+// Teal accent (tertiary slot). Light mode darkens the palette's #70D6C5 so white text
+// clears 4.5:1; dark mode uses it as-is.
+internal val TealLight = Color(0xFF0E7C72)
+internal val TealLightContainer = Color(0xFFCDF2EA)
+internal val TealLightOnContainer = Color(0xFF00332D)
+internal val TealDark = Color(0xFF70D6C5)
+internal val TealDarkOn = Color(0xFF00332D)
+internal val TealDarkContainer = Color(0xFF0E4A43)
 
 // Ramp extensions. The source palette has no dark end, so dark mode needs these:
 // tints above Brand100 for containers, and shades below Brand500 for text-on-fill.
-internal val Brand050 = Color(0xFFD3E9F9)
-internal val Brand600 = Color(0xFF1B4571)
-internal val Brand700 = Color(0xFF0F3557)
-internal val Brand800 = Color(0xFF00325F)
-internal val Brand900 = Color(0xFF00243F)
-internal val BrandInk = Color(0xFF052236)
+internal val Brand050 = Color(0xFFE3E7FA)
+internal val Brand600 = Color(0xFF1B4677)
+internal val Brand700 = Color(0xFF143559)
+internal val Brand800 = Color(0xFF191C4A)
+internal val Brand900 = Color(0xFF101336)
+internal val BrandInk = Color(0xFF0B0D26)
 
 // ---------------------------------------------------------------------------
-// Neutrals — blue-tinted, so they sit under the brand ramp without clashing.
+// Neutrals — indigo-tinted, so they sit under the brand ramp without clashing.
 // ---------------------------------------------------------------------------
 
-internal val NeutralLightBackground = Color(0xFFF7FAFC)
+internal val NeutralLightBackground = Color(0xFFF7F8FC)
 internal val NeutralLightSurface = Color(0xFFFFFFFF)
-internal val NeutralLightSurfaceVariant = Color(0xFFE8F1F8)
-internal val NeutralLightContainer = Color(0xFFF1F6FA)
-internal val NeutralLightContainerHigh = Color(0xFFE9F1F7)
-internal val NeutralLightContainerHighest = Color(0xFFE2ECF4)
-internal val NeutralLightDim = Color(0xFFDCE6EE)
-internal val NeutralLightOn = Color(0xFF12212E)
-internal val NeutralLightOnVariant = Color(0xFF53687A)
-internal val NeutralLightOutline = Color(0xFF6E8FA8)
-internal val NeutralLightDivider = Color(0xFFDCE7F0)
-internal val NeutralLightInverse = Color(0xFF25313D)
-internal val NeutralLightInverseOn = Color(0xFFEDF3F8)
+internal val NeutralLightSurfaceVariant = Color(0xFFE9EBF7)
+internal val NeutralLightContainer = Color(0xFFF1F2FA)
+internal val NeutralLightContainerHigh = Color(0xFFEAECF6)
+internal val NeutralLightContainerHighest = Color(0xFFE3E6F3)
+internal val NeutralLightDim = Color(0xFFDDE0EE)
+internal val NeutralLightOn = Color(0xFF14162B)
+internal val NeutralLightOnVariant = Color(0xFF575B78)
+internal val NeutralLightOutline = Color(0xFF7377A0)
+internal val NeutralLightDivider = Color(0xFFDEE1F0)
+internal val NeutralLightInverse = Color(0xFF262A45)
+internal val NeutralLightInverseOn = Color(0xFFEDEFFA)
 
-internal val NeutralDarkBackground = Color(0xFF0D1620)
-internal val NeutralDarkSurface = Color(0xFF141F2B)
-internal val NeutralDarkSurfaceVariant = Color(0xFF1E2C3A)
-internal val NeutralDarkContainerLowest = Color(0xFF08101A)
-internal val NeutralDarkContainerLow = Color(0xFF101A25)
-internal val NeutralDarkContainerHigh = Color(0xFF1C2836)
-internal val NeutralDarkContainerHighest = Color(0xFF243241)
-internal val NeutralDarkBright = Color(0xFF2A3847)
-internal val NeutralDarkOn = Color(0xFFE6EFF7)
-internal val NeutralDarkOnVariant = Color(0xFF9DB2C4)
-internal val NeutralDarkOutline = Color(0xFF5A7186)
-internal val NeutralDarkDivider = Color(0xFF263543)
+internal val NeutralDarkBackground = Color(0xFF080808)
+internal val NeutralDarkSurface = Color(0xFF121314)
+internal val NeutralDarkSurfaceVariant = Color(0xFF1D1F21)
+internal val NeutralDarkContainerLowest = Color(0xFF030303)
+internal val NeutralDarkContainerLow = Color(0xFF0D0E0F)
+internal val NeutralDarkContainerHigh = Color(0xFF1A1B1D)
+internal val NeutralDarkContainerHighest = Color(0xFF242629)
+internal val NeutralDarkBright = Color(0xFF2B2D30)
+internal val NeutralDarkOn = Color(0xFFEDEEF0)
+internal val NeutralDarkOnVariant = Color(0xFFA4A8AE)
+internal val NeutralDarkOutline = Color(0xFF6C7077)
+internal val NeutralDarkDivider = Color(0xFF26282B)
 
 // ---------------------------------------------------------------------------
 // Status.
@@ -167,27 +176,28 @@ internal val PaperScrim = Color(0x22000000)
 // only on the chip itself — the page behind it never participates, and one set
 // therefore serves both modes.
 //
-// Six are darkened from their iOS system-palette originals, which put a white
+// Retinted to the indigo/blue/teal theme; warm hues stay only where they carry meaning
+// (alerts, weather, export). Originally six were darkened from their iOS system-palette originals, which put a white
 // glyph on bright yellow, cyan and green at ratios as low as 1.51:1. Each is
 // darkened the minimum needed to clear the 3:1 non-text floor, so the hue reads
 // the same as before.
 // ---------------------------------------------------------------------------
 
-internal val ChipAccount = Color(0xFF007AFF)
-internal val ChipAppearance = Color(0xFF5856D6)
-internal val ChipLanguage = Color(0xFF2CA94C)
-internal val ChipNotifications = Color(0xFFFF3B30)
-internal val ChipWorldClock = Color(0xFF1A9DD9)
+internal val ChipAccount = Color(0xFF4D52B4)
+internal val ChipAppearance = Color(0xFF2F6FBF)
+internal val ChipLanguage = Color(0xFF0F8B7E)
+internal val ChipNotifications = Color(0xFFD9483B)
+internal val ChipWorldClock = Color(0xFF1F7FB8)
 internal val ChipWeather = Color(0xFFB28F00)
-internal val ChipTranslate = Color(0xFF5856D6)
-internal val ChipEmergency = Color(0xFFFF2D55)
-internal val ChipCompass = Color(0xFF2CA0B5)
-internal val ChipArchive = Color(0xFF8E8E93)
-internal val ChipExport = Color(0xFFD67D00)
-internal val ChipBackup = Color(0xFF079CE0)
-internal val ChipHelp = Color(0xFF5856D6)
-internal val ChipFeedback = Color(0xFF2CA94C)
-internal val ChipAbout = Color(0xFF8E8E93)
+internal val ChipTranslate = Color(0xFF3A3E93)
+internal val ChipEmergency = Color(0xFFE0314F)
+internal val ChipCompass = Color(0xFF0E8F8A)
+internal val ChipArchive = Color(0xFF6A6F85)
+internal val ChipExport = Color(0xFFC26A00)
+internal val ChipBackup = Color(0xFF2A7FCB)
+internal val ChipHelp = Color(0xFF5A5FC4)
+internal val ChipFeedback = Color(0xFF12937F)
+internal val ChipAbout = Color(0xFF6A6F85)
 
 // ---------------------------------------------------------------------------
 // Document type accents.
@@ -235,11 +245,11 @@ internal val PassNoticeInk = Color(0xFF664D03)
  * Links on the pass. Fixed like the rest of the card: the theme's primary inverts
  * in dark mode to a pale blue that all but vanishes on white paper (1.51:1).
  */
-internal val PassLink = Color(0xFF2B6EA8)
+internal val PassLink = Color(0xFF4D52B4)
 
 // Expense cards. The light value is sampled from the approved summary-card
 // reference; the dark counterpart keeps the same blue-toned visual hierarchy.
-internal val ExpenseCardLight = Color(0xFFE5EFF6)
+internal val ExpenseCardLight = Color(0xFFE6E9F8)
 internal val ExpenseCardDark = NeutralDarkSurfaceVariant
 
 // ---------------------------------------------------------------------------
@@ -257,18 +267,18 @@ internal val ExpenseCardDark = NeutralDarkSurfaceVariant
 // Light mode uses the theme's white surface rather than carrying the brand-blue tint.
 // Its high opacity keeps the floating bar distinct from cards scrolling beneath it.
 internal val NavBarLight = Color(0xF5FFFFFF)
-internal val NavBarDark = Color(0xCC1F3049)
-internal val NavPillLight = Color(0xF5F7FBFF)
-internal val NavPillDark = Color(0xF22C3E56)
-internal val NavBorderLight = Color(0x2212212E)
-internal val NavBorderDark = Color(0x2EE6EFF7)
+internal val NavBarDark = Color(0xCC1B1C1E)
+internal val NavPillLight = Color(0xF5F6F8FF)
+internal val NavPillDark = Color(0xF2272829)
+internal val NavBorderLight = Color(0x2214162B)
+internal val NavBorderDark = Color(0x2EEDEEF0)
 
 /** Scrim behind controls floating over photography, where the photo is the background. */
 internal val OverlayControlScrim = Color(0xFF333333)
 
 /** On-container tints for dark mode, brighter than [Brand100] so they read as text. */
-internal val Brand050Bright = Color(0xFFCDE7FA)
-internal val Brand075Bright = Color(0xFFC5E2F5)
+internal val Brand050Bright = Color(0xFFD4E7FB)
+internal val Brand075Bright = Color(0xFFC9E1F8)
 
 // ---------------------------------------------------------------------------
 // Assorted accents.

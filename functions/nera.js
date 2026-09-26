@@ -252,7 +252,7 @@ function shapeReply(apiResponse) {
   }
   return {
     type: "say",
-    message: str(block.input?.message, 2000),
+    message: str(block.input?.message, 2000),   // may be "" when the model calls say without text; runAgent retries that
     quickReplies: Array.isArray(block.input?.quick_replies)
       ? block.input.quick_replies.map((q) => str(q, 28)).filter(Boolean).slice(0, 5)
       : [],
@@ -275,6 +275,56 @@ function cleanMessages(messages) {
   return out;
 }
 
+const MONTHS = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+const MONTH_RE = "(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)";
+const DAY_FIRST = new RegExp(`\\b(\\d{1,2})(?:st|nd|rd|th)?\\s+(?:of\\s+)?${MONTH_RE}\\b(?:,?\\s+(20\\d{2}))?`, "gi");
+const MONTH_FIRST = new RegExp(`\\b${MONTH_RE}\\s+(\\d{1,2})(?:st|nd|rd|th)?\\b(?:,?\\s+(20\\d{2}))?`, "gi");
+const WEEKDAY_RE = /\b(sun|mon|tues?|wed(?:nes)?|thu(?:rs?)?|fri|sat(?:ur)?)(?:day)?\b/gi;
+
+/** Finds "<weekday> ... <date>" pairs in text whose weekday is wrong for that date. Only English; the prompt covers the rest. */
+function weekdayMismatches(text, today) {
+  const found = [];
+  const t0 = new Date(today + "T00:00:00Z");
+  const check = (index, len, day, monthWord, yearStr) => {
+    const month = MONTHS.findIndex((m) => m.startsWith(monthWord.toLowerCase().slice(0, 3)));
+    if (month < 0 || day < 1 || day > 31) return;
+    // A weekday named just before or just after the date ("Saturday 2nd October", "2 October (Saturday)").
+    const near = text.slice(Math.max(0, index - 20), index) + " | " + text.slice(index + len, index + len + 15);
+    const [before, after] = near.split(" | ");
+    const wd = [...before.matchAll(WEEKDAY_RE)].pop() || [...after.matchAll(WEEKDAY_RE)][0];
+    if (!wd) return;
+    const said = WEEKDAYS.findIndex((w) => w.toLowerCase().startsWith(wd[1].toLowerCase().slice(0, 3)));
+    let year = yearStr ? Number(yearStr) : t0.getUTCFullYear();
+    let date = new Date(Date.UTC(year, month, day));
+    if (!yearStr && date < t0) date = new Date(Date.UTC(year + 1, month, day));
+    if (date.getUTCMonth() !== month) return;   // e.g. 31 June
+    if (date.getUTCDay() !== said) {
+      found.push({ said: WEEKDAYS[said], actual: WEEKDAYS[date.getUTCDay()], label: `${day} ${MONTHS[month][0].toUpperCase()}${MONTHS[month].slice(1)} ${date.getUTCFullYear()}`, date });
+    }
+  };
+  for (const m of text.matchAll(DAY_FIRST)) check(m.index, m[0].length, Number(m[1]), m[2], m[3]);
+  for (const m of text.matchAll(MONTH_FIRST)) check(m.index, m[0].length, Number(m[2]), m[1], m[3]);
+  return found;
+}
+
+/**
+ * The model kept agreeing with a wrong weekday from the traveller ("Saturday 2nd October" when it is a Friday), so
+ * the check is done here in code: a note is appended to the traveller's latest message when weekday and date clash.
+ */
+function withWeekdayCheck(messages, today) {
+  const out = messages.map((m) => ({ ...m }));
+  const last = out[out.length - 1];
+  if (!last || last.role !== "user" || typeof last.content !== "string") return out;
+  const seen = new Set();
+  const notes = weekdayMismatches(last.content, today)
+    .filter((x) => !seen.has(x.label) && seen.add(x.label))
+    .map((x) => `${x.label} is a ${x.actual}, not a ${x.said}`);
+  if (notes.length) {
+    last.content += `\n\n[App notice, not written by the traveller: the calendar shows that ${notes.join("; ")}. Do not agree with the wrong weekday. Say so plainly in your reply, and ask which they meant: the ${notes.length === 1 ? "date" : "dates"} as written, or the ${notes.length === 1 ? "weekday" : "weekdays"} they named.]`;
+  }
+  return out;
+}
+
 const NO_PLACES_NOTE =
   "The search_places tool is NOT available right now. Recommend only well-known, established places you are " +
   "confident exist, never quote ratings, prices or coordinates, and tell the traveller to verify opening hours " +
@@ -293,6 +343,25 @@ function monthStartCalendar(today) {
   return out.join(", ");
 }
 
+/**
+ * Every date for the next 14 weeks with its weekday, one line per Mon-Sun week. The month-start calendar alone made the
+ * model count forward from the 1st and get it wrong (it confirmed "Saturday 4 October 2026", which is a Sunday).
+ */
+function weekCalendar(today) {
+  const d = new Date(today + "T00:00:00Z");
+  const monday = new Date(d.getTime() - ((d.getUTCDay() + 6) % 7) * 86400000);
+  const lines = [];
+  for (let w = 0; w < 14; w++) {
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(monday.getTime() + (w * 7 + i) * 86400000);
+      days.push(`${WEEKDAYS[day.getUTCDay()].slice(0, 3)} ${day.toISOString().slice(0, 10)}`);
+    }
+    lines.push(days.join(", "));
+  }
+  return lines.join("\n");
+}
+
 const LIMIT_NOTE = `IMPORTANT, this overrides all the planning instructions above: the traveller has used all of their free trips, so you cannot draft or change itineraries for them now. Do NOT ask planning questions (dates, days, budget, who is travelling). If they ask to plan a trip or change a draft, reply right away, in their language, in one or two friendly sentences: planning more trips needs Nera Plus, a one-time purchase (not a subscription), and they can unlock it by tapping the banner above the chat. You may still answer travel, weather, food and place questions, and help with trips they have already created.`;
 
 // Repeated at the end of the traveller's latest message, where the model pays most attention (a long system prompt
@@ -309,7 +378,7 @@ function withLimitReminder(messages) {
 
 function buildSystem(today, currentItinerary, { places = true, limited = false, homeCity = "" } = {}) {
   const weekday = WEEKDAYS[new Date(today + "T00:00:00Z").getUTCDay()];
-  let system = `${SYSTEM_PROMPT}\n\nToday's date is ${today} (${weekday}).\nCalendar (first day of each month): ${monthStartCalendar(today)}.`;
+  let system = `${SYSTEM_PROMPT}\n\nToday's date is ${today} (${weekday}).\nCalendar (first day of each month): ${monthStartCalendar(today)}.\nExact weekday of every date in the next 14 weeks, one Mon-Sun week per line:\n${weekCalendar(today)}\nNever work a weekday out by counting: look the date up here (or count from the month-start calendar for later dates). If the traveller states a weekday that does not match the date, say so plainly and ask which they meant; never agree with a wrong weekday.`;
   if (homeCity) system += `\n\nThe traveller's home/departure city (from their Itinera profile): ${homeCity}. Use it for travel legs unless they say otherwise; do not ask them for it.`;
   if (!places) system += `\n\n${NO_PLACES_NOTE}`;
   if (limited) system += `\n\n${LIMIT_NOTE}`;
@@ -344,13 +413,23 @@ function buildSystem(today, currentItinerary, { places = true, limited = false, 
 async function runAgent({ callModel, runTool, messages, dataTools = DATA_TOOLS, finalTools = FINAL_TOOLS, onUsage }) {
   const finalNames = new Set(finalTools.map((t) => t.name));
   const convo = [...messages];
+  let retriedEmpty = false;
   for (let round = 0; ; round++) {
     const lastRound = round >= MAX_TOOL_ROUNDS;
     const response = await callModel({ tools: lastRound ? finalTools : [...dataTools, ...finalTools], messages: convo });
     if (onUsage && response.usage) onUsage(response.usage);
     const uses = (response.content || []).filter((b) => b.type === "tool_use");
     const final = uses.find((b) => finalNames.has(b.name));
-    if (final || lastRound || uses.length === 0) return shapeReply(response);
+    if (final || lastRound || uses.length === 0) {
+      const reply = shapeReply(response);
+      // The model sometimes calls `say` with no text, which the app would show as an empty bubble: try once more,
+      // then fall back to a plain apology rather than ever returning a blank message.
+      if (reply.type === "say" && !reply.message) {
+        if (!retriedEmpty) { retriedEmpty = true; continue; }
+        reply.message = "Sorry, I lost my train of thought. Could you say that again?";
+      }
+      return reply;
+    }
 
     convo.push({ role: "assistant", content: response.content });
     const results = await Promise.all(uses.map(async (u) => ({
@@ -362,4 +441,4 @@ async function runAgent({ callModel, runTool, messages, dataTools = DATA_TOOLS, 
   }
 }
 
-module.exports = { MODEL, FINAL_TOOLS, monthStartCalendar, buildSystem, withLimitReminder, cleanMessages, shapeReply, cleanItinerary, runAgent };
+module.exports = { MODEL, FINAL_TOOLS, monthStartCalendar, buildSystem, withLimitReminder, withWeekdayCheck, weekdayMismatches, cleanMessages, shapeReply, cleanItinerary, runAgent };

@@ -75,6 +75,7 @@ import com.itinera.app.ui.theme.ChipBackup
 import com.itinera.app.ui.theme.ChipHelp
 import com.itinera.app.ui.theme.ChipFeedback
 import com.itinera.app.ui.theme.ChipAbout
+import com.itinera.app.ui.theme.itinera
 
 
 private val ColorAccount = ChipAccount
@@ -147,8 +148,9 @@ fun SettingsScreen(
             Surface(
                 modifier = Modifier.fillMaxWidth().clickable(onClick = onEditProfile),
                 shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surface,
-                tonalElevation = 2.dp,
+                // Use a deliberate container level so the profile card remains
+                // distinct from the page background in both themes.
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
             ) {
                 Row(
                     Modifier.fillMaxWidth().padding(16.dp),
@@ -167,14 +169,14 @@ fun SettingsScreen(
                         Text(
                             profile.email,
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
                     Icon(
                         Icons.Filled.ChevronRight, null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -230,7 +232,7 @@ fun SettingsScreen(
                 Text(
                     appVersion,
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
                     textAlign = TextAlign.Center,
                 )
@@ -249,7 +251,7 @@ private fun SectionLabel(label: String) {
         label.uppercase(),
         style = MaterialTheme.typography.labelSmall,
         fontWeight = FontWeight.SemiBold,
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(start = 6.dp, top = 20.dp, bottom = 7.dp),
     )
 }
@@ -259,8 +261,9 @@ private fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 2.dp,
+        // A visible container level keeps cards legible against both light and
+        // dark page backgrounds without hardcoding a per-screen colour.
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
     ) {
         Column(content = content)
     }
@@ -275,6 +278,7 @@ private fun SettingsRow(
     onClick: () -> Unit,
 ) {
     val onSurface = MaterialTheme.colorScheme.onSurface
+    val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
     Row(
         Modifier
             .fillMaxWidth()
@@ -314,7 +318,7 @@ private fun SettingsRow(
             Text(
                 value,
                 style = MaterialTheme.typography.bodyMedium,
-                color = onSurface.copy(alpha = 0.45f),
+                color = onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -323,7 +327,7 @@ private fun SettingsRow(
         Icon(
             Icons.Filled.ChevronRight,
             contentDescription = null,
-            tint = onSurface.copy(alpha = 0.3f),
+            tint = onSurfaceVariant,
             modifier = Modifier.size(20.dp),
         )
     }
@@ -333,7 +337,7 @@ private fun SettingsRow(
 private fun ThinDivider() {
     HorizontalDivider(
         modifier = Modifier.padding(start = 57.dp),   // ⬅ CHANGED — aligns to the new label x
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+        color = MaterialTheme.itinera.divider,
     )
 }
 

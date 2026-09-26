@@ -24,8 +24,11 @@ private val fillerWords = setOf(
 
 /** Decide the Unsplash search term for a trip. */
 fun imageQueryForTrip(trip: Trip): String {
-    // 1) most specific: last leg's destination
-    val lastDest = trip.legs.lastOrNull()?.toCity?.takeIf { it.isNotBlank() && it != "—" }
+    // 1) most specific: last leg's destination, ignoring legs that head back to the starting city (the return
+    //    journey home must not make the card show the origin instead of where the traveller is going)
+    val home = trip.legs.firstOrNull()?.fromCity?.trim()
+    val lastDest = trip.legs.map { it.toCity.trim() }
+        .lastOrNull { it.isNotBlank() && it != "—" && !it.equals(home, ignoreCase = true) }
     if (lastDest != null) return lastDest
 
     // 2) clean the trip name of filler words

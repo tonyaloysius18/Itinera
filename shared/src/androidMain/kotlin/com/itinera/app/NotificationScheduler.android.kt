@@ -142,7 +142,7 @@ private fun postNotification(context: Context, id: String, title: String, body: 
 
     val builder = androidx.core.app.NotificationCompat.Builder(context, CHANNEL_ID)
         .setSmallIcon(iconRes)
-        .setColor(0xFF85B7EB.toInt())                 // brand blue tint
+        .setColor(0xFF4E9CE8.toInt())                 // theme blue tint
         .setContentTitle(title)
         .setContentText(body)
         .setAutoCancel(true)

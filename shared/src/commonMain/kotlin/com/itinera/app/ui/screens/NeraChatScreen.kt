@@ -89,6 +89,7 @@ import com.itinera.app.prefersReducedMotion
 import com.itinera.app.resources.Res
 import com.itinera.app.resources.nera_head
 import com.itinera.app.ui.BackHandler
+import com.itinera.app.ui.theme.itinera
 import com.itinera.app.ui.components.NeraPaywall
 import com.itinera.app.ui.components.NeraThinking
 import kotlinx.coroutines.delay
@@ -289,7 +290,7 @@ fun NeraChatScreen(
     Box(
         Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceContainerLow),
+            .background(MaterialTheme.colorScheme.background),
     ) {
     Column(Modifier.fillMaxSize().imePadding()) {
         NeraChatHeader(s = s, onBack = onBack)
@@ -388,7 +389,7 @@ fun NeraChatScreen(
         Surface(
             color = MaterialTheme.colorScheme.surface,
             shadowElevation = 10.dp,
-            tonalElevation = 2.dp,
+            tonalElevation = 0.dp,
         ) {
             Row(
                 Modifier
@@ -500,8 +501,13 @@ private fun NeraChatHeader(s: Strings, onBack: () -> Unit) {
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 8.dp),
         shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 2.dp,
+        // Solid, un-tinted fill with a hairline border and soft shadow, so the bar reads as a
+        // distinct card instead of washing into the page behind it.
+        color = if (MaterialTheme.itinera.isDark) MaterialTheme.colorScheme.surfaceContainerHigh
+        else MaterialTheme.colorScheme.surface,
+        tonalElevation = 0.dp,
+        shadowElevation = 4.dp,
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
         Row(
             modifier = Modifier
@@ -549,7 +555,8 @@ private fun NeraChatHeader(s: Strings, onBack: () -> Unit) {
                     Text(
                         s.planWithNera,
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.primary,
                     )
                 }
             }
@@ -660,6 +667,13 @@ private fun QuickReplies(options: List<String>, onPick: (String) -> Unit) {
                 onClick = { onPick(option) },
                 modifier = Modifier.heightIn(min = 48.dp),
                 shape = RoundedCornerShape(16.dp),
+                colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.primary,
+                ),
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
+                ),
             ) {
                 Text(option)
             }

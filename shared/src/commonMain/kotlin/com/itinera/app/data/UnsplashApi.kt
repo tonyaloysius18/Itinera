@@ -29,12 +29,22 @@ class UnsplashApi {
         }
     }
 
-    /** Returns a photo URL for [query], or null if none found / on error. */
+    /**
+     * Returns a photo URL for [query], or null if none found / on error. "landmark" gives the best photos for big
+     * cities, but returns nothing for smaller ones (e.g. Grenoble), so fall back to broader searches.
+     */
     suspend fun fetchImage(query: String): String? {
+        for (term in listOf("$query landmark", "$query city", query)) {
+            search(term)?.let { return it }
+        }
+        return null
+    }
+
+    private suspend fun search(term: String): String? {
         return try {
             val response: UnsplashSearchResponse = client
                 .get("https://api.unsplash.com/search/photos") {
-                    parameter("query", "$query landmark")
+                    parameter("query", term)
                     parameter("per_page", "1")
                     parameter("orientation", "landscape")
                     header("Authorization", "Client-ID ${Secrets.UNSPLASH_ACCESS_KEY}")

@@ -351,6 +351,10 @@ private fun AppContent(
         }
     }
 
+    LaunchedEffect(repository.tripsSyncedOnce) {
+        if (repository.tripsSyncedOnce) repository.backfillMissingTripImages()
+    }
+
     // ===== app-level message pill =====
     var pillMessage by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(pillMessage) {

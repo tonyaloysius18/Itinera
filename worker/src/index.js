@@ -3,7 +3,7 @@
 //   -> { type: "say" | "itinerary", message, quickReplies?, itinerary? }
 // Prompt, tools and response shaping are shared with the Firebase version via ../../functions.
 
-import { FINAL_TOOLS, MODEL, buildSystem, cleanMessages, runAgent, withLimitReminder } from "../../functions/nera.js";
+import { FINAL_TOOLS, MODEL, buildSystem, cleanMessages, runAgent, withLimitReminder, withWeekdayCheck } from "../../functions/nera.js";
 import { DATA_TOOLS, getWeather, searchPlaces } from "../../functions/tools.js";
 import { verifyFirebaseClaims } from "./firebaseAuth.js";
 import { getEntitlement, isFriend, recordTrip } from "./entitlement.js";
@@ -201,7 +201,7 @@ export default {
       const onUsage = (u) => { usage.calls++; usage.input += u.input_tokens || 0; usage.output += u.output_tokens || 0; };
       // Free trips used up: Nera may chat but not draft, so only the "say" tool is offered.
       const finalTools = limited ? FINAL_TOOLS.filter((t) => t.name === "say") : FINAL_TOOLS;
-      const reply = await runAgent({ callModel: (args) => callModel(env, system, args), runTool, messages: limited ? withLimitReminder(messages) : messages, dataTools, finalTools, onUsage });
+      const reply = await runAgent({ callModel: (args) => callModel(env, system, args), runTool, messages: withWeekdayCheck(limited ? withLimitReminder(messages) : messages, today), dataTools, finalTools, onUsage });
       ctx.waitUntil(recordCost(env.DB, today, usage));
       // Tell the app where the user stands (only when enforcing), so it can show "free trips left".
       return json(paywall ? { ...reply, entitlement: entitlementBody(entitlement) } : reply);

@@ -60,10 +60,10 @@ private val LightColors = lightColorScheme(
     secondaryContainer = Brand050,
     onSecondaryContainer = Brand800,
 
-    tertiary = SuccessLight,
+    tertiary = TealLight,
     onTertiary = Color.White,
-    tertiaryContainer = SuccessLightContainer,
-    onTertiaryContainer = SuccessLightOnContainer,
+    tertiaryContainer = TealLightContainer,
+    onTertiaryContainer = TealLightOnContainer,
 
     background = NeutralLightBackground,
     onBackground = NeutralLightOn,
@@ -94,21 +94,21 @@ private val LightColors = lightColorScheme(
 )
 
 private val DarkColors = darkColorScheme(
-    primary = Brand100,
-    onPrimary = Brand900,
+    primary = Brand200,
+    onPrimary = BrandInk,
     primaryContainer = Brand600,
     onPrimaryContainer = Brand050Bright,
     inversePrimary = Brand400,
 
-    secondary = Brand200,
-    onSecondary = BrandInk,
-    secondaryContainer = Brand700,
-    onSecondaryContainer = Brand075Bright,
+    secondary = TealDark,
+    onSecondary = TealDarkOn,
+    secondaryContainer = TealDarkContainer,
+    onSecondaryContainer = TealLightContainer,
 
-    tertiary = SuccessDark,
-    onTertiary = SuccessLightOnContainer,
-    tertiaryContainer = SuccessDarkContainer,
-    onTertiaryContainer = SuccessLightContainer,
+    tertiary = TealDark,
+    onTertiary = TealDarkOn,
+    tertiaryContainer = TealDarkContainer,
+    onTertiaryContainer = TealLightContainer,
 
     background = NeutralDarkBackground,
     onBackground = NeutralDarkOn,
@@ -116,7 +116,7 @@ private val DarkColors = darkColorScheme(
     onSurface = NeutralDarkOn,
     surfaceVariant = NeutralDarkSurfaceVariant,
     onSurfaceVariant = NeutralDarkOnVariant,
-    surfaceTint = Brand100,
+    surfaceTint = NeutralDarkOn,
     inverseSurface = NeutralDarkOn,
     inverseOnSurface = NeutralDarkSurface,
 
@@ -315,7 +315,7 @@ private val DarkItineraColors = ItineraColors(
     navBarSurface = NavBarDark,
     navBarBorder = NavBorderDark,
     navPillSurface = NavPillDark,
-    navIconSelected = Brand100,
+    navIconSelected = Brand200,
     navIconUnselected = NeutralDarkOnVariant,
 )
 
