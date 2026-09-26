@@ -4,7 +4,7 @@
 // Prompt, tools and response shaping are shared with the Firebase version via ../../functions.
 
 import { FINAL_TOOLS, MODEL, buildSystem, cleanMessages, runAgent, withLimitReminder, withWeekdayCheck } from "../../functions/nera.js";
-import { DATA_TOOLS, getWeather, searchPlaces } from "../../functions/tools.js";
+import { DATA_TOOLS, getWeather, searchPlaces, transportOptions } from "../../functions/tools.js";
 import { verifyFirebaseClaims } from "./firebaseAuth.js";
 import { getEntitlement, isFriend, recordTrip } from "./entitlement.js";
 import { applyUpdate, eventToUpdate, fetchSubscriberExpiry, safeEqual } from "./revenuecat.js";
@@ -190,10 +190,12 @@ export default {
     try {
       const places = Boolean(env.GOOGLE_PLACES_API_KEY && env.GOOGLE_PLACES_API_KEY.trim());
       const system = buildSystem(today, body?.currentItinerary, { places, limited, homeCity });
-      const dataTools = places ? DATA_TOOLS : DATA_TOOLS.filter((t) => t.name !== "search_places");
+      // transport_options returns links the app shows as buttons: only offer it to builds that say they can (older builds can't).
+      const dataTools = DATA_TOOLS.filter((t) => (places || t.name !== "search_places") && (body?.supportsLinks === true || t.name !== "transport_options"));
       const cache = placesCache(env.DB);
       const runTool = async (name, input) => {
         if (name === "get_weather") return getWeather(input);
+        if (name === "transport_options") return transportOptions(input);
         if (name === "search_places") return searchPlaces(input, { apiKey: env.GOOGLE_PLACES_API_KEY, cache });
         return { error: `Unknown tool ${name}` };
       };

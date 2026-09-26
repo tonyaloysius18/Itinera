@@ -76,6 +76,7 @@ data class StoredNeraMessage(
     val role: String = "",                  // "user" | "assistant"
     val text: String = "",
     val quickReplies: List<String> = emptyList(),
+    val links: List<NeraLink> = emptyList(),  // booking/comparison links (transport) shown as buttons
     val itinerary: NeraItinerary? = null,    // set when this assistant turn proposed a draft
     val approved: Boolean = false,
     val seq: Int = 0,
@@ -96,12 +97,17 @@ data class NeraStatus(
     val entitlement: NeraEntitlement? = null,
 )
 
+/** A tappable link Nera's reply carries, e.g. a train/bus/flight comparison page for a route. */
+@Serializable
+data class NeraLink(val label: String, val url: String)
+
 /** Nera's answer: either a plain message (type "say") or a draft (type "itinerary"). */
 @Serializable
 data class NeraReply(
     val type: String,
     val message: String = "",
     val quickReplies: List<String> = emptyList(),
+    val links: List<NeraLink> = emptyList(),
     val itinerary: NeraItinerary? = null,
     val entitlement: NeraEntitlement? = null,
 )
@@ -111,6 +117,7 @@ private data class NeraRequest(
     val messages: List<NeraTurn>,
     val currentItinerary: NeraItinerary? = null,
     val homeCity: String? = null,   // the traveller's home city, from their profile; blank/null if not set
+    val supportsLinks: Boolean,     // this build can show a reply's link buttons (no default, so it is always sent)
 )
 
 @Serializable
@@ -196,7 +203,7 @@ class NeraService {
             client.post(Secrets.NERA_ENDPOINT) {
                 header(HttpHeaders.Authorization, "Bearer $token")
                 contentType(ContentType.Application.Json)
-                setBody(json.encodeToString(NeraRequest.serializer(), NeraRequest(messages, currentItinerary, homeCity?.takeIf { it.isNotBlank() })))
+                setBody(json.encodeToString(NeraRequest.serializer(), NeraRequest(messages, currentItinerary, homeCity?.takeIf { it.isNotBlank() }, supportsLinks = true)))
             }
         } catch (e: Exception) {
             throw NeraException(NeraFailure.NETWORK)

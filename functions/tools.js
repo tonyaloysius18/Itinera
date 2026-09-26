@@ -128,6 +128,36 @@ async function searchPlaces({ query, city, max_results }, { apiKey, cache, fetch
   }
 }
 
+const TRANSPORT_MODES = ["train", "bus", "flight"];
+
+/**
+ * transport_options: booking/comparison links for a route. No provider API yet, so nothing is looked up: the links
+ * open the provider's own search for the route, and the model only describes the options from general knowledge
+ * (it gets no prices or times from here). The app shows the returned links as buttons under Nera's reply.
+ */
+function transportOptions({ from, to, date, modes }) {
+  const a = typeof from === "string" ? from.trim().slice(0, 80) : "";
+  const b = typeof to === "string" ? to.trim().slice(0, 80) : "";
+  if (!a || !b) return { error: "from and to are required" };
+  const want = Array.isArray(modes) ? modes.filter((m) => TRANSPORT_MODES.includes(m)) : [];
+  const has = (m) => want.length === 0 || want.includes(m);
+  const slug = (c) => encodeURIComponent(c.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""));
+  const links = [{ label: "Compare all options (Rome2Rio)", url: `https://www.rome2rio.com/map/${encodeURIComponent(a)}/${encodeURIComponent(b)}` }];
+  if (has("train")) links.push({ label: "Trains (Omio)", url: `https://www.omio.com/trains/${slug(a)}/${slug(b)}` });
+  if (has("bus")) links.push({ label: "Buses (Omio)", url: `https://www.omio.com/buses/${slug(a)}/${slug(b)}` });
+  if (has("flight")) {
+    const when = isIso(date) ? ` on ${date}` : "";
+    links.push({ label: "Flights (Google Flights)", url: `https://www.google.com/travel/flights?q=${encodeURIComponent(`Flights from ${a} to ${b}${when}`)}` });
+  }
+  return {
+    linksShownToTraveller: links.map((l) => l.label),
+    links,
+    note: "Booking links are shown to the traveller as buttons under your reply; do NOT write any URL yourself. " +
+      "You have NO live prices, times or availability. Describe options only in general terms (typical modes, rough " +
+      "duration, whether a change is usual) and say these are approximate and to check the linked sites for times and prices.",
+  };
+}
+
 const DATA_TOOLS = [
   {
     name: "get_weather",
@@ -143,6 +173,23 @@ const DATA_TOOLS = [
         end_date: { type: "string", description: "ISO date YYYY-MM-DD. Defaults to a week after start." },
       },
       required: ["city"],
+    },
+  },
+  {
+    name: "transport_options",
+    description:
+      "Get comparison/booking links for travelling between two cities (train, bus, flight). Call it whenever the " +
+      "traveller asks how to get somewhere or which transport to take, and when choosing the transport for a leg. " +
+      "It returns links only, no live prices or times.",
+    input_schema: {
+      type: "object",
+      properties: {
+        from: { type: "string", description: "Departure city, e.g. 'Toulouse'." },
+        to: { type: "string", description: "Arrival city, e.g. 'Grenoble'." },
+        date: { type: "string", description: "ISO date YYYY-MM-DD of travel, if known." },
+        modes: { type: "array", items: { type: "string", enum: TRANSPORT_MODES }, description: "Only these modes; omit for all." },
+      },
+      required: ["from", "to"],
     },
   },
   {
@@ -163,4 +210,4 @@ const DATA_TOOLS = [
   },
 ];
 
-module.exports = { DATA_TOOLS, getWeather, searchPlaces };
+module.exports = { DATA_TOOLS, getWeather, searchPlaces, transportOptions };

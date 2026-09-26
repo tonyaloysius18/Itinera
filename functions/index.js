@@ -2,7 +2,7 @@ const { onRequest } = require("firebase-functions/v2/https");
 const { defineSecret, defineString } = require("firebase-functions/params");
 const admin = require("firebase-admin");
 const { MODEL, buildSystem, cleanMessages, runAgent } = require("./nera");
-const { DATA_TOOLS, getWeather, searchPlaces } = require("./tools");
+const { DATA_TOOLS, getWeather, searchPlaces, transportOptions } = require("./tools");
 
 admin.initializeApp();
 
@@ -38,6 +38,7 @@ const placesCache = {
 
 async function runTool(name, input) {
   if (name === "get_weather") return getWeather(input);
+  if (name === "transport_options") return transportOptions(input);
   if (name === "search_places") return searchPlaces(input, { apiKey: GOOGLE_PLACES_API_KEY.value(), cache: placesCache });
   return { error: `Unknown tool ${name}` };
 }
@@ -87,7 +88,7 @@ exports.nera = onRequest(
       const places = GOOGLE_PLACES_API_KEY.value().trim() !== "";
       const system = buildSystem(today, req.body?.currentItinerary, { places });
       // Without a Places key, don't offer search_places at all so Nera can't call a dead tool.
-      const dataTools = places ? DATA_TOOLS : DATA_TOOLS.filter((t) => t.name !== "search_places");
+      const dataTools = DATA_TOOLS.filter((t) => (places || t.name !== "search_places") && (req.body?.supportsLinks === true || t.name !== "transport_options"));
       res.json(await runAgent({ callModel: (args) => callModel(system, args), runTool, messages, dataTools }));
     } catch (e) {
       console.error("nera failed", e);

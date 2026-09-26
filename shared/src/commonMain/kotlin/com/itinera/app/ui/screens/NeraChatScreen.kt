@@ -74,6 +74,7 @@ import com.itinera.app.data.StoredNeraMessage
 import com.itinera.app.data.NeraEntitlement
 import com.itinera.app.data.NeraItinerary
 import com.itinera.app.data.NeraLeg
+import com.itinera.app.data.NeraLink
 import com.itinera.app.data.NeraOffer
 import com.itinera.app.data.PurchaseOutcome
 import com.itinera.app.data.PurchaseService
@@ -101,7 +102,7 @@ import org.jetbrains.compose.resources.painterResource
 private sealed interface NeraItem {
     val id: String
     data class FromUser(val text: String, override val id: String = "msg_${kotlin.random.Random.nextLong()}") : NeraItem
-    data class FromNera(val text: String, val quickReplies: List<String> = emptyList(), override val id: String = "msg_${kotlin.random.Random.nextLong()}") : NeraItem
+    data class FromNera(val text: String, val quickReplies: List<String> = emptyList(), val links: List<NeraLink> = emptyList(), override val id: String = "msg_${kotlin.random.Random.nextLong()}") : NeraItem
     data class Draft(val message: String, val itinerary: NeraItinerary, val approved: Boolean = false, override val id: String = "msg_${kotlin.random.Random.nextLong()}") : NeraItem
     data class Problem(val text: String, override val id: String = "msg_${kotlin.random.Random.nextLong()}") : NeraItem
 }
@@ -112,14 +113,14 @@ private fun StoredNeraMessage.toNeraItem(): NeraItem {
     return when {
         itin != null -> NeraItem.Draft(text, itin, approved, id)
         role == "user" -> NeraItem.FromUser(text, id)
-        else -> NeraItem.FromNera(text, quickReplies, id)
+        else -> NeraItem.FromNera(text, quickReplies, links, id)
     }
 }
 
 /** The other direction: what to persist for a chat row, or null for rows that never get saved (local errors). */
 private fun NeraItem.toStored(seq: Int): StoredNeraMessage? = when (this) {
     is NeraItem.FromUser -> StoredNeraMessage(id = id, role = "user", text = text, seq = seq)
-    is NeraItem.FromNera -> StoredNeraMessage(id = id, role = "assistant", text = text, quickReplies = quickReplies, seq = seq)
+    is NeraItem.FromNera -> StoredNeraMessage(id = id, role = "assistant", text = text, quickReplies = quickReplies, links = links, seq = seq)
     is NeraItem.Draft -> StoredNeraMessage(id = id, role = "assistant", text = message, itinerary = itinerary, approved = approved, seq = seq)
     is NeraItem.Problem -> null
 }
@@ -266,7 +267,7 @@ fun NeraChatScreen(
                 if (reply.type == "itinerary" && itinerary != null) {
                     items.add(NeraItem.Draft(reply.message, itinerary))
                 } else {
-                    items.add(NeraItem.FromNera(reply.message, reply.quickReplies))
+                    items.add(NeraItem.FromNera(reply.message, reply.quickReplies, reply.links))
                 }
                 persist(items.last())
             } catch (e: NeraException) {
@@ -328,6 +329,7 @@ fun NeraChatScreen(
                         AnimatedNeraResponse(item.id) {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Bubble(item.text, fromUser = false)
+                                if (item.links.isNotEmpty()) LinkButtons(item.links)
                                 if (index == items.lastIndex && !sending && item.quickReplies.isNotEmpty()) {
                                     QuickReplies(item.quickReplies, onPick = ::send)
                                 }
@@ -650,6 +652,35 @@ private fun Bubble(text: String, fromUser: Boolean, isError: Boolean = false) {
                     else -> MaterialTheme.colorScheme.onSurface
                 },
             )
+        }
+    }
+}
+
+/** Booking / comparison links from Nera (e.g. train, bus and flight pages for a route); each opens in the browser. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun LinkButtons(links: List<NeraLink>) {
+    val uriHandler = LocalUriHandler.current
+    FlowRow(
+        modifier = Modifier.padding(start = 44.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        links.forEach { link ->
+            OutlinedButton(
+                onClick = { runCatching { uriHandler.openUri(link.url) } },
+                modifier = Modifier.heightIn(min = 44.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.primary,
+                ),
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
+                ),
+            ) {
+                Text("${link.label} ↗")
+            }
         }
     }
 }
