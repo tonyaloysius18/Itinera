@@ -676,6 +676,8 @@ internal val EN: Strings by lazy { Strings().apply {
     neraErrMonthlyQuota = "You've reached this month's Nera limit. It resets on the 1st."
     neraPrivacyLabel = "Privacy Policy"
     neraConfirming = "Thanks! We're confirming your purchase. Try again in a minute."
+    legDeleted = "Leg deleted"
+    placeDeleted = "Place deleted"
     recentlyDeleted = "Recently deleted"
     recentlyDeletedInfo = "Deleted trips stay here for 30 days, then they are removed permanently."
     noRecentlyDeleted = "No recently deleted trips"

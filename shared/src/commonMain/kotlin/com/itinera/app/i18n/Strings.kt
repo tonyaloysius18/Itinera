@@ -794,6 +794,8 @@ class Strings {
     var neraErrMonthlyQuota: String = ""
     var neraPrivacyLabel: String = ""
     var neraConfirming: String = ""
+    var placeDeleted: String = ""
+    var legDeleted: String = ""
     var tripRestored: String = ""
     var oneDayLeft: String = ""
     var daysLeftN: String = ""
@@ -1487,6 +1489,8 @@ class Strings {
         c.neraErrMonthlyQuota = this.neraErrMonthlyQuota
         c.neraPrivacyLabel = this.neraPrivacyLabel
         c.neraConfirming = this.neraConfirming
+        c.placeDeleted = this.placeDeleted
+        c.legDeleted = this.legDeleted
         c.tripRestored = this.tripRestored
         c.oneDayLeft = this.oneDayLeft
         c.daysLeftN = this.daysLeftN

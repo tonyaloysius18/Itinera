@@ -222,8 +222,6 @@ fun TripDetailScreen(
     // hoisted so it survives the Dialog leaving/re-entering while the picker is up
     val pagerState = rememberPagerState(pageCount = { 2 })
 
-    var pendingDeleteLegId by remember { mutableStateOf<String?>(null) }
-    var pendingDeleteActivityId by remember { mutableStateOf<String?>(null) }
 
     var showAddChooser by remember { mutableStateOf(false) }
     var showPostcard by remember { mutableStateOf(false) }
@@ -717,7 +715,7 @@ fun TripDetailScreen(
                                                             DropdownMenuItem(
                                                                 text = { Text(s.delete, color = MaterialTheme.itinera.destructive) },
                                                                 leadingIcon = { Icon(Icons.Filled.Delete, null, tint = MaterialTheme.itinera.destructive) },
-                                                                onClick = { showMenu = false; pendingDeleteLegId = leg.id },
+                                                                onClick = { showMenu = false; onDeleteLeg(leg.id) },
                                                             )
                                                         }
                                                     }
@@ -811,7 +809,7 @@ fun TripDetailScreen(
                                                             DropdownMenuItem(
                                                                 text = { Text(s.delete, color = MaterialTheme.itinera.destructive) },
                                                                 leadingIcon = { Icon(Icons.Filled.Delete, null, tint = MaterialTheme.itinera.destructive) },
-                                                                onClick = { showMenu = false; pendingDeleteActivityId = act.id },
+                                                                onClick = { showMenu = false; onDeleteActivity(act.id) },
                                                             )
                                                         }
                                                     }
@@ -959,34 +957,6 @@ fun TripDetailScreen(
                         )
                     }
                 },
-            )
-        }
-
-        if (pendingDeleteLegId != null) {
-            AlertDialog(
-                onDismissRequest = { pendingDeleteLegId = null },
-                title = { Text(s.deleteLegQ) },
-                text = { Text(s.cantBeUndone) },
-                confirmButton = {
-                    TextButton(onClick = { onDeleteLeg(pendingDeleteLegId!!); pendingDeleteLegId = null }) {
-                        Text(s.delete, color = MaterialTheme.itinera.destructive)
-                    }
-                },
-                dismissButton = { TextButton(onClick = { pendingDeleteLegId = null }) { Text(s.cancel) } },
-            )
-        }
-
-        if (pendingDeleteActivityId != null) {
-            AlertDialog(
-                onDismissRequest = { pendingDeleteActivityId = null },
-                title = { Text(s.deletePlaceQ) },
-                text = { Text(s.cantBeUndone) },
-                confirmButton = {
-                    TextButton(onClick = { onDeleteActivity(pendingDeleteActivityId!!); pendingDeleteActivityId = null }) {
-                        Text(s.delete, color = MaterialTheme.itinera.destructive)
-                    }
-                },
-                dismissButton = { TextButton(onClick = { pendingDeleteActivityId = null }) { Text(s.cancel) } },
             )
         }
 

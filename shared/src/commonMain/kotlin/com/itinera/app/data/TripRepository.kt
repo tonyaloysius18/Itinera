@@ -570,6 +570,25 @@ class TripRepository {
         notificationScheduler.cancel(legId)
     }
 
+    /** Deletes a leg and returns a function that puts it back where it was, or null if there was no such leg. */
+    fun deleteLegUndoable(tripId: String, legId: String): (() -> Unit)? {
+        val trip = trips.firstOrNull { it.id == tripId } ?: return null
+        val at = trip.legs.indexOfFirst { it.id == legId }
+        if (at < 0) return null
+        val leg = trip.legs[at]
+        deleteLeg(tripId, legId)
+        return {
+            val index = trips.indexOfFirst { it.id == tripId }
+            if (index >= 0 && trips[index].legs.none { it.id == legId }) {
+                val current = trips[index]
+                val legs = current.legs.toMutableList().apply { add(at.coerceAtMost(size), leg) }
+                trips[index] = current.copy(legs = legs)
+                persist(trips[index])
+                scheduleLegReminder(trips[index], leg)
+            }
+        }
+    }
+
     fun markLegAddedToCalendar(tripId: String, legId: String) {
         val index = trips.indexOfFirst { it.id == tripId }
         if (index < 0) return
@@ -632,6 +651,20 @@ class TripRepository {
         val act = activities.firstOrNull { it.id == id }
         activities.removeAll { it.id == id }
         if (act != null) ioScope.launch { runCatching { activityService.deleteActivity(act.tripId, id) } }
+    }
+
+    /** Deletes an activity (a place) and returns a function that puts it back, or null if there was no such activity. */
+    fun deleteActivityUndoable(id: String): (() -> Unit)? {
+        val at = activities.indexOfFirst { it.id == id }
+        if (at < 0) return null
+        val act = activities[at]
+        deleteActivity(id)
+        return {
+            if (activities.none { it.id == id }) {
+                activities.add(at.coerceAtMost(activities.size), act)
+                ioScope.launch { runCatching { activityService.saveActivity(act) } }
+            }
+        }
     }
 
     fun tripDates(tripId: String): List<LocalDate> {
