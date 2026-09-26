@@ -794,6 +794,16 @@ class Strings {
     var neraErrMonthlyQuota: String = ""
     var neraPrivacyLabel: String = ""
     var neraConfirming: String = ""
+    var transportFlights: String = ""
+    var transportBuses: String = ""
+    var transportTrains: String = ""
+    var transportCompareAll: String = ""
+    var neraNoDraft: String = ""
+    var neraLostThread: String = ""
+    var transportDirect: String = ""
+    var transportOneChange: String = ""
+    var transportChangesN: String = ""     // "%d changes"
+    var transportScheduleNote: String = ""
 
     fun copyApply(block: Strings.() -> Unit): Strings {
 
@@ -1465,6 +1475,16 @@ class Strings {
         c.neraErrMonthlyQuota = this.neraErrMonthlyQuota
         c.neraPrivacyLabel = this.neraPrivacyLabel
         c.neraConfirming = this.neraConfirming
+        c.transportFlights = this.transportFlights
+        c.transportBuses = this.transportBuses
+        c.transportTrains = this.transportTrains
+        c.transportCompareAll = this.transportCompareAll
+        c.neraNoDraft = this.neraNoDraft
+        c.neraLostThread = this.neraLostThread
+        c.transportDirect = this.transportDirect
+        c.transportOneChange = this.transportOneChange
+        c.transportChangesN = this.transportChangesN
+        c.transportScheduleNote = this.transportScheduleNote
 
         c.block()
         return c

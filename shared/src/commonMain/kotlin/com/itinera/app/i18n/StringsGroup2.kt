@@ -609,6 +609,16 @@ internal val RU: Strings by lazy { EN.copyApply {
     neraErrMonthlyQuota = "Ты достиг месячного лимита Nera. Он сбросится 1-го числа."
     neraPrivacyLabel = "Политика конфиденциальности"
     neraConfirming = "Спасибо! Мы подтверждаем твою покупку. Попробуй снова через минуту."
+    transportDirect = "Без пересадок"
+    transportOneChange = "1 пересадка"
+    transportChangesN = "Пересадок: %d"
+    transportScheduleNote = "Расписание: уточните время и посмотрите цены на сайте бронирования."
+    neraLostThread = "Извините, я потеряла мысль. Можете повторить?"
+    neraNoDraft = "Не получилось составить черновик по этому запросу. Подтвердите, пожалуйста, пункт назначения, количество дней и дату начала."
+    transportCompareAll = "сравнить всё"
+    transportTrains = "поезда"
+    transportBuses = "автобусы"
+    transportFlights = "авиарейсы"
 } }
 internal val TAM: Strings by lazy { EN.copyApply {
     name = "பெயர்"
@@ -1217,6 +1227,16 @@ internal val TAM: Strings by lazy { EN.copyApply {
     neraErrMonthlyQuota = "இந்த மாத Nera வரம்பை அடைந்துவிட்டீர்கள். 1ஆம் தேதி மீட்டமைக்கப்படும்."
     neraPrivacyLabel = "தனியுரிமைக் கொள்கை"
     neraConfirming = "நன்றி! உங்கள் வாங்குதலை உறுதிப்படுத்துகிறோம். ஒரு நிமிடத்தில் மீண்டும் முயலவும்."
+    transportDirect = "நேரடி"
+    transportOneChange = "1 மாற்றம்"
+    transportChangesN = "%d மாற்றங்கள்"
+    transportScheduleNote = "திட்டமிட்ட நேரங்கள்: நேரங்களை உறுதிசெய்து, கட்டணங்களை முன்பதிவு தளத்தில் பாருங்கள்."
+    neraLostThread = "மன்னிக்கவும், நான் பேசியதன் தொடர்பை இழந்துவிட்டேன். மீண்டும் சொல்ல முடியுமா?"
+    neraNoDraft = "இதிலிருந்து வரைவை உருவாக்க முடியவில்லை. சேருமிடம், நாட்களின் எண்ணிக்கை, தொடக்கத் தேதியை உறுதிப்படுத்த முடியுமா?"
+    transportCompareAll = "அனைத்தையும் ஒப்பிடு"
+    transportTrains = "ரயில்கள்"
+    transportBuses = "பேருந்துகள்"
+    transportFlights = "விமானங்கள்"
 } }
 
 internal val HI: Strings by lazy { EN.copyApply {
@@ -1826,6 +1846,16 @@ internal val HI: Strings by lazy { EN.copyApply {
     neraErrMonthlyQuota = "आप इस महीने की Nera सीमा तक पहुँच गए हैं। यह 1 तारीख को रीसेट होती है।"
     neraPrivacyLabel = "गोपनीयता नीति"
     neraConfirming = "धन्यवाद! हम आपकी खरीदारी की पुष्टि कर रहे हैं। एक मिनट बाद फिर कोशिश करें।"
+    transportDirect = "सीधे"
+    transportOneChange = "1 बदलाव"
+    transportChangesN = "%d बदलाव"
+    transportScheduleNote = "निर्धारित समय: समय की पुष्टि करें और कीमतें बुकिंग साइट पर देखें।"
+    neraLostThread = "माफ़ कीजिए, मैं बात का सिरा खो बैठी। क्या आप दोबारा बता सकते हैं?"
+    neraNoDraft = "इससे मैं ड्राफ़्ट नहीं बना सकी। कृपया गंतव्य, दिनों की संख्या और शुरुआत की तारीख़ की पुष्टि करें।"
+    transportCompareAll = "सब की तुलना करें"
+    transportTrains = "ट्रेनें"
+    transportBuses = "बसें"
+    transportFlights = "उड़ानें"
 } }
 
 internal val UKR: Strings by lazy { EN.copyApply {
@@ -2435,6 +2465,16 @@ internal val UKR: Strings by lazy { EN.copyApply {
     neraErrMonthlyQuota = "Ти досяг місячного ліміту Nera. Він скинеться 1-го числа."
     neraPrivacyLabel = "Політика конфіденційності"
     neraConfirming = "Дякуємо! Ми підтверджуємо твою покупку. Спробуй ще раз за хвилину."
+    transportDirect = "Без пересадок"
+    transportOneChange = "1 пересадка"
+    transportChangesN = "Пересадок: %d"
+    transportScheduleNote = "Розклад: уточніть час і перегляньте ціни на сайті бронювання."
+    neraLostThread = "Вибачте, я втратила нитку розмови. Можете повторити?"
+    neraNoDraft = "Не вдалося скласти чернетку за цим запитом. Підтвердьте, будь ласка, пункт призначення, кількість днів і дату початку."
+    transportCompareAll = "порівняти все"
+    transportTrains = "потяги"
+    transportBuses = "автобуси"
+    transportFlights = "авіарейси"
 } }
 
 internal val HUN: Strings by lazy { EN.copyApply {
@@ -3044,6 +3084,16 @@ internal val HUN: Strings by lazy { EN.copyApply {
     neraErrMonthlyQuota = "Elérted Nera havi korlátját. A hónap 1. napján nullázódik."
     neraPrivacyLabel = "Adatvédelmi szabályzat"
     neraConfirming = "Köszönjük! Megerősítjük a vásárlásodat. Próbáld újra egy perc múlva."
+    transportDirect = "Közvetlen"
+    transportOneChange = "1 átszállás"
+    transportChangesN = "%d átszállás"
+    transportScheduleNote = "Menetrend szerinti idők: erősítsd meg az időpontokat, az árakat pedig nézd meg a foglalási oldalon."
+    neraLostThread = "Bocsánat, elvesztettem a fonalat. Meg tudod ismételni?"
+    neraNoDraft = "Ebből nem tudtam vázlatot készíteni. Meg tudod erősíteni az úti célt, a napok számát és a kezdő dátumot?"
+    transportCompareAll = "összes összehasonlítása"
+    transportTrains = "vonatok"
+    transportBuses = "buszok"
+    transportFlights = "repülőjáratok"
 } }
 
 internal val RO: Strings by lazy { EN.copyApply {
@@ -3653,6 +3703,16 @@ internal val RO: Strings by lazy { EN.copyApply {
     neraErrMonthlyQuota = "Ai atins limita lunară pentru Nera. Se resetează pe 1."
     neraPrivacyLabel = "Politica de confidențialitate"
     neraConfirming = "Mulțumim! Îți confirmăm achiziția. Încearcă din nou peste un minut."
+    transportDirect = "Direct"
+    transportOneChange = "1 schimbare"
+    transportChangesN = "%d schimbări"
+    transportScheduleNote = "Ore programate: confirmă orele și vezi prețurile pe site-ul de rezervare."
+    neraLostThread = "Scuze, am pierdut firul. Poți repeta?"
+    neraNoDraft = "Nu am putut pregăti o schiță din asta. Poți confirma destinația, numărul de zile și data de început?"
+    transportCompareAll = "compară tot"
+    transportTrains = "trenuri"
+    transportBuses = "autobuze"
+    transportFlights = "zboruri"
 } }
 
 internal val GR: Strings by lazy { EN.copyApply {
@@ -4262,6 +4322,16 @@ internal val GR: Strings by lazy { EN.copyApply {
     neraErrMonthlyQuota = "Έφτασες το μηνιαίο όριο της Nera. Επαναφέρεται την 1η του μήνα."
     neraPrivacyLabel = "Πολιτική απορρήτου"
     neraConfirming = "Ευχαριστούμε! Επιβεβαιώνουμε την αγορά σου. Δοκίμασε ξανά σε ένα λεπτό."
+    transportDirect = "Απευθείας"
+    transportOneChange = "1 αλλαγή"
+    transportChangesN = "%d αλλαγές"
+    transportScheduleNote = "Προγραμματισμένες ώρες: επιβεβαιώστε τις ώρες και δείτε τις τιμές στον ιστότοπο κράτησης."
+    neraLostThread = "Συγγνώμη, έχασα το νήμα. Μπορείς να το πεις ξανά;"
+    neraNoDraft = "Δεν μπόρεσα να φτιάξω πρόχειρο από αυτό. Μπορείς να επιβεβαιώσεις τον προορισμό, τον αριθμό ημερών και την ημερομηνία έναρξης;"
+    transportCompareAll = "σύγκριση όλων"
+    transportTrains = "τρένα"
+    transportBuses = "λεωφορεία"
+    transportFlights = "πτήσεις"
 } }
 
 internal val KA: Strings by lazy { EN.copyApply {
@@ -4871,6 +4941,16 @@ internal val KA: Strings by lazy { EN.copyApply {
     neraErrMonthlyQuota = "ამ თვის Nera-ს ლიმიტს მიაღწიე. განულდება 1 რიცხვში."
     neraPrivacyLabel = "კონფიდენციალურობის პოლიტიკა"
     neraConfirming = "გმადლობთ! შენს შეძენას ვადასტურებთ. სცადე ერთ წუთში."
+    transportDirect = "პირდაპირი"
+    transportOneChange = "1 გადაჯდომა"
+    transportChangesN = "გადაჯდომა: %d"
+    transportScheduleNote = "დაგეგმილი დრო: დაადასტურეთ დრო და ფასები იხილეთ დაჯავშნის საიტზე."
+    neraLostThread = "მაპატიეთ, ძაფი დავკარგე. შეგიძლიათ გაიმეოროთ?"
+    neraNoDraft = "ამისგან მონახაზს ვერ შევქმენი. შეგიძლიათ დაადასტუროთ დანიშნულების ადგილი, დღეების რაოდენობა და დაწყების თარიღი?"
+    transportCompareAll = "ყველას შედარება"
+    transportTrains = "მატარებლები"
+    transportBuses = "ავტობუსები"
+    transportFlights = "ფრენები"
 } }
 
 internal val BG: Strings by lazy { EN.copyApply {
@@ -5480,6 +5560,16 @@ internal val BG: Strings by lazy { EN.copyApply {
     neraErrMonthlyQuota = "Достигна месечния лимит на Nera. Нулира се на 1-во число."
     neraPrivacyLabel = "Политика за поверителност"
     neraConfirming = "Благодарим! Потвърждаваме покупката ти. Опитай отново след минута."
+    transportDirect = "Директно"
+    transportOneChange = "1 прекачване"
+    transportChangesN = "Прекачвания: %d"
+    transportScheduleNote = "Планирани часове: потвърдете часовете и вижте цените на сайта за резервации."
+    neraLostThread = "Съжалявам, изгубих нишката. Можете ли да повторите?"
+    neraNoDraft = "Не успях да направя чернова от това. Можете ли да потвърдите дестинацията, броя дни и началната дата?"
+    transportCompareAll = "сравни всичко"
+    transportTrains = "влакове"
+    transportBuses = "автобуси"
+    transportFlights = "полети"
 } }
 
 internal val SK: Strings by lazy { EN.copyApply {
@@ -6089,5 +6179,15 @@ internal val SK: Strings by lazy { EN.copyApply {
     neraErrMonthlyQuota = "Dosiahol si mesačný limit Nery. Obnoví sa 1. dňa v mesiaci."
     neraPrivacyLabel = "Zásady ochrany osobných údajov"
     neraConfirming = "Ďakujeme! Potvrdzujeme tvoj nákup. Skús to znova o minútu."
+    transportDirect = "Priamo"
+    transportOneChange = "1 prestup"
+    transportChangesN = "Prestupov: %d"
+    transportScheduleNote = "Plánované časy: potvrďte časy a pozrite si ceny na stránke rezervácie."
+    neraLostThread = "Prepáčte, stratila som niť. Môžete to zopakovať?"
+    neraNoDraft = "Z toho som nedokázala pripraviť návrh. Môžete potvrdiť cieľ, počet dní a dátum začiatku?"
+    transportCompareAll = "porovnať všetko"
+    transportTrains = "vlaky"
+    transportBuses = "autobusy"
+    transportFlights = "lety"
 } }
 

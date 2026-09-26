@@ -195,7 +195,7 @@ export default {
       const cache = placesCache(env.DB);
       const runTool = async (name, input) => {
         if (name === "get_weather") return getWeather(input);
-        if (name === "transport_options") return transportOptions(input);
+        if (name === "transport_options") return transportOptions(input, { cache });
         if (name === "search_places") return searchPlaces(input, { apiKey: env.GOOGLE_PLACES_API_KEY, cache });
         return { error: `Unknown tool ${name}` };
       };

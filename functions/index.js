@@ -38,7 +38,7 @@ const placesCache = {
 
 async function runTool(name, input) {
   if (name === "get_weather") return getWeather(input);
-  if (name === "transport_options") return transportOptions(input);
+  if (name === "transport_options") return transportOptions(input, { cache: placesCache });
   if (name === "search_places") return searchPlaces(input, { apiKey: GOOGLE_PLACES_API_KEY.value(), cache: placesCache });
   return { error: `Unknown tool ${name}` };
 }

@@ -75,6 +75,8 @@ import com.itinera.app.data.NeraEntitlement
 import com.itinera.app.data.NeraItinerary
 import com.itinera.app.data.NeraLeg
 import com.itinera.app.data.NeraLink
+import com.itinera.app.data.NeraTimetable
+import com.itinera.app.data.NeraTransportOption
 import com.itinera.app.data.NeraOffer
 import com.itinera.app.data.PurchaseOutcome
 import com.itinera.app.data.PurchaseService
@@ -102,8 +104,8 @@ import org.jetbrains.compose.resources.painterResource
 private sealed interface NeraItem {
     val id: String
     data class FromUser(val text: String, override val id: String = "msg_${kotlin.random.Random.nextLong()}") : NeraItem
-    data class FromNera(val text: String, val quickReplies: List<String> = emptyList(), val links: List<NeraLink> = emptyList(), override val id: String = "msg_${kotlin.random.Random.nextLong()}") : NeraItem
-    data class Draft(val message: String, val itinerary: NeraItinerary, val approved: Boolean = false, override val id: String = "msg_${kotlin.random.Random.nextLong()}") : NeraItem
+    data class FromNera(val text: String, val quickReplies: List<String> = emptyList(), val links: List<NeraLink> = emptyList(), val timetables: List<NeraTimetable> = emptyList(), override val id: String = "msg_${kotlin.random.Random.nextLong()}") : NeraItem
+    data class Draft(val message: String, val itinerary: NeraItinerary, val approved: Boolean = false, val links: List<NeraLink> = emptyList(), val timetables: List<NeraTimetable> = emptyList(), override val id: String = "msg_${kotlin.random.Random.nextLong()}") : NeraItem
     data class Problem(val text: String, override val id: String = "msg_${kotlin.random.Random.nextLong()}") : NeraItem
 }
 
@@ -111,17 +113,17 @@ private sealed interface NeraItem {
 private fun StoredNeraMessage.toNeraItem(): NeraItem {
     val itin = itinerary
     return when {
-        itin != null -> NeraItem.Draft(text, itin, approved, id)
+        itin != null -> NeraItem.Draft(text, itin, approved, links, timetables, id)
         role == "user" -> NeraItem.FromUser(text, id)
-        else -> NeraItem.FromNera(text, quickReplies, links, id)
+        else -> NeraItem.FromNera(text, quickReplies, links, timetables, id)
     }
 }
 
 /** The other direction: what to persist for a chat row, or null for rows that never get saved (local errors). */
 private fun NeraItem.toStored(seq: Int): StoredNeraMessage? = when (this) {
     is NeraItem.FromUser -> StoredNeraMessage(id = id, role = "user", text = text, seq = seq)
-    is NeraItem.FromNera -> StoredNeraMessage(id = id, role = "assistant", text = text, quickReplies = quickReplies, links = links, seq = seq)
-    is NeraItem.Draft -> StoredNeraMessage(id = id, role = "assistant", text = message, itinerary = itinerary, approved = approved, seq = seq)
+    is NeraItem.FromNera -> StoredNeraMessage(id = id, role = "assistant", text = text, quickReplies = quickReplies, links = links, timetables = timetables, seq = seq)
+    is NeraItem.Draft -> StoredNeraMessage(id = id, role = "assistant", text = message, links = links, timetables = timetables, itinerary = itinerary, approved = approved, seq = seq)
     is NeraItem.Problem -> null
 }
 
@@ -265,9 +267,14 @@ fun NeraChatScreen(
                 freeTier = reply.entitlement?.takeIf { it.status != "paid" }
                 val itinerary = reply.itinerary
                 if (reply.type == "itinerary" && itinerary != null) {
-                    items.add(NeraItem.Draft(reply.message, itinerary))
+                    items.add(NeraItem.Draft(reply.message, itinerary, links = reply.links, timetables = reply.timetables))
                 } else {
-                    items.add(NeraItem.FromNera(reply.message, reply.quickReplies, reply.links))
+                    val text = when (reply.fallback) {
+                        "lost" -> s.neraLostThread
+                        "noDraft" -> s.neraNoDraft
+                        else -> reply.message
+                    }
+                    items.add(NeraItem.FromNera(text, reply.quickReplies, reply.links, reply.timetables))
                 }
                 persist(items.last())
             } catch (e: NeraException) {
@@ -329,6 +336,7 @@ fun NeraChatScreen(
                         AnimatedNeraResponse(item.id) {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Bubble(item.text, fromUser = false)
+                                item.timetables.forEach { TimetableCard(it, s) }
                                 if (item.links.isNotEmpty()) LinkButtons(item.links)
                                 if (index == items.lastIndex && !sending && item.quickReplies.isNotEmpty()) {
                                     QuickReplies(item.quickReplies, onPick = ::send)
@@ -340,6 +348,8 @@ fun NeraChatScreen(
                         AnimatedNeraResponse(item.id) {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 if (item.message.isNotBlank()) Bubble(item.message, fromUser = false)
+                                item.timetables.forEach { TimetableCard(it, s) }
+                                if (item.links.isNotEmpty()) LinkButtons(item.links)
                                 DraftCard(
                                     itinerary = item.itinerary,
                                     s = s,
@@ -656,10 +666,84 @@ private fun Bubble(text: String, fromUser: Boolean, isError: Boolean = false) {
     }
 }
 
+/** "5h 48m" from minutes. */
+private fun durationLabel(min: Int): String = if (min >= 60) "${min / 60}h ${(min % 60).toString().padStart(2, '0')}m" else "${min}m"
+
+private fun changesLabel(n: Int, s: Strings): String = when (n) {
+    0 -> s.transportDirect
+    1 -> s.transportOneChange
+    else -> s.transportChangesN.replace("%d", n.toString())
+}
+
+private fun modeIcon(modes: List<String>) = when (modes.firstOrNull()) {
+    "bus" -> transportIcon(TransportType.BUS)
+    "ferry" -> transportIcon(TransportType.FERRY)
+    "flight" -> transportIcon(TransportType.FLIGHT)
+    else -> transportIcon(TransportType.TRAIN)
+}
+
+/** The scheduled options Nera found for a route: times, duration, changes, operators. Booking stays on the provider's site. */
+@Composable
+private fun TimetableCard(t: NeraTimetable, s: Strings) {
+    Surface(
+        modifier = Modifier.fillMaxWidth().padding(start = 44.dp),
+        shape = RoundedCornerShape(18.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    ) {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text(
+                "${t.from} → ${t.to}",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+            )
+            t.options.forEach { o -> TimetableRow(o, s) }
+            Text(
+                s.transportScheduleNote,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+private fun TimetableRow(o: NeraTransportOption, s: Strings) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Icon(modeIcon(o.modes), contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
+        Column(Modifier.weight(1f)) {
+            Text("${o.depart} → ${o.arrive}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
+            val operators = o.operators.joinToString(" · ")
+            if (operators.isNotBlank()) {
+                Text(operators, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+            }
+        }
+        Column(horizontalAlignment = Alignment.End) {
+            Text(durationLabel(o.durationMin), style = MaterialTheme.typography.bodyMedium)
+            Text(changesLabel(o.changes, s), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+/** "Toulouse → Grenoble: trains (Omio)" in the app language; falls back to the server's English label. */
+private fun linkLabel(link: NeraLink, s: Strings): String {
+    val word = when (link.mode) {
+        "all" -> s.transportCompareAll
+        "train" -> s.transportTrains
+        "bus" -> s.transportBuses
+        "flight" -> s.transportFlights
+        else -> return link.label
+    }
+    if (link.from.isBlank() || link.to.isBlank()) return link.label
+    val provider = if (link.provider.isBlank()) "" else " (${link.provider})"
+    return "${link.from} → ${link.to}: $word$provider"
+}
+
 /** Booking / comparison links from Nera (e.g. train, bus and flight pages for a route); each opens in the browser. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun LinkButtons(links: List<NeraLink>) {
+    val s = LocalStrings.current
     val uriHandler = LocalUriHandler.current
     FlowRow(
         modifier = Modifier.padding(start = 44.dp),
@@ -679,7 +763,7 @@ private fun LinkButtons(links: List<NeraLink>) {
                     MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
                 ),
             ) {
-                Text("${link.label} ↗")
+                Text("${linkLabel(link, s)} ↗")
             }
         }
     }

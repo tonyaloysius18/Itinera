@@ -77,6 +77,7 @@ data class StoredNeraMessage(
     val text: String = "",
     val quickReplies: List<String> = emptyList(),
     val links: List<NeraLink> = emptyList(),  // booking/comparison links (transport) shown as buttons
+    val timetables: List<NeraTimetable> = emptyList(),
     val itinerary: NeraItinerary? = null,    // set when this assistant turn proposed a draft
     val approved: Boolean = false,
     val seq: Int = 0,
@@ -99,15 +100,45 @@ data class NeraStatus(
 
 /** A tappable link Nera's reply carries, e.g. a train/bus/flight comparison page for a route. */
 @Serializable
-data class NeraLink(val label: String, val url: String)
+data class NeraLink(
+    val label: String,                  // English fallback text
+    val url: String,
+    val mode: String = "",              // "all" | "train" | "bus" | "flight": with from/to/provider, lets the app build the label in the user's language
+    val from: String = "",
+    val to: String = "",
+    val provider: String = "",
+)
+
+/** One scheduled journey option between two cities (local departure/arrival times, no prices). */
+@Serializable
+data class NeraTransportOption(
+    val depart: String = "",          // "07:36", local time at the origin
+    val arrive: String = "",          // "12:33", local time at the destination
+    val durationMin: Int = 0,
+    val changes: Int = 0,
+    val modes: List<String> = emptyList(),      // "train" | "bus" | "ferry" | "flight"
+    val operators: List<String> = emptyList(),
+    val lines: List<String> = emptyList(),
+)
+
+/** The scheduled options Nera found for one route on one day; shown as a card in the chat. */
+@Serializable
+data class NeraTimetable(
+    val from: String = "",
+    val to: String = "",
+    val date: String = "",            // ISO "2026-10-03"
+    val options: List<NeraTransportOption> = emptyList(),
+)
 
 /** Nera's answer: either a plain message (type "say") or a draft (type "itinerary"). */
 @Serializable
 data class NeraReply(
     val type: String,
     val message: String = "",
+    val fallback: String = "",          // "lost" | "noDraft": the server had no real answer; the app shows its own translated text
     val quickReplies: List<String> = emptyList(),
     val links: List<NeraLink> = emptyList(),
+    val timetables: List<NeraTimetable> = emptyList(),
     val itinerary: NeraItinerary? = null,
     val entitlement: NeraEntitlement? = null,
 )
