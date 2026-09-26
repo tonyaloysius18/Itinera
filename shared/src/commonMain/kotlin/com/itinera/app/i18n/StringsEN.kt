@@ -679,7 +679,7 @@ internal val EN: Strings by lazy { Strings().apply {
     legDeleted = "Leg deleted"
     placeDeleted = "Place deleted"
     recentlyDeleted = "Recently deleted"
-    recentlyDeletedInfo = "Deleted trips stay here for 30 days, then they are removed permanently."
+    recentlyDeletedInfo = "Deleted trips stay here for 30 days. Then they are removed permanently."
     noRecentlyDeleted = "No recently deleted trips"
     restore = "Restore"
     deleteForever = "Delete permanently"

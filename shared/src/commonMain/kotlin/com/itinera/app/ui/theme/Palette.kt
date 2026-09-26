@@ -13,50 +13,52 @@ import androidx.compose.ui.graphics.Color
  */
 
 // ---------------------------------------------------------------------------
-// Brand ramp — indigo/blue palette (#4D52B4, #4E9CE8), light end to dark end.
+// Brand palette: three source swatches — mint teal #70D6C5, leaf green #CAE5BC, pale sage #E1EDD4.
+//
+// Only #70D6C5 has enough contrast on black to be a dark-mode primary (11.5:1); none of the three
+// clears 4.5:1 against white, so light mode needs deeper partners for text and fills. Each deep
+// value is the swatch's own hue darkened just far enough: MintDeep 5.5:1, LeafDeep 6.3:1 on white.
 // ---------------------------------------------------------------------------
 
-internal val Brand100 = Color(0xFFA9CCF6)
-internal val Brand200 = Color(0xFF4E9CE8)
-internal val Brand300 = Color(0xFF6E73D0)
-internal val Brand400 = Color(0xFF4D52B4)
-internal val Brand500 = Color(0xFF3A3E93)
+// Mint teal — the primary.
+internal val Mint = Color(0xFF70D6C5)                    // source swatch; dark-mode primary
+internal val MintDeep = Color(0xFF0B7669)                // light-mode primary (white text 5.5:1)
+internal val MintContainerLight = Color(0xFFBFEBE2)      // a lighter tint of the swatch
+internal val MintInk = Color(0xFF0A3A33)                 // text on the light container (9.7:1)
+internal val MintDarkContainer = Color(0xFF0E4A43)
+internal val MintDarkOnContainer = Color(0xFFCFF5EC)     // 8.6:1 on MintDarkContainer
+internal val MintDarkInk = Color(0xFF00332D)             // text on Mint (8.0:1)
 
-// Teal accent (tertiary slot). Light mode darkens the palette's #70D6C5 so white text
-// clears 4.5:1; dark mode uses it as-is.
-internal val TealLight = Color(0xFF0E7C72)
-internal val TealLightContainer = Color(0xFFCDF2EA)
-internal val TealLightOnContainer = Color(0xFF00332D)
-internal val TealDark = Color(0xFF70D6C5)
-internal val TealDarkOn = Color(0xFF00332D)
-internal val TealDarkContainer = Color(0xFF0E4A43)
+// Leaf green — the secondary.
+internal val Leaf = Color(0xFFCAE5BC)                    // source swatch; light container and dark-mode secondary
+internal val LeafDeep = Color(0xFF3E6B2E)                // light-mode secondary (white text 6.3:1)
+internal val LeafInk = Color(0xFF1B3013)                 // text on Leaf (10.4:1)
+internal val LeafDarkContainer = Color(0xFF2D4525)
+internal val LeafDarkInk = Color(0xFF1E3316)             // text on Leaf in dark mode (10.0:1)
 
-// Ramp extensions. The source palette has no dark end, so dark mode needs these:
-// tints above Brand100 for containers, and shades below Brand500 for text-on-fill.
-internal val Brand050 = Color(0xFFE3E7FA)
-internal val Brand600 = Color(0xFF1B4677)
-internal val Brand700 = Color(0xFF143559)
-internal val Brand800 = Color(0xFF191C4A)
-internal val Brand900 = Color(0xFF101336)
-internal val BrandInk = Color(0xFF0B0D26)
+// Pale sage — the tertiary and the tint behind cards.
+internal val Sage = Color(0xFFE1EDD4)                    // source swatch
+internal val SageDeep = Color(0xFF2F6B4F)                // light-mode tertiary
+internal val SageInk = Color(0xFF24371B)                 // text on Sage (10.5:1)
+internal val SageDarkContainer = Color(0xFF34472B)
 
 // ---------------------------------------------------------------------------
-// Neutrals — indigo-tinted, so they sit under the brand ramp without clashing.
+// Neutrals — light mode is tinted toward the sage palette; dark mode stays neutral black.
 // ---------------------------------------------------------------------------
 
-internal val NeutralLightBackground = Color(0xFFF7F8FC)
+internal val NeutralLightBackground = Color(0xFFF6FAF2)
 internal val NeutralLightSurface = Color(0xFFFFFFFF)
-internal val NeutralLightSurfaceVariant = Color(0xFFE9EBF7)
-internal val NeutralLightContainer = Color(0xFFF1F2FA)
-internal val NeutralLightContainerHigh = Color(0xFFEAECF6)
-internal val NeutralLightContainerHighest = Color(0xFFE3E6F3)
-internal val NeutralLightDim = Color(0xFFDDE0EE)
-internal val NeutralLightOn = Color(0xFF14162B)
-internal val NeutralLightOnVariant = Color(0xFF575B78)
-internal val NeutralLightOutline = Color(0xFF7377A0)
-internal val NeutralLightDivider = Color(0xFFDEE1F0)
-internal val NeutralLightInverse = Color(0xFF262A45)
-internal val NeutralLightInverseOn = Color(0xFFEDEFFA)
+internal val NeutralLightSurfaceVariant = Color(0xFFE1EDD4)
+internal val NeutralLightContainer = Color(0xFFEEF5E7)
+internal val NeutralLightContainerHigh = Color(0xFFE6F0DC)
+internal val NeutralLightContainerHighest = Color(0xFFDDEBD0)
+internal val NeutralLightDim = Color(0xFFD3E4C6)
+internal val NeutralLightOn = Color(0xFF142019)
+internal val NeutralLightOnVariant = Color(0xFF4A5B4D)
+internal val NeutralLightOutline = Color(0xFF6B806E)
+internal val NeutralLightDivider = Color(0xFFD6E4CB)
+internal val NeutralLightInverse = Color(0xFF1F2A22)
+internal val NeutralLightInverseOn = Color(0xFFE9F3E4)
 
 internal val NeutralDarkBackground = Color(0xFF080808)
 internal val NeutralDarkSurface = Color(0xFF121314)
@@ -176,27 +178,27 @@ internal val PaperScrim = Color(0x22000000)
 // only on the chip itself — the page behind it never participates, and one set
 // therefore serves both modes.
 //
-// Retinted to the indigo/blue/teal theme; warm hues stay only where they carry meaning
+// Retinted to the mint/leaf theme; warm hues stay only where they carry meaning
 // (alerts, weather, export). Originally six were darkened from their iOS system-palette originals, which put a white
 // glyph on bright yellow, cyan and green at ratios as low as 1.51:1. Each is
 // darkened the minimum needed to clear the 3:1 non-text floor, so the hue reads
 // the same as before.
 // ---------------------------------------------------------------------------
 
-internal val ChipAccount = Color(0xFF4D52B4)
+internal val ChipAccount = Color(0xFF0B7669)
 internal val ChipAppearance = Color(0xFF2F6FBF)
 internal val ChipLanguage = Color(0xFF0F8B7E)
 internal val ChipNotifications = Color(0xFFD9483B)
 internal val ChipWorldClock = Color(0xFF1F7FB8)
 internal val ChipWeather = Color(0xFFB28F00)
-internal val ChipTranslate = Color(0xFF3A3E93)
+internal val ChipTranslate = Color(0xFF2E6F4E)
 internal val ChipEmergency = Color(0xFFE0314F)
 internal val ChipCompass = Color(0xFF0E8F8A)
 internal val ChipArchive = Color(0xFF6A6F85)
 internal val ChipTrash = Color(0xFFB4525C)
 internal val ChipExport = Color(0xFFC26A00)
 internal val ChipBackup = Color(0xFF2A7FCB)
-internal val ChipHelp = Color(0xFF5A5FC4)
+internal val ChipHelp = Color(0xFF3E7D5A)
 internal val ChipFeedback = Color(0xFF12937F)
 internal val ChipAbout = Color(0xFF6A6F85)
 
@@ -246,11 +248,11 @@ internal val PassNoticeInk = Color(0xFF664D03)
  * Links on the pass. Fixed like the rest of the card: the theme's primary inverts
  * in dark mode to a pale blue that all but vanishes on white paper (1.51:1).
  */
-internal val PassLink = Color(0xFF4D52B4)
+internal val PassLink = Color(0xFF0B7669)
 
 // Expense cards. The light value is sampled from the approved summary-card
 // reference; the dark counterpart keeps the same blue-toned visual hierarchy.
-internal val ExpenseCardLight = Color(0xFFE6E9F8)
+internal val ExpenseCardLight = Color(0xFFE1EDD4)
 internal val ExpenseCardDark = NeutralDarkSurfaceVariant
 
 // ---------------------------------------------------------------------------
@@ -269,17 +271,13 @@ internal val ExpenseCardDark = NeutralDarkSurfaceVariant
 // Its high opacity keeps the floating bar distinct from cards scrolling beneath it.
 internal val NavBarLight = Color(0xF5FFFFFF)
 internal val NavBarDark = Color(0xCC1B1C1E)
-internal val NavPillLight = Color(0xF5F6F8FF)
+internal val NavPillLight = Color(0xF5F1F7EA)
 internal val NavPillDark = Color(0xF2272829)
-internal val NavBorderLight = Color(0x2214162B)
+internal val NavBorderLight = Color(0x22142019)
 internal val NavBorderDark = Color(0x2EEDEEF0)
 
 /** Scrim behind controls floating over photography, where the photo is the background. */
 internal val OverlayControlScrim = Color(0xFF333333)
-
-/** On-container tints for dark mode, brighter than [Brand100] so they read as text. */
-internal val Brand050Bright = Color(0xFFD4E7FB)
-internal val Brand075Bright = Color(0xFFC9E1F8)
 
 // ---------------------------------------------------------------------------
 // Assorted accents.

@@ -49,21 +49,21 @@ private val ItineraTypography = Typography().let { type ->
 // ---------------------------------------------------------------------------
 
 private val LightColors = lightColorScheme(
-    primary = Brand400,
+    primary = MintDeep,
     onPrimary = Color.White,
-    primaryContainer = Brand100,
-    onPrimaryContainer = Brand800,
-    inversePrimary = Brand100,
+    primaryContainer = MintContainerLight,
+    onPrimaryContainer = MintInk,
+    inversePrimary = Mint,
 
-    secondary = Brand500,
+    secondary = LeafDeep,
     onSecondary = Color.White,
-    secondaryContainer = Brand050,
-    onSecondaryContainer = Brand800,
+    secondaryContainer = Leaf,
+    onSecondaryContainer = LeafInk,
 
-    tertiary = TealLight,
+    tertiary = SageDeep,
     onTertiary = Color.White,
-    tertiaryContainer = TealLightContainer,
-    onTertiaryContainer = TealLightOnContainer,
+    tertiaryContainer = Sage,
+    onTertiaryContainer = SageInk,
 
     background = NeutralLightBackground,
     onBackground = NeutralLightOn,
@@ -71,7 +71,7 @@ private val LightColors = lightColorScheme(
     onSurface = NeutralLightOn,
     surfaceVariant = NeutralLightSurfaceVariant,
     onSurfaceVariant = NeutralLightOnVariant,
-    surfaceTint = Brand400,
+    surfaceTint = MintDeep,
     inverseSurface = NeutralLightInverse,
     inverseOnSurface = NeutralLightInverseOn,
 
@@ -94,21 +94,21 @@ private val LightColors = lightColorScheme(
 )
 
 private val DarkColors = darkColorScheme(
-    primary = Brand200,
-    onPrimary = BrandInk,
-    primaryContainer = Brand600,
-    onPrimaryContainer = Brand050Bright,
-    inversePrimary = Brand400,
+    primary = Mint,
+    onPrimary = MintDarkInk,
+    primaryContainer = MintDarkContainer,
+    onPrimaryContainer = MintDarkOnContainer,
+    inversePrimary = MintDeep,
 
-    secondary = TealDark,
-    onSecondary = TealDarkOn,
-    secondaryContainer = TealDarkContainer,
-    onSecondaryContainer = TealLightContainer,
+    secondary = Leaf,
+    onSecondary = LeafDarkInk,
+    secondaryContainer = LeafDarkContainer,
+    onSecondaryContainer = Sage,
 
-    tertiary = TealDark,
-    onTertiary = TealDarkOn,
-    tertiaryContainer = TealDarkContainer,
-    onTertiaryContainer = TealLightContainer,
+    tertiary = Sage,
+    onTertiary = SageInk,
+    tertiaryContainer = SageDarkContainer,
+    onTertiaryContainer = Sage,
 
     background = NeutralDarkBackground,
     onBackground = NeutralDarkOn,
@@ -257,7 +257,7 @@ private val LightItineraColors = ItineraColors(
     navBarSurface = NavBarLight,
     navBarBorder = NavBorderLight,
     navPillSurface = NavPillLight,
-    navIconSelected = Brand500,
+    navIconSelected = MintDeep,
     navIconUnselected = NeutralLightOnVariant,
 )
 
@@ -315,7 +315,7 @@ private val DarkItineraColors = ItineraColors(
     navBarSurface = NavBarDark,
     navBarBorder = NavBorderDark,
     navPillSurface = NavPillDark,
-    navIconSelected = Brand200,
+    navIconSelected = Mint,
     navIconUnselected = NeutralDarkOnVariant,
 )
 
