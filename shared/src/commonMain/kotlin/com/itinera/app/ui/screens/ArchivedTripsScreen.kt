@@ -3,6 +3,8 @@ package com.itinera.app.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -33,9 +35,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.Trip
+import com.itinera.app.ui.components.ActionPill
 import com.itinera.app.ui.components.TopBar
 import com.itinera.app.ui.theme.itinera
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ArchivedTripsScreen(
     trips: List<Trip>,
@@ -44,7 +48,6 @@ fun ArchivedTripsScreen(
     onDelete: (String) -> Unit,
 ) {
     val s = LocalStrings.current
-    var pendingDeleteId by remember { mutableStateOf<String?>(null) }
 
     fun String.toTitleCase(): String =
         split(" ").joinToString(" ") { word ->
@@ -93,39 +96,17 @@ fun ArchivedTripsScreen(
                             isPinned = trip.pinned,
                         )
                         // action row beneath the card
-                        Row(
-                            Modifier.fillMaxWidth().padding(top = 6.dp),
-                            horizontalArrangement = Arrangement.End,
+                        FlowRow(
+                            Modifier.fillMaxWidth().padding(top = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            TextButton(onClick = { onUnarchive(trip.id) }) {
-                                Icon(Icons.Filled.Unarchive, null, modifier = Modifier.size(18.dp))
-                                Spacer(Modifier.width(6.dp))
-                                Text(s.unarchive)
-                            }
-                            Spacer(Modifier.width(4.dp))
-                            TextButton(onClick = { pendingDeleteId = trip.id }) {
-                                Icon(Icons.Filled.Delete, null, tint = MaterialTheme.itinera.destructive, modifier = Modifier.size(18.dp))
-                                Spacer(Modifier.width(6.dp))
-                                Text(s.delete, color = MaterialTheme.itinera.destructive)
-                            }
+                            ActionPill(s.unarchive, Icons.Filled.Unarchive, MaterialTheme.colorScheme.primary, { onUnarchive(trip.id) })
+                            ActionPill(s.delete, Icons.Filled.Delete, MaterialTheme.itinera.destructive, { onDelete(trip.id) })
                         }
                     }
                 }
             }
         }
-    }
-
-    if (pendingDeleteId != null) {
-        AlertDialog(
-            onDismissRequest = { pendingDeleteId = null },
-            title = { Text(s.deleteTripQ) },
-            text = { Text(s.cantBeUndone) },
-            confirmButton = {
-                TextButton(onClick = { onDelete(pendingDeleteId!!); pendingDeleteId = null }) {
-                    Text(s.delete, color = MaterialTheme.itinera.destructive)
-                }
-            },
-            dismissButton = { TextButton(onClick = { pendingDeleteId = null }) { Text(s.cancel) } },
-        )
     }
 }

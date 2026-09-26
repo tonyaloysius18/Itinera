@@ -129,7 +129,6 @@ fun TripsHomeScreen(
 
     val s = LocalStrings.current
     var openCardId by remember { mutableStateOf<String?>(null) }
-    var pendingDeleteId by remember { mutableStateOf<String?>(null) }
 
     var showAddDialog by remember { mutableStateOf(false) }
     var editingTrip by remember { mutableStateOf<Trip?>(null) }
@@ -275,7 +274,7 @@ fun TripsHomeScreen(
                                 onPin = { onPinTrip(trip.id); openCardId = null },
                                 onEdit = { editingTrip = trip; openCardId = null },
                                 onArchive = { onArchiveTrip(trip.id); openCardId = null },
-                                onDelete = { pendingDeleteId = trip.id; openCardId = null },
+                                onDelete = { onDeleteTrip(trip.id); openCardId = null },
                                 isOwner = trip.isOwnedBy(currentUid),
                                 isPinned = trip.id in pinnedTripIds,
                             )
@@ -313,7 +312,7 @@ fun TripsHomeScreen(
                                     onPin = { onPinTrip(trip.id); openCardId = null },
                                     onEdit = { editingTrip = trip; openCardId = null },
                                     onArchive = { onArchiveTrip(trip.id); openCardId = null },
-                                    onDelete = { pendingDeleteId = trip.id; openCardId = null },
+                                    onDelete = { onDeleteTrip(trip.id); openCardId = null },
                                     isOwner = trip.isOwnedBy(currentUid),
                                     isPinned = trip.id in pinnedTripIds,
                                 )
@@ -357,19 +356,6 @@ fun TripsHomeScreen(
                 )
             }
         }
-    }
-    if (pendingDeleteId != null) {
-        AlertDialog(
-            onDismissRequest = { pendingDeleteId = null },
-            title = { Text(s.deleteTripQ) },
-            text = { Text(s.cantBeUndone) },
-            confirmButton = {
-                TextButton(onClick = { onDeleteTrip(pendingDeleteId!!); pendingDeleteId = null }) {
-                    Text(s.delete, color = MaterialTheme.itinera.destructive)
-                }
-            },
-            dismissButton = { TextButton(onClick = { pendingDeleteId = null }) { Text(s.cancel) } },
-        )
     }
     if (showAddDialog) {
         TripNameDialog(
@@ -511,9 +497,14 @@ private fun SwipeableTripCard(
 ) {
     val s = LocalStrings.current
     val density = LocalDensity.current
-    val actionWidth = 80.dp
+    val isPast = phase == TripPhase.PAST
+    val actionWidth = if (isPast) 42.dp else 80.dp
     val gap = 15.dp
-    val panelWidth = (if (isOwner) actionWidth * 2 else actionWidth) + gap
+    val panelWidth = if (isPast) {
+        (if (isOwner) 168.dp else 84.dp) + gap
+    } else {
+        (if (isOwner) actionWidth * 2 else actionWidth) + gap
+    }
     val panelPx = with(density) { panelWidth.toPx() }
     val scope = rememberCoroutineScope()
     val offsetX = remember { Animatable(0f) }
@@ -528,7 +519,7 @@ private fun SwipeableTripCard(
     // Slide the WHOLE card (card + action icons) off the left edge, then run the action.
     fun animateOutThen(action: () -> Unit) {
         scope.launch {
-            val screenSlide = with(density) { (panelWidth + 600.dp).toPx() }
+            val screenSlide = with(density) { panelWidth.toPx() + 600f }
             exitOffsetX.animateTo(-screenSlide, tween(durationMillis = 300))
             action()
         }
@@ -544,24 +535,47 @@ private fun SwipeableTripCard(
             Modifier.matchParentSize().clip(CardShape),
             horizontalArrangement = Arrangement.End,
         ) {
-            Column(
+            Box(
                 Modifier
                     .width(panelWidth)
                     .fillMaxHeight()
                     .padding(start = gap)
             ) {
-                if (isOwner) {
-                    Row(Modifier.weight(1f)) {
-                        ActionButton(Icons.Filled.PushPin, if (isPinned) s.unpin else s.pin, MaterialTheme.itinera.actionPin, progress, Modifier.weight(1f), onPin)
-                        ActionButton(Icons.Filled.Edit, s.edit, MaterialTheme.itinera.actionEdit, progress, Modifier.weight(1f), onEdit)
-                    }
-                    Row(Modifier.weight(1f)) {
-                        ActionButton(Icons.Filled.Archive, s.archive, MaterialTheme.itinera.actionArchive, progress, Modifier.weight(1f)) { animateOutThen(onArchive) }
-                        ActionButton(Icons.Filled.Delete, s.delete, MaterialTheme.itinera.actionDelete, progress, Modifier.weight(1f), onDelete)
+                if (isPast) {
+                    Row(
+                        Modifier.fillMaxSize(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        if (isOwner) {
+                            ActionButton(Icons.Filled.PushPin, if (isPinned) s.unpin else s.pin, MaterialTheme.itinera.actionPin, progress, Modifier.weight(1f), compact = true, onPin = onPin)
+                            ActionButton(Icons.Filled.Edit, s.edit, MaterialTheme.itinera.actionEdit, progress, Modifier.weight(1f), compact = true, onPin = onEdit)
+                            ActionButton(Icons.Filled.Archive, s.archive, MaterialTheme.itinera.actionArchive, progress, Modifier.weight(1f), compact = true) { animateOutThen(onArchive) }
+                            ActionButton(Icons.Filled.Delete, s.delete, MaterialTheme.itinera.actionDelete, progress, Modifier.weight(1f), compact = true, onPin = onDelete)
+                        } else {
+                            ActionButton(Icons.Filled.PushPin, if (isPinned) s.unpin else s.pin, MaterialTheme.itinera.actionPin, progress, Modifier.weight(1f), compact = true, onPin = onPin)
+                            ActionButton(Icons.Filled.Archive, s.archive, MaterialTheme.itinera.actionArchive, progress, Modifier.weight(1f), compact = true) { animateOutThen(onArchive) }
+                        }
                     }
                 } else {
-                    ActionButton(Icons.Filled.PushPin, if (isPinned) s.unpin else s.pin, MaterialTheme.itinera.actionPin, progress, Modifier.weight(1f), onPin)
-                    ActionButton(Icons.Filled.Archive, s.archive, MaterialTheme.itinera.actionArchive, progress, Modifier.weight(1f)) { animateOutThen(onArchive) }
+                    Column(
+                        Modifier
+                            .fillMaxSize()
+                    ) {
+                        if (isOwner) {
+                            Row(Modifier.weight(1f)) {
+                                ActionButton(Icons.Filled.PushPin, if (isPinned) s.unpin else s.pin, MaterialTheme.itinera.actionPin, progress, Modifier.weight(1f), compact = false, onPin = onPin)
+                                ActionButton(Icons.Filled.Edit, s.edit, MaterialTheme.itinera.actionEdit, progress, Modifier.weight(1f), compact = false, onPin = onEdit)
+                            }
+                            Row(Modifier.weight(1f)) {
+                                ActionButton(Icons.Filled.Archive, s.archive, MaterialTheme.itinera.actionArchive, progress, Modifier.weight(1f), compact = false) { animateOutThen(onArchive) }
+                                ActionButton(Icons.Filled.Delete, s.delete, MaterialTheme.itinera.actionDelete, progress, Modifier.weight(1f), compact = false, onPin = onDelete)
+                            }
+                        } else {
+                            ActionButton(Icons.Filled.PushPin, if (isPinned) s.unpin else s.pin, MaterialTheme.itinera.actionPin, progress, Modifier.weight(1f), compact = false, onPin = onPin)
+                            ActionButton(Icons.Filled.Archive, s.archive, MaterialTheme.itinera.actionArchive, progress, Modifier.weight(1f), compact = false) { animateOutThen(onArchive) }
+                        }
+                    }
                 }
             }
         }
@@ -624,13 +638,16 @@ private fun ActionButton(
     bg: Color,
     progress: Float,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit,
+    compact: Boolean = false,
+    onPin: (() -> Unit)? = null,
+    onClick: (() -> Unit)? = null,
 ) {
+    val action = onClick ?: onPin ?: {}
     Column(
         modifier
             .fillMaxHeight()
             .clickable(
-                onClick = onClick,
+                onClick = action,
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() },
             ),
@@ -639,7 +656,7 @@ private fun ActionButton(
     ) {
         Box(
             Modifier
-                .size(52.dp)
+                .size(if (compact) 36.dp else 52.dp)
                 .graphicsLayer {
                     scaleX = progress
                     scaleY = progress
@@ -649,14 +666,16 @@ private fun ActionButton(
                 .background(bg),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(icon, contentDescription = label, tint = Color.White, modifier = Modifier.size(20.dp))
+            Icon(icon, contentDescription = label, tint = Color.White, modifier = Modifier.size(if (compact) 16.dp else 20.dp))
         }
-        Spacer(Modifier.height(5.dp))
-        Text(
-            label,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-            style = MaterialTheme.typography.labelSmall,
-        )
+        if (!compact) {
+            Spacer(Modifier.height(5.dp))
+            Text(
+                label,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                style = MaterialTheme.typography.labelSmall,
+            )
+        }
     }
 }
 

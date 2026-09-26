@@ -84,6 +84,9 @@ data class Trip(
     val endDate: LocalDate? = null,
     // Countries the trip visits, for trips without transport legs (Nera). Legs win when present.
     val destinationCountries: List<String> = emptyList(),
+    // 0 = not deleted; otherwise the epoch millis when the owner moved the trip to "Recently deleted". It stays
+    // restorable for 30 days, then it is removed for good.
+    val deletedAt: Long = 0L,
 )
 
 /**

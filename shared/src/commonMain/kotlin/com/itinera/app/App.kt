@@ -18,12 +18,15 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -34,6 +37,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CurrencyExchange
@@ -87,6 +91,7 @@ import com.itinera.app.i18n.systemLanguage
 import com.itinera.app.model.ExpenseCategory
 import com.itinera.app.model.Trip
 import com.itinera.app.model.canEdit
+import com.itinera.app.model.isOwnedBy
 import com.itinera.app.model.inferExpenseCategory
 import com.itinera.app.ui.BackHandler
 import com.itinera.app.ui.Navigator
@@ -101,6 +106,7 @@ import com.itinera.app.ui.screens.AddLegScreen
 import com.itinera.app.ui.screens.AddPlaceScreen
 import com.itinera.app.ui.screens.AppearanceScreen
 import com.itinera.app.ui.screens.ArchivedTripsScreen
+import com.itinera.app.ui.screens.RecentlyDeletedScreen
 import com.itinera.app.ui.screens.BackupStatusScreen
 import com.itinera.app.ui.screens.CalendarScreen
 import com.itinera.app.ui.screens.ChecklistScreen
@@ -352,7 +358,10 @@ private fun AppContent(
     }
 
     LaunchedEffect(repository.tripsSyncedOnce) {
-        if (repository.tripsSyncedOnce) repository.backfillMissingTripImages()
+        if (repository.tripsSyncedOnce) {
+            repository.purgeExpiredTrips()          // erase trips that have sat in "Recently deleted" for over 30 days
+            repository.backfillMissingTripImages()
+        }
     }
 
     // ===== app-level message pill =====
@@ -364,6 +373,11 @@ private fun AppContent(
         }
     }
 
+    // Undo snackbar: shown after deleting a trip or an expense. A newer request replaces the current one.
+    var undoRequest by remember { mutableStateOf<UndoRequest?>(null) }
+    LaunchedEffect(undoRequest) {
+        if (undoRequest != null) { delay(6000); undoRequest = null }
+    }
     var pillMessageTop by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(pillMessageTop) {
         if (pillMessageTop != null) { delay(2000); pillMessageTop = null }
@@ -494,7 +508,7 @@ private fun AppContent(
                                 onRenameTrip = { id, name -> repository.updateTrip(id, name) },
                                 onPinTrip = { repository.togglePin(it) },
                                 onArchiveTrip = { repository.toggleArchive(it) },
-                                onDeleteTrip = { repository.deleteTrip(it) },
+                                onDeleteTrip = { id -> repository.deleteTripUndoable(id)?.let { undo -> undoRequest = UndoRequest(s.tripDeleted, undo) } },
                                 onPlanWithNera = { navigator.push(Screen.Nera()) },
                                 currentUid = repository.authService.currentUid ?: "",
                                 onOpenMembers = { navigator.push(Screen.Members(it)) },
@@ -591,7 +605,17 @@ private fun AppContent(
                                 trips = repository.archivedTrips(),
                                 onBack = { navigator.back() },
                                 onUnarchive = { repository.toggleArchive(it) },
-                                onDelete = { repository.deleteTrip(it) },
+                                onDelete = { id -> repository.deleteTripUndoable(id)?.let { undo -> undoRequest = UndoRequest(s.tripDeleted, undo) } },
+                            )
+
+                            is Screen.RecentlyDeleted -> RecentlyDeletedScreen(
+                                trips = repository.deletedTrips
+                                    .filter { it.isOwnedBy(repository.authService.currentUid ?: "") }
+                                    .sortedByDescending { it.deletedAt },
+                                daysLeft = { repository.daysLeftInTrash(it) },
+                                onBack = { navigator.back() },
+                                onRestore = { id -> repository.restoreTrip(id); pillMessage = s.tripRestored },
+                                onDeleteForever = { id -> repository.deleteTripForever(id) },
                             )
 
                             is Screen.Travellers -> {
@@ -764,7 +788,7 @@ private fun AppContent(
                                         onBack = { navigator.back() },
                                         onAddExpense = { navigator.push(Screen.AddExpense(screen.tripId)) },
                                         onEditExpense = { navigator.push(Screen.AddExpense(screen.tripId, it)) },
-                                        onDeleteExpense = { repository.deleteExpense(it) },
+                                        onDeleteExpense = { id -> repository.deleteExpenseUndoable(id)?.let { undo -> undoRequest = UndoRequest(s.expenseDeleted, undo) } },
                                         onSetCurrency = { repository.setTripCurrency(screen.tripId, it) },
                                         canEdit = trip.canEdit(repository.authService.currentUid ?: ""),
                                         currentUid = repository.authService.currentUid ?: "",
@@ -839,6 +863,7 @@ private fun AppContent(
                                 onTranslate = { navigator.push(Screen.Translate) },
                                 onCompass = { navigator.push(Screen.Compass) },
                                 onArchivedTrips = { navigator.push(Screen.ArchivedTrips) },
+                                onRecentlyDeleted = { navigator.push(Screen.RecentlyDeleted) },
                                 onExportTrips = { navigator.push(Screen.ExportTrips) },
                                 onBackupStatus = { navigator.push(Screen.BackupStatus) },
                                 onHelp = { navigator.push(Screen.Help) },
@@ -1156,6 +1181,18 @@ private fun AppContent(
                 ) { navigator.resetTo(it) }
             }
         }
+
+        // Undo snackbar overlay
+        UndoSnackbar(
+            request = undoRequest,
+            actionLabel = s.undo,
+            onAction = { undoRequest?.onUndo?.invoke(); undoRequest = null },
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 96.dp),
+        )
 
         // Message pill overlay
         MessagePill(
@@ -1496,6 +1533,68 @@ private fun NavSearchButton(
             tint = tint,
             modifier = Modifier.size(24.dp),
         )
+    }
+}
+
+/** What the Undo snackbar shows and what tapping Undo does. A fresh instance per delete, so a new one restarts the timer. */
+private class UndoRequest(val message: String, val onUndo: () -> Unit)
+
+/** A bottom snackbar with an action button, for reversible actions such as deleting a trip or an expense. */
+@Composable
+private fun UndoSnackbar(request: UndoRequest?, actionLabel: String, onAction: () -> Unit, modifier: Modifier = Modifier) {
+    var last by remember { mutableStateOf<UndoRequest?>(null) }
+    if (request != null) last = request
+
+    val dark = MaterialTheme.itinera.isDark
+    val primary = MaterialTheme.colorScheme.primary
+    AnimatedVisibility(
+        visible = request != null,
+        enter = fadeIn() + slideInVertically { it / 2 },
+        exit = fadeOut() + slideOutVertically { it / 2 },
+        modifier = modifier,
+    ) {
+        // A translucent card in the theme's own surface colour (so light and dark both fit), with a hairline border.
+        Surface(
+            modifier = Modifier.widthIn(max = 560.dp).fillMaxWidth(),
+            shape = RoundedCornerShape(18.dp),
+            color = (if (dark) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surface).copy(alpha = 0.92f),
+            // No shadowElevation: a shadow is drawn under a translucent surface and shows through as a lighter inner block.
+            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.8f)),
+        ) {
+            Row(
+                Modifier.padding(start = 16.dp, end = 10.dp, top = 8.dp, bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Icon(
+                    Icons.Filled.Info,
+                    contentDescription = null,
+                    tint = primary,
+                    modifier = Modifier.size(24.dp),
+                )
+                Text(
+                    last?.message.orEmpty(),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f).padding(vertical = 6.dp),
+                )
+                // "Undo" as a tinted pill.
+                Surface(
+                    onClick = onAction,
+                    shape = RoundedCornerShape(50),
+                    color = primary.copy(alpha = if (dark) 0.22f else 0.12f),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, primary.copy(alpha = 0.45f)),
+                ) {
+                    Text(
+                        actionLabel,
+                        color = primary,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 9.dp),
+                    )
+                }
+            }
+        }
     }
 }
 

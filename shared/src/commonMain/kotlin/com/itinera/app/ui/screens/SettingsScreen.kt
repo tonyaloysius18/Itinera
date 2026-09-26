@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Feedback
@@ -70,6 +71,7 @@ import com.itinera.app.ui.theme.ChipTranslate
 import com.itinera.app.ui.theme.ChipEmergency
 import com.itinera.app.ui.theme.ChipCompass
 import com.itinera.app.ui.theme.ChipArchive
+import com.itinera.app.ui.theme.ChipTrash
 import com.itinera.app.ui.theme.ChipExport
 import com.itinera.app.ui.theme.ChipBackup
 import com.itinera.app.ui.theme.ChipHelp
@@ -88,6 +90,7 @@ private val ColorTranslate = ChipTranslate
 private val ColorEmergency = ChipEmergency
 private val ColorCompass = ChipCompass
 private val ColorArchive = ChipArchive
+private val ColorTrash = ChipTrash
 private val ColorExport = ChipExport
 private val ColorBackup = ChipBackup
 private val ColorHelp = ChipHelp
@@ -108,6 +111,7 @@ fun SettingsScreen(
     onTranslate: () -> Unit,
     onCompass: () -> Unit,
     onArchivedTrips: () -> Unit,
+    onRecentlyDeleted: () -> Unit,
     onExportTrips: () -> Unit,
     onBackupStatus: () -> Unit,
     onHelp: () -> Unit,
@@ -212,6 +216,8 @@ fun SettingsScreen(
                 // ⬅ CHANGED — was s.archivedTrips.toTitleCase(). Fix the casing in
                 // Strings.kt rather than transforming it here.
                 SettingsRow(Icons.Filled.Archive, s.archivedTrips, ColorArchive, onClick = onArchivedTrips)
+                ThinDivider()
+                SettingsRow(Icons.Filled.Delete, s.recentlyDeleted, ColorTrash, onClick = onRecentlyDeleted)
                 ThinDivider()
                 SettingsRow(Icons.Filled.Download, s.exportTrips, ColorExport, onClick = onExportTrips)
                 ThinDivider()

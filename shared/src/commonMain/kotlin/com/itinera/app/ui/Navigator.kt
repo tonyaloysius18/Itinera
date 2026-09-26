@@ -54,6 +54,8 @@ sealed interface Screen {
 
     data object ArchivedTrips : Screen
 
+    data object RecentlyDeleted : Screen
+
     data object LanguagePicker : Screen
 
     data object ExportTrips : Screen

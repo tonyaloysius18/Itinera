@@ -45,6 +45,9 @@ import kotlinx.datetime.LocalDate
 class TripRepository {
 
     val trips = mutableStateListOf<Trip>()
+
+    /** Trips in "Recently deleted": still in the cloud with deletedAt set, hidden from every normal list. */
+    val deletedTrips = mutableStateListOf<Trip>()
     val documents = mutableStateListOf<DocItem>()
 
     val docService = DocService()
@@ -112,6 +115,12 @@ class TripRepository {
 
 
     @OptIn(kotlin.time.ExperimentalTime::class)
+    companion object {
+        /** How long a deleted trip stays restorable in "Recently deleted". */
+        const val TRASH_DAYS = 30L
+        private const val DAY_MS = 86_400_000L
+    }
+
     private fun nowMillis(): Long =
         kotlin.time.Clock.System.now().toEpochMilliseconds()
 
@@ -158,7 +167,9 @@ class TripRepository {
             val remote = tripService.loadTrips(uid)
             println("ITINERA: LOAD ok — ${remote.size} trips")
             trips.clear()
-            trips.addAll(remote)
+            trips.addAll(remote.filter { it.deletedAt == 0L })
+            deletedTrips.clear()
+            deletedTrips.addAll(remote.filter { it.deletedAt != 0L })
         } catch (e: Exception) {
             println("ITINERA: LOAD FAILED — ${e.message}")
         }
@@ -385,9 +396,57 @@ class TripRepository {
         }
     }
 
+    /**
+     * Moves a trip to "Recently deleted" instead of erasing it: the trip document stays in the cloud with deletedAt set
+     * (so everything under it stays too) and can be restored for [TRASH_DAYS] days. Only the owner can delete a trip.
+     */
     fun deleteTrip(id: String) {
+        val trip = trips.firstOrNull { it.id == id } ?: return
+        val uid = authService.currentUid ?: return
+        if (!trip.isOwnedBy(uid)) return
+        val trashed = trip.copy(deletedAt = nowMillis())
         trips.removeAll { it.id == id }
-        removeRemote(id)
+        deletedTrips.removeAll { it.id == id }
+        deletedTrips.add(trashed)
+        persist(trashed)
+    }
+
+    /** Takes a trip out of "Recently deleted" and back into the normal lists. */
+    fun restoreTrip(id: String) {
+        val trashed = deletedTrips.firstOrNull { it.id == id } ?: return
+        val restored = trashed.copy(deletedAt = 0L)
+        deletedTrips.removeAll { it.id == id }
+        if (trips.none { it.id == id }) trips.add(restored)
+        persist(restored)
+    }
+
+    /** Removes a trip in "Recently deleted" for good: the trip and everything under it. */
+    fun deleteTripForever(id: String) {
+        deletedTrips.removeAll { it.id == id }
+        ioScope.launch { runCatching { tripService.deleteTripCascade(id) } }
+    }
+
+    /** Days left before a trip in "Recently deleted" is removed for good (0 once it is due). */
+    fun daysLeftInTrash(trip: Trip): Int {
+        val leftMs = trip.deletedAt + TRASH_DAYS * DAY_MS - nowMillis()
+        return if (leftMs <= 0) 0 else ((leftMs + DAY_MS - 1) / DAY_MS).toInt()
+    }
+
+    /** Erases my trips that have been in "Recently deleted" for more than [TRASH_DAYS] days. Run after the first sync. */
+    fun purgeExpiredTrips() {
+        val uid = authService.currentUid ?: return
+        deletedTrips
+            .filter { it.isOwnedBy(uid) && nowMillis() - it.deletedAt > TRASH_DAYS * DAY_MS }
+            .forEach { deleteTripForever(it.id) }
+    }
+
+    /** Deletes a trip (to "Recently deleted") and returns a function that restores it, or null if it can't be deleted. */
+    fun deleteTripUndoable(id: String): (() -> Unit)? {
+        val uid = authService.currentUid ?: return null
+        val trip = trips.firstOrNull { it.id == id } ?: return null
+        if (!trip.isOwnedBy(uid)) return null
+        deleteTrip(id)
+        return { restoreTrip(id) }
     }
 
     fun isPinned(tripId: String): Boolean = tripId in profile.pinnedTripIds
@@ -709,6 +768,7 @@ class TripRepository {
     fun clearLocal() {
         stopSync()
         trips.clear()
+        deletedTrips.clear()
         documents.clear()
         checklist.clear()
         activities.clear()
@@ -1052,6 +1112,20 @@ class TripRepository {
         if (exp != null) ioScope.launch { runCatching { expenseService.deleteExpense(exp.tripId, expenseId) } }
     }
 
+    /** Deletes an expense and returns a function that brings it back, or null if there was no such expense. */
+    fun deleteExpenseUndoable(expenseId: String): (() -> Unit)? {
+        val i = expenses.indexOfFirst { it.id == expenseId }
+        if (i < 0) return null
+        val exp = expenses[i]
+        deleteExpense(expenseId)
+        return {
+            if (expenses.none { it.id == exp.id }) {
+                expenses.add(i.coerceAtMost(expenses.size), exp)
+                ioScope.launch { runCatching { expenseService.saveExpense(exp) } }
+            }
+        }
+    }
+
     /** No longer needed for live sync; kept as a no-op so Backup "Sync Now" compiles. */
     suspend fun loadExpenses(uid: String) { /* handled by live collection-group sync */ }
 
@@ -1211,11 +1285,19 @@ class TripRepository {
     }
 
     // Diff-apply: update only what changed, so lists don't flicker or lose scroll.
-    private fun applyTrips(remote: List<Trip>) {
+    private fun applyTrips(remoteAll: List<Trip>) {
+        // Trips in "Recently deleted" (deletedAt set) live in their own list so no normal screen ever sees them.
+        val remote = remoteAll.filter { it.deletedAt == 0L }
         trips.removeAll { local -> remote.none { it.id == local.id } }
         remote.forEach { r ->
             val i = trips.indexOfFirst { it.id == r.id }
             if (i >= 0) { if (trips[i] != r) trips[i] = r } else trips.add(r)
+        }
+        val gone = remoteAll.filter { it.deletedAt != 0L }
+        deletedTrips.removeAll { local -> gone.none { it.id == local.id } }
+        gone.forEach { r ->
+            val i = deletedTrips.indexOfFirst { it.id == r.id }
+            if (i >= 0) { if (deletedTrips[i] != r) deletedTrips[i] = r } else deletedTrips.add(r)
         }
     }
 

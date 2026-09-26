@@ -431,6 +431,25 @@ function cleanLinks(links) {
   return out.slice(0, 12);
 }
 
+// The model occasionally malforms a tool call so that the rest of the call (e.g. <parameter name="legs">[...]) ends up
+// inside a text field such as "message". That must never reach the traveller, and the data it swallowed is lost.
+const LEAK = /<\/?(?:antml:)?(?:parameter|invoke|function_calls)\b|<parameter\b/i;
+const leaked = (v) => typeof v === "string" && LEAK.test(v);
+const cutLeak = (v) => (typeof v === "string" && LEAK.test(v) ? v.slice(0, v.search(LEAK)).replace(/["\s,]+$/, "").trim() : v);
+
+/** True when a final tool call has markup leaked into any of its text fields. */
+function toolCallLeaked(block) {
+  const i = (block && block.input) || {};
+  return [i.message, i.title, i.destination, ...(Array.isArray(i.quick_replies) ? i.quick_replies : [])].some(leaked);
+}
+
+/** Adds a note to the last message of a conversation copy (a string turn or a list of tool results). */
+function withNote(convo, note) {
+  const last = convo[convo.length - 1];
+  const content = typeof last.content === "string" ? `${last.content}\n\n${note}` : [...last.content, { type: "text", text: note }];
+  return [...convo.slice(0, -1), { ...last, content }];
+}
+
 /**
  * For a draft: per leg, keep the "compare all" link plus the link for the mode Nera chose for that leg, so a round trip
  * shows 4 buttons instead of every mode both ways (the model does not reliably limit the modes it asks for).
@@ -451,8 +470,9 @@ function selectLegTimetables(timetables, legs) {
 
 async function runAgent({ callModel, runTool, messages, dataTools = DATA_TOOLS, finalTools = FINAL_TOOLS, onUsage }) {
   const finalNames = new Set(finalTools.map((t) => t.name));
-  const convo = [...messages];
+  let convo = [...messages];
   let retriedEmpty = false;
+  let retriedLeak = false;
   const links = [];
   const timetables = [];
   for (let round = 0; ; round++) {
@@ -462,7 +482,13 @@ async function runAgent({ callModel, runTool, messages, dataTools = DATA_TOOLS, 
     const uses = (response.content || []).filter((b) => b.type === "tool_use");
     const final = uses.find((b) => finalNames.has(b.name));
     if (final || lastRound || uses.length === 0) {
+      if (!retriedLeak && toolCallLeaked(final)) {
+        retriedLeak = true;
+        convo = withNote(convo, "[App notice, not written by the traveller: your last tool call was malformed, with parameter markup inside a text field. Call the tool again correctly: \"message\" must be plain sentences only, and legs, days and every other field go in their own parameters.]");
+        continue;
+      }
       const reply = shapeReply(response);
+      reply.message = cutLeak(reply.message);
       // The model sometimes calls `say` with no text, which the app would show as an empty bubble: try once more,
       // then fall back to a plain apology rather than ever returning a blank message.
       if (reply.type === "say" && !reply.message) {
@@ -488,4 +514,4 @@ async function runAgent({ callModel, runTool, messages, dataTools = DATA_TOOLS, 
   }
 }
 
-module.exports = { MODEL, FINAL_TOOLS, monthStartCalendar, buildSystem, withLimitReminder, withWeekdayCheck, weekdayMismatches, cleanMessages, cleanLinks, selectLegLinks, selectLegTimetables, shapeReply, cleanItinerary, runAgent };
+module.exports = { MODEL, FINAL_TOOLS, monthStartCalendar, buildSystem, withLimitReminder, withWeekdayCheck, weekdayMismatches, cleanMessages, cleanLinks, toolCallLeaked, cutLeak, selectLegLinks, selectLegTimetables, shapeReply, cleanItinerary, runAgent };
