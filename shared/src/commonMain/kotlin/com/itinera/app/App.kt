@@ -80,6 +80,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.itinera.app.data.FeatureBadges
 import com.itinera.app.data.PackingGroups
 import com.itinera.app.data.TripRepository
 import com.itinera.app.data.greetingDestinationForTrip
@@ -370,6 +371,8 @@ private fun AppContent(
 
     // ===== app-level message pill =====
     var pillMessage by remember { mutableStateOf<String?>(null) }
+    // "New" chip on the Discover Templates pill until the user first opens Discover after the update that added it.
+    var discoverIsNew by remember { mutableStateOf(FeatureBadges.isNew(FeatureBadges.DISCOVER_TEMPLATES)) }
     LaunchedEffect(pillMessage) {
         if (pillMessage != null) {
             delay(2000)
@@ -514,7 +517,12 @@ private fun AppContent(
                                 onArchiveTrip = { repository.toggleArchive(it) },
                                 onDeleteTrip = { id -> repository.deleteTripUndoable(id)?.let { undo -> undoRequest = UndoRequest(s.tripDeleted, undo) } },
                                 onPlanWithNera = { navigator.push(Screen.Nera()) },
-                                onOpenTemplates = { navigator.push(Screen.TripTemplates) },
+                                onOpenTemplates = {
+                                    FeatureBadges.markSeen(FeatureBadges.DISCOVER_TEMPLATES)
+                                    discoverIsNew = false
+                                    navigator.push(Screen.TripTemplates)
+                                },
+                                showDiscoverNew = discoverIsNew,
                                 currentUid = repository.authService.currentUid ?: "",
                                 onOpenMembers = { navigator.push(Screen.Members(it)) },
                                 onJoinByCode = { repository.joinTripByCode(it) },

@@ -125,6 +125,8 @@ fun TripsHomeScreen(
     onDeleteTrip: (String) -> Unit,
     onPlanWithNera: () -> Unit = {},
     onOpenTemplates: () -> Unit = {},
+    /** Show a "New" chip on the Discover Templates pill (until the user first opens Discover after an update). */
+    showDiscoverNew: Boolean = false,
     pinnedTripIds: Set<String> = emptySet(),
     /** Incremented by the nav bar's search button; each change opens the search field. */
     searchRequest: Int = 0,
@@ -239,7 +241,7 @@ fun TripsHomeScreen(
                     icon = Icons.Filled.Luggage,
                     title = s.noTripsYet,
                     subtitle = s.noTripsSubtitle,
-                    trailing = { ActionPill(s.discoverTemplatesPill, Icons.Filled.Explore, MaterialTheme.colorScheme.primary, onOpenTemplates) },
+                    trailing = { ActionPill(s.discoverTemplatesPill, Icons.Filled.Explore, MaterialTheme.colorScheme.primary, onOpenTemplates, badge = if (showDiscoverNew) s.newBadge else null) },
                 )
 
                 visibleTrips.isEmpty() -> HomeEmptyState(
@@ -299,7 +301,7 @@ fun TripsHomeScreen(
                                 },
                                 count = group.size,
                                 trailing = if (phase == TripPhase.UPCOMING) {
-                                    { ActionPill(s.discoverTemplatesPill, Icons.Filled.Explore, MaterialTheme.colorScheme.primary, onOpenTemplates) }
+                                    { ActionPill(s.discoverTemplatesPill, Icons.Filled.Explore, MaterialTheme.colorScheme.primary, onOpenTemplates, badge = if (showDiscoverNew) s.newBadge else null) }
                                 } else null,
                             )
                         }
@@ -884,7 +886,7 @@ fun TripCardContent(
                                 Modifier
                                     .fillMaxWidth(doneCount.toFloat() / trip.legs.size)
                                     .fillMaxHeight()
-                                    .background(if (doneCount == trip.legs.size) MaterialTheme.itinera.success else accent),
+                                    .background(if (doneCount == trip.legs.size) MaterialTheme.itinera.success else MaterialTheme.colorScheme.primary),
                             )
                         }
                         Spacer(Modifier.width(9.dp))
