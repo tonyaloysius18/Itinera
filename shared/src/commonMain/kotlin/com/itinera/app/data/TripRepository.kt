@@ -16,9 +16,11 @@ import com.itinera.app.model.Traveller
 import com.itinera.app.model.TransportType
 import com.itinera.app.model.Trip
 import com.itinera.app.model.TripAccent
+import com.itinera.app.model.TripTemplate
 import com.itinera.app.model.UserProfile
 import com.itinera.app.model.isOwnedBy
 import com.itinera.app.model.label
+import com.itinera.app.model.toNeraItinerary
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -65,6 +67,11 @@ class TripRepository {
     val purchaseService = PurchaseService()
 
     val activityService = ActivityService()
+
+    val tripTemplateService = TripTemplateService()
+    val tripTemplates = mutableStateListOf<TripTemplate>()
+    var tripTemplatesSyncedOnce by mutableStateOf(false)
+        private set
 
     val expenseService = ExpenseService()
 
@@ -250,6 +257,26 @@ class TripRepository {
         }
         return id
     }
+
+    /** Loads the curated Discover templates from Firestore. Cheap read, safe to call each time the screen opens. */
+    suspend fun loadTripTemplates() {
+        try {
+            val remote = tripTemplateService.loadTemplates()
+            tripTemplates.clear()
+            tripTemplates.addAll(remote)
+        } catch (e: Exception) {
+            println("ITINERA: TEMPLATES LOAD FAILED — ${e.message}")
+        }
+        tripTemplatesSyncedOnce = true
+    }
+
+    /**
+     * Adds a copy of a Discover [template] to the user's own trips, starting on [startDate]: converts
+     * it to the same draft shape Nera produces and hands it to [createTripFromItinerary]. Returns the
+     * new trip id.
+     */
+    fun addTripFromTemplate(template: TripTemplate, startDate: LocalDate): String =
+        createTripFromItinerary(template.toNeraItinerary(startDate))
 
     /**
      * Rebuilds a NeraItinerary from a trip's CURRENT real state (its activities and legs —

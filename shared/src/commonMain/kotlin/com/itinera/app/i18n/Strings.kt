@@ -754,6 +754,8 @@ class Strings {
     var planWithNera: String = ""
     var neraWelcome: String = ""
     var neraWelcomeNamed: String = ""
+    var neraWelcomeTrip: String = ""
+    var neraWelcomeTripNamed: String = ""
     var neraSuggest1: String = ""
     var neraSuggest2: String = ""
     var neraSuggest3: String = ""
@@ -818,6 +820,43 @@ class Strings {
     var transportOneChange: String = ""
     var transportChangesN: String = ""     // "%d changes"
     var transportScheduleNote: String = ""
+
+    // ── trip templates (Discover) ──
+    var browseTemplates: String = "Browse templates"
+    var discoverTemplates: String = "Discover"
+    var discoverTemplatesPill: String = "Discover Templates"
+    var noTemplatesMatch: String = "No templates match your filters"
+    var allFilter: String = "All"
+    var filterContinent: String = "Continent"
+    var filterType: String = "Type"
+    var filterBudget: String = "Budget"
+    var filterPace: String = "Pace"
+    var continentEurope: String = "Europe"
+    var continentAsia: String = "Asia"
+    var continentAfrica: String = "Africa"
+    var continentNorthAmerica: String = "North America"
+    var continentSouthAmerica: String = "South America"
+    var continentOceania: String = "Oceania"
+    var destinationBeach: String = "Beach"
+    var destinationMountain: String = "Mountain"
+    var destinationDesert: String = "Desert"
+    var destinationCity: String = "City"
+    var destinationCountryside: String = "Countryside"
+    var destinationIsland: String = "Island"
+    var destinationLake: String = "Lake"
+    var budgetBudget: String = "Budget"
+    var budgetMidRange: String = "Mid-range"
+    var budgetLuxury: String = "Luxury"
+    var paceRelaxed: String = "Relaxed"
+    var paceBalanced: String = "Balanced"
+    var pacePacked: String = "Packed"
+    var useThisTemplate: String = "Use this template"
+    var chooseStartDate: String = "Choose a start date"
+    var templateAddedToTrips: String = "Added to your trips"
+    var templateDurationDaysN: String = "%d days"     // e.g. "5 days"
+    var itinerary: String = "Itinerary"
+    var searchTemplates: String = "Search Templates"
+    var durationLabel: String = "Duration"
 
     fun copyApply(block: Strings.() -> Unit): Strings {
 
@@ -1449,6 +1488,8 @@ class Strings {
         c.planWithNera = this.planWithNera
         c.neraWelcome = this.neraWelcome
         c.neraWelcomeNamed = this.neraWelcomeNamed
+        c.neraWelcomeTrip = this.neraWelcomeTrip
+        c.neraWelcomeTripNamed = this.neraWelcomeTripNamed
         c.neraSuggest1 = this.neraSuggest1
         c.neraSuggest2 = this.neraSuggest2
         c.neraSuggest3 = this.neraSuggest3
@@ -1513,6 +1554,42 @@ class Strings {
         c.transportOneChange = this.transportOneChange
         c.transportChangesN = this.transportChangesN
         c.transportScheduleNote = this.transportScheduleNote
+
+        c.browseTemplates = this.browseTemplates
+        c.discoverTemplates = this.discoverTemplates
+        c.discoverTemplatesPill = this.discoverTemplatesPill
+        c.noTemplatesMatch = this.noTemplatesMatch
+        c.allFilter = this.allFilter
+        c.filterContinent = this.filterContinent
+        c.filterType = this.filterType
+        c.filterBudget = this.filterBudget
+        c.filterPace = this.filterPace
+        c.continentEurope = this.continentEurope
+        c.continentAsia = this.continentAsia
+        c.continentAfrica = this.continentAfrica
+        c.continentNorthAmerica = this.continentNorthAmerica
+        c.continentSouthAmerica = this.continentSouthAmerica
+        c.continentOceania = this.continentOceania
+        c.destinationBeach = this.destinationBeach
+        c.destinationMountain = this.destinationMountain
+        c.destinationDesert = this.destinationDesert
+        c.destinationCity = this.destinationCity
+        c.destinationCountryside = this.destinationCountryside
+        c.destinationIsland = this.destinationIsland
+        c.destinationLake = this.destinationLake
+        c.budgetBudget = this.budgetBudget
+        c.budgetMidRange = this.budgetMidRange
+        c.budgetLuxury = this.budgetLuxury
+        c.paceRelaxed = this.paceRelaxed
+        c.paceBalanced = this.paceBalanced
+        c.pacePacked = this.pacePacked
+        c.useThisTemplate = this.useThisTemplate
+        c.chooseStartDate = this.chooseStartDate
+        c.templateAddedToTrips = this.templateAddedToTrips
+        c.templateDurationDaysN = this.templateDurationDaysN
+        c.itinerary = this.itinerary
+        c.searchTemplates = this.searchTemplates
+        c.durationLabel = this.durationLabel
 
         c.block()
         return c

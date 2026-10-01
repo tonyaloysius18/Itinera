@@ -82,6 +82,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.itinera.app.data.PackingGroups
 import com.itinera.app.data.TripRepository
+import com.itinera.app.data.greetingDestinationForTrip
 import com.itinera.app.data.imageQueryForTrip
 import com.itinera.app.data.packingSuggestions
 import com.itinera.app.i18n.Language
@@ -140,6 +141,8 @@ import com.itinera.app.ui.screens.TripDetailScreen
 import com.itinera.app.ui.screens.TripExpensesScreen
 import com.itinera.app.ui.screens.TripMapScreen
 import com.itinera.app.ui.screens.TripsHomeScreen
+import com.itinera.app.ui.screens.TripTemplatesScreen
+import com.itinera.app.ui.screens.TripTemplateDetailScreen
 import com.itinera.app.ui.screens.WeatherScreen
 import com.itinera.app.ui.screens.WorldClockScreen
 import com.itinera.app.ui.screens.formatMoney
@@ -510,6 +513,7 @@ private fun AppContent(
                                 onArchiveTrip = { repository.toggleArchive(it) },
                                 onDeleteTrip = { id -> repository.deleteTripUndoable(id)?.let { undo -> undoRequest = UndoRequest(s.tripDeleted, undo) } },
                                 onPlanWithNera = { navigator.push(Screen.Nera()) },
+                                onOpenTemplates = { navigator.push(Screen.TripTemplates) },
                                 currentUid = repository.authService.currentUid ?: "",
                                 onOpenMembers = { navigator.push(Screen.Members(it)) },
                                 onJoinByCode = { repository.joinTripByCode(it) },
@@ -845,6 +849,29 @@ private fun AppContent(
                                 )
                             }
 
+                            Screen.TripTemplates -> {
+                                LaunchedEffect(Unit) { repository.loadTripTemplates() }
+                                TripTemplatesScreen(
+                                    templates = repository.tripTemplates,
+                                    isLoading = !repository.tripTemplatesSyncedOnce,
+                                    onBack = { navigator.back() },
+                                    onOpenTemplate = { navigator.push(Screen.TripTemplateDetail(it)) },
+                                )
+                            }
+
+                            is Screen.TripTemplateDetail -> {
+                                val template = repository.tripTemplates.firstOrNull { it.id == screen.templateId }
+                                if (template == null) navigator.back()
+                                else TripTemplateDetailScreen(
+                                    template = template,
+                                    onBack = { navigator.back() },
+                                    onUseTemplate = { startDate ->
+                                        val id = repository.addTripFromTemplate(template, startDate)
+                                        navigator.replace(Screen.TripDetail(id))
+                                    },
+                                )
+                            }
+
                             Screen.Calendar -> CalendarScreen(
                                 trips = repository.trips,
                                 onMarkAdded = { tripId, legId -> repository.markLegAddedToCalendar(tripId, legId) },
@@ -1017,6 +1044,11 @@ private fun AppContent(
                                 tripId = screen.tripId,
                                 seed = screen.tripId?.let { repository.seedItineraryFor(it) },
                                 travellerName = repository.profile.name,
+                                destination = screen.tripId?.let { tid ->
+                                    repository.tripById(tid)?.let { trip ->
+                                        greetingDestinationForTrip(trip, repository.activitiesForTrip(tid).map { a -> a.location })
+                                    }
+                                }.orEmpty(),
                                 homeCity = repository.profile.city,
                                 onBack = { navigator.back() },
                                 onApprove = { draft, pending ->

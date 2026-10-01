@@ -77,6 +77,9 @@ sealed interface Screen {
 
     data object ChangePassword : Screen
 
+    data object TripTemplates : Screen
+    data class TripTemplateDetail(val templateId: String) : Screen
+
 }
 
 /**

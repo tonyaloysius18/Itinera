@@ -141,6 +141,7 @@ fun NeraChatScreen(
     tripId: String? = null,       // null starts a fresh trip; set, restores and continues that trip's saved chat
     seed: NeraItinerary? = null,  // the trip's current real activities/legs, so Nera knows what's already there
     travellerName: String = "",   // first name from the profile, for a personal greeting; blank if unknown
+    destination: String = "",     // this trip's destination (e.g. "London"), for a trip-specific greeting; blank if unknown
     homeCity: String = "",        // home city from the profile, used for travel legs; blank if unknown
     onBack: () -> Unit,
     // Creates (tripId null) or updates (tripId set) the trip and returns its id; pending is every
@@ -148,9 +149,13 @@ fun NeraChatScreen(
     onApprove: (NeraItinerary, pending: List<StoredNeraMessage>) -> String,
 ) {
     val s = LocalStrings.current
-    val welcomeText = travellerName.takeIf { it.isNotBlank() }
-        ?.let { s.neraWelcomeNamed.replace("%s", it) }
-        ?: s.neraWelcome
+    val welcomeText = when {
+        destination.isNotBlank() && travellerName.isNotBlank() ->
+            s.neraWelcomeTripNamed.replace("%1\$s", travellerName).replace("%2\$s", destination)
+        destination.isNotBlank() -> s.neraWelcomeTrip.replace("%1\$s", destination)
+        travellerName.isNotBlank() -> s.neraWelcomeNamed.replace("%s", travellerName)
+        else -> s.neraWelcome
+    }
     val items = remember {
         mutableStateListOf<NeraItem>().apply {
             // A fresh trip has no history to restore, so greet right away; an existing trip's

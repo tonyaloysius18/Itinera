@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Luggage
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Place
@@ -86,6 +87,7 @@ import com.itinera.app.model.TripAccent
 import com.itinera.app.model.isOwnedBy
 import com.itinera.app.model.scheduleDates
 import com.itinera.app.model.label
+import com.itinera.app.ui.components.ActionPill
 import com.itinera.app.ui.components.CardShape
 import com.itinera.app.ui.components.PlaneLoader
 import androidx.compose.ui.text.style.TextOverflow
@@ -122,6 +124,7 @@ fun TripsHomeScreen(
     onArchiveTrip: (String) -> Unit,
     onDeleteTrip: (String) -> Unit,
     onPlanWithNera: () -> Unit = {},
+    onOpenTemplates: () -> Unit = {},
     pinnedTripIds: Set<String> = emptySet(),
     /** Incremented by the nav bar's search button; each change opens the search field. */
     searchRequest: Int = 0,
@@ -236,6 +239,7 @@ fun TripsHomeScreen(
                     icon = Icons.Filled.Luggage,
                     title = s.noTripsYet,
                     subtitle = s.noTripsSubtitle,
+                    trailing = { ActionPill(s.discoverTemplatesPill, Icons.Filled.Explore, MaterialTheme.colorScheme.primary, onOpenTemplates) },
                 )
 
                 visibleTrips.isEmpty() -> HomeEmptyState(
@@ -283,7 +287,9 @@ fun TripsHomeScreen(
 
                     fun cardsFor(phase: TripPhase) {
                         val group = grouped[phase].orEmpty()
-                        if (group.isEmpty()) return
+                        // The Upcoming header always shows (it carries the Discover Templates pill),
+                        // even with nothing upcoming; other sections still disappear when empty.
+                        if (group.isEmpty() && phase != TripPhase.UPCOMING) return
                         item(key = "hdr-$phase") {
                             SectionHeader(
                                 label = when (phase) {
@@ -292,6 +298,9 @@ fun TripsHomeScreen(
                                     TripPhase.PAST -> s.past
                                 },
                                 count = group.size,
+                                trailing = if (phase == TripPhase.UPCOMING) {
+                                    { ActionPill(s.discoverTemplatesPill, Icons.Filled.Explore, MaterialTheme.colorScheme.primary, onOpenTemplates) }
+                                } else null,
                             )
                         }
                         group.forEach { trip ->
@@ -1047,7 +1056,7 @@ private fun AvatarStack(travellers: List<com.itinera.app.model.Traveller>, max: 
 }
 
 @Composable
-private fun SectionHeader(label: String, count: Int) {
+private fun SectionHeader(label: String, count: Int, trailing: (@Composable () -> Unit)? = null) {
     Row(
         Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, top = 6.dp, bottom = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -1070,6 +1079,10 @@ private fun SectionHeader(label: String, count: Int) {
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
             )
+        }
+        if (trailing != null) {
+            Spacer(Modifier.weight(1f))
+            trailing()
         }
     }
 }
@@ -1112,7 +1125,7 @@ private fun TripSearchField(
 }
 
 @Composable
-private fun HomeEmptyState(icon: ImageVector, title: String, subtitle: String) {
+private fun HomeEmptyState(icon: ImageVector, title: String, subtitle: String, trailing: (@Composable () -> Unit)? = null) {
     Column(
         Modifier.fillMaxSize().padding(horizontal = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -1136,5 +1149,9 @@ private fun HomeEmptyState(icon: ImageVector, title: String, subtitle: String) {
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
             textAlign = TextAlign.Center,
         )
+        if (trailing != null) {
+            Spacer(Modifier.height(18.dp))
+            trailing()
+        }
     }
 }
