@@ -6267,7 +6267,7 @@
             "endTime": "09:00",
             "location": "Fiordland National Park",
             "lat": -44.95,
-            "lng": 168.0
+            "lng": 168
           },
           {
             "title": "Homer Tunnel",
@@ -6283,7 +6283,7 @@
             "endTime": "11:05",
             "location": "Te Anau, Fiordland",
             "lat": -44.98,
-            "lng": 168.0,
+            "lng": 168,
             "note": "Perfect mountain reflection"
           },
           {
@@ -6473,7 +6473,7 @@
             "endTime": "10:45",
             "location": "Waikato",
             "lat": -38.457,
-            "lng": 175.0
+            "lng": 175
           },
           {
             "title": "Hobbiton Movie Set",
@@ -7584,7 +7584,7 @@
             "time": "20:00",
             "endTime": "21:15",
             "location": "Stubai, Tyrol",
-            "lat": 47.0,
+            "lat": 47,
             "lng": 11.12
           }
         ]
@@ -8145,7 +8145,7 @@
             "endTime": "21:30",
             "location": "Tromsø",
             "lat": 69.65,
-            "lng": 19.0
+            "lng": 19
           }
         ]
       },
@@ -10765,7 +10765,7 @@
             "endTime": "18:45",
             "location": "Campos, Mallorca",
             "lat": 39.35,
-            "lng": 3.0,
+            "lng": 3,
             "note": "Caribbean-style white sand"
           },
           {
@@ -15330,7 +15330,7 @@
     "id": "tpl_croatia_summer_islands_7d",
     "title": "7 Days of Croatian Summer Island Hopping",
     "shortDescription": "Brač, Hvar and Vis: white pebble beaches, blue caves and open-air dining.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1715868815301-69052383b092?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxIdmFyJTIwQ3JvYXRpYSUyMGhhcmJvdXJ8ZW58MHwwfHx8MTc5MDg2MzAwNHww&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Croatia",
     "continent": "EUROPE",
     "durationDays": 7,
@@ -15639,7 +15639,7 @@
     "id": "tpl_istria_plitvice_5d",
     "title": "5 Days in Istria & Plitvice Lakes",
     "shortDescription": "Truffle hill towns, Roman Pula and Croatia's most famous waterfalls.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1589312133722-eab40c686ebb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxQbGl0dmljZSUyMExha2VzJTIwQ3JvYXRpYSUyMHdhdGVyZmFsbHN8ZW58MHwwfHx8MTc5MDg1ODM1M3ww&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Croatia",
     "continent": "EUROPE",
     "durationDays": 5,
@@ -15883,7 +15883,7 @@
     "id": "tpl_florence_tuscany_5d",
     "title": "5 Days in Florence & Tuscany",
     "shortDescription": "Renaissance art, Chianti vineyards and Siena's medieval square.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1733269345489-3bd78e434762?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxGbG9yZW5jZSUyMER1b21vJTIwVHVzY2FueXxlbnwwfDB8fHwxNzkwODU4MzU0fDA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Italy",
     "continent": "EUROPE",
     "durationDays": 5,
@@ -16109,7 +16109,7 @@
     "id": "tpl_cinque_terre_4d",
     "title": "4 Days in Cinque Terre & Portofino",
     "shortDescription": "Pastel cliff villages, coastal footpaths and Riviera glamour.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1616234643798-12dc87da67b4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxDaW5xdWUlMjBUZXJyZSUyME1hbmFyb2xhJTIwSXRhbHl8ZW58MHwwfHx8MTc5MDg2MzAwNXww&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Italy",
     "continent": "EUROPE",
     "durationDays": 4,
@@ -16321,7 +16321,7 @@
     "id": "tpl_puglia_6d",
     "title": "6 Days in Puglia",
     "shortDescription": "Trulli villages, whitewashed coastal towns and the heel of Italy's boot.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1632226705528-14afa4dcdc0f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxBbGJlcm9iZWxsbyUyMHRydWxsaSUyMFB1Z2xpYSUyMEl0YWx5fGVufDB8MHx8fDE3OTA4NjMwMDZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Italy",
     "continent": "EUROPE",
     "durationDays": 6,
@@ -17351,7 +17351,7 @@
     "id": "tpl_holland_tulips_4d",
     "title": "4 Days of Holland's Tulip Season",
     "shortDescription": "Keukenhof gardens, Delft blue pottery and Rotterdam architecture.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1651422933132-d3e8822d8b40?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxLZXVrZW5ob2YlMjB0dWxpcHMlMjBOZXRoZXJsYW5kc3xlbnwwfDB8fHwxNzkwODYzMDA4fDA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Netherlands",
     "continent": "EUROPE",
     "durationDays": 4,
@@ -17545,7 +17545,7 @@
     "id": "tpl_brussels_bruges_ghent_5d",
     "title": "5 Days in Brussels, Bruges & Ghent",
     "shortDescription": "Grand Place, canals, chocolate and medieval Flemish towns.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1601961208755-3519c8a31ded?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxCcnVnZXMlMjBCZWxnaXVtJTIwY2FuYWwlMjBtZWRpZXZhbHxlbnwwfDB8fHwxNzkwODYzMDA5fDA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Belgium",
     "continent": "EUROPE",
     "durationDays": 5,
@@ -17818,7 +17818,7 @@
     "id": "tpl_london_weekend_3d",
     "title": "3 Days in London: Weekend Break",
     "shortDescription": "A packed long weekend of royal highlights, markets and a West End night.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxMb25kb24lMjBUb3dlciUyMEJyaWRnZXxlbnwwfDB8fHwxNzkwODYzMDEwfDA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "United Kingdom",
     "continent": "EUROPE",
     "durationDays": 3,
@@ -17980,7 +17980,7 @@
     "id": "tpl_manchester_liverpool_4d",
     "title": "4 Days in Manchester & Liverpool",
     "shortDescription": "Football, music heritage and Victorian waterfronts.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1726410238762-2388af04eadb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxMaXZlcnBvb2wlMjBSb3lhbCUyMEFsYmVydCUyMERvY2t8ZW58MHwwfHx8MTc5MDg2MzAxMHww&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "United Kingdom",
     "continent": "EUROPE",
     "durationDays": 4,
@@ -18407,7 +18407,7 @@
     "id": "tpl_cornwall_5d",
     "title": "5 Days in Cornwall",
     "shortDescription": "Fishing harbours, surf coves and the clifftop path to Land's End.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586016738878-f582c20713a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxDb3Jud2FsbCUyMFN0JTIwSXZlcyUyMGNvYXN0JTIwRW5nbGFuZHxlbnwwfDB8fHwxNzkwODYzMDExfDA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "United Kingdom",
     "continent": "EUROPE",
     "durationDays": 5,
@@ -18649,7 +18649,7 @@
     "id": "tpl_edinburgh_glasgow_4d",
     "title": "4 Days in Edinburgh & Glasgow",
     "shortDescription": "Medieval Old Town, street art, whisky and Loch Lomond.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1693515141386-00f47c21c2d5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxHbGFzZ293JTIwS2VsdmluZ3JvdmUlMjBTY290bGFuZHxlbnwwfDB8fHwxNzkwODYzMDEyfDA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "United Kingdom",
     "continent": "EUROPE",
     "durationDays": 4,
@@ -18860,7 +18860,7 @@
     "id": "tpl_scotland_nc500_7d",
     "title": "7 Days on Scotland's North Coast 500",
     "shortDescription": "Castles, white-sand beaches and remote Highland roads.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1451337516015-6b6e9a44a8a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxOb3J0aCUyMENvYXN0JTIwNTAwJTIwU2NvdGxhbmQlMjBIaWdobGFuZHMlMjByb2FkfGVufDB8MHx8fDE3OTA4NjMwMTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "United Kingdom",
     "continent": "EUROPE",
     "durationDays": 7,
@@ -19187,7 +19187,7 @@
     "id": "tpl_dublin_wicklow_4d",
     "title": "4 Days in Dublin & Wicklow",
     "shortDescription": "Georgian streets, Guinness, pubs and Glendalough monastery.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1651127403819-6c15d8b5f589?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxEdWJsaW4lMjBJcmVsYW5kJTIwVGVtcGxlJTIwQmFyfGVufDB8MHx8fDE3OTA4NjMwMTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Ireland",
     "continent": "EUROPE",
     "durationDays": 4,
@@ -19380,7 +19380,7 @@
     "id": "tpl_wild_atlantic_way_6d",
     "title": "6 Days on the Wild Atlantic Way",
     "shortDescription": "Cliffs of Moher, Dingle Peninsula and the Ring of Kerry.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1602354817989-b9664561ae84?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxDbGlmZnMlMjBvZiUyME1vaGVyJTIwSXJlbGFuZHxlbnwwfDB8fHwxNzkwODYzMDE0fDA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Ireland",
     "continent": "EUROPE",
     "durationDays": 6,
@@ -19576,7 +19576,7 @@
             "time": "08:30",
             "endTime": "09:00",
             "location": "Killarney, Kerry",
-            "lat": 52.0,
+            "lat": 52,
             "lng": -9.5
           },
           {
@@ -19658,7 +19658,7 @@
     "id": "tpl_belfast_causeway_3d",
     "title": "3 Days in Belfast & the Giant's Causeway",
     "shortDescription": "Titanic heritage and the Causeway Coastal Route.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1595538853083-dc3160ca6881?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxHaWFudHMlMjBDYXVzZXdheSUyME5vcnRoZXJuJTIwSXJlbGFuZHxlbnwwfDB8fHwxNzkwODYzMDE1fDA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "United Kingdom",
     "continent": "EUROPE",
     "durationDays": 3,
@@ -19822,7 +19822,7 @@
     "id": "tpl_faroe_islands_5d",
     "title": "5 Days in the Faroe Islands",
     "shortDescription": "Waterfalls into the sea, turf-roof villages and puffin cliffs.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1681798216387-a90c020577a8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxGYXJvZSUyMElzbGFuZHMlMjBHYXNhZGFsdXIlMjB3YXRlcmZhbGx8ZW58MHwwfHx8MTc5MDg2MzAxNXww&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Faroe Islands",
     "continent": "EUROPE",
     "durationDays": 5,
@@ -20032,7 +20032,7 @@
     "id": "tpl_greenland_ilulissat_6d",
     "title": "6 Days in Greenland: Ilulissat & Disko Bay",
     "shortDescription": "Icebergs the size of cathedrals, Arctic hiking and the midnight sun or aurora.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1519832064761-bbc1d76d4ef8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxJbHVsaXNzYXQlMjBpY2Vmam9yZCUyMEdyZWVubGFuZCUyMGljZWJlcmd8ZW58MHwwfHx8MTc5MDg2MzAxNnww&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Greenland",
     "continent": "NORTH_AMERICA",
     "durationDays": 6,
@@ -20076,7 +20076,7 @@
             "time": "20:00",
             "endTime": "21:00",
             "location": "Kangerlussuaq, Greenland",
-            "lat": 67.0,
+            "lat": 67,
             "lng": -50.7
           }
         ]
@@ -20256,7 +20256,7 @@
     "id": "tpl_iceland_golden_circle_4d",
     "title": "4 Days: Reykjavík & the Golden Circle",
     "shortDescription": "Geysers, Gullfoss and a soak in the Secret Lagoon, all from Reykjavík.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1603226851957-1768f812309b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxHdWxsZm9zcyUyMHdhdGVyZmFsbCUyMEljZWxhbmQlMjBHb2xkZW4lMjBDaXJjbGV8ZW58MHwwfHx8MTc5MDg2MzAxN3ww&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Iceland",
     "continent": "EUROPE",
     "durationDays": 5,
@@ -20436,7 +20436,7 @@
             "endTime": "19:00",
             "location": "Reykjanes, Iceland",
             "lat": 63.92,
-            "lng": -22.0
+            "lng": -22
           },
           {
             "title": "Grindavík harbour fish dinner",
@@ -20552,7 +20552,7 @@
     "id": "tpl_iceland_south_coast_4d",
     "title": "4 Days on Iceland's South Coast",
     "shortDescription": "Waterfalls, black sand, glacier hikes and Jökulsárlón.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1657281277001-a00e4a0c611e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxTa29nYWZvc3MlMjBJY2VsYW5kJTIwc291dGglMjBjb2FzdHxlbnwwfDB8fHwxNzkwODYzMDE4fDA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Iceland",
     "continent": "EUROPE",
     "durationDays": 4,
@@ -20731,7 +20731,7 @@
     "id": "tpl_iceland_winter_aurora_5d",
     "title": "5 Days in Iceland: Winter Aurora & Ice Caves",
     "shortDescription": "Chase the northern lights, walk inside a glacier and soak in snow-ringed hot springs.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1488415032361-b7e238421f1b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxJY2VsYW5kJTIwbm9ydGhlcm4lMjBsaWdodHMlMjBpY2UlMjBjYXZlJTIwd2ludGVyfGVufDB8MHx8fDE3OTA4NjMwMTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Iceland",
     "continent": "EUROPE",
     "durationDays": 5,
@@ -20956,7 +20956,7 @@
     "id": "tpl_nyc_5d",
     "title": "5 Days in New York City",
     "shortDescription": "Skyline views, Central Park, Broadway and borough food crawls.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1496588152823-86ff7695e68f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxOZXclMjBZb3JrJTIwQ2l0eSUyME1hbmhhdHRhbiUyMHNreWxpbmV8ZW58MHwwfHx8MTc5MDg2MzAxOXww&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "United States",
     "continent": "NORTH_AMERICA",
     "durationDays": 5,
@@ -21231,7 +21231,7 @@
     "id": "tpl_new_england_fall_6d",
     "title": "6 Days of New England Fall Foliage",
     "shortDescription": "Boston, Vermont villages and White Mountains in peak autumn colour.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1635866217732-83cc10ad8730?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxOZXclMjBFbmdsYW5kJTIwZmFsbCUyMGZvbGlhZ2UlMjBWZXJtb250fGVufDB8MHx8fDE3OTA4NjMwMjB8MA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "United States",
     "continent": "NORTH_AMERICA",
     "durationDays": 6,
@@ -21527,7 +21527,7 @@
     "id": "tpl_dc_philly_4d",
     "title": "4 Days in Washington DC & Philadelphia",
     "shortDescription": "National monuments, Smithsonian museums and Revolutionary history.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1574004294357-6e78ed4fb9d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxXYXNoaW5ndG9uJTIwREMlMjBMaW5jb2xuJTIwTWVtb3JpYWx8ZW58MHwwfHx8MTc5MDg2MzAyMHww&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "United States",
     "continent": "NORTH_AMERICA",
     "durationDays": 4,
@@ -21746,7 +21746,7 @@
     "id": "tpl_miami_keys_5d",
     "title": "5 Days in Miami & the Florida Keys",
     "shortDescription": "Art Deco, Cuban coffee and the Overseas Highway to Key West.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1577372970039-2ac351969c87?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxNaWFtaSUyMFNvdXRoJTIwQmVhY2glMjBGbG9yaWRhJTIwS2V5c3xlbnwwfDB8fHwxNzkwODYzMDIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "United States",
     "continent": "NORTH_AMERICA",
     "durationDays": 5,
@@ -22004,7 +22004,7 @@
     "id": "tpl_new_orleans_nashville_6d",
     "title": "6 Days in New Orleans & Nashville",
     "shortDescription": "Jazz, Cajun food and Music City honky-tonks.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1549965738-e1aaf1168943?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxOZXclMjBPcmxlYW5zJTIwRnJlbmNoJTIwUXVhcnRlciUyMGphenp8ZW58MHwwfHx8MTc5MDg2MzAyMnww&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "United States",
     "continent": "NORTH_AMERICA",
     "durationDays": 6,
@@ -22298,7 +22298,7 @@
     "id": "tpl_vegas_grand_canyon_5d",
     "title": "5 Days in Las Vegas & the Grand Canyon",
     "shortDescription": "Neon Strip, Hoover Dam and the South Rim at sunset.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1527333656061-ca7adf608ae1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxHcmFuZCUyMENhbnlvbiUyMFNvdXRoJTIwUmltJTIwQXJpem9uYXxlbnwwfDB8fHwxNzkwODYzMDIyfDA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "United States",
     "continent": "NORTH_AMERICA",
     "durationDays": 5,
@@ -22558,7 +22558,7 @@
     "id": "tpl_utah_mighty_five_7d",
     "title": "7 Days Across Utah's Mighty Five",
     "shortDescription": "Zion, Bryce, Capitol Reef, Canyonlands and Arches.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1434730737257-3e97ad16f4b6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxBcmNoZXMlMjBOYXRpb25hbCUyMFBhcmslMjBVdGFofGVufDB8MHx8fDE3OTA4NjMwMjN8MA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "United States",
     "continent": "NORTH_AMERICA",
     "durationDays": 7,
@@ -22858,7 +22858,7 @@
     "id": "tpl_pacific_coast_highway_7d",
     "title": "7 Days on the Pacific Coast Highway",
     "shortDescription": "San Diego to San Francisco via Big Sur and Santa Barbara.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1623169840544-0982db65d00e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxCaWclMjBTdXIlMjBCaXhieSUyMEJyaWRnZSUyMENhbGlmb3JuaWElMjBjb2FzdHxlbnwwfDB8fHwxNzkwODYzMDI0fDA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "United States",
     "continent": "NORTH_AMERICA",
     "durationDays": 7,
@@ -23234,7 +23234,7 @@
     "id": "tpl_hawaii_oahu_maui_7d",
     "title": "7 Days in Hawaii: Oahu & Maui",
     "shortDescription": "Waikiki surf, Pearl Harbor, Road to Hana and Haleakalā sunrise.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1568576599263-ad9f374633d4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxNYXVpJTIwSGF3YWlpJTIwUm9hZCUyMHRvJTIwSGFuYSUyMGJlYWNofGVufDB8MHx8fDE3OTA4NjMwMjR8MA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "United States",
     "continent": "NORTH_AMERICA",
     "durationDays": 7,
@@ -23561,7 +23561,7 @@
     "id": "tpl_alaska_7d",
     "title": "7 Days in Alaska",
     "shortDescription": "Denali, Kenai fjords glaciers and midnight-sun wildlife.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1752784446617-273a6785d2b0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxBbGFza2ElMjBEZW5hbGklMjBnbGFjaWVyfGVufDB8MHx8fDE3OTA4NjMwMjV8MA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "United States",
     "continent": "NORTH_AMERICA",
     "durationDays": 7,
@@ -23824,7 +23824,7 @@
     "id": "tpl_yellowstone_tetons_6d",
     "title": "6 Days in Yellowstone & the Grand Tetons",
     "shortDescription": "Geysers, grizzlies and alpine lakes in Wyoming.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1629985692757-48648f4f1fc1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxZZWxsb3dzdG9uZSUyMEdyYW5kJTIwUHJpc21hdGljJTIwU3ByaW5nfGVufDB8MHx8fDE3OTA4NjMwMjZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "United States",
     "continent": "NORTH_AMERICA",
     "durationDays": 6,
@@ -24091,7 +24091,7 @@
     "id": "tpl_vancouver_whistler_5d",
     "title": "5 Days in Vancouver & Whistler",
     "shortDescription": "Stanley Park, Pacific coast and alpine Whistler village.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1559511260-66a654ae982a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxWYW5jb3V2ZXIlMjBTdGFubGV5JTIwUGFyayUyMHNreWxpbmV8ZW58MHwwfHx8MTc5MDg2MzAyNnww&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Canada",
     "continent": "NORTH_AMERICA",
     "durationDays": 5,
@@ -24355,7 +24355,7 @@
     "id": "tpl_toronto_niagara_4d",
     "title": "4 Days in Toronto & Niagara Falls",
     "shortDescription": "CN Tower, food neighbourhoods and the thundering Falls.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1489447068241-b3490214e879?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxOaWFnYXJhJTIwRmFsbHMlMjBDYW5hZGF8ZW58MHwwfHx8MTc5MDg2MzAyN3ww&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Canada",
     "continent": "NORTH_AMERICA",
     "durationDays": 4,
@@ -24558,7 +24558,7 @@
     "id": "tpl_montreal_quebec_5d",
     "title": "5 Days in Montréal & Québec City",
     "shortDescription": "French-Canadian charm, old-world streets and poutine.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1716840268887-6717c6b60902?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxRdWViZWMlMjBDaXR5JTIwQ2hhdGVhdSUyMEZyb250ZW5hY3xlbnwwfDB8fHwxNzkwODYzMDI4fDA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Canada",
     "continent": "NORTH_AMERICA",
     "durationDays": 5,
@@ -24782,7 +24782,7 @@
     "id": "tpl_nova_scotia_cabot_6d",
     "title": "6 Days in Nova Scotia & the Cabot Trail",
     "shortDescription": "Lighthouses, lobster and one of the world's great coastal drives.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1593664606979-69efba2128d8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxQZWdneXMlMjBDb3ZlJTIwbGlnaHRob3VzZSUyME5vdmElMjBTY290aWF8ZW58MHwwfHx8MTc5MDg2MzAyOHww&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Canada",
     "continent": "NORTH_AMERICA",
     "durationDays": 6,
@@ -25052,7 +25052,7 @@
     "id": "tpl_jasper_icefields_5d",
     "title": "5 Days in Jasper & the Icefields Parkway",
     "shortDescription": "Rocky Mountain glaciers, turquoise lakes and elk on the road.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1587381419916-78fc843a36f8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxKYXNwZXIlMjBNYWxpZ25lJTIwTGFrZSUyMENhbmFkYSUyMFJvY2tpZXN8ZW58MHwwfHx8MTc5MDg2MzAyOXww&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Canada",
     "continent": "NORTH_AMERICA",
     "durationDays": 5,
@@ -25286,7 +25286,7 @@
     "id": "tpl_mexico_city_5d",
     "title": "5 Days in Mexico City",
     "shortDescription": "Aztec ruins, Frida Kahlo, street tacos and lucha libre.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1772048683336-d5a890a885e1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxNZXhpY28lMjBDaXR5JTIwWm9jYWxvJTIwY2F0aGVkcmFsfGVufDB8MHx8fDE3OTA4NjMwMzB8MA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Mexico",
     "continent": "NORTH_AMERICA",
     "durationDays": 5,
@@ -25527,7 +25527,7 @@
     "id": "tpl_yucatan_riviera_maya_6d",
     "title": "6 Days in the Yucatán & Riviera Maya",
     "shortDescription": "Chichén Itzá, cenotes, Tulum ruins and Caribbean beaches.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1638552713889-2d678079d441?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxUdWx1bSUyME1leGljbyUyMGJlYWNoJTIwcnVpbnN8ZW58MHwwfHx8MTc5MDg2MzAzMXww&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Mexico",
     "continent": "NORTH_AMERICA",
     "durationDays": 6,
@@ -25777,7 +25777,7 @@
     "id": "tpl_costa_rica_7d",
     "title": "7 Days in Costa Rica",
     "shortDescription": "Volcanoes, cloud forest, sloths and Pacific surf.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1705351978871-2b3316c25e6d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxBcmVuYWwlMjBWb2xjYW5vJTIwQ29zdGElMjBSaWNhfGVufDB8MHx8fDE3OTA4NjMwMzF8MA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Costa Rica",
     "continent": "NORTH_AMERICA",
     "durationDays": 7,
@@ -26062,7 +26062,7 @@
     "id": "tpl_buenos_aires_4d",
     "title": "4 Days in Buenos Aires",
     "shortDescription": "Tango, steak, grand boulevards and Recoleta's cemetery.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1612294086756-b5ec2ae84aa8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxCdWVub3MlMjBBaXJlcyUyMENhbWluaXRvJTIwTGElMjBCb2NhfGVufDB8MHx8fDE3OTA4NjMwMzJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Argentina",
     "continent": "SOUTH_AMERICA",
     "durationDays": 4,
@@ -26271,7 +26271,7 @@
     "id": "tpl_patagonia_8d",
     "title": "8 Days in Patagonia: Torres del Paine & El Calafate",
     "shortDescription": "Granite towers, Perito Moreno glacier and condors across Chile and Argentina.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1558517286-8a9cb0b8c793?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxUb3JyZXMlMjBkZWwlMjBQYWluZSUyMFBhdGFnb25pYSUyMENoaWxlfGVufDB8MHx8fDE3OTA4NjMwMzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Chile",
     "continent": "SOUTH_AMERICA",
     "durationDays": 8,
@@ -26373,7 +26373,7 @@
             "time": "09:00",
             "endTime": "13:00",
             "location": "Lago Grey, Chile",
-            "lat": -51.0,
+            "lat": -51,
             "lng": -73.15
           },
           {
@@ -26406,7 +26406,7 @@
             "time": "20:00",
             "endTime": "21:00",
             "location": "Torres del Paine, Chile",
-            "lat": -51.0,
+            "lat": -51,
             "lng": -72.9
           }
         ]
@@ -26556,7 +26556,7 @@
     "id": "tpl_rio_5d",
     "title": "5 Days in Rio de Janeiro",
     "shortDescription": "Christ the Redeemer, Sugarloaf, Copacabana and samba nights.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1772603503638-74ca65f96589?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxSaW8lMjBkZSUyMEphbmVpcm8lMjBDaHJpc3QlMjBSZWRlZW1lciUyMFN1Z2FybG9hZnxlbnwwfDB8fHwxNzkwODYzMDMzfDA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Brazil",
     "continent": "SOUTH_AMERICA",
     "durationDays": 5,
@@ -26773,7 +26773,7 @@
     "id": "tpl_colombia_8d",
     "title": "8 Days in Colombia: Bogotá, Medellín & Cartagena",
     "shortDescription": "Mountain capital, comuna transformation and a Caribbean walled city.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1767743364534-15bf2ea67781?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxDYXJ0YWdlbmElMjBDb2xvbWJpYSUyMGNvbG91cmZ1bCUyMG9sZCUyMHRvd258ZW58MHwwfHx8MTc5MDg2MzAzNHww&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Colombia",
     "continent": "SOUTH_AMERICA",
     "durationDays": 8,
@@ -27099,7 +27099,7 @@
     "id": "tpl_galapagos_quito_7d",
     "title": "7 Days in Quito & the Galápagos",
     "shortDescription": "Colonial Andean capital then giant tortoises, sea lions and blue-footed boobies.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1595517930215-d2778a56ac93?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxHYWxhcGFnb3MlMjBzZWElMjBsaW9uJTIwdG9ydG9pc2UlMjBFY3VhZG9yfGVufDB8MHx8fDE3OTA4NjMwMzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Ecuador",
     "continent": "SOUTH_AMERICA",
     "durationDays": 7,
@@ -27376,7 +27376,7 @@
     "id": "tpl_chile_atacama_santiago_7d",
     "title": "7 Days in Chile: Santiago, Valparaíso & Atacama",
     "shortDescription": "Colourful port hills, Chilean wine and the driest desert on Earth.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1573502059387-0848782c6956?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxTYW4lMjBQZWRybyUyMGRlJTIwQXRhY2FtYSUyMGRlc2VydCUyMENoaWxlfGVufDB8MHx8fDE3OTA4NjMwMzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Chile",
     "continent": "SOUTH_AMERICA",
     "durationDays": 7,
@@ -27686,7 +27686,7 @@
     "id": "tpl_uyuni_salt_flats_4d",
     "title": "4 Days in Bolivia: Salar de Uyuni",
     "shortDescription": "Mirror-like salt flats, flamingo lagoons and Andean volcanoes.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1664272051371-943ce55d7b22?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxTYWxhciUyMGRlJTIwVXl1bmklMjBCb2xpdmlhJTIwbWlycm9yfGVufDB8MHx8fDE3OTA4NjMwMzZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Bolivia",
     "continent": "SOUTH_AMERICA",
     "durationDays": 4,
@@ -27873,7 +27873,7 @@
     "id": "tpl_iguazu_falls_3d",
     "title": "3 Days at Iguazú Falls",
     "shortDescription": "The world's widest waterfall system, from both Argentina and Brazil.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1614949260630-1d8a27791215?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxJZ3VhenUlMjBGYWxscyUyMHdhdGVyZmFsbCUyMEFyZ2VudGluYSUyMEJyYXppbHxlbnwwfDB8fHwxNzkwODYzMDM2fDA&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Argentina",
     "continent": "SOUTH_AMERICA",
     "durationDays": 3,
@@ -28019,7 +28019,7 @@
     "id": "tpl_masai_mara_nairobi_6d",
     "title": "6 Days in Nairobi & the Masai Mara",
     "shortDescription": "Big Five game drives, Maasai culture and the Great Migration season.",
-    "coverImageUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1709402606682-400133d92ab2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzQ1MTJ8MHwxfHNlYXJjaHwxfHxNYXNhaSUyME1hcmElMjBsaW9uJTIwc2FmYXJpJTIwS2VueWF8ZW58MHwwfHx8MTc5MDg2MzAzN3ww&ixlib=rb-4.1.0&q=80&w=1080",
     "country": "Kenya",
     "continent": "AFRICA",
     "durationDays": 6,
@@ -28332,7 +28332,7 @@
             "endTime": "16:00",
             "location": "Tarangire National Park, Tanzania",
             "lat": -3.84,
-            "lng": 36.0
+            "lng": 36
           },
           {
             "title": "Tarangire sunset game drive",
@@ -28340,7 +28340,7 @@
             "endTime": "19:00",
             "location": "Tarangire National Park, Tanzania",
             "lat": -3.84,
-            "lng": 36.0
+            "lng": 36
           }
         ]
       },
@@ -28950,7 +28950,7 @@
             "endTime": "17:45",
             "location": "Cape Agulhas, South Africa",
             "lat": -34.83,
-            "lng": 20.0
+            "lng": 20
           }
         ]
       },
@@ -29142,7 +29142,7 @@
             "time": "05:30",
             "endTime": "09:00",
             "location": "Kruger National Park, South Africa",
-            "lat": -25.0,
+            "lat": -25,
             "lng": 31.5
           },
           {
@@ -29188,7 +29188,7 @@
             "time": "11:00",
             "endTime": "13:00",
             "location": "Olifants, Kruger",
-            "lat": -24.0,
+            "lat": -24,
             "lng": 31.73
           },
           {
@@ -29272,7 +29272,7 @@
             "time": "18:00",
             "endTime": "19:00",
             "location": "Olifants, Kruger",
-            "lat": -24.0,
+            "lat": -24,
             "lng": 31.73
           }
         ]
@@ -30114,7 +30114,7 @@
             "endTime": "13:00",
             "location": "Solitaire, Namibia",
             "lat": -23.89,
-            "lng": 16.0
+            "lng": 16
           },
           {
             "title": "Naukluft mountain scenic drive",
@@ -30206,7 +30206,7 @@
             "endTime": "17:30",
             "location": "Damaraland, Namibia",
             "lat": -20.4,
-            "lng": 14.0
+            "lng": 14
           }
         ]
       },
@@ -30510,7 +30510,7 @@
             "endTime": "09:00",
             "location": "Chobe National Park, Botswana",
             "lat": -18.7,
-            "lng": 25.0
+            "lng": 25
           },
           {
             "title": "Kazungula border view",
@@ -30574,7 +30574,7 @@
             "time": "11:00",
             "endTime": "11:45",
             "location": "Kayabwe, Uganda",
-            "lat": -0.0,
+            "lat": 0,
             "lng": 31.5
           },
           {
@@ -30621,7 +30621,7 @@
             "endTime": "12:00",
             "location": "Queen Elizabeth National Park",
             "lat": -0.19,
-            "lng": 30.0
+            "lng": 30
           },
           {
             "title": "Katwe salt lake",
@@ -30658,7 +30658,7 @@
             "time": "09:00",
             "endTime": "14:00",
             "location": "Kigezi, Uganda",
-            "lat": -1.0,
+            "lat": -1,
             "lng": 29.8
           },
           {
@@ -31738,7 +31738,7 @@
             "endTime": "13:45",
             "location": "Goa",
             "lat": 15.4,
-            "lng": 74.0
+            "lng": 74
           },
           {
             "title": "Dudhsagar Falls",
@@ -32156,7 +32156,7 @@
             "endTime": "10:00",
             "location": "Panna, Madhya Pradesh",
             "lat": 24.72,
-            "lng": 80.0
+            "lng": 80
           },
           {
             "title": "Ken Gharial sanctuary boat",
@@ -32164,7 +32164,7 @@
             "endTime": "16:00",
             "location": "Panna, Madhya Pradesh",
             "lat": 24.72,
-            "lng": 80.0
+            "lng": 80
           }
         ]
       }
@@ -33660,7 +33660,7 @@
             "time": "06:00",
             "endTime": "09:00",
             "location": "Nagarhole, Karnataka",
-            "lat": 12.0,
+            "lat": 12,
             "lng": 76.1
           },
           {
@@ -34470,7 +34470,7 @@
             "endTime": "19:00",
             "location": "Polonnaruwa, Sri Lanka",
             "lat": 7.93,
-            "lng": 81.0
+            "lng": 81
           }
         ]
       },
@@ -39683,7 +39683,7 @@
             "endTime": "16:00",
             "location": "Tunku Abdul Rahman Park, Sabah",
             "lat": 5.96,
-            "lng": 116.0
+            "lng": 116
           }
         ]
       },
@@ -39774,7 +39774,7 @@
             "endTime": "09:00",
             "location": "Kinabatangan, Sabah",
             "lat": 5.42,
-            "lng": 118.0
+            "lng": 118
           },
           {
             "title": "Birdwatching at dawn",
@@ -39782,7 +39782,7 @@
             "endTime": "10:30",
             "location": "Kinabatangan, Sabah",
             "lat": 5.42,
-            "lng": 118.0
+            "lng": 118
           },
           {
             "title": "Evening wildlife safari",
@@ -40299,7 +40299,7 @@
             "time": "09:00",
             "endTime": "12:00",
             "location": "Coron, Palawan",
-            "lat": 12.0,
+            "lat": 12,
             "lng": 120.18
           },
           {
@@ -42017,7 +42017,7 @@
             "time": "07:00",
             "endTime": "07:45",
             "location": "Yasawa Islands, Fiji",
-            "lat": -17.0,
+            "lat": -17,
             "lng": 177.38
           },
           {
@@ -42041,7 +42041,7 @@
             "time": "16:00",
             "endTime": "18:30",
             "location": "Yasawa Islands, Fiji",
-            "lat": -17.0,
+            "lat": -17,
             "lng": 177.38
           }
         ]
@@ -44739,7 +44739,7 @@
             "time": "09:00",
             "endTime": "13:00",
             "location": "Samaná, Dominican Republic",
-            "lat": 19.0,
+            "lat": 19,
             "lng": -69.47
           },
           {
@@ -46128,7 +46128,7 @@
             "endTime": "10:30",
             "location": "Istanbul",
             "lat": 41.04,
-            "lng": 29.0
+            "lng": 29
           },
           {
             "title": "Ortaköy Mosque & kumpir",
@@ -46603,7 +46603,7 @@
             "endTime": "15:45",
             "location": "Aqaba, Jordan",
             "lat": 29.52,
-            "lng": 35.0
+            "lng": 35
           },
           {
             "title": "Seafood dinner on the Red Sea",
@@ -46723,8 +46723,8 @@
             "time": "18:00",
             "endTime": "18:45",
             "location": "Fins, Oman",
-            "lat": 23.0,
-            "lng": 59.0
+            "lat": 23,
+            "lng": 59
           }
         ]
       },
@@ -47794,7 +47794,7 @@
             "endTime": "09:30",
             "location": "Lake Sevan, Armenia",
             "lat": 40.56,
-            "lng": 45.0
+            "lng": 45
           },
           {
             "title": "Lake Sevan lunch with sevan trout",
