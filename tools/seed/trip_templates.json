@@ -7424,5 +7424,4405 @@
       }
     ],
     "legs": []
+  },
+  {
+    "id": "tpl_tbilisi_kazbegi_5d",
+    "title": "5 Days in Tbilisi & Kazbegi",
+    "shortDescription": "Sulphur baths, Silk Road bazaars and the Caucasus mountains.",
+    "coverImageUrl": "",
+    "country": "Georgia",
+    "continent": "EUROPE",
+    "durationDays": 5,
+    "destinationTypes": [
+      "CITY",
+      "MOUNTAIN"
+    ],
+    "budgetTier": "BUDGET",
+    "paceTag": "BALANCED",
+    "tags": [
+      "culture",
+      "food",
+      "mountains",
+      "budget-friendly"
+    ],
+    "published": true,
+    "sortOrder": 560,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Old Tbilisi",
+        "activities": [
+          {
+            "title": "Narikala Fortress & cable car",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Old Tbilisi",
+            "lat": 41.6878,
+            "lng": 44.809
+          },
+          {
+            "title": "Abanotubani sulphur baths",
+            "time": "15:00",
+            "endTime": "17:00",
+            "location": "Abanotubani, Tbilisi",
+            "lat": 41.688,
+            "lng": 44.811
+          },
+          {
+            "title": "Khinkali & wine dinner",
+            "time": "19:30",
+            "endTime": "21:30",
+            "location": "Sololaki, Tbilisi",
+            "lat": 41.693,
+            "lng": 44.807
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Mtskheta & Jvari",
+        "activities": [
+          {
+            "title": "Jvari Monastery",
+            "time": "10:00",
+            "endTime": "11:30",
+            "location": "Mtskheta",
+            "lat": 41.838,
+            "lng": 44.733
+          },
+          {
+            "title": "Svetitskhoveli Cathedral",
+            "time": "12:00",
+            "endTime": "13:30",
+            "location": "Mtskheta",
+            "lat": 41.842,
+            "lng": 44.72
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Georgian Military Road",
+        "activities": [
+          {
+            "title": "Ananuri Fortress",
+            "time": "10:00",
+            "endTime": "11:30",
+            "location": "Ananuri, Mtskheta-Mtianeti",
+            "lat": 42.163,
+            "lng": 44.701
+          },
+          {
+            "title": "Gudauri viewpoint",
+            "time": "12:30",
+            "endTime": "13:30",
+            "location": "Gudauri",
+            "lat": 42.477,
+            "lng": 44.477
+          },
+          {
+            "title": "Gergeti Trinity Church",
+            "time": "15:00",
+            "endTime": "17:30",
+            "location": "Stepantsminda, Kazbegi",
+            "lat": 42.662,
+            "lng": 44.62
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Kazbegi hike",
+        "activities": [
+          {
+            "title": "Gveleti waterfall hike",
+            "time": "09:30",
+            "endTime": "12:30",
+            "location": "Stepantsminda, Kazbegi",
+            "lat": 42.674,
+            "lng": 44.627
+          }
+        ]
+      },
+      {
+        "dayNumber": 5,
+        "theme": "Tbilisi markets",
+        "activities": [
+          {
+            "title": "Dry Bridge flea market",
+            "time": "10:30",
+            "endTime": "12:30",
+            "location": "Tbilisi",
+            "lat": 41.695,
+            "lng": 44.807
+          },
+          {
+            "title": "Rustaveli Avenue & Fabrika",
+            "time": "14:00",
+            "endTime": "17:00",
+            "location": "Tbilisi",
+            "lat": 41.706,
+            "lng": 44.79
+          }
+        ]
+      }
+    ],
+    "legs": [
+      {
+        "dayNumber": 3,
+        "fromCity": "Tbilisi",
+        "toCity": "Kazbegi",
+        "transport": "CAR",
+        "time": "08:00",
+        "endTime": "10:00"
+      },
+      {
+        "dayNumber": 5,
+        "fromCity": "Kazbegi",
+        "toCity": "Tbilisi",
+        "transport": "CAR",
+        "time": "08:00",
+        "endTime": "11:00"
+      }
+    ]
+  },
+  {
+    "id": "tpl_georgia_wine_batumi_6d",
+    "title": "6 Days in Georgia: Kakheti Wine & Batumi",
+    "shortDescription": "Qvevri cellars, hilltop monasteries and Black Sea boulevards.",
+    "coverImageUrl": "",
+    "country": "Georgia",
+    "continent": "EUROPE",
+    "durationDays": 6,
+    "destinationTypes": [
+      "COUNTRYSIDE",
+      "BEACH"
+    ],
+    "budgetTier": "BUDGET",
+    "paceTag": "RELAXED",
+    "tags": [
+      "wine",
+      "food",
+      "road-trip"
+    ],
+    "published": true,
+    "sortOrder": 570,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Tbilisi",
+        "activities": [
+          {
+            "title": "Chronicle of Georgia monument",
+            "time": "10:30",
+            "endTime": "12:00",
+            "location": "Tbilisi",
+            "lat": 41.796,
+            "lng": 44.803
+          },
+          {
+            "title": "Bridge of Peace & Rike Park",
+            "time": "17:00",
+            "endTime": "19:00",
+            "location": "Tbilisi",
+            "lat": 41.693,
+            "lng": 44.81
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Kakheti wine country",
+        "activities": [
+          {
+            "title": "Bodbe Monastery",
+            "time": "10:30",
+            "endTime": "12:00",
+            "location": "Sighnaghi, Kakheti",
+            "lat": 41.615,
+            "lng": 45.923
+          },
+          {
+            "title": "Qvevri winery tasting",
+            "time": "13:30",
+            "endTime": "16:30",
+            "location": "Telavi, Kakheti",
+            "lat": 41.919,
+            "lng": 45.473
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Sighnaghi",
+        "activities": [
+          {
+            "title": "Sighnaghi city walls",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Sighnaghi, Kakheti",
+            "lat": 41.619,
+            "lng": 45.922
+          },
+          {
+            "title": "Tsinandali Estate",
+            "time": "14:00",
+            "endTime": "16:30",
+            "location": "Tsinandali, Kakheti",
+            "lat": 41.892,
+            "lng": 45.575
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "To Batumi",
+        "activities": [
+          {
+            "title": "Batumi Boulevard",
+            "time": "16:00",
+            "endTime": "19:00",
+            "location": "Batumi",
+            "lat": 41.649,
+            "lng": 41.637
+          },
+          {
+            "title": "Ali & Nino statue at night",
+            "time": "20:00",
+            "endTime": "21:00",
+            "location": "Batumi",
+            "lat": 41.645,
+            "lng": 41.631
+          }
+        ]
+      },
+      {
+        "dayNumber": 5,
+        "theme": "Batumi & Botanical Garden",
+        "activities": [
+          {
+            "title": "Batumi Botanical Garden",
+            "time": "10:00",
+            "endTime": "13:00",
+            "location": "Green Cape, Batumi",
+            "lat": 41.69,
+            "lng": 41.7
+          },
+          {
+            "title": "Piazza Square",
+            "time": "17:00",
+            "endTime": "19:00",
+            "location": "Batumi",
+            "lat": 41.652,
+            "lng": 41.636
+          }
+        ]
+      },
+      {
+        "dayNumber": 6,
+        "theme": "Mtirala & farewell",
+        "activities": [
+          {
+            "title": "Mtirala National Park hike",
+            "time": "09:30",
+            "endTime": "13:00",
+            "location": "Chakvi, Adjara",
+            "lat": 41.69,
+            "lng": 41.78
+          }
+        ]
+      }
+    ],
+    "legs": [
+      {
+        "dayNumber": 4,
+        "fromCity": "Tbilisi",
+        "toCity": "Batumi",
+        "transport": "TRAIN",
+        "time": "09:00",
+        "endTime": "14:00"
+      }
+    ]
+  },
+  {
+    "id": "tpl_andorra_4d",
+    "title": "4 Days in Andorra",
+    "shortDescription": "Pyrenean ski slopes, Caldea spa and duty-free shopping in a tiny principality.",
+    "coverImageUrl": "",
+    "country": "Andorra",
+    "continent": "EUROPE",
+    "durationDays": 4,
+    "destinationTypes": [
+      "MOUNTAIN"
+    ],
+    "budgetTier": "MID_RANGE",
+    "paceTag": "BALANCED",
+    "tags": [
+      "skiing",
+      "winter",
+      "spa",
+      "hiking"
+    ],
+    "published": true,
+    "sortOrder": 580,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Andorra la Vella",
+        "activities": [
+          {
+            "title": "Casa de la Vall & old quarter",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Andorra la Vella",
+            "lat": 42.5071,
+            "lng": 1.5236
+          },
+          {
+            "title": "Caldea thermal spa",
+            "time": "16:00",
+            "endTime": "19:00",
+            "location": "Escaldes-Engordany",
+            "lat": 42.507,
+            "lng": 1.534
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Grandvalira",
+        "activities": [
+          {
+            "title": "Skiing or summer hiking at Grandvalira",
+            "time": "09:00",
+            "endTime": "15:30",
+            "location": "Canillo, Andorra",
+            "lat": 42.578,
+            "lng": 1.725
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Madriu-Perafita-Claror Valley",
+        "activities": [
+          {
+            "title": "Madriu Valley hike (UNESCO)",
+            "time": "09:00",
+            "endTime": "14:00",
+            "location": "Escaldes-Engordany",
+            "lat": 42.52,
+            "lng": 1.6
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Romanesque Andorra",
+        "activities": [
+          {
+            "title": "Sant Joan de Caselles church",
+            "time": "10:00",
+            "endTime": "11:30",
+            "location": "Canillo, Andorra",
+            "lat": 42.568,
+            "lng": 1.597
+          },
+          {
+            "title": "Ordino village",
+            "time": "13:00",
+            "endTime": "15:30",
+            "location": "Ordino, Andorra",
+            "lat": 42.556,
+            "lng": 1.533
+          }
+        ]
+      }
+    ],
+    "legs": []
+  },
+  {
+    "id": "tpl_transylvania_6d",
+    "title": "6 Days in Transylvania",
+    "shortDescription": "Castles, medieval Saxon towns and Carpathian drives.",
+    "coverImageUrl": "",
+    "country": "Romania",
+    "continent": "EUROPE",
+    "durationDays": 6,
+    "destinationTypes": [
+      "COUNTRYSIDE",
+      "CITY"
+    ],
+    "budgetTier": "BUDGET",
+    "paceTag": "BALANCED",
+    "tags": [
+      "history",
+      "castles",
+      "road-trip",
+      "budget-friendly"
+    ],
+    "published": true,
+    "sortOrder": 590,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Bucharest",
+        "activities": [
+          {
+            "title": "Palace of the Parliament",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Sector 5, Bucharest",
+            "lat": 44.4275,
+            "lng": 26.0875
+          },
+          {
+            "title": "Old Town Lipscani",
+            "time": "14:30",
+            "endTime": "17:30",
+            "location": "Bucharest",
+            "lat": 44.432,
+            "lng": 26.1
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Sinaia & Peleș Castle",
+        "activities": [
+          {
+            "title": "Peleș Castle",
+            "time": "11:00",
+            "endTime": "13:00",
+            "location": "Sinaia, Prahova",
+            "lat": 45.3597,
+            "lng": 25.543
+          },
+          {
+            "title": "Sinaia Monastery",
+            "time": "14:00",
+            "endTime": "15:00",
+            "location": "Sinaia, Prahova",
+            "lat": 45.351,
+            "lng": 25.547
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Brașov & Bran",
+        "activities": [
+          {
+            "title": "Brașov Council Square",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Brașov",
+            "lat": 45.6427,
+            "lng": 25.5887
+          },
+          {
+            "title": "Bran Castle (Dracula's)",
+            "time": "14:00",
+            "endTime": "16:30",
+            "location": "Bran, Brașov",
+            "lat": 45.515,
+            "lng": 25.3672
+          },
+          {
+            "title": "Tampa Mountain cable car",
+            "time": "17:30",
+            "endTime": "19:00",
+            "location": "Brașov",
+            "lat": 45.639,
+            "lng": 25.6
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Rasnov & Peștera",
+        "activities": [
+          {
+            "title": "Râșnov Fortress",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Râșnov, Brașov",
+            "lat": 45.59,
+            "lng": 25.46
+          },
+          {
+            "title": "Piatra Craiului hike",
+            "time": "13:30",
+            "endTime": "16:30",
+            "location": "Zărnești, Brașov",
+            "lat": 45.56,
+            "lng": 25.28
+          }
+        ]
+      },
+      {
+        "dayNumber": 5,
+        "theme": "Sighișoara",
+        "activities": [
+          {
+            "title": "Sighișoara Citadel & Clock Tower",
+            "time": "11:00",
+            "endTime": "14:00",
+            "location": "Sighișoara, Mureș",
+            "lat": 46.219,
+            "lng": 24.792
+          },
+          {
+            "title": "Biertan fortified church",
+            "time": "15:30",
+            "endTime": "17:00",
+            "location": "Biertan, Sibiu",
+            "lat": 46.14,
+            "lng": 24.52
+          }
+        ]
+      },
+      {
+        "dayNumber": 6,
+        "theme": "Sibiu & Transfăgărășan",
+        "activities": [
+          {
+            "title": "Sibiu Grand Square",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Sibiu",
+            "lat": 45.7983,
+            "lng": 24.1256
+          },
+          {
+            "title": "Transfăgărășan Highway to Bâlea Lake",
+            "time": "13:30",
+            "endTime": "17:30",
+            "location": "Bâlea Lac, Argeș",
+            "lat": 45.6,
+            "lng": 24.62
+          }
+        ]
+      }
+    ],
+    "legs": [
+      {
+        "dayNumber": 2,
+        "fromCity": "Bucharest",
+        "toCity": "Sinaia",
+        "transport": "TRAIN",
+        "time": "09:30",
+        "endTime": "11:00"
+      },
+      {
+        "dayNumber": 3,
+        "fromCity": "Sinaia",
+        "toCity": "Brașov",
+        "transport": "TRAIN",
+        "time": "08:30",
+        "endTime": "09:30"
+      }
+    ]
+  },
+  {
+    "id": "tpl_krakow_4d",
+    "title": "4 Days in Kraków",
+    "shortDescription": "Medieval square, Wawel Castle and Wieliczka Salt Mine.",
+    "coverImageUrl": "",
+    "country": "Poland",
+    "continent": "EUROPE",
+    "durationDays": 4,
+    "destinationTypes": [
+      "CITY"
+    ],
+    "budgetTier": "BUDGET",
+    "paceTag": "BALANCED",
+    "tags": [
+      "history",
+      "food",
+      "budget-friendly"
+    ],
+    "published": true,
+    "sortOrder": 600,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Old Town",
+        "activities": [
+          {
+            "title": "Main Market Square & Cloth Hall",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Old Town, Kraków",
+            "lat": 50.0617,
+            "lng": 19.9373
+          },
+          {
+            "title": "St. Mary's Basilica trumpeter",
+            "time": "12:00",
+            "endTime": "12:30",
+            "location": "Old Town, Kraków",
+            "lat": 50.0617,
+            "lng": 19.9392
+          },
+          {
+            "title": "Pierogi dinner",
+            "time": "19:00",
+            "endTime": "21:00",
+            "location": "Old Town, Kraków",
+            "lat": 50.064,
+            "lng": 19.94
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Wawel & Kazimierz",
+        "activities": [
+          {
+            "title": "Wawel Castle & Cathedral",
+            "time": "10:00",
+            "endTime": "13:00",
+            "location": "Wawel, Kraków",
+            "lat": 50.054,
+            "lng": 19.9352
+          },
+          {
+            "title": "Kazimierz Jewish Quarter",
+            "time": "15:00",
+            "endTime": "18:00",
+            "location": "Kazimierz, Kraków",
+            "lat": 50.051,
+            "lng": 19.944
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Wieliczka Salt Mine",
+        "activities": [
+          {
+            "title": "Wieliczka Salt Mine",
+            "time": "10:00",
+            "endTime": "13:00",
+            "location": "Wieliczka",
+            "lat": 49.9833,
+            "lng": 20.0545
+          },
+          {
+            "title": "Podgórze & Schindler's Factory",
+            "time": "15:30",
+            "endTime": "17:30",
+            "location": "Podgórze, Kraków",
+            "lat": 50.0475,
+            "lng": 19.9625
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Auschwitz-Birkenau",
+        "activities": [
+          {
+            "title": "Auschwitz-Birkenau Memorial",
+            "time": "09:00",
+            "endTime": "14:00",
+            "location": "Oświęcim",
+            "lat": 50.0343,
+            "lng": 19.2098
+          }
+        ]
+      }
+    ],
+    "legs": []
+  },
+  {
+    "id": "tpl_warsaw_gdansk_5d",
+    "title": "5 Days in Warsaw & Gdańsk",
+    "shortDescription": "Rebuilt old towns, uprising history and Baltic amber coast.",
+    "coverImageUrl": "",
+    "country": "Poland",
+    "continent": "EUROPE",
+    "durationDays": 5,
+    "destinationTypes": [
+      "CITY",
+      "BEACH"
+    ],
+    "budgetTier": "MID_RANGE",
+    "paceTag": "BALANCED",
+    "tags": [
+      "history",
+      "coast",
+      "food"
+    ],
+    "published": true,
+    "sortOrder": 610,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Warsaw Old Town",
+        "activities": [
+          {
+            "title": "Old Town Market Square",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Stare Miasto, Warsaw",
+            "lat": 52.2497,
+            "lng": 21.0122
+          },
+          {
+            "title": "Royal Castle",
+            "time": "12:30",
+            "endTime": "14:30",
+            "location": "Warsaw",
+            "lat": 52.2479,
+            "lng": 21.0149
+          },
+          {
+            "title": "Łazienki Park",
+            "time": "16:00",
+            "endTime": "18:30",
+            "location": "Warsaw",
+            "lat": 52.215,
+            "lng": 21.035
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Warsaw history",
+        "activities": [
+          {
+            "title": "POLIN Museum",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Muranów, Warsaw",
+            "lat": 52.2496,
+            "lng": 20.993
+          },
+          {
+            "title": "Warsaw Uprising Museum",
+            "time": "14:00",
+            "endTime": "16:30",
+            "location": "Wola, Warsaw",
+            "lat": 52.2328,
+            "lng": 20.9805
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "To Gdańsk",
+        "activities": [
+          {
+            "title": "Long Market & Neptune Fountain",
+            "time": "16:00",
+            "endTime": "18:30",
+            "location": "Gdańsk",
+            "lat": 54.3485,
+            "lng": 18.6531
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Gdańsk & Westerplatte",
+        "activities": [
+          {
+            "title": "Museum of the Second World War",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Gdańsk",
+            "lat": 54.3605,
+            "lng": 18.659
+          },
+          {
+            "title": "Mariacka Street amber shops",
+            "time": "14:00",
+            "endTime": "16:00",
+            "location": "Gdańsk",
+            "lat": 54.3495,
+            "lng": 18.654
+          }
+        ]
+      },
+      {
+        "dayNumber": 5,
+        "theme": "Sopot & Malbork",
+        "activities": [
+          {
+            "title": "Sopot Pier",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Sopot",
+            "lat": 54.4452,
+            "lng": 18.57
+          },
+          {
+            "title": "Malbork Castle",
+            "time": "14:00",
+            "endTime": "17:00",
+            "location": "Malbork",
+            "lat": 54.039,
+            "lng": 19.029
+          }
+        ]
+      }
+    ],
+    "legs": [
+      {
+        "dayNumber": 3,
+        "fromCity": "Warsaw",
+        "toCity": "Gdańsk",
+        "transport": "TRAIN",
+        "time": "09:00",
+        "endTime": "11:45"
+      }
+    ]
+  },
+  {
+    "id": "tpl_zakopane_tatras_4d",
+    "title": "4 Days in Zakopane & the Tatras",
+    "shortDescription": "Mountain lakes, wooden chalets and the highest peaks in Poland.",
+    "coverImageUrl": "",
+    "country": "Poland",
+    "continent": "EUROPE",
+    "durationDays": 4,
+    "destinationTypes": [
+      "MOUNTAIN",
+      "LAKE"
+    ],
+    "budgetTier": "BUDGET",
+    "paceTag": "BALANCED",
+    "tags": [
+      "hiking",
+      "mountains",
+      "budget-friendly"
+    ],
+    "published": true,
+    "sortOrder": 620,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Zakopane town",
+        "activities": [
+          {
+            "title": "Krupówki Street",
+            "time": "14:00",
+            "endTime": "16:00",
+            "location": "Zakopane",
+            "lat": 49.295,
+            "lng": 19.95
+          },
+          {
+            "title": "Gubałówka funicular",
+            "time": "16:30",
+            "endTime": "18:30",
+            "location": "Zakopane",
+            "lat": 49.3,
+            "lng": 19.94
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Morskie Oko",
+        "activities": [
+          {
+            "title": "Morskie Oko lake trek",
+            "time": "08:00",
+            "endTime": "15:00",
+            "location": "Tatra National Park",
+            "lat": 49.2,
+            "lng": 20.07
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Kasprowy Wierch",
+        "activities": [
+          {
+            "title": "Kasprowy Wierch cable car",
+            "time": "10:00",
+            "endTime": "13:00",
+            "location": "Zakopane",
+            "lat": 49.232,
+            "lng": 19.981
+          },
+          {
+            "title": "Thermal baths Chochołowskie",
+            "time": "15:00",
+            "endTime": "18:00",
+            "location": "Chochołów",
+            "lat": 49.27,
+            "lng": 19.85
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Dunajec gorge",
+        "activities": [
+          {
+            "title": "Dunajec rafting",
+            "time": "10:00",
+            "endTime": "13:00",
+            "location": "Szczawnica",
+            "lat": 49.41,
+            "lng": 20.49
+          }
+        ]
+      }
+    ],
+    "legs": []
+  },
+  {
+    "id": "tpl_eger_balaton_4d",
+    "title": "4 Days in Eger & Lake Balaton",
+    "shortDescription": "Baroque wine town, Valley of the Beautiful Women and Hungary's inland sea.",
+    "coverImageUrl": "",
+    "country": "Hungary",
+    "continent": "EUROPE",
+    "durationDays": 4,
+    "destinationTypes": [
+      "LAKE",
+      "COUNTRYSIDE"
+    ],
+    "budgetTier": "BUDGET",
+    "paceTag": "RELAXED",
+    "tags": [
+      "wine",
+      "lakes",
+      "summer"
+    ],
+    "published": true,
+    "sortOrder": 630,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Eger",
+        "activities": [
+          {
+            "title": "Eger Castle",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Eger",
+            "lat": 47.905,
+            "lng": 20.377
+          },
+          {
+            "title": "Valley of the Beautiful Women cellars",
+            "time": "16:00",
+            "endTime": "19:30",
+            "location": "Eger",
+            "lat": 47.896,
+            "lng": 20.367
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Hollókő village",
+        "activities": [
+          {
+            "title": "Hollókő village",
+            "time": "11:00",
+            "endTime": "14:00",
+            "location": "Hollókő",
+            "lat": 47.999,
+            "lng": 19.585
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Lake Balaton",
+        "activities": [
+          {
+            "title": "Tihany Abbey",
+            "time": "10:30",
+            "endTime": "12:30",
+            "location": "Tihany",
+            "lat": 46.914,
+            "lng": 17.887
+          },
+          {
+            "title": "Lake swim & lángos",
+            "time": "14:00",
+            "endTime": "17:00",
+            "location": "Balatonfüred",
+            "lat": 46.957,
+            "lng": 17.889
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Badacsony",
+        "activities": [
+          {
+            "title": "Badacsony wine hill",
+            "time": "10:00",
+            "endTime": "13:00",
+            "location": "Badacsony",
+            "lat": 46.8,
+            "lng": 17.5
+          },
+          {
+            "title": "Keszthely Festetics Palace",
+            "time": "14:30",
+            "endTime": "17:00",
+            "location": "Keszthely",
+            "lat": 46.764,
+            "lng": 17.242
+          }
+        ]
+      }
+    ],
+    "legs": []
+  },
+  {
+    "id": "tpl_croatia_summer_islands_7d",
+    "title": "7 Days of Croatian Summer Island Hopping",
+    "shortDescription": "Brač, Hvar and Vis: white pebble beaches, blue caves and open-air dining.",
+    "coverImageUrl": "",
+    "country": "Croatia",
+    "continent": "EUROPE",
+    "durationDays": 7,
+    "destinationTypes": [
+      "ISLAND",
+      "BEACH"
+    ],
+    "budgetTier": "MID_RANGE",
+    "paceTag": "RELAXED",
+    "tags": [
+      "summer",
+      "sailing",
+      "beach",
+      "islands"
+    ],
+    "published": true,
+    "sortOrder": 640,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Split & Brač",
+        "activities": [
+          {
+            "title": "Bol Zlatni Rat beach",
+            "time": "11:00",
+            "endTime": "16:00",
+            "location": "Bol, Brač",
+            "lat": 43.256,
+            "lng": 16.638
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Brač",
+        "activities": [
+          {
+            "title": "Vidova Gora summit",
+            "time": "09:30",
+            "endTime": "11:00",
+            "location": "Brač",
+            "lat": 43.299,
+            "lng": 16.636
+          },
+          {
+            "title": "Supetar harbour sunset",
+            "time": "18:00",
+            "endTime": "19:30",
+            "location": "Supetar, Brač",
+            "lat": 43.383,
+            "lng": 16.55
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Hvar town",
+        "activities": [
+          {
+            "title": "Hvar Fortress Španjola",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Hvar",
+            "lat": 43.173,
+            "lng": 16.444
+          },
+          {
+            "title": "Pakleni Islands swim stop",
+            "time": "14:00",
+            "endTime": "17:00",
+            "location": "Pakleni Islands, Hvar",
+            "lat": 43.16,
+            "lng": 16.4
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Stari Grad & lavender",
+        "activities": [
+          {
+            "title": "Stari Grad Plain (UNESCO)",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Stari Grad, Hvar",
+            "lat": 43.19,
+            "lng": 16.59
+          },
+          {
+            "title": "Lavender fields near Velo Grablje",
+            "time": "15:00",
+            "endTime": "17:30",
+            "location": "Velo Grablje, Hvar",
+            "lat": 43.15,
+            "lng": 16.52
+          }
+        ]
+      },
+      {
+        "dayNumber": 5,
+        "theme": "Vis Island",
+        "activities": [
+          {
+            "title": "Stiniva Beach",
+            "time": "10:30",
+            "endTime": "13:00",
+            "location": "Vis",
+            "lat": 43.009,
+            "lng": 16.16
+          },
+          {
+            "title": "Komiža waterfront",
+            "time": "16:30",
+            "endTime": "19:00",
+            "location": "Komiža, Vis",
+            "lat": 43.04,
+            "lng": 16.09
+          }
+        ]
+      },
+      {
+        "dayNumber": 6,
+        "theme": "Blue Cave & Biševo",
+        "activities": [
+          {
+            "title": "Blue Cave boat tour",
+            "time": "09:00",
+            "endTime": "14:00",
+            "location": "Biševo",
+            "lat": 42.963,
+            "lng": 16.019
+          }
+        ]
+      },
+      {
+        "dayNumber": 7,
+        "theme": "Back to Split",
+        "activities": [
+          {
+            "title": "Split Riva promenade",
+            "time": "11:00",
+            "endTime": "13:00",
+            "location": "Split",
+            "lat": 43.508,
+            "lng": 16.4402
+          }
+        ]
+      }
+    ],
+    "legs": [
+      {
+        "dayNumber": 1,
+        "fromCity": "Split",
+        "toCity": "Brač",
+        "transport": "FERRY",
+        "time": "09:30",
+        "endTime": "10:20"
+      },
+      {
+        "dayNumber": 3,
+        "fromCity": "Brač",
+        "toCity": "Hvar",
+        "transport": "FERRY",
+        "time": "09:00",
+        "endTime": "10:00"
+      },
+      {
+        "dayNumber": 5,
+        "fromCity": "Hvar",
+        "toCity": "Vis",
+        "transport": "FERRY",
+        "time": "08:00",
+        "endTime": "10:00"
+      },
+      {
+        "dayNumber": 7,
+        "fromCity": "Vis",
+        "toCity": "Split",
+        "transport": "FERRY",
+        "time": "09:00",
+        "endTime": "11:30"
+      }
+    ]
+  },
+  {
+    "id": "tpl_istria_plitvice_5d",
+    "title": "5 Days in Istria & Plitvice Lakes",
+    "shortDescription": "Truffle hill towns, Roman Pula and Croatia's most famous waterfalls.",
+    "coverImageUrl": "",
+    "country": "Croatia",
+    "continent": "EUROPE",
+    "durationDays": 5,
+    "destinationTypes": [
+      "COUNTRYSIDE",
+      "LAKE",
+      "BEACH"
+    ],
+    "budgetTier": "MID_RANGE",
+    "paceTag": "BALANCED",
+    "tags": [
+      "summer",
+      "food",
+      "road-trip",
+      "nature"
+    ],
+    "published": true,
+    "sortOrder": 650,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Rovinj",
+        "activities": [
+          {
+            "title": "Rovinj old town & St Euphemia",
+            "time": "10:00",
+            "endTime": "13:00",
+            "location": "Rovinj, Istria",
+            "lat": 45.081,
+            "lng": 13.64
+          },
+          {
+            "title": "Golden Cape Forest Park swim",
+            "time": "15:00",
+            "endTime": "17:30",
+            "location": "Rovinj, Istria",
+            "lat": 45.058,
+            "lng": 13.677
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Pula",
+        "activities": [
+          {
+            "title": "Pula Arena",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Pula, Istria",
+            "lat": 44.873,
+            "lng": 13.85
+          },
+          {
+            "title": "Verudela beaches",
+            "time": "14:00",
+            "endTime": "17:00",
+            "location": "Pula, Istria",
+            "lat": 44.84,
+            "lng": 13.83
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Hill towns & truffles",
+        "activities": [
+          {
+            "title": "Motovun hill town",
+            "time": "10:30",
+            "endTime": "12:30",
+            "location": "Motovun, Istria",
+            "lat": 45.337,
+            "lng": 13.828
+          },
+          {
+            "title": "Truffle hunt & lunch",
+            "time": "13:00",
+            "endTime": "16:00",
+            "location": "Buzet, Istria",
+            "lat": 45.41,
+            "lng": 13.97
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Opatija riviera",
+        "activities": [
+          {
+            "title": "Opatija Lungomare promenade",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Opatija",
+            "lat": 45.338,
+            "lng": 14.305
+          },
+          {
+            "title": "Lovran old town",
+            "time": "13:30",
+            "endTime": "15:30",
+            "location": "Lovran",
+            "lat": 45.29,
+            "lng": 14.27
+          }
+        ]
+      },
+      {
+        "dayNumber": 5,
+        "theme": "Plitvice Lakes",
+        "activities": [
+          {
+            "title": "Plitvice Lakes National Park",
+            "time": "09:00",
+            "endTime": "14:30",
+            "location": "Plitvička Jezera",
+            "lat": 44.8654,
+            "lng": 15.582
+          }
+        ]
+      }
+    ],
+    "legs": [
+      {
+        "dayNumber": 5,
+        "fromCity": "Opatija",
+        "toCity": "Plitvice",
+        "transport": "CAR",
+        "time": "06:30",
+        "endTime": "09:00"
+      }
+    ]
+  },
+  {
+    "id": "tpl_florence_tuscany_5d",
+    "title": "5 Days in Florence & Tuscany",
+    "shortDescription": "Renaissance art, Chianti vineyards and Siena's medieval square.",
+    "coverImageUrl": "",
+    "country": "Italy",
+    "continent": "EUROPE",
+    "durationDays": 5,
+    "destinationTypes": [
+      "CITY",
+      "COUNTRYSIDE"
+    ],
+    "budgetTier": "MID_RANGE",
+    "paceTag": "BALANCED",
+    "tags": [
+      "art",
+      "wine",
+      "food"
+    ],
+    "published": true,
+    "sortOrder": 660,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Florence icons",
+        "activities": [
+          {
+            "title": "Duomo & Brunelleschi's Dome",
+            "time": "09:30",
+            "endTime": "12:00",
+            "location": "Florence",
+            "lat": 43.7731,
+            "lng": 11.256
+          },
+          {
+            "title": "Ponte Vecchio",
+            "time": "13:00",
+            "endTime": "14:00",
+            "location": "Florence",
+            "lat": 43.768,
+            "lng": 11.2531
+          },
+          {
+            "title": "Piazzale Michelangelo sunset",
+            "time": "18:00",
+            "endTime": "19:30",
+            "location": "Florence",
+            "lat": 43.7629,
+            "lng": 11.265
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Uffizi & Oltrarno",
+        "activities": [
+          {
+            "title": "Uffizi Gallery",
+            "time": "09:00",
+            "endTime": "12:30",
+            "location": "Florence",
+            "lat": 43.7678,
+            "lng": 11.2553
+          },
+          {
+            "title": "Pitti Palace & Boboli Gardens",
+            "time": "14:30",
+            "endTime": "17:30",
+            "location": "Oltrarno, Florence",
+            "lat": 43.765,
+            "lng": 11.25
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Chianti wine day",
+        "activities": [
+          {
+            "title": "Chianti winery tour & tasting",
+            "time": "10:30",
+            "endTime": "15:00",
+            "location": "Greve in Chianti, Tuscany",
+            "lat": 43.585,
+            "lng": 11.316
+          },
+          {
+            "title": "Castello di Brolio",
+            "time": "15:30",
+            "endTime": "17:00",
+            "location": "Gaiole in Chianti, Tuscany",
+            "lat": 43.418,
+            "lng": 11.53
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Siena & San Gimignano",
+        "activities": [
+          {
+            "title": "Piazza del Campo, Siena",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Siena",
+            "lat": 43.3188,
+            "lng": 11.3308
+          },
+          {
+            "title": "San Gimignano towers",
+            "time": "14:30",
+            "endTime": "17:00",
+            "location": "San Gimignano, Tuscany",
+            "lat": 43.4677,
+            "lng": 11.0432
+          }
+        ]
+      },
+      {
+        "dayNumber": 5,
+        "theme": "Pisa & farewell",
+        "activities": [
+          {
+            "title": "Leaning Tower of Pisa",
+            "time": "10:30",
+            "endTime": "12:30",
+            "location": "Pisa",
+            "lat": 43.723,
+            "lng": 10.3966
+          }
+        ]
+      }
+    ],
+    "legs": [
+      {
+        "dayNumber": 5,
+        "fromCity": "Florence",
+        "toCity": "Pisa",
+        "transport": "TRAIN",
+        "time": "09:30",
+        "endTime": "10:30"
+      }
+    ]
+  },
+  {
+    "id": "tpl_cinque_terre_4d",
+    "title": "4 Days in Cinque Terre & Portofino",
+    "shortDescription": "Pastel cliff villages, coastal footpaths and Riviera glamour.",
+    "coverImageUrl": "",
+    "country": "Italy",
+    "continent": "EUROPE",
+    "durationDays": 4,
+    "destinationTypes": [
+      "BEACH",
+      "COUNTRYSIDE"
+    ],
+    "budgetTier": "MID_RANGE",
+    "paceTag": "RELAXED",
+    "tags": [
+      "coast",
+      "hiking",
+      "romantic"
+    ],
+    "published": true,
+    "sortOrder": 670,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Monterosso & Vernazza",
+        "activities": [
+          {
+            "title": "Monterosso beach",
+            "time": "11:00",
+            "endTime": "14:00",
+            "location": "Monterosso al Mare",
+            "lat": 44.146,
+            "lng": 9.656
+          },
+          {
+            "title": "Vernazza harbour",
+            "time": "16:00",
+            "endTime": "18:30",
+            "location": "Vernazza",
+            "lat": 44.135,
+            "lng": 9.684
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Sentiero Azzurro",
+        "activities": [
+          {
+            "title": "Vernazza to Corniglia trail",
+            "time": "09:30",
+            "endTime": "12:30",
+            "location": "Cinque Terre",
+            "lat": 44.12,
+            "lng": 9.71
+          },
+          {
+            "title": "Manarola sunset",
+            "time": "17:30",
+            "endTime": "19:30",
+            "location": "Manarola",
+            "lat": 44.107,
+            "lng": 9.73
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Riomaggiore & Portovenere",
+        "activities": [
+          {
+            "title": "Via dell'Amore & Riomaggiore",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Riomaggiore",
+            "lat": 44.099,
+            "lng": 9.738
+          },
+          {
+            "title": "Portovenere boat trip",
+            "time": "14:30",
+            "endTime": "18:00",
+            "location": "Portovenere",
+            "lat": 44.053,
+            "lng": 9.835
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Portofino",
+        "activities": [
+          {
+            "title": "Portofino harbour",
+            "time": "10:30",
+            "endTime": "13:00",
+            "location": "Portofino, Liguria",
+            "lat": 44.303,
+            "lng": 9.209
+          },
+          {
+            "title": "Santa Margherita Ligure promenade",
+            "time": "14:30",
+            "endTime": "17:00",
+            "location": "Santa Margherita Ligure",
+            "lat": 44.334,
+            "lng": 9.211
+          }
+        ]
+      }
+    ],
+    "legs": [
+      {
+        "dayNumber": 4,
+        "fromCity": "La Spezia",
+        "toCity": "Portofino",
+        "transport": "TRAIN",
+        "time": "08:30",
+        "endTime": "10:00"
+      }
+    ]
+  },
+  {
+    "id": "tpl_puglia_6d",
+    "title": "6 Days in Puglia",
+    "shortDescription": "Trulli villages, whitewashed coastal towns and the heel of Italy's boot.",
+    "coverImageUrl": "",
+    "country": "Italy",
+    "continent": "EUROPE",
+    "durationDays": 6,
+    "destinationTypes": [
+      "COUNTRYSIDE",
+      "BEACH"
+    ],
+    "budgetTier": "MID_RANGE",
+    "paceTag": "RELAXED",
+    "tags": [
+      "road-trip",
+      "food",
+      "coast"
+    ],
+    "published": true,
+    "sortOrder": 680,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Bari",
+        "activities": [
+          {
+            "title": "Bari Vecchia orecchiette alley",
+            "time": "11:00",
+            "endTime": "13:00",
+            "location": "Bari Vecchia, Bari",
+            "lat": 41.128,
+            "lng": 16.87
+          },
+          {
+            "title": "Basilica di San Nicola",
+            "time": "15:00",
+            "endTime": "16:30",
+            "location": "Bari",
+            "lat": 41.13,
+            "lng": 16.869
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Polignano & Monopoli",
+        "activities": [
+          {
+            "title": "Polignano a Mare cliffs",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Polignano a Mare",
+            "lat": 40.996,
+            "lng": 17.221
+          },
+          {
+            "title": "Monopoli old harbour",
+            "time": "15:00",
+            "endTime": "18:00",
+            "location": "Monopoli",
+            "lat": 40.953,
+            "lng": 17.301
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Alberobello & Locorotondo",
+        "activities": [
+          {
+            "title": "Alberobello trulli",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Alberobello",
+            "lat": 40.783,
+            "lng": 17.238
+          },
+          {
+            "title": "Locorotondo",
+            "time": "14:30",
+            "endTime": "17:00",
+            "location": "Locorotondo",
+            "lat": 40.755,
+            "lng": 17.326
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Ostuni & Lecce",
+        "activities": [
+          {
+            "title": "Ostuni White City",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Ostuni",
+            "lat": 40.731,
+            "lng": 17.577
+          },
+          {
+            "title": "Lecce baroque centre",
+            "time": "15:30",
+            "endTime": "19:00",
+            "location": "Lecce",
+            "lat": 40.352,
+            "lng": 18.17
+          }
+        ]
+      },
+      {
+        "dayNumber": 5,
+        "theme": "Salento coast",
+        "activities": [
+          {
+            "title": "Otranto old town",
+            "time": "10:30",
+            "endTime": "12:30",
+            "location": "Otranto",
+            "lat": 40.149,
+            "lng": 18.49
+          },
+          {
+            "title": "Santa Maria di Leuca",
+            "time": "14:00",
+            "endTime": "16:00",
+            "location": "Santa Maria di Leuca",
+            "lat": 39.796,
+            "lng": 18.359
+          }
+        ]
+      },
+      {
+        "dayNumber": 6,
+        "theme": "Gallipoli & farewell",
+        "activities": [
+          {
+            "title": "Gallipoli old town & beach",
+            "time": "11:00",
+            "endTime": "15:00",
+            "location": "Gallipoli",
+            "lat": 40.055,
+            "lng": 17.991
+          }
+        ]
+      }
+    ],
+    "legs": []
+  },
+  {
+    "id": "tpl_sardinia_6d",
+    "title": "6 Days in Sardinia",
+    "shortDescription": "Caribbean-clear bays, nuraghe ruins and cliffside coves.",
+    "coverImageUrl": "",
+    "country": "Italy",
+    "continent": "EUROPE",
+    "durationDays": 6,
+    "destinationTypes": [
+      "ISLAND",
+      "BEACH"
+    ],
+    "budgetTier": "MID_RANGE",
+    "paceTag": "RELAXED",
+    "tags": [
+      "beach",
+      "island",
+      "road-trip",
+      "summer"
+    ],
+    "published": true,
+    "sortOrder": 690,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Cagliari",
+        "activities": [
+          {
+            "title": "Castello district",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Cagliari",
+            "lat": 39.217,
+            "lng": 9.112
+          },
+          {
+            "title": "Poetto Beach",
+            "time": "14:00",
+            "endTime": "18:00",
+            "location": "Cagliari",
+            "lat": 39.2,
+            "lng": 9.17
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Costa Rei",
+        "activities": [
+          {
+            "title": "Villasimius & Cala Brandinchi",
+            "time": "10:00",
+            "endTime": "16:00",
+            "location": "Villasimius, Sardinia",
+            "lat": 39.142,
+            "lng": 9.523
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Nuraghe & Alghero",
+        "activities": [
+          {
+            "title": "Su Nuraxi di Barumini (UNESCO)",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Barumini, Sardinia",
+            "lat": 39.706,
+            "lng": 8.993
+          },
+          {
+            "title": "Alghero old town",
+            "time": "17:00",
+            "endTime": "19:30",
+            "location": "Alghero",
+            "lat": 40.558,
+            "lng": 8.319
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Capo Caccia",
+        "activities": [
+          {
+            "title": "Neptune's Grotto",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Capo Caccia, Alghero",
+            "lat": 40.56,
+            "lng": 8.165
+          },
+          {
+            "title": "Bosa colourful riverside",
+            "time": "15:00",
+            "endTime": "17:30",
+            "location": "Bosa",
+            "lat": 40.299,
+            "lng": 8.483
+          }
+        ]
+      },
+      {
+        "dayNumber": 5,
+        "theme": "Costa Smeralda",
+        "activities": [
+          {
+            "title": "Porto Cervo",
+            "time": "11:00",
+            "endTime": "13:00",
+            "location": "Porto Cervo",
+            "lat": 41.138,
+            "lng": 9.536
+          },
+          {
+            "title": "La Pelosa Beach",
+            "time": "14:30",
+            "endTime": "18:00",
+            "location": "Stintino, Sardinia",
+            "lat": 40.96,
+            "lng": 8.219
+          }
+        ]
+      },
+      {
+        "dayNumber": 6,
+        "theme": "La Maddalena",
+        "activities": [
+          {
+            "title": "La Maddalena archipelago boat tour",
+            "time": "10:00",
+            "endTime": "16:00",
+            "location": "La Maddalena",
+            "lat": 41.216,
+            "lng": 9.407
+          }
+        ]
+      }
+    ],
+    "legs": []
+  },
+  {
+    "id": "tpl_bologna_emilia_4d",
+    "title": "4 Days in Bologna & Emilia-Romagna",
+    "shortDescription": "Italy's food capital: tortellini, Parmigiano and balsamic.",
+    "coverImageUrl": "",
+    "country": "Italy",
+    "continent": "EUROPE",
+    "durationDays": 4,
+    "destinationTypes": [
+      "CITY",
+      "COUNTRYSIDE"
+    ],
+    "budgetTier": "MID_RANGE",
+    "paceTag": "RELAXED",
+    "tags": [
+      "food",
+      "foodie",
+      "culture"
+    ],
+    "published": true,
+    "sortOrder": 700,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Bologna porticoes",
+        "activities": [
+          {
+            "title": "Piazza Maggiore & Two Towers",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Bologna",
+            "lat": 44.4938,
+            "lng": 11.343
+          },
+          {
+            "title": "Tortellini pasta-making class",
+            "time": "15:00",
+            "endTime": "18:00",
+            "location": "Bologna",
+            "lat": 44.495,
+            "lng": 11.345
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "San Luca & markets",
+        "activities": [
+          {
+            "title": "Portico di San Luca walk",
+            "time": "09:30",
+            "endTime": "12:00",
+            "location": "Bologna",
+            "lat": 44.479,
+            "lng": 11.298
+          },
+          {
+            "title": "Quadrilatero market food crawl",
+            "time": "13:00",
+            "endTime": "15:30",
+            "location": "Bologna",
+            "lat": 44.494,
+            "lng": 11.345
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Parma",
+        "activities": [
+          {
+            "title": "Parmigiano-Reggiano dairy visit",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Parma",
+            "lat": 44.78,
+            "lng": 10.33
+          },
+          {
+            "title": "Prosciutto di Parma tasting",
+            "time": "14:00",
+            "endTime": "16:00",
+            "location": "Langhirano, Parma",
+            "lat": 44.608,
+            "lng": 10.267
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Modena",
+        "activities": [
+          {
+            "title": "Balsamic vinegar acetaia",
+            "time": "10:30",
+            "endTime": "12:30",
+            "location": "Modena",
+            "lat": 44.647,
+            "lng": 10.925
+          },
+          {
+            "title": "Osteria Francescana area stroll",
+            "time": "14:00",
+            "endTime": "16:30",
+            "location": "Modena",
+            "lat": 44.649,
+            "lng": 10.926
+          }
+        ]
+      }
+    ],
+    "legs": [
+      {
+        "dayNumber": 3,
+        "fromCity": "Bologna",
+        "toCity": "Parma",
+        "transport": "TRAIN",
+        "time": "08:45",
+        "endTime": "09:35"
+      },
+      {
+        "dayNumber": 4,
+        "fromCity": "Bologna",
+        "toCity": "Modena",
+        "transport": "TRAIN",
+        "time": "09:00",
+        "endTime": "09:30"
+      }
+    ]
+  },
+  {
+    "id": "tpl_albania_riviera_6d",
+    "title": "6 Days in Albania: Tirana to the Riviera",
+    "shortDescription": "Ottoman UNESCO towns, mountain castles and unspoiled Ionian beaches.",
+    "coverImageUrl": "",
+    "country": "Albania",
+    "continent": "EUROPE",
+    "durationDays": 6,
+    "destinationTypes": [
+      "BEACH",
+      "CITY",
+      "MOUNTAIN"
+    ],
+    "budgetTier": "BUDGET",
+    "paceTag": "BALANCED",
+    "tags": [
+      "beach",
+      "budget-friendly",
+      "history",
+      "road-trip"
+    ],
+    "published": true,
+    "sortOrder": 710,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Tirana",
+        "activities": [
+          {
+            "title": "Skanderbeg Square",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Tirana",
+            "lat": 41.3275,
+            "lng": 19.8187
+          },
+          {
+            "title": "Dajti Ekspres cable car",
+            "time": "13:00",
+            "endTime": "15:30",
+            "location": "Tirana",
+            "lat": 41.343,
+            "lng": 19.912
+          },
+          {
+            "title": "Blloku neighbourhood",
+            "time": "17:00",
+            "endTime": "20:00",
+            "location": "Blloku, Tirana",
+            "lat": 41.319,
+            "lng": 19.814
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Berat",
+        "activities": [
+          {
+            "title": "Berat Castle",
+            "time": "11:00",
+            "endTime": "13:30",
+            "location": "Berat",
+            "lat": 40.706,
+            "lng": 19.952
+          },
+          {
+            "title": "Onufri Museum & Mangalem quarter",
+            "time": "15:00",
+            "endTime": "17:30",
+            "location": "Berat",
+            "lat": 40.705,
+            "lng": 19.954
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Llogara Pass & Himara",
+        "activities": [
+          {
+            "title": "Llogara Pass",
+            "time": "11:00",
+            "endTime": "12:30",
+            "location": "Llogara National Park",
+            "lat": 40.22,
+            "lng": 19.57
+          },
+          {
+            "title": "Himara beach",
+            "time": "14:30",
+            "endTime": "18:00",
+            "location": "Himara",
+            "lat": 40.1,
+            "lng": 19.74
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Albanian Riviera",
+        "activities": [
+          {
+            "title": "Gjipe Beach canyon hike",
+            "time": "09:30",
+            "endTime": "13:00",
+            "location": "Himara",
+            "lat": 40.05,
+            "lng": 19.79
+          },
+          {
+            "title": "Ksamil islands swim",
+            "time": "15:00",
+            "endTime": "18:00",
+            "location": "Ksamil",
+            "lat": 39.77,
+            "lng": 20.0
+          }
+        ]
+      },
+      {
+        "dayNumber": 5,
+        "theme": "Butrint & Saranda",
+        "activities": [
+          {
+            "title": "Butrint archaeological park",
+            "time": "10:00",
+            "endTime": "13:00",
+            "location": "Butrint, Saranda",
+            "lat": 39.745,
+            "lng": 20.021
+          },
+          {
+            "title": "Saranda promenade",
+            "time": "17:00",
+            "endTime": "19:00",
+            "location": "Saranda",
+            "lat": 39.875,
+            "lng": 20.005
+          }
+        ]
+      },
+      {
+        "dayNumber": 6,
+        "theme": "Gjirokastër",
+        "activities": [
+          {
+            "title": "Gjirokastër Castle & old bazaar",
+            "time": "10:30",
+            "endTime": "13:30",
+            "location": "Gjirokastër",
+            "lat": 40.075,
+            "lng": 20.139
+          }
+        ]
+      }
+    ],
+    "legs": [
+      {
+        "dayNumber": 2,
+        "fromCity": "Tirana",
+        "toCity": "Berat",
+        "transport": "BUS",
+        "time": "08:30",
+        "endTime": "10:30"
+      },
+      {
+        "dayNumber": 3,
+        "fromCity": "Berat",
+        "toCity": "Himara",
+        "transport": "CAR",
+        "time": "08:00",
+        "endTime": "11:00"
+      }
+    ]
+  },
+  {
+    "id": "tpl_holland_tulips_4d",
+    "title": "4 Days of Holland's Tulip Season",
+    "shortDescription": "Keukenhof gardens, Delft blue pottery and Rotterdam architecture.",
+    "coverImageUrl": "",
+    "country": "Netherlands",
+    "continent": "EUROPE",
+    "durationDays": 4,
+    "destinationTypes": [
+      "COUNTRYSIDE",
+      "CITY"
+    ],
+    "budgetTier": "MID_RANGE",
+    "paceTag": "RELAXED",
+    "tags": [
+      "spring",
+      "flowers",
+      "family-friendly"
+    ],
+    "published": true,
+    "sortOrder": 720,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "The Hague & Delft",
+        "activities": [
+          {
+            "title": "Mauritshuis (Girl with a Pearl Earring)",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "The Hague",
+            "lat": 52.0805,
+            "lng": 4.314
+          },
+          {
+            "title": "Delft canal town & Royal Delft",
+            "time": "14:00",
+            "endTime": "17:00",
+            "location": "Delft",
+            "lat": 52.0116,
+            "lng": 4.3571
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Keukenhof",
+        "activities": [
+          {
+            "title": "Keukenhof Gardens",
+            "time": "09:00",
+            "endTime": "14:00",
+            "location": "Lisse",
+            "lat": 52.27,
+            "lng": 4.546
+          },
+          {
+            "title": "Bulb fields cycle ride",
+            "time": "15:00",
+            "endTime": "17:30",
+            "location": "Lisse",
+            "lat": 52.26,
+            "lng": 4.56
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Rotterdam",
+        "activities": [
+          {
+            "title": "Markthal & Cube Houses",
+            "time": "10:00",
+            "endTime": "13:00",
+            "location": "Rotterdam",
+            "lat": 51.92,
+            "lng": 4.487
+          },
+          {
+            "title": "Erasmus Bridge & Euromast",
+            "time": "14:30",
+            "endTime": "17:30",
+            "location": "Rotterdam",
+            "lat": 51.9094,
+            "lng": 4.478
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Windmills of Kinderdijk",
+        "activities": [
+          {
+            "title": "Kinderdijk windmills (UNESCO)",
+            "time": "10:00",
+            "endTime": "13:00",
+            "location": "Kinderdijk",
+            "lat": 51.884,
+            "lng": 4.634
+          }
+        ]
+      }
+    ],
+    "legs": []
+  },
+  {
+    "id": "tpl_brussels_bruges_ghent_5d",
+    "title": "5 Days in Brussels, Bruges & Ghent",
+    "shortDescription": "Grand Place, canals, chocolate and medieval Flemish towns.",
+    "coverImageUrl": "",
+    "country": "Belgium",
+    "continent": "EUROPE",
+    "durationDays": 5,
+    "destinationTypes": [
+      "CITY"
+    ],
+    "budgetTier": "MID_RANGE",
+    "paceTag": "BALANCED",
+    "tags": [
+      "food",
+      "history",
+      "chocolate",
+      "beer"
+    ],
+    "published": true,
+    "sortOrder": 730,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Brussels",
+        "activities": [
+          {
+            "title": "Grand-Place",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Brussels",
+            "lat": 50.8467,
+            "lng": 4.3525
+          },
+          {
+            "title": "Manneken Pis & chocolate shops",
+            "time": "12:30",
+            "endTime": "14:30",
+            "location": "Brussels",
+            "lat": 50.845,
+            "lng": 4.35
+          },
+          {
+            "title": "Beer tasting at Delirium",
+            "time": "19:00",
+            "endTime": "21:00",
+            "location": "Brussels",
+            "lat": 50.848,
+            "lng": 4.354
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Brussels museums",
+        "activities": [
+          {
+            "title": "Atomium",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Laeken, Brussels",
+            "lat": 50.8949,
+            "lng": 4.3415
+          },
+          {
+            "title": "Magritte Museum",
+            "time": "14:00",
+            "endTime": "16:30",
+            "location": "Brussels",
+            "lat": 50.842,
+            "lng": 4.359
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Bruges",
+        "activities": [
+          {
+            "title": "Belfry & Markt square",
+            "time": "11:00",
+            "endTime": "13:00",
+            "location": "Bruges",
+            "lat": 51.2087,
+            "lng": 3.2245
+          },
+          {
+            "title": "Canal boat tour",
+            "time": "14:30",
+            "endTime": "15:30",
+            "location": "Bruges",
+            "lat": 51.209,
+            "lng": 3.225
+          },
+          {
+            "title": "Minnewater Lake",
+            "time": "17:00",
+            "endTime": "18:30",
+            "location": "Bruges",
+            "lat": 51.198,
+            "lng": 3.223
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Ghent",
+        "activities": [
+          {
+            "title": "Gravensteen Castle",
+            "time": "10:30",
+            "endTime": "12:30",
+            "location": "Ghent",
+            "lat": 51.057,
+            "lng": 3.721
+          },
+          {
+            "title": "Graslei & Korenlei",
+            "time": "14:00",
+            "endTime": "16:30",
+            "location": "Ghent",
+            "lat": 51.054,
+            "lng": 3.72
+          }
+        ]
+      },
+      {
+        "dayNumber": 5,
+        "theme": "Antwerp",
+        "activities": [
+          {
+            "title": "Antwerp Central Station",
+            "time": "10:00",
+            "endTime": "11:00",
+            "location": "Antwerp",
+            "lat": 51.2172,
+            "lng": 4.4211
+          },
+          {
+            "title": "Grote Markt & diamond district",
+            "time": "12:00",
+            "endTime": "15:00",
+            "location": "Antwerp",
+            "lat": 51.2211,
+            "lng": 4.3997
+          }
+        ]
+      }
+    ],
+    "legs": [
+      {
+        "dayNumber": 3,
+        "fromCity": "Brussels",
+        "toCity": "Bruges",
+        "transport": "TRAIN",
+        "time": "09:30",
+        "endTime": "10:30"
+      },
+      {
+        "dayNumber": 4,
+        "fromCity": "Bruges",
+        "toCity": "Ghent",
+        "transport": "TRAIN",
+        "time": "09:30",
+        "endTime": "10:00"
+      },
+      {
+        "dayNumber": 5,
+        "fromCity": "Ghent",
+        "toCity": "Antwerp",
+        "transport": "TRAIN",
+        "time": "09:00",
+        "endTime": "09:50"
+      }
+    ]
+  },
+  {
+    "id": "tpl_london_weekend_3d",
+    "title": "3 Days in London: Weekend Break",
+    "shortDescription": "A packed long weekend of royal highlights, markets and a West End night.",
+    "coverImageUrl": "",
+    "country": "United Kingdom",
+    "continent": "EUROPE",
+    "durationDays": 3,
+    "destinationTypes": [
+      "CITY"
+    ],
+    "budgetTier": "MID_RANGE",
+    "paceTag": "PACKED",
+    "tags": [
+      "weekend",
+      "first-timer",
+      "city-break"
+    ],
+    "published": true,
+    "sortOrder": 740,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Royal London",
+        "activities": [
+          {
+            "title": "Buckingham Palace",
+            "time": "09:30",
+            "endTime": "10:30",
+            "location": "Westminster, London",
+            "lat": 51.5014,
+            "lng": -0.1419
+          },
+          {
+            "title": "Westminster Abbey",
+            "time": "11:00",
+            "endTime": "12:30",
+            "location": "Westminster, London",
+            "lat": 51.4993,
+            "lng": -0.1273
+          },
+          {
+            "title": "London Eye at dusk",
+            "time": "17:00",
+            "endTime": "18:30",
+            "location": "South Bank, London",
+            "lat": 51.5033,
+            "lng": -0.1196
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "History & markets",
+        "activities": [
+          {
+            "title": "Tower Bridge & Tower of London",
+            "time": "09:30",
+            "endTime": "12:30",
+            "location": "Tower Hamlets, London",
+            "lat": 51.5055,
+            "lng": -0.0754
+          },
+          {
+            "title": "Borough Market lunch",
+            "time": "13:00",
+            "endTime": "14:30",
+            "location": "Southwark, London",
+            "lat": 51.5055,
+            "lng": -0.091
+          },
+          {
+            "title": "West End musical",
+            "time": "19:30",
+            "endTime": "22:00",
+            "location": "Soho, London",
+            "lat": 51.513,
+            "lng": -0.128
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Greenwich & Camden",
+        "activities": [
+          {
+            "title": "Greenwich Observatory & Cutty Sark",
+            "time": "10:00",
+            "endTime": "13:00",
+            "location": "Greenwich, London",
+            "lat": 51.4769,
+            "lng": 0.0005
+          },
+          {
+            "title": "Camden Market",
+            "time": "14:30",
+            "endTime": "17:00",
+            "location": "Camden, London",
+            "lat": 51.5416,
+            "lng": -0.1461
+          }
+        ]
+      }
+    ],
+    "legs": []
+  },
+  {
+    "id": "tpl_manchester_liverpool_4d",
+    "title": "4 Days in Manchester & Liverpool",
+    "shortDescription": "Football, music heritage and Victorian waterfronts.",
+    "coverImageUrl": "",
+    "country": "United Kingdom",
+    "continent": "EUROPE",
+    "durationDays": 4,
+    "destinationTypes": [
+      "CITY"
+    ],
+    "budgetTier": "BUDGET",
+    "paceTag": "BALANCED",
+    "tags": [
+      "music",
+      "football",
+      "museums"
+    ],
+    "published": true,
+    "sortOrder": 750,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Manchester centre",
+        "activities": [
+          {
+            "title": "Northern Quarter street art",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Manchester",
+            "lat": 53.484,
+            "lng": -2.237
+          },
+          {
+            "title": "Science and Industry Museum",
+            "time": "14:00",
+            "endTime": "16:30",
+            "location": "Manchester",
+            "lat": 53.478,
+            "lng": -2.254
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Football & canals",
+        "activities": [
+          {
+            "title": "National Football Museum",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Manchester",
+            "lat": 53.485,
+            "lng": -2.243
+          },
+          {
+            "title": "Old Trafford stadium tour",
+            "time": "14:30",
+            "endTime": "17:00",
+            "location": "Old Trafford, Manchester",
+            "lat": 53.4631,
+            "lng": -2.2913
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Liverpool waterfront",
+        "activities": [
+          {
+            "title": "Royal Albert Dock & Tate Liverpool",
+            "time": "10:30",
+            "endTime": "13:00",
+            "location": "Liverpool",
+            "lat": 53.4001,
+            "lng": -2.993
+          },
+          {
+            "title": "The Beatles Story",
+            "time": "14:00",
+            "endTime": "16:00",
+            "location": "Liverpool",
+            "lat": 53.4,
+            "lng": -2.993
+          },
+          {
+            "title": "Mathew Street live music",
+            "time": "19:30",
+            "endTime": "22:00",
+            "location": "Liverpool",
+            "lat": 53.406,
+            "lng": -2.989
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Liverpool cathedrals",
+        "activities": [
+          {
+            "title": "Liverpool Cathedral tower",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Liverpool",
+            "lat": 53.397,
+            "lng": -2.973
+          },
+          {
+            "title": "Ferry across the Mersey",
+            "time": "13:30",
+            "endTime": "15:00",
+            "location": "Pier Head, Liverpool",
+            "lat": 53.406,
+            "lng": -3.003
+          }
+        ]
+      }
+    ],
+    "legs": [
+      {
+        "dayNumber": 3,
+        "fromCity": "Manchester",
+        "toCity": "Liverpool",
+        "transport": "TRAIN",
+        "time": "09:00",
+        "endTime": "10:00"
+      }
+    ]
+  },
+  {
+    "id": "tpl_bath_cotswolds_oxford_4d",
+    "title": "4 Days in Bath, the Cotswolds & Oxford",
+    "shortDescription": "Roman baths, honey-stone villages and dreaming spires.",
+    "coverImageUrl": "",
+    "country": "United Kingdom",
+    "continent": "EUROPE",
+    "durationDays": 4,
+    "destinationTypes": [
+      "COUNTRYSIDE",
+      "CITY"
+    ],
+    "budgetTier": "MID_RANGE",
+    "paceTag": "RELAXED",
+    "tags": [
+      "countryside",
+      "history",
+      "romantic",
+      "road-trip"
+    ],
+    "published": true,
+    "sortOrder": 760,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Bath",
+        "activities": [
+          {
+            "title": "Roman Baths",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Bath",
+            "lat": 51.3811,
+            "lng": -2.359
+          },
+          {
+            "title": "Royal Crescent & Circus",
+            "time": "14:00",
+            "endTime": "16:00",
+            "location": "Bath",
+            "lat": 51.3866,
+            "lng": -2.3669
+          },
+          {
+            "title": "Thermae Bath Spa rooftop pool",
+            "time": "17:00",
+            "endTime": "19:00",
+            "location": "Bath",
+            "lat": 51.38,
+            "lng": -2.36
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Cotswolds villages",
+        "activities": [
+          {
+            "title": "Castle Combe",
+            "time": "10:00",
+            "endTime": "11:30",
+            "location": "Castle Combe, Wiltshire",
+            "lat": 51.493,
+            "lng": -2.227
+          },
+          {
+            "title": "Bibury Arlington Row",
+            "time": "13:00",
+            "endTime": "14:30",
+            "location": "Bibury, Gloucestershire",
+            "lat": 51.76,
+            "lng": -1.835
+          },
+          {
+            "title": "Bourton-on-the-Water",
+            "time": "15:30",
+            "endTime": "17:30",
+            "location": "Bourton-on-the-Water",
+            "lat": 51.886,
+            "lng": -1.755
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Stratford & Warwick",
+        "activities": [
+          {
+            "title": "Shakespeare's Birthplace",
+            "time": "10:30",
+            "endTime": "12:30",
+            "location": "Stratford-upon-Avon",
+            "lat": 52.194,
+            "lng": -1.707
+          },
+          {
+            "title": "Warwick Castle",
+            "time": "14:00",
+            "endTime": "17:00",
+            "location": "Warwick",
+            "lat": 52.279,
+            "lng": -1.585
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Oxford",
+        "activities": [
+          {
+            "title": "Radcliffe Camera & Bodleian",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Oxford",
+            "lat": 51.7536,
+            "lng": -1.254
+          },
+          {
+            "title": "Christ Church College",
+            "time": "13:00",
+            "endTime": "14:30",
+            "location": "Oxford",
+            "lat": 51.75,
+            "lng": -1.256
+          },
+          {
+            "title": "Punting on the Cherwell",
+            "time": "15:00",
+            "endTime": "16:30",
+            "location": "Oxford",
+            "lat": 51.76,
+            "lng": -1.25
+          }
+        ]
+      }
+    ],
+    "legs": []
+  },
+  {
+    "id": "tpl_cornwall_5d",
+    "title": "5 Days in Cornwall",
+    "shortDescription": "Fishing harbours, surf coves and the clifftop path to Land's End.",
+    "coverImageUrl": "",
+    "country": "United Kingdom",
+    "continent": "EUROPE",
+    "durationDays": 5,
+    "destinationTypes": [
+      "BEACH",
+      "COUNTRYSIDE"
+    ],
+    "budgetTier": "MID_RANGE",
+    "paceTag": "RELAXED",
+    "tags": [
+      "coast",
+      "road-trip",
+      "family-friendly",
+      "summer"
+    ],
+    "published": true,
+    "sortOrder": 770,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "St Ives",
+        "activities": [
+          {
+            "title": "St Ives harbour & Porthmeor Beach",
+            "time": "11:00",
+            "endTime": "15:00",
+            "location": "St Ives, Cornwall",
+            "lat": 50.211,
+            "lng": -5.48
+          },
+          {
+            "title": "Tate St Ives",
+            "time": "15:30",
+            "endTime": "17:00",
+            "location": "St Ives, Cornwall",
+            "lat": 50.215,
+            "lng": -5.483
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Penwith peninsula",
+        "activities": [
+          {
+            "title": "Land's End",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Sennen, Cornwall",
+            "lat": 50.0657,
+            "lng": -5.7132
+          },
+          {
+            "title": "Minack Theatre",
+            "time": "13:30",
+            "endTime": "15:30",
+            "location": "Porthcurno, Cornwall",
+            "lat": 50.042,
+            "lng": -5.65
+          },
+          {
+            "title": "Porthcurno Beach",
+            "time": "16:00",
+            "endTime": "18:00",
+            "location": "Porthcurno, Cornwall",
+            "lat": 50.044,
+            "lng": -5.654
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "St Michael's Mount",
+        "activities": [
+          {
+            "title": "St Michael's Mount",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Marazion, Cornwall",
+            "lat": 50.116,
+            "lng": -5.478
+          },
+          {
+            "title": "Penzance seafront",
+            "time": "14:00",
+            "endTime": "16:00",
+            "location": "Penzance, Cornwall",
+            "lat": 50.118,
+            "lng": -5.537
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Lizard & Falmouth",
+        "activities": [
+          {
+            "title": "Kynance Cove",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Lizard, Cornwall",
+            "lat": 49.978,
+            "lng": -5.229
+          },
+          {
+            "title": "Pendennis Castle",
+            "time": "14:30",
+            "endTime": "16:30",
+            "location": "Falmouth, Cornwall",
+            "lat": 50.147,
+            "lng": -5.046
+          }
+        ]
+      },
+      {
+        "dayNumber": 5,
+        "theme": "Eden & Padstow",
+        "activities": [
+          {
+            "title": "Eden Project",
+            "time": "10:00",
+            "endTime": "13:30",
+            "location": "Bodelva, Cornwall",
+            "lat": 50.36,
+            "lng": -4.745
+          },
+          {
+            "title": "Padstow harbour fish & chips",
+            "time": "15:30",
+            "endTime": "18:00",
+            "location": "Padstow, Cornwall",
+            "lat": 50.542,
+            "lng": -4.939
+          }
+        ]
+      }
+    ],
+    "legs": []
+  },
+  {
+    "id": "tpl_edinburgh_glasgow_4d",
+    "title": "4 Days in Edinburgh & Glasgow",
+    "shortDescription": "Medieval Old Town, street art, whisky and Loch Lomond.",
+    "coverImageUrl": "",
+    "country": "United Kingdom",
+    "continent": "EUROPE",
+    "durationDays": 4,
+    "destinationTypes": [
+      "CITY",
+      "LAKE"
+    ],
+    "budgetTier": "MID_RANGE",
+    "paceTag": "BALANCED",
+    "tags": [
+      "city-break",
+      "history",
+      "whisky"
+    ],
+    "published": true,
+    "sortOrder": 780,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Edinburgh Old Town",
+        "activities": [
+          {
+            "title": "Edinburgh Castle",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Edinburgh",
+            "lat": 55.9486,
+            "lng": -3.1999
+          },
+          {
+            "title": "Royal Mile & Camera Obscura",
+            "time": "13:30",
+            "endTime": "16:00",
+            "location": "Edinburgh",
+            "lat": 55.949,
+            "lng": -3.195
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Holyrood & Calton Hill",
+        "activities": [
+          {
+            "title": "Palace of Holyroodhouse",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Edinburgh",
+            "lat": 55.9525,
+            "lng": -3.1722
+          },
+          {
+            "title": "Calton Hill sunset",
+            "time": "17:30",
+            "endTime": "19:00",
+            "location": "Edinburgh",
+            "lat": 55.9553,
+            "lng": -3.1826
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Glasgow",
+        "activities": [
+          {
+            "title": "Kelvingrove Art Gallery",
+            "time": "10:30",
+            "endTime": "13:00",
+            "location": "Glasgow",
+            "lat": 55.8688,
+            "lng": -4.2906
+          },
+          {
+            "title": "Glasgow Cathedral & Necropolis",
+            "time": "14:30",
+            "endTime": "16:30",
+            "location": "Glasgow",
+            "lat": 55.863,
+            "lng": -4.234
+          },
+          {
+            "title": "Merchant City dinner",
+            "time": "19:00",
+            "endTime": "21:00",
+            "location": "Glasgow",
+            "lat": 55.859,
+            "lng": -4.245
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Loch Lomond",
+        "activities": [
+          {
+            "title": "Loch Lomond cruise",
+            "time": "10:30",
+            "endTime": "12:30",
+            "location": "Balloch, West Dunbartonshire",
+            "lat": 56.003,
+            "lng": -4.58
+          },
+          {
+            "title": "Luss village",
+            "time": "14:00",
+            "endTime": "16:00",
+            "location": "Luss, Argyll",
+            "lat": 56.1,
+            "lng": -4.634
+          }
+        ]
+      }
+    ],
+    "legs": [
+      {
+        "dayNumber": 3,
+        "fromCity": "Edinburgh",
+        "toCity": "Glasgow",
+        "transport": "TRAIN",
+        "time": "09:30",
+        "endTime": "10:15"
+      }
+    ]
+  },
+  {
+    "id": "tpl_scotland_nc500_7d",
+    "title": "7 Days on Scotland's North Coast 500",
+    "shortDescription": "Castles, white-sand beaches and remote Highland roads.",
+    "coverImageUrl": "",
+    "country": "United Kingdom",
+    "continent": "EUROPE",
+    "durationDays": 7,
+    "destinationTypes": [
+      "COUNTRYSIDE",
+      "MOUNTAIN",
+      "BEACH"
+    ],
+    "budgetTier": "MID_RANGE",
+    "paceTag": "BALANCED",
+    "tags": [
+      "road-trip",
+      "scenic",
+      "castles"
+    ],
+    "published": true,
+    "sortOrder": 790,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Inverness",
+        "activities": [
+          {
+            "title": "Culloden Battlefield",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Inverness",
+            "lat": 57.477,
+            "lng": -4.097
+          },
+          {
+            "title": "Inverness Castle viewpoint",
+            "time": "15:00",
+            "endTime": "16:30",
+            "location": "Inverness",
+            "lat": 57.477,
+            "lng": -4.226
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Black Isle & Dornoch",
+        "activities": [
+          {
+            "title": "Chanonry Point dolphins",
+            "time": "10:00",
+            "endTime": "11:30",
+            "location": "Black Isle, Highland",
+            "lat": 57.574,
+            "lng": -4.093
+          },
+          {
+            "title": "Dunrobin Castle",
+            "time": "14:00",
+            "endTime": "16:30",
+            "location": "Golspie, Highland",
+            "lat": 57.981,
+            "lng": -3.946
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "John o' Groats",
+        "activities": [
+          {
+            "title": "Duncansby Head stacks",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Caithness, Highland",
+            "lat": 58.643,
+            "lng": -3.023
+          },
+          {
+            "title": "John o' Groats signpost",
+            "time": "13:00",
+            "endTime": "14:00",
+            "location": "John o' Groats",
+            "lat": 58.644,
+            "lng": -3.068
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Durness coast",
+        "activities": [
+          {
+            "title": "Smoo Cave",
+            "time": "10:00",
+            "endTime": "11:30",
+            "location": "Durness, Highland",
+            "lat": 58.567,
+            "lng": -4.721
+          },
+          {
+            "title": "Balnakeil Beach",
+            "time": "13:00",
+            "endTime": "15:30",
+            "location": "Durness, Highland",
+            "lat": 58.582,
+            "lng": -4.765
+          }
+        ]
+      },
+      {
+        "dayNumber": 5,
+        "theme": "Assynt & Lochinver",
+        "activities": [
+          {
+            "title": "Suilven & Assynt viewpoint",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Lochinver, Highland",
+            "lat": 58.15,
+            "lng": -5.25
+          },
+          {
+            "title": "Achmelvich Beach",
+            "time": "14:00",
+            "endTime": "16:30",
+            "location": "Achmelvich, Highland",
+            "lat": 58.173,
+            "lng": -5.304
+          }
+        ]
+      },
+      {
+        "dayNumber": 6,
+        "theme": "Applecross",
+        "activities": [
+          {
+            "title": "Bealach na Bà road",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Applecross, Highland",
+            "lat": 57.422,
+            "lng": -5.703
+          },
+          {
+            "title": "Applecross Inn seafood",
+            "time": "13:00",
+            "endTime": "14:30",
+            "location": "Applecross, Highland",
+            "lat": 57.431,
+            "lng": -5.816
+          }
+        ]
+      },
+      {
+        "dayNumber": 7,
+        "theme": "Eilean Donan & return",
+        "activities": [
+          {
+            "title": "Eilean Donan Castle",
+            "time": "10:30",
+            "endTime": "12:00",
+            "location": "Dornie, Highland",
+            "lat": 57.274,
+            "lng": -5.516
+          }
+        ]
+      }
+    ],
+    "legs": []
+  },
+  {
+    "id": "tpl_dublin_wicklow_4d",
+    "title": "4 Days in Dublin & Wicklow",
+    "shortDescription": "Georgian streets, Guinness, pubs and Glendalough monastery.",
+    "coverImageUrl": "",
+    "country": "Ireland",
+    "continent": "EUROPE",
+    "durationDays": 4,
+    "destinationTypes": [
+      "CITY",
+      "COUNTRYSIDE"
+    ],
+    "budgetTier": "MID_RANGE",
+    "paceTag": "BALANCED",
+    "tags": [
+      "first-timer",
+      "pubs",
+      "history"
+    ],
+    "published": true,
+    "sortOrder": 800,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Dublin centre",
+        "activities": [
+          {
+            "title": "Trinity College & Book of Kells",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Dublin",
+            "lat": 53.3438,
+            "lng": -6.2546
+          },
+          {
+            "title": "Grafton Street & St Stephen's Green",
+            "time": "13:00",
+            "endTime": "15:00",
+            "location": "Dublin",
+            "lat": 53.339,
+            "lng": -6.26
+          },
+          {
+            "title": "Temple Bar live music",
+            "time": "20:00",
+            "endTime": "23:00",
+            "location": "Temple Bar, Dublin",
+            "lat": 53.3455,
+            "lng": -6.265
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Guinness & Kilmainham",
+        "activities": [
+          {
+            "title": "Guinness Storehouse",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Dublin",
+            "lat": 53.3419,
+            "lng": -6.2867
+          },
+          {
+            "title": "Kilmainham Gaol",
+            "time": "14:00",
+            "endTime": "16:00",
+            "location": "Dublin",
+            "lat": 53.3419,
+            "lng": -6.31
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Glendalough",
+        "activities": [
+          {
+            "title": "Glendalough monastic site & lakes",
+            "time": "10:00",
+            "endTime": "14:30",
+            "location": "Glendalough, Wicklow",
+            "lat": 53.011,
+            "lng": -6.327
+          },
+          {
+            "title": "Powerscourt Estate",
+            "time": "15:30",
+            "endTime": "17:30",
+            "location": "Enniskerry, Wicklow",
+            "lat": 53.185,
+            "lng": -6.185
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Howth & Malahide",
+        "activities": [
+          {
+            "title": "Howth Cliff Walk",
+            "time": "10:00",
+            "endTime": "13:00",
+            "location": "Howth, Dublin",
+            "lat": 53.381,
+            "lng": -6.068
+          },
+          {
+            "title": "Malahide Castle",
+            "time": "14:30",
+            "endTime": "16:30",
+            "location": "Malahide, Dublin",
+            "lat": 53.451,
+            "lng": -6.164
+          }
+        ]
+      }
+    ],
+    "legs": []
+  },
+  {
+    "id": "tpl_wild_atlantic_way_6d",
+    "title": "6 Days on the Wild Atlantic Way",
+    "shortDescription": "Cliffs of Moher, Dingle Peninsula and the Ring of Kerry.",
+    "coverImageUrl": "",
+    "country": "Ireland",
+    "continent": "EUROPE",
+    "durationDays": 6,
+    "destinationTypes": [
+      "COUNTRYSIDE",
+      "MOUNTAIN"
+    ],
+    "budgetTier": "MID_RANGE",
+    "paceTag": "BALANCED",
+    "tags": [
+      "road-trip",
+      "scenic",
+      "coast",
+      "pubs"
+    ],
+    "published": true,
+    "sortOrder": 810,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Galway",
+        "activities": [
+          {
+            "title": "Galway Latin Quarter",
+            "time": "14:00",
+            "endTime": "17:00",
+            "location": "Galway",
+            "lat": 53.271,
+            "lng": -9.054
+          },
+          {
+            "title": "Trad session at Tigh Neachtain",
+            "time": "20:00",
+            "endTime": "22:30",
+            "location": "Galway",
+            "lat": 53.272,
+            "lng": -9.053
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Connemara",
+        "activities": [
+          {
+            "title": "Kylemore Abbey",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Connemara, Galway",
+            "lat": 53.562,
+            "lng": -9.878
+          },
+          {
+            "title": "Sky Road Clifden",
+            "time": "14:30",
+            "endTime": "17:00",
+            "location": "Clifden, Galway",
+            "lat": 53.489,
+            "lng": -10.04
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Cliffs of Moher",
+        "activities": [
+          {
+            "title": "Cliffs of Moher",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Doolin, Clare",
+            "lat": 52.9715,
+            "lng": -9.4265
+          },
+          {
+            "title": "The Burren",
+            "time": "14:00",
+            "endTime": "16:30",
+            "location": "Clare",
+            "lat": 53.0,
+            "lng": -9.0
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Dingle Peninsula",
+        "activities": [
+          {
+            "title": "Slea Head Drive",
+            "time": "10:00",
+            "endTime": "14:00",
+            "location": "Dingle, Kerry",
+            "lat": 52.12,
+            "lng": -10.46
+          },
+          {
+            "title": "Dingle town pubs",
+            "time": "17:00",
+            "endTime": "20:00",
+            "location": "Dingle, Kerry",
+            "lat": 52.141,
+            "lng": -10.268
+          }
+        ]
+      },
+      {
+        "dayNumber": 5,
+        "theme": "Ring of Kerry",
+        "activities": [
+          {
+            "title": "Killarney National Park & Ross Castle",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Killarney, Kerry",
+            "lat": 52.052,
+            "lng": -9.538
+          },
+          {
+            "title": "Ladies View & Molls Gap",
+            "time": "14:00",
+            "endTime": "16:00",
+            "location": "Killarney, Kerry",
+            "lat": 52.001,
+            "lng": -9.549
+          }
+        ]
+      },
+      {
+        "dayNumber": 6,
+        "theme": "Skellig coast & Blarney",
+        "activities": [
+          {
+            "title": "Skellig Ring viewpoints",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Portmagee, Kerry",
+            "lat": 51.887,
+            "lng": -10.37
+          },
+          {
+            "title": "Blarney Castle",
+            "time": "15:00",
+            "endTime": "17:30",
+            "location": "Blarney, Cork",
+            "lat": 51.929,
+            "lng": -8.571
+          }
+        ]
+      }
+    ],
+    "legs": []
+  },
+  {
+    "id": "tpl_belfast_causeway_3d",
+    "title": "3 Days in Belfast & the Giant's Causeway",
+    "shortDescription": "Titanic heritage and the Causeway Coastal Route.",
+    "coverImageUrl": "",
+    "country": "United Kingdom",
+    "continent": "EUROPE",
+    "durationDays": 3,
+    "destinationTypes": [
+      "CITY",
+      "COUNTRYSIDE"
+    ],
+    "budgetTier": "MID_RANGE",
+    "paceTag": "BALANCED",
+    "tags": [
+      "history",
+      "scenic",
+      "game-of-thrones"
+    ],
+    "published": true,
+    "sortOrder": 820,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Belfast",
+        "activities": [
+          {
+            "title": "St George's Market",
+            "time": "10:00",
+            "endTime": "11:30",
+            "location": "Belfast",
+            "lat": 54.596,
+            "lng": -5.921
+          },
+          {
+            "title": "Titanic Belfast",
+            "time": "12:00",
+            "endTime": "15:00",
+            "location": "Titanic Quarter, Belfast",
+            "lat": 54.608,
+            "lng": -5.91
+          },
+          {
+            "title": "Black taxi mural tour",
+            "time": "15:30",
+            "endTime": "17:30",
+            "location": "West Belfast",
+            "lat": 54.597,
+            "lng": -5.95
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Causeway Coast",
+        "activities": [
+          {
+            "title": "Dark Hedges",
+            "time": "09:30",
+            "endTime": "10:30",
+            "location": "Armoy, Antrim",
+            "lat": 55.133,
+            "lng": -6.38
+          },
+          {
+            "title": "Carrick-a-Rede Rope Bridge",
+            "time": "11:30",
+            "endTime": "13:00",
+            "location": "Ballintoy, Antrim",
+            "lat": 55.239,
+            "lng": -6.335
+          },
+          {
+            "title": "Giant's Causeway",
+            "time": "14:30",
+            "endTime": "17:00",
+            "location": "Bushmills, Antrim",
+            "lat": 55.2408,
+            "lng": -6.5116
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Glens of Antrim",
+        "activities": [
+          {
+            "title": "Glenariff Forest Park",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Cushendall, Antrim",
+            "lat": 54.95,
+            "lng": -6.1
+          },
+          {
+            "title": "Dunluce Castle",
+            "time": "14:00",
+            "endTime": "15:30",
+            "location": "Portrush, Antrim",
+            "lat": 55.21,
+            "lng": -6.58
+          }
+        ]
+      }
+    ],
+    "legs": []
+  },
+  {
+    "id": "tpl_faroe_islands_5d",
+    "title": "5 Days in the Faroe Islands",
+    "shortDescription": "Waterfalls into the sea, turf-roof villages and puffin cliffs.",
+    "coverImageUrl": "",
+    "country": "Faroe Islands",
+    "continent": "EUROPE",
+    "durationDays": 5,
+    "destinationTypes": [
+      "ISLAND",
+      "MOUNTAIN"
+    ],
+    "budgetTier": "LUXURY",
+    "paceTag": "BALANCED",
+    "tags": [
+      "scenic",
+      "hiking",
+      "photography",
+      "remote"
+    ],
+    "published": true,
+    "sortOrder": 830,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Tórshavn",
+        "activities": [
+          {
+            "title": "Tinganes old town",
+            "time": "14:00",
+            "endTime": "16:00",
+            "location": "Tórshavn",
+            "lat": 62.01,
+            "lng": -6.77
+          },
+          {
+            "title": "Tórshavn harbour dinner",
+            "time": "19:00",
+            "endTime": "21:00",
+            "location": "Tórshavn",
+            "lat": 62.011,
+            "lng": -6.768
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Vágar",
+        "activities": [
+          {
+            "title": "Múlafossur Waterfall at Gásadalur",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Gásadalur, Vágar",
+            "lat": 62.105,
+            "lng": -7.36
+          },
+          {
+            "title": "Lake Sørvágsvatn (Leitisvatn)",
+            "time": "13:30",
+            "endTime": "16:00",
+            "location": "Sørvágur, Vágar",
+            "lat": 62.05,
+            "lng": -7.22
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Mykines puffins",
+        "activities": [
+          {
+            "title": "Mykines Island puffin hike",
+            "time": "09:00",
+            "endTime": "15:00",
+            "location": "Mykines",
+            "lat": 62.102,
+            "lng": -7.646
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Saksun & Eysturoy",
+        "activities": [
+          {
+            "title": "Saksun village & lagoon",
+            "time": "10:30",
+            "endTime": "12:30",
+            "location": "Saksun, Streymoy",
+            "lat": 62.249,
+            "lng": -7.162
+          },
+          {
+            "title": "Gjógv gorge village",
+            "time": "14:30",
+            "endTime": "16:30",
+            "location": "Gjógv, Eysturoy",
+            "lat": 62.327,
+            "lng": -6.954
+          }
+        ]
+      },
+      {
+        "dayNumber": 5,
+        "theme": "Kalsoy & farewell",
+        "activities": [
+          {
+            "title": "Kallur Lighthouse",
+            "time": "09:30",
+            "endTime": "13:00",
+            "location": "Kalsoy",
+            "lat": 62.36,
+            "lng": -6.92
+          }
+        ]
+      }
+    ],
+    "legs": [
+      {
+        "dayNumber": 1,
+        "fromCity": "Copenhagen",
+        "toCity": "Vágar",
+        "transport": "FLIGHT",
+        "time": "08:00",
+        "endTime": "10:30"
+      }
+    ]
+  },
+  {
+    "id": "tpl_greenland_ilulissat_6d",
+    "title": "6 Days in Greenland: Ilulissat & Disko Bay",
+    "shortDescription": "Icebergs the size of cathedrals, Arctic hiking and the midnight sun or aurora.",
+    "coverImageUrl": "",
+    "country": "Greenland",
+    "continent": "NORTH_AMERICA",
+    "durationDays": 6,
+    "destinationTypes": [
+      "COUNTRYSIDE",
+      "MOUNTAIN"
+    ],
+    "budgetTier": "LUXURY",
+    "paceTag": "BALANCED",
+    "tags": [
+      "arctic",
+      "adventure",
+      "northern-lights",
+      "wilderness"
+    ],
+    "published": true,
+    "sortOrder": 840,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Fly to Kangerlussuaq",
+        "activities": [
+          {
+            "title": "Kangerlussuaq tundra & Russell Glacier",
+            "time": "13:00",
+            "endTime": "17:00",
+            "location": "Kangerlussuaq, Greenland",
+            "lat": 67.0,
+            "lng": -50.7
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Ilulissat Icefjord",
+        "activities": [
+          {
+            "title": "Ilulissat Icefjord (UNESCO)",
+            "time": "10:00",
+            "endTime": "13:00",
+            "location": "Ilulissat, Greenland",
+            "lat": 69.19,
+            "lng": -51.1
+          },
+          {
+            "title": "Sermermiut hike",
+            "time": "14:30",
+            "endTime": "17:00",
+            "location": "Ilulissat, Greenland",
+            "lat": 69.202,
+            "lng": -51.123
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Iceberg boat tour",
+        "activities": [
+          {
+            "title": "Disko Bay iceberg cruise",
+            "time": "10:00",
+            "endTime": "14:00",
+            "location": "Ilulissat, Greenland",
+            "lat": 69.22,
+            "lng": -51.1
+          },
+          {
+            "title": "Ilulissat town & Knud Rasmussen museum",
+            "time": "15:30",
+            "endTime": "17:30",
+            "location": "Ilulissat, Greenland",
+            "lat": 69.219,
+            "lng": -51.098
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Eqi Glacier",
+        "activities": [
+          {
+            "title": "Eqi Glacier calving day trip",
+            "time": "08:00",
+            "endTime": "18:00",
+            "location": "Eqip Sermia, Greenland",
+            "lat": 69.78,
+            "lng": -50.2
+          }
+        ]
+      },
+      {
+        "dayNumber": 5,
+        "theme": "Whales & Greenlandic culture",
+        "activities": [
+          {
+            "title": "Whale watching (summer)",
+            "time": "10:00",
+            "endTime": "13:00",
+            "location": "Disko Bay, Greenland",
+            "lat": 69.2,
+            "lng": -51.2
+          },
+          {
+            "title": "Kaffemik cultural evening",
+            "time": "18:00",
+            "endTime": "20:00",
+            "location": "Ilulissat, Greenland",
+            "lat": 69.219,
+            "lng": -51.098
+          }
+        ]
+      },
+      {
+        "dayNumber": 6,
+        "theme": "Departure",
+        "activities": [
+          {
+            "title": "Ilulissat farewell walk",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Ilulissat, Greenland",
+            "lat": 69.219,
+            "lng": -51.098
+          }
+        ]
+      }
+    ],
+    "legs": [
+      {
+        "dayNumber": 1,
+        "fromCity": "Copenhagen",
+        "toCity": "Kangerlussuaq",
+        "transport": "FLIGHT",
+        "time": "09:30",
+        "endTime": "11:30"
+      },
+      {
+        "dayNumber": 2,
+        "fromCity": "Kangerlussuaq",
+        "toCity": "Ilulissat",
+        "transport": "FLIGHT",
+        "time": "08:30",
+        "endTime": "09:50"
+      }
+    ]
+  },
+  {
+    "id": "tpl_iceland_golden_circle_4d",
+    "title": "4 Days: Reykjavík & the Golden Circle",
+    "shortDescription": "Geysers, Gullfoss and a soak in the Secret Lagoon, all from Reykjavík.",
+    "coverImageUrl": "",
+    "country": "Iceland",
+    "continent": "EUROPE",
+    "durationDays": 4,
+    "destinationTypes": [
+      "CITY",
+      "COUNTRYSIDE"
+    ],
+    "budgetTier": "MID_RANGE",
+    "paceTag": "BALANCED",
+    "tags": [
+      "first-timer",
+      "geothermal",
+      "waterfalls"
+    ],
+    "published": true,
+    "sortOrder": 850,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Reykjavík",
+        "activities": [
+          {
+            "title": "Hallgrímskirkja tower",
+            "time": "10:00",
+            "endTime": "11:30",
+            "location": "Reykjavík",
+            "lat": 64.1417,
+            "lng": -21.9266
+          },
+          {
+            "title": "Harpa Concert Hall & old harbour",
+            "time": "12:30",
+            "endTime": "15:00",
+            "location": "Reykjavík",
+            "lat": 64.15,
+            "lng": -21.93
+          },
+          {
+            "title": "Whale watching",
+            "time": "16:00",
+            "endTime": "19:00",
+            "location": "Reykjavík",
+            "lat": 64.155,
+            "lng": -21.944
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Golden Circle",
+        "activities": [
+          {
+            "title": "Þingvellir National Park",
+            "time": "09:30",
+            "endTime": "11:30",
+            "location": "Þingvellir",
+            "lat": 64.2559,
+            "lng": -21.13
+          },
+          {
+            "title": "Geysir & Strokkur",
+            "time": "12:30",
+            "endTime": "14:00",
+            "location": "Haukadalur",
+            "lat": 64.31,
+            "lng": -20.3
+          },
+          {
+            "title": "Gullfoss",
+            "time": "14:30",
+            "endTime": "16:00",
+            "location": "Hvítá, Iceland",
+            "lat": 64.327,
+            "lng": -20.121
+          },
+          {
+            "title": "Secret Lagoon soak",
+            "time": "17:00",
+            "endTime": "19:00",
+            "location": "Flúðir",
+            "lat": 64.138,
+            "lng": -20.315
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Reykjanes & Blue Lagoon",
+        "activities": [
+          {
+            "title": "Reykjanes lighthouse & Bridge Between Continents",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Reykjanes, Iceland",
+            "lat": 63.815,
+            "lng": -22.705
+          },
+          {
+            "title": "Blue Lagoon",
+            "time": "14:30",
+            "endTime": "17:30",
+            "location": "Grindavík",
+            "lat": 63.8804,
+            "lng": -22.4495
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Snæfellsnes",
+        "activities": [
+          {
+            "title": "Kirkjufell mountain",
+            "time": "11:30",
+            "endTime": "13:00",
+            "location": "Grundarfjörður",
+            "lat": 64.942,
+            "lng": -23.307
+          },
+          {
+            "title": "Arnarstapi cliffs",
+            "time": "14:30",
+            "endTime": "16:30",
+            "location": "Snæfellsnes",
+            "lat": 64.767,
+            "lng": -23.636
+          }
+        ]
+      }
+    ],
+    "legs": []
+  },
+  {
+    "id": "tpl_iceland_south_coast_4d",
+    "title": "4 Days on Iceland's South Coast",
+    "shortDescription": "Waterfalls, black sand, glacier hikes and Jökulsárlón.",
+    "coverImageUrl": "",
+    "country": "Iceland",
+    "continent": "EUROPE",
+    "durationDays": 4,
+    "destinationTypes": [
+      "COUNTRYSIDE",
+      "MOUNTAIN"
+    ],
+    "budgetTier": "MID_RANGE",
+    "paceTag": "BALANCED",
+    "tags": [
+      "scenic",
+      "glaciers",
+      "waterfalls",
+      "road-trip"
+    ],
+    "published": true,
+    "sortOrder": 860,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Seljalandsfoss & Skógafoss",
+        "activities": [
+          {
+            "title": "Seljalandsfoss",
+            "time": "10:00",
+            "endTime": "11:30",
+            "location": "South Iceland",
+            "lat": 63.6156,
+            "lng": -19.9886
+          },
+          {
+            "title": "Skógafoss",
+            "time": "12:00",
+            "endTime": "13:30",
+            "location": "Skógar",
+            "lat": 63.532,
+            "lng": -19.511
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Vík & Dyrhólaey",
+        "activities": [
+          {
+            "title": "Dyrhólaey arch & puffins",
+            "time": "10:00",
+            "endTime": "12:00",
+            "location": "Vík, Iceland",
+            "lat": 63.4,
+            "lng": -19.129
+          },
+          {
+            "title": "Reynisfjara beach",
+            "time": "13:00",
+            "endTime": "14:30",
+            "location": "Vík, Iceland",
+            "lat": 63.405,
+            "lng": -19.071
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "Glacier day",
+        "activities": [
+          {
+            "title": "Svínafellsjökull glacier hike",
+            "time": "09:30",
+            "endTime": "13:30",
+            "location": "Skaftafell, Iceland",
+            "lat": 64.005,
+            "lng": -16.87
+          },
+          {
+            "title": "Skaftafell Svartifoss",
+            "time": "14:30",
+            "endTime": "16:30",
+            "location": "Skaftafell, Iceland",
+            "lat": 64.017,
+            "lng": -16.975
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Jökulsárlón",
+        "activities": [
+          {
+            "title": "Jökulsárlón glacier lagoon",
+            "time": "10:00",
+            "endTime": "12:30",
+            "location": "Breiðamerkursandur",
+            "lat": 64.0484,
+            "lng": -16.1795
+          },
+          {
+            "title": "Diamond Beach",
+            "time": "13:00",
+            "endTime": "14:30",
+            "location": "Breiðamerkursandur",
+            "lat": 64.044,
+            "lng": -16.179
+          }
+        ]
+      }
+    ],
+    "legs": []
+  },
+  {
+    "id": "tpl_iceland_winter_aurora_5d",
+    "title": "5 Days in Iceland: Winter Aurora & Ice Caves",
+    "shortDescription": "Chase the northern lights, walk inside a glacier and soak in snow-ringed hot springs.",
+    "coverImageUrl": "",
+    "country": "Iceland",
+    "continent": "EUROPE",
+    "durationDays": 5,
+    "destinationTypes": [
+      "COUNTRYSIDE",
+      "MOUNTAIN"
+    ],
+    "budgetTier": "LUXURY",
+    "paceTag": "BALANCED",
+    "tags": [
+      "winter",
+      "northern-lights",
+      "ice-caves",
+      "hot-springs"
+    ],
+    "published": true,
+    "sortOrder": 870,
+    "days": [
+      {
+        "dayNumber": 1,
+        "theme": "Reykjavík",
+        "activities": [
+          {
+            "title": "Perlan museum & ice cave exhibit",
+            "time": "11:00",
+            "endTime": "13:30",
+            "location": "Reykjavík",
+            "lat": 64.1297,
+            "lng": -21.917
+          },
+          {
+            "title": "Northern Lights boat tour",
+            "time": "21:00",
+            "endTime": "23:30",
+            "location": "Reykjavík",
+            "lat": 64.15,
+            "lng": -21.94
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "theme": "Golden Circle in snow",
+        "activities": [
+          {
+            "title": "Gullfoss frozen falls",
+            "time": "10:00",
+            "endTime": "11:30",
+            "location": "Hvítá, Iceland",
+            "lat": 64.327,
+            "lng": -20.121
+          },
+          {
+            "title": "Geysir",
+            "time": "12:30",
+            "endTime": "14:00",
+            "location": "Haukadalur",
+            "lat": 64.31,
+            "lng": -20.3
+          },
+          {
+            "title": "Fontana geothermal baths",
+            "time": "17:00",
+            "endTime": "19:30",
+            "location": "Laugarvatn",
+            "lat": 64.216,
+            "lng": -20.728
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "theme": "South coast ice",
+        "activities": [
+          {
+            "title": "Skógafoss in winter",
+            "time": "10:00",
+            "endTime": "11:00",
+            "location": "Skógar",
+            "lat": 63.532,
+            "lng": -19.511
+          },
+          {
+            "title": "Reynisfjara beach",
+            "time": "12:00",
+            "endTime": "13:30",
+            "location": "Vík, Iceland",
+            "lat": 63.405,
+            "lng": -19.071
+          }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "theme": "Crystal ice cave",
+        "activities": [
+          {
+            "title": "Crystal Ice Cave tour",
+            "time": "09:30",
+            "endTime": "13:00",
+            "location": "Vatnajökull, Iceland",
+            "lat": 64.03,
+            "lng": -16.8
+          },
+          {
+            "title": "Jökulsárlón in winter",
+            "time": "14:30",
+            "endTime": "17:00",
+            "location": "Breiðamerkursandur",
+            "lat": 64.0484,
+            "lng": -16.1795
+          }
+        ]
+      },
+      {
+        "dayNumber": 5,
+        "theme": "Blue Lagoon & departure",
+        "activities": [
+          {
+            "title": "Blue Lagoon morning soak",
+            "time": "08:30",
+            "endTime": "11:00",
+            "location": "Grindavík",
+            "lat": 63.8804,
+            "lng": -22.4495
+          }
+        ]
+      }
+    ],
+    "legs": []
   }
 ]

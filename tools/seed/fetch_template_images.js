@@ -80,6 +80,38 @@ const QUERIES = {
   tpl_croatia_coast_6d: "Dubrovnik Croatia old town coast",
   tpl_edinburgh_highlands_5d: "Edinburgh Castle Scotland",
   tpl_iceland_ring_road_7d: "Iceland Skogafoss waterfall ring road",
+  tpl_tbilisi_kazbegi_5d: "Tbilisi Georgia old town Narikala",
+  tpl_georgia_wine_batumi_6d: "Georgia Kakheti vineyard Caucasus",
+  tpl_andorra_4d: "Andorra Pyrenees mountains Grandvalira",
+  tpl_transylvania_6d: "Transylvania Bran Castle Romania",
+  tpl_krakow_4d: "Krakow Main Market Square Poland",
+  tpl_warsaw_gdansk_5d: "Gdansk Poland Long Market waterfront",
+  tpl_zakopane_tatras_4d: "Zakopane Tatra mountains Poland",
+  tpl_eger_balaton_4d: "Lake Balaton Hungary Tihany",
+  tpl_croatia_summer_islands_7d: "Hvar Croatia harbour",
+  tpl_istria_plitvice_5d: "Plitvice Lakes Croatia waterfalls",
+  tpl_florence_tuscany_5d: "Florence Duomo Tuscany",
+  tpl_cinque_terre_4d: "Cinque Terre Manarola Italy",
+  tpl_puglia_6d: "Alberobello trulli Puglia Italy",
+  tpl_sardinia_6d: "Sardinia Cala Goloritze beach Italy",
+  tpl_bologna_emilia_4d: "Bologna Piazza Maggiore Italy food",
+  tpl_albania_riviera_6d: "Albanian Riviera Ksamil beach",
+  tpl_holland_tulips_4d: "Keukenhof tulips Netherlands",
+  tpl_brussels_bruges_ghent_5d: "Bruges Belgium canal medieval",
+  tpl_london_weekend_3d: "London Tower Bridge",
+  tpl_manchester_liverpool_4d: "Liverpool Royal Albert Dock",
+  tpl_bath_cotswolds_oxford_4d: "Cotswolds Bibury Arlington Row England",
+  tpl_cornwall_5d: "Cornwall St Ives coast England",
+  tpl_edinburgh_glasgow_4d: "Glasgow Kelvingrove Scotland",
+  tpl_scotland_nc500_7d: "North Coast 500 Scotland Highlands road",
+  tpl_dublin_wicklow_4d: "Dublin Ireland Temple Bar",
+  tpl_wild_atlantic_way_6d: "Cliffs of Moher Ireland",
+  tpl_belfast_causeway_3d: "Giants Causeway Northern Ireland",
+  tpl_faroe_islands_5d: "Faroe Islands Gasadalur waterfall",
+  tpl_greenland_ilulissat_6d: "Ilulissat icefjord Greenland iceberg",
+  tpl_iceland_golden_circle_4d: "Gullfoss waterfall Iceland Golden Circle",
+  tpl_iceland_south_coast_4d: "Skogafoss Iceland south coast",
+  tpl_iceland_winter_aurora_5d: "Iceland northern lights ice cave winter",
 };
 
 async function searchUnsplash(key, query) {
@@ -102,10 +134,19 @@ async function main() {
       console.warn(`No query mapped for ${template.id}, skipping`);
       continue;
     }
-    const url = await searchUnsplash(key, query);
+    let url;
+    try {
+      url = await searchUnsplash(key, query);
+    } catch (err) {
+      // Unsplash's demo key allows ~50 requests/hour. Keep what we have so far; re-run later to resume.
+      console.error(String(err.message).slice(0, 120));
+      console.error("Stopping early — progress saved. Re-run after the rate limit resets.");
+      break;
+    }
     if (url) {
       template.coverImageUrl = url;
-      console.log(`${template.id}: ${url}`);
+      console.log(`${template.id}: ${url.slice(0, 70)}`);
+      fs.writeFileSync(TEMPLATES_PATH, JSON.stringify(templates, null, 2) + "\n");
     } else {
       console.warn(`${template.id}: no result for "${query}"`);
     }
