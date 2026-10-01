@@ -17,12 +17,12 @@ const { createRequire } = require("module");
 // through Node's normal algorithm, so anchor a require() at functions/ rather
 // than reaching into its node_modules by literal path.
 const requireFromFunctions = createRequire(path.join(__dirname, "..", "..", "functions", "package.json"));
-const admin = requireFromFunctions("firebase-admin");
+const { initializeApp, cert } = requireFromFunctions("firebase-admin/app");
 const { getFirestore } = requireFromFunctions("firebase-admin/firestore");
 
 const keyPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 const serviceAccount = JSON.parse(fs.readFileSync(keyPath, "utf8"));
-admin.initializeApp({ credential: admin.cert(serviceAccount) });
+initializeApp({ credential: cert(serviceAccount) });
 const db = getFirestore();
 
 async function main() {
