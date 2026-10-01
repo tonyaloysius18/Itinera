@@ -19,7 +19,9 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -118,9 +120,12 @@ fun TripTemplateDetailScreen(
     template: TripTemplate,
     onBack: () -> Unit,
     onUseTemplate: (LocalDate) -> Unit,
+    onEditWithNera: (LocalDate) -> Unit,
 ) {
     val s = LocalStrings.current
     var showDatePicker by remember { mutableStateOf(false) }
+    // Both buttons need a start date first; this remembers which one opened the picker.
+    var pickerForNera by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
     val accent = templateAccent(template)
     val primaryType = template.destinationTypes.firstOrNull()
@@ -252,23 +257,43 @@ fun TripTemplateDetailScreen(
             }
         }
 
-        Button(
-            onClick = { showDatePicker = true },
+        Row(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(horizontal = 16.dp, vertical = 20.dp)
                 .padding(bottom = 16.dp)
-                .fillMaxWidth(0.8f)
-                .height(52.dp),
-            shape = CircleShape,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-            ),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)),
-            elevation = null,
+                .fillMaxWidth(0.94f),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Text(s.useThisTemplate, fontWeight = FontWeight.Medium)
+            OutlinedButton(
+                onClick = { pickerForNera = true; showDatePicker = true },
+                modifier = Modifier.weight(1f).height(52.dp),
+                shape = CircleShape,
+                contentPadding = PaddingValues(horizontal = 8.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = MaterialTheme.colorScheme.background.copy(alpha = 0.7f),
+                    contentColor = MaterialTheme.colorScheme.primary,
+                ),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)),
+            ) {
+                Icon(Icons.Filled.AutoAwesome, contentDescription = null, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(6.dp))
+                Text(s.editWithNera, fontWeight = FontWeight.Medium, maxLines = 1)
+            }
+            Button(
+                onClick = { pickerForNera = false; showDatePicker = true },
+                modifier = Modifier.weight(1f).height(52.dp),
+                shape = CircleShape,
+                contentPadding = PaddingValues(horizontal = 8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                ),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)),
+                elevation = null,
+            ) {
+                Text(s.useThisTemplate, fontWeight = FontWeight.Medium, maxLines = 1)
+            }
         }
     }
 
@@ -279,7 +304,7 @@ fun TripTemplateDetailScreen(
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
                         val date = Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.UTC).date
-                        onUseTemplate(date)
+                        if (pickerForNera) onEditWithNera(date) else onUseTemplate(date)
                     }
                     showDatePicker = false
                 }) { Text(s.ok) }

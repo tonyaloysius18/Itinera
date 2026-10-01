@@ -91,6 +91,7 @@ import com.itinera.app.i18n.stringsFor
 import com.itinera.app.i18n.systemLanguage
 import com.itinera.app.model.ExpenseCategory
 import com.itinera.app.model.Trip
+import com.itinera.app.model.toNeraItinerary
 import com.itinera.app.model.canEdit
 import com.itinera.app.model.isOwnedBy
 import com.itinera.app.model.inferExpenseCategory
@@ -869,6 +870,9 @@ private fun AppContent(
                                         val id = repository.addTripFromTemplate(template, startDate)
                                         navigator.replace(Screen.TripDetail(id))
                                     },
+                                    onEditWithNera = { startDate ->
+                                        navigator.push(Screen.Nera(templateId = template.id, templateStartDate = startDate.toString()))
+                                    },
                                 )
                             }
 
@@ -1043,6 +1047,10 @@ private fun AppContent(
                                 uid = repository.authService.currentUid ?: "",
                                 tripId = screen.tripId,
                                 seed = screen.tripId?.let { repository.seedItineraryFor(it) },
+                                templateDraft = if (screen.tripId == null && screen.templateId != null && screen.templateStartDate != null) {
+                                    repository.tripTemplates.firstOrNull { it.id == screen.templateId }
+                                        ?.toNeraItinerary(LocalDate.parse(screen.templateStartDate))
+                                } else null,
                                 travellerName = repository.profile.name,
                                 destination = screen.tripId?.let { tid ->
                                     repository.tripById(tid)?.let { trip ->

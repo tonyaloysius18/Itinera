@@ -140,6 +140,7 @@ fun NeraChatScreen(
     uid: String,
     tripId: String? = null,       // null starts a fresh trip; set, restores and continues that trip's saved chat
     seed: NeraItinerary? = null,  // the trip's current real activities/legs, so Nera knows what's already there
+    templateDraft: NeraItinerary? = null,  // a Discover template to start from (fresh trips only): shown as the first draft so it can be trimmed or changed before the trip exists
     travellerName: String = "",   // first name from the profile, for a personal greeting; blank if unknown
     destination: String = "",     // this trip's destination (e.g. "London"), for a trip-specific greeting; blank if unknown
     homeCity: String = "",        // home city from the profile, used for travel legs; blank if unknown
@@ -160,7 +161,18 @@ fun NeraChatScreen(
         mutableStateListOf<NeraItem>().apply {
             // A fresh trip has no history to restore, so greet right away; an existing trip's
             // history (or lack of it) is loaded below, once we know whether there's anything to show.
-            if (tripId == null) add(NeraItem.FromNera(welcomeText, listOf(s.neraSuggest1, s.neraSuggest2, s.neraSuggest3)))
+            if (tripId == null && templateDraft != null) {
+                val n = templateDraft.days.size
+                add(NeraItem.Draft("", templateDraft))
+                add(
+                    NeraItem.FromNera(
+                        s.neraTemplateIntro.replace("%1\$s", templateDraft.title).replace("%2\$d", n.toString()),
+                        (n - 1 downTo 2).toList().takeLast(3).map { s.neraMakeItDays.replace("%d", it.toString()) },
+                    )
+                )
+            } else if (tripId == null) {
+                add(NeraItem.FromNera(welcomeText, listOf(s.neraSuggest1, s.neraSuggest2, s.neraSuggest3)))
+            }
         }
     }
     var boundTripId by remember { mutableStateOf(tripId) }   // set once a brand-new trip gets created on Approve

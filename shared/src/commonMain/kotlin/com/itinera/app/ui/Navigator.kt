@@ -71,7 +71,12 @@ sealed interface Screen {
     data object Compass : Screen
 
     /** Chat with Nera. [tripId] null starts a fresh trip; set, it continues that trip's saved conversation. */
-    data class Nera(val tripId: String? = null) : Screen
+    data class Nera(
+        val tripId: String? = null,
+        /** Set when opened from a Discover template: Nera starts from that template's itinerary so it can be trimmed/changed before the trip is created. */
+        val templateId: String? = null,
+        val templateStartDate: String? = null,
+    ) : Screen
 
     data class TripMap(val tripId: String) : Screen
 

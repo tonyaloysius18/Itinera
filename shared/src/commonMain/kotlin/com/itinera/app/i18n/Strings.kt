@@ -857,6 +857,9 @@ class Strings {
     var itinerary: String = "Itinerary"
     var searchTemplates: String = "Search Templates"
     var durationLabel: String = "Duration"
+    var editWithNera: String = "Edit with Nera"
+    var neraTemplateIntro: String = "Here's the %2\$d-day plan for %1\$s. Tell me how many days you have, or what to change, and I'll trim it to the best highlights."
+    var neraMakeItDays: String = "Make it %d days"
 
     fun copyApply(block: Strings.() -> Unit): Strings {
 
@@ -1590,6 +1593,9 @@ class Strings {
         c.itinerary = this.itinerary
         c.searchTemplates = this.searchTemplates
         c.durationLabel = this.durationLabel
+        c.editWithNera = this.editWithNera
+        c.neraTemplateIntro = this.neraTemplateIntro
+        c.neraMakeItDays = this.neraMakeItDays
 
         c.block()
         return c
