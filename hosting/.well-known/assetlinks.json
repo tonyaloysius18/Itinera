@@ -1,0 +1,11 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.itinera.app",
+      "sha256_cert_fingerprints":
+        ["5D:9F:B2:2F:69:D2:98:5E:20:53:D9:46:B1:13:83:3A:8B:14:96:D8:A6:C7:BC:7C:16:67:18:9A:38:7F:04:BE"]
+    }
+  }
+]
