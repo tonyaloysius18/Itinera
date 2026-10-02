@@ -1,5 +1,19 @@
 package com.itinera.app.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,17 +32,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -47,7 +57,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.itinera.app.data.SHARE_BASE_URL
@@ -102,6 +111,7 @@ fun ShareItineraryScreen(
     var loaded by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
     var listInCommunity by remember { mutableStateOf(false) }
+    var showPrivacy by remember { mutableStateOf(false) }
     var existing by remember { mutableStateOf<SharedItinerary?>(null) }
 
     LaunchedEffect(Unit) {
@@ -113,18 +123,33 @@ fun ShareItineraryScreen(
     val byDate = remember(activities) { activities.groupBy { it.date }.toList().sortedBy { it.first } }
     val included = activities.count { it.id !in excluded }
 
-    Column(Modifier.fillMaxSize()) {
+    Column(Modifier.fillMaxSize().imePadding()) {
         TopBar(s.shareItinerary, onBack = onBack)
         Column(
             Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            // What is and isn't shared
-            Surface(shape = RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)) {
-                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(s.shareIntro, style = MaterialTheme.typography.bodyMedium)
-                    Text(s.shareIncluded, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f))
-                    Text(s.shareNeverShared, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f))
+            Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Icon(Icons.Filled.Link, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
+                        Text(s.shareIntro, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+                    }
+                    Row(
+                        Modifier.fillMaxWidth().clickable { showPrivacy = !showPrivacy }.padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(Icons.Filled.VisibilityOff, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text(s.detailsLabel.ifBlank { s.shareItinerary }, style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
+                        Icon(if (showPrivacy) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore, s.detailsLabel)
+                    }
+                    AnimatedVisibility(showPrivacy) {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(s.shareIncluded, style = MaterialTheme.typography.bodySmall)
+                            Text(s.shareNeverShared, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
                 }
             }
 
@@ -172,44 +197,69 @@ fun ShareItineraryScreen(
             } else {
                 OutlinedTextField(
                     value = title, onValueChange = { title = it.take(80) }, label = { Text(s.shareTitleLabel) },
-                    singleLine = true, modifier = Modifier.fillMaxWidth(),
+                    singleLine = true, shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth(),
+                    supportingText = { Text("${title.length}/80", modifier = Modifier.fillMaxWidth(), textAlign = androidx.compose.ui.text.style.TextAlign.End) },
                 )
                 OutlinedTextField(
                     value = description, onValueChange = { description = it.take(300) }, label = { Text(s.shareDescriptionLabel) },
-                    minLines = 2, modifier = Modifier.fillMaxWidth(),
+                    minLines = 2, maxLines = 4, shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth(),
+                    supportingText = { Text("${description.length}/300", modifier = Modifier.fillMaxWidth(), textAlign = androidx.compose.ui.text.style.TextAlign.End) },
                 )
                 Text(s.filterBudget, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Medium)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    BudgetTier.values().forEach { b -> FilterChip(selected = budget == b, onClick = { budget = b }, label = { Text(b.label()) }) }
+                    BudgetTier.values().forEach { b -> FilterChip(selected = budget == b, onClick = { budget = b }, label = { Text(b.label()) }, colors = shareChipColors(), border = null, leadingIcon = if (budget == b) ({ Icon(Icons.Filled.CheckCircle, null, Modifier.size(16.dp)) }) else null) }
                 }
                 Text(s.filterPace, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Medium)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    PaceTag.values().forEach { p -> FilterChip(selected = pace == p, onClick = { pace = p }, label = { Text(p.label()) }) }
+                    PaceTag.values().forEach { p -> FilterChip(selected = pace == p, onClick = { pace = p }, label = { Text(p.label()) }, colors = shareChipColors(), border = null, leadingIcon = if (pace == p) ({ Icon(Icons.Filled.CheckCircle, null, Modifier.size(16.dp)) }) else null) }
                 }
 
-                Text("${s.shareStopsLabel} ($included)", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Medium)
+                HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text("${s.shareStopsLabel} · $included/${activities.size}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+                    androidx.compose.material3.TextButton(onClick = {
+                        excluded = if (included == activities.size) activities.map { it.id }.toSet() else emptySet()
+                    }) { Text(if (included == activities.size) s.deselectAll else s.selectAll) }
+                }
+                if (included == 0) Text(s.shareNeedsStops, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
                 // Number days exactly as the published copy does: relative to the first day that still has a place
                 // or a journey on it, so the preview and the shared page always agree.
                 val firstDate = (activities.filter { it.id !in excluded }.map { it.date } + sharedLegDates(trip, homeCity)).minOrNull()
                 byDate.forEach { (date, dayStops) ->
                     val dayNo = if (firstDate != null) firstDate.daysUntil(date) + 1 else 1
-                    Text("${s.day} $dayNo", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
-                    dayStops.sortedBy { it.time.ifBlank { "99:99" } }.forEach { a ->
-                        val off = a.id in excluded
-                        Row(
-                            Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f), RoundedCornerShape(10.dp)).padding(start = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Column(Modifier.weight(1f).padding(vertical = 8.dp)) {
-                                Text(
-                                    a.title, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                                    textDecoration = if (off) TextDecoration.LineThrough else null,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (off) 0.4f else 1f),
-                                )
-                                if (a.location.isNotBlank()) Text(a.location, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Surface(shape = RoundedCornerShape(18.dp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f)) {
+                        Column {
+                            val allSelected = dayStops.all { it.id !in excluded }
+                            Row(
+                                Modifier.fillMaxWidth().toggleable(value = allSelected, role = Role.Checkbox, onValueChange = { selected ->
+                                    val ids = dayStops.map { it.id }.toSet()
+                                    excluded = if (selected) excluded - ids else excluded + ids
+                                }).padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text("${s.day} $dayNo", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
+                                Text("${dayStops.count { it.id !in excluded }}/${dayStops.size}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Checkbox(checked = allSelected, onCheckedChange = null)
                             }
-                            IconButton(onClick = { excluded = if (off) excluded - a.id else excluded + a.id }) {
-                                Icon(if (off) Icons.Filled.Add else Icons.Filled.Close, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                            dayStops.sortedBy { it.time.ifBlank { "99:99" } }.forEachIndexed { index, a ->
+                                val off = a.id in excluded
+                                val rowColor by animateColorAsState(if (off) MaterialTheme.colorScheme.surface.copy(alpha = 0.5f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.03f))
+                                if (index > 0) HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
+                                Row(
+                                    Modifier.fillMaxWidth().background(rowColor).toggleable(value = !off, role = Role.Checkbox, onValueChange = {
+                                        excluded = if (off) excluded - a.id else excluded + a.id
+                                    }).padding(horizontal = 12.dp, vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Checkbox(checked = !off, onCheckedChange = null)
+                                    Spacer(Modifier.width(4.dp))
+                                    Column(Modifier.weight(1f).padding(vertical = 8.dp)) {
+                                        Text(a.title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (off) 0.4f else 1f))
+                                        if (a.location.isNotBlank()) Text(a.location, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    }
+                                    if (a.time.isNotBlank()) Text(a.time, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 8.dp))
+                                }
                             }
                         }
                     }
@@ -223,38 +273,55 @@ fun ShareItineraryScreen(
                     Spacer(Modifier.width(12.dp))
                     Switch(checked = listInCommunity, onCheckedChange = { listInCommunity = it })
                 }
-                Button(
-                    onClick = {
-                        if (busy) return@Button
-                        if (included == 0) { onMessage(s.shareNeedsStops); return@Button }
-                        if (listInCommunity && included < 4) { onMessage(s.shareNeedsMoreStops); return@Button }
-                        if (listInCommunity) {
-                            // Same text rules the server applies, so the person hears about a problem now rather than
-                            // after the share page says "Not approved".
-                            if (!CommunityRules.isAcceptable(title)) { onMessage(s.shareInvalidTitle); return@Button }
-                            if (!CommunityRules.isAcceptable(description)) { onMessage(s.shareInvalidDescription); return@Button }
-                            if (activities.any { it.id !in excluded && !(CommunityRules.isAcceptable(it.title) && CommunityRules.isAcceptable(it.location)) }) {
-                                onMessage(s.shareInvalidPlace); return@Button
-                            }
-                        }
-                        scope.launch {
-                            busy = true
-                            val id = onPublish { newId ->
-                                buildSharedItinerary(newId, trip, activities, title, description, budget, pace, excluded, 0L, homeCity, listInCommunity, authorUid)
-                            }
-                            if (id != null) { shareId = id; existing = runCatching { loadStatus(id) }.getOrNull() } else onMessage(s.shareFailed)
-                            busy = false
-                        }
-                    },
-                    enabled = !busy,
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
-                    shape = RoundedCornerShape(26.dp),
-                ) {
-                    if (busy) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onPrimary)
-                    else Text(s.shareCreateLink)
-                }
+
             }
             Spacer(Modifier.height(24.dp))
         }
+        if (loaded && shareId == null) {
+            Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 8.dp) {
+                Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 16.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("${s.shareStopsLabel}: $included · ${budget.label()} · ${pace.label()}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Button(
+                        onClick = {
+                            if (busy) return@Button
+                            if (included == 0) { onMessage(s.shareNeedsStops); return@Button }
+                            if (listInCommunity && included < 4) { onMessage(s.shareNeedsMoreStops); return@Button }
+                            if (listInCommunity) {
+                                // Same text rules the server applies, so the person hears about a problem now rather than
+                                // after the share page says "Not approved".
+                                if (!CommunityRules.isAcceptable(title)) { onMessage(s.shareInvalidTitle); return@Button }
+                                if (!CommunityRules.isAcceptable(description)) { onMessage(s.shareInvalidDescription); return@Button }
+                                if (activities.any { it.id !in excluded && !(CommunityRules.isAcceptable(it.title) && CommunityRules.isAcceptable(it.location)) }) {
+                                    onMessage(s.shareInvalidPlace); return@Button
+                                }
+                            }
+                            scope.launch {
+                                busy = true
+                                val id = onPublish { newId ->
+                                    buildSharedItinerary(newId, trip, activities, title, description, budget, pace, excluded, 0L, homeCity, listInCommunity, authorUid)
+                                }
+                                if (id != null) { shareId = id; existing = runCatching { loadStatus(id) }.getOrNull() } else onMessage(s.shareFailed)
+                                busy = false
+                            }
+                        },
+                        enabled = !busy && included > 0 && title.isNotBlank(),
+                        modifier = Modifier.fillMaxWidth().height(52.dp),
+                        shape = RoundedCornerShape(26.dp),
+                    ) {
+                        if (busy) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onPrimary)
+                        else Text(s.shareCreateLink)
+                    }
+                }
+            }
+        }
+
     }
 }
+
+@Composable
+private fun shareChipColors() = FilterChipDefaults.filterChipColors(
+    containerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
+    selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.16f),
+    selectedLabelColor = MaterialTheme.colorScheme.primary,
+    selectedLeadingIconColor = MaterialTheme.colorScheme.primary,
+)

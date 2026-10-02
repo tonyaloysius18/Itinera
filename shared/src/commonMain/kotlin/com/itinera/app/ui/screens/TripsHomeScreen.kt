@@ -287,11 +287,24 @@ fun TripsHomeScreen(
                         }
                     }
 
+                    val inProgressGroup = grouped[TripPhase.IN_PROGRESS].orEmpty()
+                    val showDiscoverOnInProgress = inProgressGroup.isNotEmpty()
+
                     fun cardsFor(phase: TripPhase) {
                         val group = grouped[phase].orEmpty()
-                        // The Upcoming header always shows (it carries the Discover Templates pill),
-                        // even with nothing upcoming; other sections still disappear when empty.
-                        if (group.isEmpty() && phase != TripPhase.UPCOMING) return
+                        val shouldShowHeader = when (phase) {
+                            TripPhase.IN_PROGRESS -> group.isNotEmpty()
+                            TripPhase.UPCOMING -> true
+                            TripPhase.PAST -> group.isNotEmpty()
+                        }
+                        if (!shouldShowHeader) return
+
+                        val hasDiscover = if (showDiscoverOnInProgress) {
+                            phase == TripPhase.IN_PROGRESS
+                        } else {
+                            phase == TripPhase.UPCOMING
+                        }
+
                         item(key = "hdr-$phase") {
                             SectionHeader(
                                 label = when (phase) {
@@ -300,7 +313,7 @@ fun TripsHomeScreen(
                                     TripPhase.PAST -> s.past
                                 },
                                 count = group.size,
-                                trailing = if (phase == TripPhase.UPCOMING) {
+                                trailing = if (hasDiscover) {
                                     { ActionPill(s.discoverTemplatesPill, Icons.Filled.Explore, MaterialTheme.colorScheme.primary, onOpenTemplates, badge = if (showDiscoverNew) s.newBadge else null) }
                                 } else null,
                             )
