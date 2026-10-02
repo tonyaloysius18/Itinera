@@ -58,7 +58,9 @@ import com.itinera.app.model.PaceTag
 import com.itinera.app.model.SharedItinerary
 import com.itinera.app.model.Trip
 import com.itinera.app.model.buildSharedItinerary
+import com.itinera.app.model.sharedLegDates
 import com.itinera.app.ui.components.TopBar
+import kotlinx.datetime.daysUntil
 import kotlinx.coroutines.launch
 
 /**
@@ -77,6 +79,8 @@ fun ShareItineraryScreen(
     onPublish: suspend (build: (id: String) -> SharedItinerary) -> String?,
     onUnpublish: suspend (id: String) -> Boolean,
     onMessage: (String) -> Unit,
+    /** The owner's home city (profile), so journeys to and from home are left out of what is shared. */
+    homeCity: String = "",
 ) {
     val s = LocalStrings.current
     val scope = rememberCoroutineScope()
@@ -167,9 +171,11 @@ fun ShareItineraryScreen(
                 }
 
                 Text("${s.shareStopsLabel} ($included)", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Medium)
-                var dayNo = 0
-                byDate.forEach { (_, dayStops) ->
-                    dayNo++
+                // Number days exactly as the published copy does: relative to the first day that still has a place
+                // or a journey on it, so the preview and the shared page always agree.
+                val firstDate = (activities.filter { it.id !in excluded }.map { it.date } + sharedLegDates(trip, homeCity)).minOrNull()
+                byDate.forEach { (date, dayStops) ->
+                    val dayNo = if (firstDate != null) firstDate.daysUntil(date) + 1 else 1
                     Text("${s.day} $dayNo", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
                     dayStops.sortedBy { it.time.ifBlank { "99:99" } }.forEach { a ->
                         val off = a.id in excluded
@@ -199,7 +205,7 @@ fun ShareItineraryScreen(
                         scope.launch {
                             busy = true
                             val id = onPublish { newId ->
-                                buildSharedItinerary(newId, trip, activities, title, description, budget, pace, excluded, 0L)
+                                buildSharedItinerary(newId, trip, activities, title, description, budget, pace, excluded, 0L, homeCity)
                             }
                             if (id != null) shareId = id else onMessage(s.shareFailed)
                             busy = false

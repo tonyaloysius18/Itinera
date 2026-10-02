@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.itinera.app.ui.theme.itinera
 
@@ -42,12 +43,22 @@ fun ActionPill(
         border = BorderStroke(1.dp, tint.copy(alpha = 0.45f)),
     ) {
         Row(
-            Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
+            // A badge makes the pill wider, so the padding, gap and icon tighten a little to keep the label readable.
+            Modifier.padding(horizontal = if (badge != null) 10.dp else 14.dp, vertical = 9.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            horizontalArrangement = Arrangement.spacedBy(if (badge != null) 4.dp else 6.dp),
         ) {
-            Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(18.dp))
-            Text(label, color = tint, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, maxLines = 1)
+            Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(if (badge != null) 16.dp else 18.dp))
+            // With a badge the pill is wider; the label gives way (smaller, then ellipsis) before the badge is squeezed.
+            Text(
+                label,
+                color = tint,
+                style = if (badge != null) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false),
+            )
             if (badge != null) {
                 Surface(shape = RoundedCornerShape(50), color = tint) {
                     Text(
@@ -56,6 +67,7 @@ fun ActionPill(
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
+                        softWrap = false,
                         modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp),
                     )
                 }

@@ -392,10 +392,14 @@ private fun AppContent(
     LaunchedEffect(PendingDeepLink.sharedId, repository.tripsSyncedOnce) {
         val sharedId = PendingDeepLink.sharedId
         if (sharedId != null && repository.tripsSyncedOnce) {
+            // Clearing the id changes this effect's own key, which restarts the effect and would cancel a load running
+            // inside it. So the load runs in the screen's scope instead, which that restart can't touch.
             PendingDeepLink.sharedId = null
-            val opened = repository.openSharedItinerary(sharedId)
-            if (opened == null) pillMessage = s.shareLinkNotFound
-            else navigator.push(Screen.TripTemplateDetail(opened.id))
+            scope.launch {
+                val opened = repository.openSharedItinerary(sharedId)
+                if (opened == null) pillMessage = s.shareLinkNotFound
+                else navigator.push(Screen.TripTemplateDetail(opened.id))
+            }
         }
     }
 
@@ -883,6 +887,7 @@ private fun AppContent(
                                     onPublish = { build -> repository.publishItinerary(screen.tripId, build) },
                                     onUnpublish = { id -> repository.unpublishItinerary(id) },
                                     onMessage = { pillMessage = it },
+                                    homeCity = repository.profile.city,
                                 )
                             }
 

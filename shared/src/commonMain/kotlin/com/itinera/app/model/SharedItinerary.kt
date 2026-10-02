@@ -57,6 +57,27 @@ data class SharedLinkRecord(
     val createdAt: Long = 0L,
 )
 
+/**
+ * Recognises the owner's home city: the profile city when known, else the city a round trip starts and ends in.
+ * Used to leave the outbound and return journeys (and the home country) out of what is shared.
+ */
+private fun homeMatcher(trip: Trip, homeCity: String): (String) -> Boolean {
+    val sorted = trip.legs.sortedBy { it.date }
+    val roundTripCity = sorted.firstOrNull()?.fromCity?.trim()
+        ?.takeIf { it.isNotBlank() && it.equals(sorted.lastOrNull()?.toCity?.trim(), ignoreCase = true) }
+    val homes = listOfNotNull(homeCity.trim().takeIf { it.isNotBlank() }, roundTripCity).map { it.lowercase() }
+    return { city ->
+        val c = city.trim().lowercase()
+        homes.isNotEmpty() && c.length >= 3 && homes.any { h -> c == h || h.contains(c) || c.contains(h) }
+    }
+}
+
+/** The trip's journeys minus the ones that start or end at the owner's home, so a shared itinerary never reveals where its owner lives. */
+private fun tripLegsWithoutHome(trip: Trip, homeCity: String): List<Leg> {
+    val isHome = homeMatcher(trip, homeCity)
+    return trip.legs.filter { !isHome(it.fromCity) && !isHome(it.toCity) }
+}
+
 private val EMAIL = Regex("""[\w.+-]+@[\w-]+\.[\w.-]+""")
 private val URL = Regex("""(https?://|www\.)\S+""", RegexOption.IGNORE_CASE)
 private val PHONE = Regex("""\+?\d[\d\s().-]{7,}\d""")
@@ -82,14 +103,16 @@ fun buildSharedItinerary(
     paceTag: PaceTag,
     excluded: Set<String>,
     sharedAt: Long,
+    homeCity: String = "",
 ): SharedItinerary {
     val chosen = activities.filter { it.id !in excluded }
-    val allDates = (chosen.map { it.date } + trip.legs.map { it.date }).sorted()
+    val legs = tripLegsWithoutHome(trip, homeCity)
+    val allDates = (chosen.map { it.date } + legs.map { it.date }).sorted()
     val first: LocalDate? = allDates.firstOrNull()
     fun dayOf(date: LocalDate): Int = first!!.daysUntil(date) + 1
 
     val stopsByDay = chosen.groupBy { dayOf(it.date) }
-    val legsByDay = trip.legs.map {
+    val legsByDay = legs.map {
         SharedLeg(
             dayNumber = dayOf(it.date),
             fromCity = scrubPersonal(it.fromCity, 60),
@@ -119,7 +142,10 @@ fun buildSharedItinerary(
         )
     }
 
-    val countries = (trip.destinationCountries + trip.legs.map { it.country })
+    // Countries come from every journey that does NOT end at home (so the destination of the outbound flight counts,
+    // but the return flight's home country never does).
+    val isHome = homeMatcher(trip, homeCity)
+    val countries = (trip.destinationCountries + trip.legs.filter { !isHome(it.toCity) }.map { it.country })
         .map { scrubPersonal(it, 40) }.filter { it.isNotBlank() }.distinct().take(8)
 
     return SharedItinerary(
@@ -183,3 +209,6 @@ fun parseShareId(input: String): String? {
     val candidate = cleaned.substringAfterLast('/')
     return candidate.takeIf { Regex("""[A-Za-z0-9]{16,40}""").matches(it) }
 }
+
+/** Dates of the journeys that will be shared (home legs excluded), so the share preview numbers days like the published copy. */
+fun sharedLegDates(trip: Trip, homeCity: String): List<LocalDate> = tripLegsWithoutHome(trip, homeCity).map { it.date }
