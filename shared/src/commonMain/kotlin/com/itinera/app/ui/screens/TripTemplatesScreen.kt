@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -49,6 +50,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,11 +58,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -336,9 +344,14 @@ fun TripTemplatesScreen(
     var selectedType by remember { mutableStateOf<DestinationType?>(null) }
     var selectedBudget by remember { mutableStateOf<BudgetTier?>(null) }
     var selectedPace by remember { mutableStateOf<PaceTag?>(null) }
+    val listState = rememberLazyListState()
+    val blurZonePx = with(LocalDensity.current) { 70.dp.toPx() }
 
-    val filtered = remember(templates, query, selectedContinent, selectedType, selectedBudget, selectedPace) {
-        templates.filter { t ->
+    // The repository populates a SnapshotStateList in place after the first load.
+    // Capture its contents so remember invalidates when templates arrive or refresh.
+    val templateSnapshot = templates.toList()
+    val filtered = remember(templateSnapshot, query, selectedContinent, selectedType, selectedBudget, selectedPace) {
+        templateSnapshot.filter { t ->
             (query.isBlank() || t.title.contains(query.trim(), ignoreCase = true) ||
                 t.country.contains(query.trim(), ignoreCase = true)) &&
                 (selectedContinent == null || t.continent == selectedContinent) &&
@@ -396,7 +409,7 @@ fun TripTemplatesScreen(
                         }
                     }
                 }
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(8.dp))
                 TypeChipsRow(selected = selectedType, onSelect = { selectedType = it })
 
                 if (sheetFilterCount > 0) {
@@ -410,6 +423,9 @@ fun TripTemplatesScreen(
                         selectedPace?.let { p -> item { ActiveFilterChip(p.label()) { selectedPace = null } } }
                     }
                 }
+
+                // Keep breathing room below the fixed filters even after scrolling.
+                Spacer(Modifier.height(12.dp))
 
                 if (filtered.isEmpty()) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -436,16 +452,61 @@ fun TripTemplatesScreen(
                     }
                 } else {
                     LazyColumn(
+                        state = listState,
                         modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp),
-                        contentPadding = PaddingValues(top = 16.dp, bottom = 24.dp),
+                        contentPadding = PaddingValues(top = 24.dp, bottom = 24.dp),
                     ) {
                         items(filtered, key = { it.id }) { template ->
-                            TemplateCard(
-                                template = template,
-                                daysWord = s.templateDurationDaysN.replace("%d", template.durationDays.toString()),
-                                onClick = { onOpenTemplate(template.id) },
-                            )
+                            val blurStrip by remember(listState, template.id, blurZonePx) {
+                                derivedStateOf {
+                                    if (!listState.canScrollBackward) null
+                                    else {
+                                        val item = listState.layoutInfo.visibleItemsInfo
+                                            .firstOrNull { it.key == template.id }
+                                        if (item == null) null
+                                        else {
+                                            // Item offsets exclude the before-content padding.
+                                            // Convert to the actual visible viewport coordinates.
+                                            val viewportOffset = item.offset - listState.layoutInfo.viewportStartOffset
+                                            val start = -viewportOffset.toFloat()
+                                            val end = blurZonePx - viewportOffset
+                                            if (end > 0f && start < item.size) start to end else null
+                                        }
+                                    }
+                                }
+                            }
+                            Box {
+                                TemplateCard(
+                                    template = template,
+                                    daysWord = s.templateDurationDaysN.replace("%d", template.durationDays.toString()),
+                                    onClick = { onOpenTemplate(template.id) },
+                                )
+                                // Mask outside the blur layer so the header transition
+                                // fades smoothly while the remaining card stays sharp.
+                                blurStrip?.let { (start, end) ->
+                                    TemplateCard(
+                                        template = template,
+                                        daysWord = s.templateDurationDaysN.replace("%d", template.durationDays.toString()),
+                                        onClick = { onOpenTemplate(template.id) },
+                                        modifier = Modifier
+                                            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                                            .drawWithContent {
+                                                drawContent()
+                                                // Fade the blurred overlay into the sharp card;
+                                                // the transition stays fixed at the viewport top.
+                                                drawRect(
+                                                    brush = Brush.verticalGradient(
+                                                        colors = listOf(Color.White, Color.Transparent),
+                                                        startY = start,
+                                                        endY = end,
+                                                    ),
+                                                    blendMode = BlendMode.DstIn,
+                                                )
+                                            }.blur(6.dp),
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -469,12 +530,17 @@ fun TripTemplatesScreen(
 
 /** Image-led card: title sits on the photo, so the card is one tall visual unit instead of image + text block. */
 @Composable
-private fun TemplateCard(template: TripTemplate, daysWord: String, onClick: () -> Unit) {
+private fun TemplateCard(
+    template: TripTemplate,
+    daysWord: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val accent = templateAccent(template)
     val primaryType = template.destinationTypes.firstOrNull()
     val shape = RoundedCornerShape(20.dp)
 
-    Box(Modifier.fillMaxWidth().height(230.dp).clip(shape).clickable(onClick = onClick)) {
+    Box(modifier.fillMaxWidth().height(230.dp).clip(shape).clickable(onClick = onClick)) {
         if (template.coverImageUrl.isNotBlank()) {
             AsyncImage(
                 model = template.coverImageUrl,

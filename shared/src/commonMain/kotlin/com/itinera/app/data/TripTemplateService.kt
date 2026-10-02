@@ -17,11 +17,16 @@ class TripTemplateService {
 
     /** All published templates, ordered for Discover browsing. */
     suspend fun loadTemplates(): List<TripTemplate> {
-        val snapshot = templatesRef()
-            .where { "published" equalTo true }
-            .get()
-        return snapshot.documents
-            .map { it.data(TripTemplate.serializer()) }
-            .sortedBy { it.sortOrder }
+        val snapshot = templatesRef().get()
+        println("ITINERA: Loaded ${snapshot.documents.size} template documents from Firestore")
+        return snapshot.documents.mapNotNull { doc ->
+            try {
+                val t = doc.data(TripTemplate.serializer())
+                t
+            } catch (e: Exception) {
+                println("ITINERA: Failed to parse template doc ${doc.id}: ${e.message}")
+                null
+            }
+        }.filter { it.published }.sortedBy { it.sortOrder }
     }
 }
