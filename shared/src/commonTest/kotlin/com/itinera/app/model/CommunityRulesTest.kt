@@ -24,7 +24,15 @@ class CommunityRulesTest {
         assertFalse(CommunityRules.isAcceptable("dm me @someone"))
     }
 
+    @Test fun commonEndingsAndCompoundsAreRejected() {
+        listOf("fucker", "fuckers", "motherfucker", "You are an idiot", "idiots", "stupid trip", "what a moron", "bitches", "shitty hotel")
+            .forEach { assertFalse(CommunityRules.isAcceptable(it), it) }
+    }
+
     @Test fun placeNamesContainingAWordAreFine() {
+        assertTrue(CommunityRules.isAcceptable("Dickens walking tour"))
+        assertTrue(CommunityRules.isAcceptable("Shitennoji temple, Osaka"))
+        assertTrue(CommunityRules.isAcceptable("Fagaras mountains"))
         assertTrue(CommunityRules.isAcceptable("Sussex and Essex weekend"))
         assertTrue(CommunityRules.isAcceptable("Scunthorpe"))
     }

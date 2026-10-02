@@ -6,24 +6,28 @@ export const REPORTS_TO_HIDE = 3;      // distinct people reporting a listed iti
 export const MAX_TITLE = 100;
 export const MAX_DESCRIPTION = 500;
 
-// Deliberately short and unambiguous. This is a first line of defence, not a complete filter: anything that slips
-// through is caught by reports (auto-hide at REPORTS_TO_HIDE) and the moderator CLI. Matched on whole words, after
-// lower-casing and stripping look-alike characters.
-const BLOCKED_WORDS = [
-  "fuck", "fucking", "shit", "bitch", "cunt", "asshole", "dick", "pussy", "nigger", "nigga", "faggot", "whore", "slut",
-  "porn", "porno", "xxx", "sex", "escort", "nude", "nudes", "onlyfans", "casino", "viagra", "cialis",
-  "bitcoin", "crypto", "forex", "loan", "nazi", "hitler", "kill yourself", "rape", "terrorist",
+// A first line of defence, not a complete filter: anything that slips through is caught by reports (auto-hide at
+// REPORTS_TO_HIDE) and the moderator CLI. Words are matched whole, optionally with a common ending (fuck -> fucker,
+// fucking; idiot -> idiots), so place names that merely contain one (Sussex, Dickens, Shitennoji) are not blocked.
+// "fuck" is the one exception: it is matched anywhere, so compounds like "motherfucker" are caught too.
+const BLOCKED_STEMS = [
+  "shit", "bitch", "cunt", "asshole", "dick", "pussy", "nigger", "nigga", "faggot", "fag", "whore", "slut", "twat", "wanker",
+  "porn", "porno", "xxx", "sex", "escort", "nude", "onlyfans", "casino", "viagra", "cialis",
+  "bitcoin", "crypto", "forex", "loan", "nazi", "hitler", "kill yourself", "rape", "rapist", "terrorist",
+  "idiot", "moron", "retard", "stupid", "bastard", "scumbag", "dumbass", "jackass", "imbecile",
 ];
+const ENDINGS = "(?:s|es|er|ers|ed|ing|y|ty|head|heads|face|hole|holes|ic|ish)?";
+const BLOCKED_PATTERNS = BLOCKED_STEMS.map((w) => new RegExp(`\\b${w}${ENDINGS}\\b`));
 const URL_PATTERN = /(https?:\/\/|www\.|\b[a-z0-9-]+\.(com|net|org|io|ru|xyz|top|click|link|shop|biz)\b)/i;
 const CONTACT_PATTERN = /(\b\d{3}[\s.-]?\d{3,4}[\s.-]?\d{4}\b|@[a-z0-9_.]{3,}|\bwhats ?app\b|\btelegram\b|\bt\.me\b)/i;
 
 const normalize = (s) =>
   String(s || "").toLowerCase().replace(/[01345$@!]/g, (c) => ({ 0: "o", 1: "i", 3: "e", 4: "a", 5: "s", $: "s", "@": "a", "!": "i" })[c]);
 
-/** True when [text] contains a blocked word as a whole word/phrase. */
+/** True when [text] contains a blocked word (see above). */
 export function hasBlockedWord(text) {
-  const t = ` ${normalize(text).replace(/[^a-z\s]/g, " ").replace(/\s+/g, " ")} `;
-  return BLOCKED_WORDS.some((w) => t.includes(` ${w} `));
+  const t = normalize(text).replace(/[^a-z\s]/g, " ").replace(/\s+/g, " ");
+  return t.includes("fuck") || BLOCKED_PATTERNS.some((re) => re.test(t));
 }
 
 /** Every piece of free text a person typed in the listing: title, description and each place's name and location. */

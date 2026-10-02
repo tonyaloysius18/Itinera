@@ -31,10 +31,19 @@ test("whole words only: place names containing a blocked word are fine", () => {
   assert.equal(hasBlockedWord("Sussex and Essex weekend"), false);
   assert.equal(hasBlockedWord("Scunthorpe"), false);
   assert.equal(hasBlockedWord("what the shit"), true);
+  assert.equal(hasBlockedWord("Dickens walking tour"), false);
+  assert.equal(hasBlockedWord("Shitennoji temple, Osaka"), false);
+  assert.equal(hasBlockedWord("Fagaras mountains"), false);
 });
 test("hide after enough distinct reporters, ignoring other reports and repeats", () => {
   const r = (tripId, reporterUid) => ({ tripId, reporterUid });
   const reports = [r("shared_a", "1"), r("shared_a", "2"), r("shared_a", "2"), r("shared_b", "1"), r("trip_x", "1"), r("trip_x", "2"), r("trip_x", "3")];
   assert.deepEqual(idsToHide(reports), []);
   assert.deepEqual(idsToHide([...reports, r("shared_a", "3")]), ["a"]);
+});
+
+test("common endings and compounds are caught", () => {
+  for (const w of ["fucker", "fuckers", "motherfucker", "You are an idiot", "idiots", "stupid trip", "what a moron", "bitches", "shitty hotel", "F u c k"]) {
+    assert.equal(hasBlockedWord(w), w === "F u c k" ? false : true, w);
+  }
 });
