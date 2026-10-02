@@ -26,3 +26,8 @@ binding = "DB"
 database_name = "nera"
 database_id = "f259701c-e388-4520-9996-44cadc650d97"
 migrations_dir = "migrations"
+
+# Community moderation: review any listing still pending and hide heavily-reported ones. Needs the secret
+# FIREBASE_SERVICE_ACCOUNT (service-account JSON): `npx wrangler secret put FIREBASE_SERVICE_ACCOUNT`.
+[triggers]
+crons = ["*/5 * * * *"]

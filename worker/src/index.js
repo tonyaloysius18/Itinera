@@ -8,6 +8,8 @@ import { DATA_TOOLS, getWeather, searchPlaces, transportOptions } from "../../fu
 import { verifyFirebaseClaims } from "./firebaseAuth.js";
 import { getEntitlement, isFriend, recordTrip } from "./entitlement.js";
 import { applyUpdate, eventToUpdate, fetchSubscriberExpiry, safeEqual } from "./revenuecat.js";
+import { getShared, openReports, pendingListings, setReview } from "./firestoreAdmin.js";
+import { idsToHide, reviewListing } from "./moderation.js";
 
 const DEFAULT_DAILY_LIMIT = 80;    // Nera requests per user per UTC day, for everyone except OWNER_UIDS
 const DEFAULT_PAID_MONTHLY_LIMIT = 150;   // fair-use cap per paying/friend user per UTC month
@@ -104,7 +106,29 @@ async function callModel(env, system, { tools, messages }) {
   return res.json();
 }
 
+/** Applies the automatic review to one listing request. Returns what happened. */
+async function reviewOne(env, id, doc) {
+  const verdict = reviewListing(doc);
+  if (verdict.action === "approve") await setReview(env, id, { status: "approved", feed: true, approvedAt: Date.now() });
+  else if (verdict.action === "reject") await setReview(env, id, { status: "rejected", feed: false });
+  return verdict;
+}
+
+/** Safety net, every few minutes: review anything still pending, and hide listings that enough people reported. */
+async function sweepModeration(env) {
+  if (!env.FIREBASE_SERVICE_ACCOUNT) return;
+  for (const doc of await pendingListings(env)) await reviewOne(env, doc.id, doc).catch(() => {});
+  for (const id of idsToHide(await openReports(env))) {
+    const doc = await getShared(env, id).catch(() => null);
+    if (doc && doc.feed === true) await setReview(env, id, { status: "taken_down", feed: false }).catch(() => {});
+  }
+}
+
 export default {
+  async scheduled(_event, env, ctx) {
+    ctx.waitUntil(sweepModeration(env));
+  },
+
   async fetch(request, env, ctx) {
     if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
     if (new URL(request.url).pathname === "/revenuecat") return handleRevenueCat(request, env);
@@ -120,6 +144,24 @@ export default {
     }
 
     const path = new URL(request.url).pathname;
+
+    // POST /community/review { id }: the author asks for their listing to be checked right away. The decision comes
+    // from the stored listing and fixed rules, never from the request, so this can only ever do what the sweep would.
+    if (path === "/community/review") {
+      if (!env.FIREBASE_SERVICE_ACCOUNT) return json({ error: "moderation_not_configured" }, 503);
+      let id = "";
+      try { id = String(JSON.parse((await request.text()) || "{}").id || ""); } catch { /* no body */ }
+      if (!/^[A-Za-z0-9_-]{6,64}$/.test(id)) return json({ error: "bad_id" }, 400);
+      try {
+        const doc = await getShared(env, id);
+        if (!doc || doc.authorUid !== uid) return json({ error: "not_found" }, 404);
+        const verdict = await reviewOne(env, id, doc);
+        return json({ ok: true, action: verdict.action });
+      } catch {
+        return json({ error: "review_failed" }, 502);
+      }
+    }
+
     const freeTrips = positiveInt(env.FREE_TRIPS, DEFAULT_FREE_TRIPS);
 
     // POST /entitlement: where does this user stand? No model call and no quota used.

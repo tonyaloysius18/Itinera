@@ -225,6 +225,26 @@ class NeraService {
         }
     }
 
+    /**
+     * Asks the server to review the author's Community listing [id] right away, so it appears in the feed without
+     * waiting for the periodic sweep. Best effort: the sweep reviews it either way.
+     */
+    suspend fun requestCommunityReview(id: String) {
+        if (!isConfigured) return
+        val token = Firebase.auth.currentUser?.getIdToken(false) ?: return
+        try {
+            client.post(Secrets.NERA_ENDPOINT.trimEnd('/') + "/community/review") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                contentType(ContentType.Application.Json)
+                setBody("""{"id":"$id"}""")
+            }
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // The periodic sweep picks it up.
+        }
+    }
+
     /** Throws [NeraException] on any failure. */
     suspend fun send(messages: List<NeraTurn>, currentItinerary: NeraItinerary?, homeCity: String? = null): NeraReply {
         if (!isConfigured) throw NeraException(NeraFailure.NOT_CONFIGURED)

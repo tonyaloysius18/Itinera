@@ -293,7 +293,10 @@ class TripRepository {
         val uid = authService.currentUid ?: return null
         return runCatching {
             val id = sharedItineraryService.newId()
-            sharedItineraryService.publish(uid, tripId, build(id), nowMillis())
+            val item = build(id)
+            sharedItineraryService.publish(uid, tripId, item, nowMillis())
+            // Community listings are checked automatically; do it now rather than waiting for the periodic sweep.
+            if (item.listRequested) kotlinx.coroutines.withTimeoutOrNull(8_000) { neraService.requestCommunityReview(id) }
             id
         }.getOrNull()
     }
