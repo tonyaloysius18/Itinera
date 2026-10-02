@@ -16,6 +16,16 @@
 				<string>com.googleusercontent.apps.780952897576-p0nisai19dev7oa2nklhnmq608mrf2u4</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLName</key>
+			<string>dev.ynotlabs.itinera.share</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>itinera</string>
+			</array>
+		</dict>
 	</array>
 	<key>GIDClientID</key>
 	<string>780952897576-p0nisai19dev7oa2nklhnmq608mrf2u4.apps.googleusercontent.com</string>

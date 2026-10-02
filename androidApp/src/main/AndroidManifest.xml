@@ -48,6 +48,13 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- Shared itineraries: itinera://s/<id> (the share page's "Open in Itinera" button) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="itinera" android:host="s" />
+            </intent-filter>
         </activity>
     </application>
 </manifest>

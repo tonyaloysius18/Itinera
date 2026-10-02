@@ -20,7 +20,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material3.Button
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
@@ -121,11 +124,14 @@ fun TripTemplateDetailScreen(
     onBack: () -> Unit,
     onUseTemplate: (LocalDate) -> Unit,
     onEditWithNera: (LocalDate) -> Unit,
+    /** Set for user-shared itineraries only (user-generated content must be reportable): called with the chosen reason. */
+    onReport: ((reason: String) -> Unit)? = null,
 ) {
     val s = LocalStrings.current
     var showDatePicker by remember { mutableStateOf(false) }
     // Both buttons need a start date first; this remembers which one opened the picker.
     var pickerForNera by remember { mutableStateOf(false) }
+    var showReport by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
     val accent = templateAccent(template)
     val primaryType = template.destinationTypes.firstOrNull()
@@ -133,7 +139,17 @@ fun TripTemplateDetailScreen(
 
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
-            TopBar(template.title, onBack = onBack)
+            TopBar(
+                template.title,
+                onBack = onBack,
+                trailing = if (onReport != null) {
+                    {
+                        IconButton(onClick = { showReport = true }) {
+                            Icon(Icons.Filled.Flag, contentDescription = s.reportItinerary, tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                        }
+                    }
+                } else null,
+            )
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -295,6 +311,22 @@ fun TripTemplateDetailScreen(
                 Text(s.useThisTemplate, fontWeight = FontWeight.Medium, maxLines = 1)
             }
         }
+    }
+
+    if (showReport && onReport != null) {
+        AlertDialog(
+            onDismissRequest = { showReport = false },
+            title = { Text(s.reportItinerary) },
+            text = {
+                Column {
+                    listOf("spam" to s.reportReasonSpam, "inappropriate" to s.reportReasonInappropriate, "other" to s.reportReasonOther).forEach { (code, label) ->
+                        TextButton(onClick = { showReport = false; onReport(code) }, modifier = Modifier.fillMaxWidth()) { Text(label) }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = { TextButton(onClick = { showReport = false }) { Text(s.cancel) } },
+        )
     }
 
     if (showDatePicker) {

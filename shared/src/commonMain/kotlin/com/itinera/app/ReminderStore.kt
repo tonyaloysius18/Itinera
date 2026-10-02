@@ -1,5 +1,8 @@
 package com.itinera.app
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.set
 import kotlinx.serialization.Serializable
@@ -63,4 +66,6 @@ object ReminderStore {
  */
 object PendingDeepLink {
     var tripId: String? = null
+    /** A shared-itinerary id from an `itinera://s/<id>` link. Observable so App() reacts even when the app is already open. */
+    var sharedId: String? by mutableStateOf<String?>(null)
 }

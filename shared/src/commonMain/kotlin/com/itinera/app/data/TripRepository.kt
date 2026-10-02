@@ -17,6 +17,7 @@ import com.itinera.app.model.TransportType
 import com.itinera.app.model.Trip
 import com.itinera.app.model.TripAccent
 import com.itinera.app.model.TripTemplate
+import com.itinera.app.model.toTemplate
 import com.itinera.app.model.UserProfile
 import com.itinera.app.model.isOwnedBy
 import com.itinera.app.model.label
@@ -69,6 +70,10 @@ class TripRepository {
     val activityService = ActivityService()
 
     val tripTemplateService = TripTemplateService()
+
+    val sharedItineraryService = SharedItineraryService()
+    /** Shared itineraries opened by link this session, keyed by their template id ("shared_<id>"), so the template detail screen can show them. */
+    val importedTemplates = androidx.compose.runtime.mutableStateMapOf<String, TripTemplate>()
     val tripTemplates = mutableStateListOf<TripTemplate>()
     var tripTemplatesSyncedOnce by mutableStateOf(false)
         private set
@@ -268,6 +273,56 @@ class TripRepository {
             println("ITINERA: TEMPLATES LOAD FAILED — ${e.message}")
         }
         tripTemplatesSyncedOnce = true
+    }
+
+    // ── Share an itinerary by link ──
+
+    /** The link this trip is already shared under, if any. */
+    suspend fun sharedLinkFor(tripId: String): com.itinera.app.model.SharedLinkRecord? {
+        val uid = authService.currentUid ?: return null
+        return runCatching { sharedItineraryService.linkFor(uid, tripId) }.getOrNull()
+    }
+
+    /** Publishes a sanitized copy of a trip; returns its share id, or null on failure. */
+    suspend fun publishItinerary(tripId: String, build: (id: String) -> com.itinera.app.model.SharedItinerary): String? {
+        val uid = authService.currentUid ?: return null
+        return runCatching {
+            val id = sharedItineraryService.newId()
+            sharedItineraryService.publish(uid, tripId, build(id), nowMillis())
+            id
+        }.getOrNull()
+    }
+
+    suspend fun unpublishItinerary(id: String): Boolean {
+        val uid = authService.currentUid ?: return false
+        return runCatching { sharedItineraryService.unpublish(uid, id) }.isSuccess
+    }
+
+    /** Opens a pasted link/code: loads the shared itinerary and makes it viewable as a template. Null if not found. */
+    suspend fun openSharedItinerary(input: String): TripTemplate? {
+        val id = com.itinera.app.model.parseShareId(input) ?: return null
+        val shared = runCatching { sharedItineraryService.load(id) }.getOrNull() ?: return null
+        val template = shared.toTemplate()
+        importedTemplates[template.id] = template
+        return template
+    }
+
+    /** Report a shared itinerary (it is user-generated content). Reuses the abuse-report collection. */
+    suspend fun reportSharedItinerary(templateId: String, reason: String): Boolean {
+        val reporter = authService.currentUid ?: return false
+        return runCatching {
+            reportService.submitReport(
+                com.itinera.app.model.Report(
+                    id = "rep_${kotlin.random.Random.nextLong()}",
+                    reporterUid = reporter,
+                    reportedUid = "",
+                    tripId = templateId,
+                    reason = reason,
+                    details = "shared itinerary",
+                    createdAt = nowMillis(),
+                )
+            )
+        }.isSuccess
     }
 
     /**

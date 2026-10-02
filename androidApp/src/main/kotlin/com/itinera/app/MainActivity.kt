@@ -25,6 +25,7 @@ class MainActivity : ComponentActivity() {
         intent?.getStringExtra("tripId")?.takeIf { it.isNotBlank() }?.let {
             PendingDeepLink.tripId = it                       // ⬅ cold start from notification
         }
+        handleShareLink(intent)                               // cold start from an itinera://s/<id> link
 
         // Let shared code trigger the system permission dialog.
         NotificationPermission.requester = {
@@ -42,6 +43,15 @@ class MainActivity : ComponentActivity() {
         setIntent(intent)
         intent.getStringExtra("tripId")?.takeIf { it.isNotBlank() }?.let {
             PendingDeepLink.tripId = it
+        }
+        handleShareLink(intent)
+    }
+
+    /** itinera://s/<id> opens a shared itinerary. */
+    private fun handleShareLink(intent: Intent?) {
+        val uri = intent?.data ?: return
+        if (uri.scheme == "itinera" && uri.host == "s") {
+            uri.pathSegments.firstOrNull()?.takeIf { it.isNotBlank() }?.let { PendingDeepLink.sharedId = it }
         }
     }
 }

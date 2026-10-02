@@ -144,6 +144,7 @@ import com.itinera.app.ui.screens.TripExpensesScreen
 import com.itinera.app.ui.screens.TripMapScreen
 import com.itinera.app.ui.screens.TripsHomeScreen
 import com.itinera.app.ui.screens.TripTemplatesScreen
+import com.itinera.app.ui.screens.ShareItineraryScreen
 import com.itinera.app.ui.screens.TripTemplateDetailScreen
 import com.itinera.app.ui.screens.WeatherScreen
 import com.itinera.app.ui.screens.WorldClockScreen
@@ -386,6 +387,18 @@ private fun AppContent(
         if (undoRequest != null) { delay(6000); undoRequest = null }
     }
     var pillMessageTop by remember { mutableStateOf<String?>(null) }
+
+    // An itinera://s/<id> link (or a tap on a shared-itinerary link): open it once the user is signed in and loaded.
+    LaunchedEffect(PendingDeepLink.sharedId, repository.tripsSyncedOnce) {
+        val sharedId = PendingDeepLink.sharedId
+        if (sharedId != null && repository.tripsSyncedOnce) {
+            PendingDeepLink.sharedId = null
+            val opened = repository.openSharedItinerary(sharedId)
+            if (opened == null) pillMessage = s.shareLinkNotFound
+            else navigator.push(Screen.TripTemplateDetail(opened.id))
+        }
+    }
+
     LaunchedEffect(pillMessageTop) {
         if (pillMessageTop != null) { delay(2000); pillMessageTop = null }
     }
@@ -553,6 +566,7 @@ private fun AppContent(
                                     onLoadImageBytes = { url -> repository.loadBytes(url) },
                                     onDocuments = { navigator.push(Screen.TripDocuments(screen.tripId)) },
                                     onAskNera = { navigator.push(Screen.Nera(screen.tripId)) },
+                                    onShare = { navigator.push(Screen.ShareItinerary(screen.tripId)) },
                                     onAddLeg = { navigator.push(Screen.AddLeg(screen.tripId)) },
                                     onAddPlace = { navigator.push(Screen.AddPlace(screen.tripId)) },
                                     onEditActivity = { actId -> navigator.push(Screen.EditPlace(screen.tripId, actId)) },
@@ -858,6 +872,20 @@ private fun AppContent(
                                 )
                             }
 
+                            is Screen.ShareItinerary -> {
+                                val trip = repository.tripById(screen.tripId)
+                                if (trip == null) navigator.back()
+                                else ShareItineraryScreen(
+                                    trip = trip,
+                                    activities = repository.activitiesForTrip(screen.tripId),
+                                    onBack = { navigator.back() },
+                                    loadExistingLinkId = { repository.sharedLinkFor(screen.tripId)?.id },
+                                    onPublish = { build -> repository.publishItinerary(screen.tripId, build) },
+                                    onUnpublish = { id -> repository.unpublishItinerary(id) },
+                                    onMessage = { pillMessage = it },
+                                )
+                            }
+
                             Screen.TripTemplates -> {
                                 LaunchedEffect(Unit) { repository.loadTripTemplates() }
                                 TripTemplatesScreen(
@@ -865,13 +893,26 @@ private fun AppContent(
                                     isLoading = !repository.tripTemplatesSyncedOnce,
                                     onBack = { navigator.back() },
                                     onOpenTemplate = { navigator.push(Screen.TripTemplateDetail(it)) },
+                                    onOpenSharedLink = { pasted ->
+                                        scope.launch {
+                                            val opened = repository.openSharedItinerary(pasted)
+                                            if (opened == null) pillMessage = s.shareLinkNotFound
+                                            else navigator.push(Screen.TripTemplateDetail(opened.id))
+                                        }
+                                    },
                                 )
                             }
 
                             is Screen.TripTemplateDetail -> {
                                 val template = repository.tripTemplates.firstOrNull { it.id == screen.templateId }
+                                    ?: repository.importedTemplates[screen.templateId]
                                 if (template == null) navigator.back()
                                 else TripTemplateDetailScreen(
+                                    onReport = if (template.id.startsWith("shared_")) { reason ->
+                                        scope.launch {
+                                            pillMessage = if (repository.reportSharedItinerary(template.id, reason)) s.reportSubmitted else s.reportFailed
+                                        }
+                                    } else null,
                                     template = template,
                                     onBack = { navigator.back() },
                                     onUseTemplate = { startDate ->
@@ -1056,7 +1097,7 @@ private fun AppContent(
                                 tripId = screen.tripId,
                                 seed = screen.tripId?.let { repository.seedItineraryFor(it) },
                                 templateDraft = if (screen.tripId == null && screen.templateId != null && screen.templateStartDate != null) {
-                                    repository.tripTemplates.firstOrNull { it.id == screen.templateId }
+                                    (repository.tripTemplates.firstOrNull { it.id == screen.templateId } ?: repository.importedTemplates[screen.templateId])
                                         ?.toNeraItinerary(LocalDate.parse(screen.templateStartDate))
                                 } else null,
                                 travellerName = repository.profile.name,

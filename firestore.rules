@@ -24,6 +24,24 @@ service cloud.firestore {
       allow read, update, delete: if false;
     }
 
+    // ── Shared itineraries (share by link) — a sanitized copy of a trip: places and common factors only.
+    // Readable by anyone who has the unguessable id (the hosted preview page and the app both fetch by id), but the
+    // collection can never be listed. Whoever creates one must first have written their private record
+    // users/{uid}/sharedLinks/{id}; that record is also what authorizes deleting it, so no owner id is stored here.
+    match /sharedItineraries/{shareId} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if request.auth != null
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid)/sharedLinks/$(shareId))
+        && request.resource.data.id == shareId
+        && request.resource.data.keys().hasOnly(['id', 'title', 'description', 'countries', 'budgetTier', 'paceTag', 'coverImageUrl', 'days', 'legs', 'sharedAt'])
+        && request.resource.data.title is string && request.resource.data.title.size() <= 100
+        && request.resource.data.days is list && request.resource.data.days.size() <= 60;
+      allow update: if false;
+      allow delete: if request.auth != null
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid)/sharedLinks/$(shareId));
+    }
+
     // ── Trip templates (Discover) — curated, read-only content; authored out of
     // band (see tools/seed/), never written from the app.
     match /tripTemplates/{templateId} {

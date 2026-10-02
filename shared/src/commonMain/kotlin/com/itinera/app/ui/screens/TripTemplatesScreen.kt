@@ -8,9 +8,11 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Button
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,6 +37,7 @@ import androidx.compose.material.icons.filled.BeachAccess
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Grass
 import androidx.compose.material.icons.filled.LocationCity
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Schedule
@@ -46,8 +49,10 @@ import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -334,9 +339,12 @@ fun TripTemplatesScreen(
     isLoading: Boolean,
     onBack: () -> Unit,
     onOpenTemplate: (String) -> Unit,
+    /** Called with whatever the user pastes (a share link or bare code) to open a shared itinerary. */
+    onOpenSharedLink: (String) -> Unit = {},
 ) {
     val s = LocalStrings.current
 
+    var showOpenLink by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
     var showFilters by remember { mutableStateOf(false) }
 
@@ -363,7 +371,15 @@ fun TripTemplatesScreen(
     val sheetFilterCount = listOfNotNull(selectedContinent, selectedBudget, selectedPace).size
 
     Column(Modifier.fillMaxSize()) {
-        TopBar(s.discoverTemplates, onBack = onBack)
+        TopBar(
+            s.discoverTemplates,
+            onBack = onBack,
+            trailing = {
+                IconButton(onClick = { showOpenLink = true }) {
+                    Icon(Icons.Filled.Link, contentDescription = s.shareOpenLinkTitle, tint = MaterialTheme.colorScheme.primary)
+                }
+            },
+        )
 
         when {
             isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -512,6 +528,30 @@ fun TripTemplatesScreen(
                 }
             }
         }
+    }
+
+    if (showOpenLink) {
+        var pasted by remember { mutableStateOf("") }
+        AlertDialog(
+            onDismissRequest = { showOpenLink = false },
+            title = { Text(s.shareOpenLinkTitle) },
+            text = {
+                OutlinedTextField(
+                    value = pasted,
+                    onValueChange = { pasted = it },
+                    placeholder = { Text(s.shareOpenLinkHint) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = pasted.isNotBlank(),
+                    onClick = { showOpenLink = false; onOpenSharedLink(pasted) },
+                ) { Text(s.shareOpen) }
+            },
+            dismissButton = { TextButton(onClick = { showOpenLink = false }) { Text(s.cancel) } },
+        )
     }
 
     if (showFilters) {

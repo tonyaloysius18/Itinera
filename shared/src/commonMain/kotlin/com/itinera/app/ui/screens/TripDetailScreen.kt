@@ -114,6 +114,7 @@ import com.itinera.app.model.DocItem
 import com.itinera.app.model.Leg
 import com.itinera.app.model.Traveller
 import com.itinera.app.model.Trip
+import com.itinera.app.model.isOwnedBy
 import com.itinera.app.model.WalletTicket
 import com.itinera.app.model.label
 import com.itinera.app.parseHourMinute
@@ -172,6 +173,7 @@ fun TripDetailScreen(
     onDocuments: () -> Unit,
     onOpenDoc: (String) -> Unit = {},
     onAskNera: () -> Unit = {},
+    onShare: () -> Unit = {},
     onAddLeg: () -> Unit,
     onAddPlace: () -> Unit,
     onChecklist: () -> Unit,
@@ -385,6 +387,11 @@ fun TripDetailScreen(
                     Row {
                         IconButton(onClick = onAskNera) {
                             Icon(Icons.Filled.AutoAwesome, contentDescription = s.planWithNera, tint = MaterialTheme.colorScheme.primary)
+                        }
+                        if (trip.isOwnedBy(currentUid)) {
+                            IconButton(onClick = onShare) {
+                                Icon(Icons.Filled.Share, contentDescription = s.shareItinerary, tint = MaterialTheme.colorScheme.primary)
+                            }
                         }
                         IconButton(onClick = onTravellers) {
                             Icon(Icons.Filled.People, contentDescription = s.travellers, tint = MaterialTheme.colorScheme.primary)

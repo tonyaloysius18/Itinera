@@ -80,6 +80,9 @@ sealed interface Screen {
 
     data class TripMap(val tripId: String) : Screen
 
+    /** Preview, sanitize and publish a trip as a shareable link. */
+    data class ShareItinerary(val tripId: String) : Screen
+
     data object ChangePassword : Screen
 
     data object TripTemplates : Screen
