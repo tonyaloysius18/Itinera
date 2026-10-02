@@ -55,6 +55,7 @@ import com.itinera.app.data.rememberFileSharer
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.Activity
 import com.itinera.app.model.BudgetTier
+import com.itinera.app.model.CommunityRules
 import com.itinera.app.model.PaceTag
 import com.itinera.app.model.SharedItinerary
 import com.itinera.app.model.Trip
@@ -227,6 +228,15 @@ fun ShareItineraryScreen(
                         if (busy) return@Button
                         if (included == 0) { onMessage(s.shareNeedsStops); return@Button }
                         if (listInCommunity && included < 4) { onMessage(s.shareNeedsMoreStops); return@Button }
+                        if (listInCommunity) {
+                            // Same text rules the server applies, so the person hears about a problem now rather than
+                            // after the share page says "Not approved".
+                            if (!CommunityRules.isAcceptable(title)) { onMessage(s.shareInvalidTitle); return@Button }
+                            if (!CommunityRules.isAcceptable(description)) { onMessage(s.shareInvalidDescription); return@Button }
+                            if (activities.any { it.id !in excluded && !(CommunityRules.isAcceptable(it.title) && CommunityRules.isAcceptable(it.location)) }) {
+                                onMessage(s.shareInvalidPlace); return@Button
+                            }
+                        }
                         scope.launch {
                             busy = true
                             val id = onPublish { newId ->

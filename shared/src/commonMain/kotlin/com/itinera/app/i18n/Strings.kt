@@ -891,6 +891,9 @@ class Strings {
     var shareStatusListed: String = "Listed in Community"
     var shareStatusRejected: String = "Not approved for Community"
     var shareNeedsMoreStops: String = "Add at least 4 places to list this in Community."
+    var shareInvalidTitle: String = "Invalid title. Remove inappropriate words, links or contact details."
+    var shareInvalidDescription: String = "Invalid description. Remove inappropriate words, links or contact details."
+    var shareInvalidPlace: String = "A place name isn't allowed in Community. Remove it or change the name."
     var blockAuthor: String = "Block this author"
     var authorBlocked: String = "Author blocked"
     var neraTemplateIntro: String = "Here's the %2\$d-day plan for %1\$s. Tell me how many days you have, or what to change, and I'll trim it to the best highlights."
@@ -1662,6 +1665,9 @@ class Strings {
         c.shareStatusListed = this.shareStatusListed
         c.shareStatusRejected = this.shareStatusRejected
         c.shareNeedsMoreStops = this.shareNeedsMoreStops
+        c.shareInvalidTitle = this.shareInvalidTitle
+        c.shareInvalidDescription = this.shareInvalidDescription
+        c.shareInvalidPlace = this.shareInvalidPlace
         c.blockAuthor = this.blockAuthor
         c.authorBlocked = this.authorBlocked
         c.neraTemplateIntro = this.neraTemplateIntro
