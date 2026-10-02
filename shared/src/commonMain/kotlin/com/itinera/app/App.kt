@@ -144,6 +144,7 @@ import com.itinera.app.ui.screens.TripExpensesScreen
 import com.itinera.app.ui.screens.TripMapScreen
 import com.itinera.app.ui.screens.TripsHomeScreen
 import com.itinera.app.ui.screens.TripTemplatesScreen
+import com.itinera.app.ui.screens.CommunityFeedScreen
 import com.itinera.app.ui.screens.ShareItineraryScreen
 import com.itinera.app.ui.screens.TripTemplateDetailScreen
 import com.itinera.app.ui.screens.WeatherScreen
@@ -888,8 +889,18 @@ private fun AppContent(
                                     onUnpublish = { id -> repository.unpublishItinerary(id) },
                                     onMessage = { pillMessage = it },
                                     homeCity = repository.profile.city,
+                                    authorUid = repository.authService.currentUid ?: "",
+                                    loadStatus = { id -> repository.sharedItineraryStatus(id) },
                                 )
                             }
+
+                            Screen.Community -> CommunityFeedScreen(
+                                items = repository.communityItems,
+                                loading = repository.communityLoading,
+                                onLoad = { popular -> scope.launch { repository.loadCommunity(popular) } },
+                                onBack = { navigator.back() },
+                                onOpen = { navigator.push(Screen.TripTemplateDetail(it)) },
+                            )
 
                             Screen.TripTemplates -> {
                                 LaunchedEffect(Unit) { repository.loadTripTemplates() }
@@ -898,6 +909,7 @@ private fun AppContent(
                                     isLoading = !repository.tripTemplatesSyncedOnce,
                                     onBack = { navigator.back() },
                                     onOpenTemplate = { navigator.push(Screen.TripTemplateDetail(it)) },
+                                    onOpenCommunity = { navigator.push(Screen.Community) },
                                     onOpenSharedLink = { pasted ->
                                         scope.launch {
                                             val opened = repository.openSharedItinerary(pasted)
@@ -913,6 +925,13 @@ private fun AppContent(
                                     ?: repository.importedTemplates[screen.templateId]
                                 if (template == null) navigator.back()
                                 else TripTemplateDetailScreen(
+                                    onBlockAuthor = if (template.authorUid.isNotBlank() && template.authorUid != repository.authService.currentUid) {
+                                        {
+                                            repository.blockAuthor(template.authorUid)
+                                            pillMessage = s.authorBlocked
+                                            navigator.back()
+                                        }
+                                    } else null,
                                     onReport = if (template.id.startsWith("shared_")) { reason ->
                                         scope.launch {
                                             pillMessage = if (repository.reportSharedItinerary(template.id, reason)) s.reportSubmitted else s.reportFailed
@@ -922,6 +941,7 @@ private fun AppContent(
                                     onBack = { navigator.back() },
                                     onUseTemplate = { startDate ->
                                         val id = repository.addTripFromTemplate(template, startDate)
+                                        if (template.id.startsWith("shared_")) scope.launch { repository.recordSharedCopy(template.id) }
                                         navigator.replace(Screen.TripDetail(id))
                                     },
                                     onEditWithNera = { startDate ->
@@ -1122,6 +1142,7 @@ private fun AppContent(
                                         repository.createTripFromItinerary(draft)
                                     }
                                     scope.launch { repository.neraService.tripCreated(id) }   // uses up one free trip (idempotent per trip)
+                                    screen.templateId?.takeIf { it.startsWith("shared_") }?.let { sid -> scope.launch { repository.recordSharedCopy(sid) } }
                                     if (pending.isNotEmpty()) scope.launch { repository.neraChatService.appendMessages(id, pending) }
                                     if (existingId == null) scope.launch {
                                         val trip = repository.tripById(id)

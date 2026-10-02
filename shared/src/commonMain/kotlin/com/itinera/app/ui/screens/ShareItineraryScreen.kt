@@ -33,6 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -81,6 +82,10 @@ fun ShareItineraryScreen(
     onMessage: (String) -> Unit,
     /** The owner's home city (profile), so journeys to and from home are left out of what is shared. */
     homeCity: String = "",
+    /** The signed-in user's id, attached only when listing in Community so people can report or block the author. */
+    authorUid: String = "",
+    /** Review status and copy count of an existing share, so the owner can see if it has been listed. */
+    loadStatus: suspend (id: String) -> SharedItinerary? = { null },
 ) {
     val s = LocalStrings.current
     val scope = rememberCoroutineScope()
@@ -95,9 +100,12 @@ fun ShareItineraryScreen(
     var shareId by remember { mutableStateOf<String?>(null) }
     var loaded by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
+    var listInCommunity by remember { mutableStateOf(false) }
+    var existing by remember { mutableStateOf<SharedItinerary?>(null) }
 
     LaunchedEffect(Unit) {
         shareId = runCatching { loadExistingLinkId() }.getOrNull()
+        shareId?.let { existing = runCatching { loadStatus(it) }.getOrNull() }
         loaded = true
     }
 
@@ -127,6 +135,14 @@ fun ShareItineraryScreen(
                 Surface(shape = RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f)) {
                     Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text(s.shareLinkReady, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                        existing?.takeIf { it.listRequested }?.let { e ->
+                            val label = when {
+                                e.feed -> "${s.shareStatusListed} · ${s.usedByN.replace("%d", e.copyCount.toString())}"
+                                e.status == "rejected" || e.status == "taken_down" -> s.shareStatusRejected
+                                else -> s.shareStatusPending
+                            }
+                            Text(label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                        }
                         Text(link, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary, maxLines = 2, overflow = TextOverflow.Ellipsis)
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             OutlinedButton(
@@ -198,16 +214,25 @@ fun ShareItineraryScreen(
                     }
                 }
                 Spacer(Modifier.height(4.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(s.listInCommunity, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Medium)
+                        Text(s.listInCommunityHint, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f))
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    Switch(checked = listInCommunity, onCheckedChange = { listInCommunity = it })
+                }
                 Button(
                     onClick = {
                         if (busy) return@Button
                         if (included == 0) { onMessage(s.shareNeedsStops); return@Button }
+                        if (listInCommunity && included < 4) { onMessage(s.shareNeedsMoreStops); return@Button }
                         scope.launch {
                             busy = true
                             val id = onPublish { newId ->
-                                buildSharedItinerary(newId, trip, activities, title, description, budget, pace, excluded, 0L, homeCity)
+                                buildSharedItinerary(newId, trip, activities, title, description, budget, pace, excluded, 0L, homeCity, listInCommunity, authorUid)
                             }
-                            if (id != null) shareId = id else onMessage(s.shareFailed)
+                            if (id != null) { shareId = id; existing = runCatching { loadStatus(id) }.getOrNull() } else onMessage(s.shareFailed)
                             busy = false
                         }
                     },

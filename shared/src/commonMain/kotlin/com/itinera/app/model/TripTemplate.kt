@@ -99,6 +99,8 @@ data class TripTemplate(
     val legs: List<TemplateLeg> = emptyList(),
     val published: Boolean = true,             // false = hidden from Discover while still being authored
     val sortOrder: Int = 0,
+    val usedCount: Int = 0,                    // community itineraries only: how many travellers copied it
+    val authorUid: String = "",                // community itineraries only: lets people report/block the author
 )
 
 /**

@@ -80,6 +80,9 @@ sealed interface Screen {
 
     data class TripMap(val tripId: String) : Screen
 
+    /** Community feed of shared itineraries (approved by a moderator). */
+    data object Community : Screen
+
     /** Preview, sanitize and publish a trip as a shareable link. */
     data class ShareItinerary(val tripId: String) : Screen
 

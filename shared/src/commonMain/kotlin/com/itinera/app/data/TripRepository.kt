@@ -74,6 +74,11 @@ class TripRepository {
     val sharedItineraryService = SharedItineraryService()
     /** Shared itineraries opened by link this session, keyed by their template id ("shared_<id>"), so the template detail screen can show them. */
     val importedTemplates = androidx.compose.runtime.mutableStateMapOf<String, TripTemplate>()
+
+    /** Approved community itineraries shown in the Community feed (also registered in [importedTemplates] so they open like any template). */
+    val communityItems = mutableStateListOf<TripTemplate>()
+    var communityLoading by mutableStateOf(false)
+        private set
     val tripTemplates = mutableStateListOf<TripTemplate>()
     var tripTemplatesSyncedOnce by mutableStateOf(false)
         private set
@@ -296,6 +301,37 @@ class TripRepository {
     suspend fun unpublishItinerary(id: String): Boolean {
         val uid = authService.currentUid ?: return false
         return runCatching { sharedItineraryService.unpublish(uid, id) }.isSuccess
+    }
+
+    /** Loads the Community feed, most-copied or newest first, hiding authors the user has blocked. */
+    suspend fun loadCommunity(popular: Boolean) {
+        communityLoading = true
+        val items = runCatching { sharedItineraryService.feed(popular) }.getOrDefault(emptyList())
+            .filter { !isBlocked(it.authorUid) }
+        communityItems.clear()
+        items.forEach { shared ->
+            val template = shared.toTemplate()
+            importedTemplates[template.id] = template
+            communityItems.add(template)
+        }
+        communityLoading = false
+    }
+
+    /** Counts this person's copy of a shared itinerary (once per person). Best effort. */
+    suspend fun recordSharedCopy(templateId: String) {
+        val uid = authService.currentUid ?: return
+        runCatching { sharedItineraryService.recordCopy(uid, templateId.removePrefix("shared_"), nowMillis()) }
+    }
+
+    /** Current review status and copy count of one of the user's own shared itineraries. */
+    suspend fun sharedItineraryStatus(id: String): com.itinera.app.model.SharedItinerary? =
+        runCatching { sharedItineraryService.load(id) }.getOrNull()
+
+    /** Blocks a community author and removes their itineraries from the feed on screen. */
+    fun blockAuthor(authorUid: String) {
+        if (authorUid.isBlank()) return
+        blockUser(authorUid)
+        communityItems.removeAll { it.authorUid == authorUid }
     }
 
     /** Opens a pasted link/code: loads the shared itinerary and makes it viewable as a template. Null if not found. */

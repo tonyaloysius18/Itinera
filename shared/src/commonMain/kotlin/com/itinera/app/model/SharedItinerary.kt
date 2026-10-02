@@ -24,6 +24,19 @@ data class SharedItinerary(
     val days: List<SharedDay> = emptyList(),
     val legs: List<SharedLeg> = emptyList(),
     val sharedAt: Long = 0L,
+    // ── Community listing (opt-in) ──
+    /** The owner asked for this to appear in the public Community feed. Link-only shares leave this false. */
+    val listRequested: Boolean = false,
+    /** Only set when listing, so people can report or block the author. No name or photo is ever stored. */
+    val authorUid: String = "",
+    // Moderator-controlled; clients can only ever create these at their defaults (see firestore.rules).
+    /** "" = not reviewed yet, "approved", "rejected", "taken_down". */
+    val status: String = "",
+    /** True only while approved and listed; the feed queries on it. */
+    val feed: Boolean = false,
+    val approvedAt: Long = 0L,
+    /** How many different travellers copied this into their trips (one per person; see firestore.rules). */
+    val copyCount: Int = 0,
 )
 
 @Serializable
@@ -104,6 +117,8 @@ fun buildSharedItinerary(
     excluded: Set<String>,
     sharedAt: Long,
     homeCity: String = "",
+    listRequested: Boolean = false,
+    authorUid: String = "",
 ): SharedItinerary {
     val chosen = activities.filter { it.id !in excluded }
     val legs = tripLegsWithoutHome(trip, homeCity)
@@ -160,6 +175,8 @@ fun buildSharedItinerary(
         days = days,
         legs = legsByDay.take(30),
         sharedAt = sharedAt,
+        listRequested = listRequested,
+        authorUid = if (listRequested) authorUid else "",
     )
 }
 
@@ -200,6 +217,8 @@ fun SharedItinerary.toTemplate(): TripTemplate {
         },
         legs = legs.map { TemplateLeg(it.dayNumber, it.fromCity, it.toCity, it.transport) },
         published = true,
+        usedCount = copyCount,
+        authorUid = authorUid,
     )
 }
 

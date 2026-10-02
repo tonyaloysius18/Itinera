@@ -879,6 +879,20 @@ class Strings {
     var shareLinkNotFound: String = "That link wasn't found"
     var sharedBadge: String = "Shared by a traveller"
     var reportItinerary: String = "Report this itinerary"
+    var communityTab: String = "Community"
+    var curatedTab: String = "Curated"
+    var communityPopular: String = "Popular"
+    var communityNewest: String = "Newest"
+    var communityEmpty: String = "No community itineraries yet. Be the first to share one!"
+    var usedByN: String = "Used by %d"
+    var listInCommunity: String = "List in Community"
+    var listInCommunityHint: String = "After a quick review it appears under Discover > Community. Your name and photo are never shown, but people can report or block you as the author."
+    var shareStatusPending: String = "Waiting for review"
+    var shareStatusListed: String = "Listed in Community"
+    var shareStatusRejected: String = "Not approved for Community"
+    var shareNeedsMoreStops: String = "Add at least 4 places to list this in Community."
+    var blockAuthor: String = "Block this author"
+    var authorBlocked: String = "Author blocked"
     var neraTemplateIntro: String = "Here's the %2\$d-day plan for %1\$s. Tell me how many days you have, or what to change, and I'll trim it to the best highlights."
     var neraMakeItDays: String = "Make it %d days"
 
@@ -1636,6 +1650,20 @@ class Strings {
         c.shareLinkNotFound = this.shareLinkNotFound
         c.sharedBadge = this.sharedBadge
         c.reportItinerary = this.reportItinerary
+        c.communityTab = this.communityTab
+        c.curatedTab = this.curatedTab
+        c.communityPopular = this.communityPopular
+        c.communityNewest = this.communityNewest
+        c.communityEmpty = this.communityEmpty
+        c.usedByN = this.usedByN
+        c.listInCommunity = this.listInCommunity
+        c.listInCommunityHint = this.listInCommunityHint
+        c.shareStatusPending = this.shareStatusPending
+        c.shareStatusListed = this.shareStatusListed
+        c.shareStatusRejected = this.shareStatusRejected
+        c.shareNeedsMoreStops = this.shareNeedsMoreStops
+        c.blockAuthor = this.blockAuthor
+        c.authorBlocked = this.authorBlocked
         c.neraTemplateIntro = this.neraTemplateIntro
         c.neraMakeItDays = this.neraMakeItDays
 

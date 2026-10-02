@@ -30,16 +30,37 @@ service cloud.firestore {
     // users/{uid}/sharedLinks/{id}; that record is also what authorizes deleting it, so no owner id is stored here.
     match /sharedItineraries/{shareId} {
       allow get: if true;
-      allow list: if false;
+      // The Community feed: only moderator-approved items (feed == true), signed-in users, and always with a page limit.
+      allow list: if request.auth != null && resource.data.feed == true && request.query.limit <= 50;
+      // Clients may only create an unreviewed, uncounted copy: status/feed/approvedAt/copyCount are moderator-controlled,
+      // and an author id is only accepted (and only equal to the caller) when the owner asked to be listed.
       allow create: if request.auth != null
         && exists(/databases/$(database)/documents/users/$(request.auth.uid)/sharedLinks/$(shareId))
         && request.resource.data.id == shareId
-        && request.resource.data.keys().hasOnly(['id', 'title', 'description', 'countries', 'budgetTier', 'paceTag', 'coverImageUrl', 'days', 'legs', 'sharedAt'])
+        && request.resource.data.keys().hasOnly(['id', 'title', 'description', 'countries', 'budgetTier', 'paceTag', 'coverImageUrl', 'days', 'legs', 'sharedAt', 'listRequested', 'authorUid', 'status', 'feed', 'approvedAt', 'copyCount'])
         && request.resource.data.title is string && request.resource.data.title.size() <= 100
-        && request.resource.data.days is list && request.resource.data.days.size() <= 60;
-      allow update: if false;
+        && request.resource.data.days is list && request.resource.data.days.size() <= 60
+        && request.resource.data.get('status', '') == ''
+        && request.resource.data.get('feed', false) == false
+        && request.resource.data.get('approvedAt', 0) == 0
+        && request.resource.data.get('copyCount', 0) == 0
+        && (request.resource.data.get('authorUid', '') == ''
+            || (request.resource.data.get('listRequested', false) == true && request.resource.data.authorUid == request.auth.uid));
+      // The only client update: +1 to copyCount, once per person. The per-person marker (copies/{uid}) must be created in
+      // the same batch and must not already exist.
+      allow update: if request.auth != null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['copyCount'])
+        && request.resource.data.copyCount == resource.data.copyCount + 1
+        && !exists(/databases/$(database)/documents/sharedItineraries/$(shareId)/copies/$(request.auth.uid))
+        && existsAfter(/databases/$(database)/documents/sharedItineraries/$(shareId)/copies/$(request.auth.uid));
       allow delete: if request.auth != null
         && exists(/databases/$(database)/documents/users/$(request.auth.uid)/sharedLinks/$(shareId));
+
+      match /copies/{uid} {
+        allow create: if request.auth != null && request.auth.uid == uid;
+        allow get: if request.auth != null && request.auth.uid == uid;
+        allow list, update, delete: if false;
+      }
     }
 
     // ── Trip templates (Discover) — curated, read-only content; authored out of

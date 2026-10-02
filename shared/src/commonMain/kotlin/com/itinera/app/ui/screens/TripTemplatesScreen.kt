@@ -214,7 +214,7 @@ private fun DiscoverSearchField(
 }
 
 @Composable
-private fun tonalChipColors() = FilterChipDefaults.filterChipColors(
+internal fun tonalChipColors() = FilterChipDefaults.filterChipColors(
     containerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
     labelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
     iconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
@@ -341,6 +341,7 @@ fun TripTemplatesScreen(
     onOpenTemplate: (String) -> Unit,
     /** Called with whatever the user pastes (a share link or bare code) to open a shared itinerary. */
     onOpenSharedLink: (String) -> Unit = {},
+    onOpenCommunity: () -> Unit = {},
 ) {
     val s = LocalStrings.current
 
@@ -380,6 +381,9 @@ fun TripTemplatesScreen(
                 }
             },
         )
+
+        FeedSwitch(communitySelected = false, onCurated = {}, onCommunity = onOpenCommunity)
+        Spacer(Modifier.height(10.dp))
 
         when {
             isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -570,7 +574,7 @@ fun TripTemplatesScreen(
 
 /** Image-led card: title sits on the photo, so the card is one tall visual unit instead of image + text block. */
 @Composable
-private fun TemplateCard(
+internal fun TemplateCard(
     template: TripTemplate,
     daysWord: String,
     onClick: () -> Unit,
@@ -607,6 +611,21 @@ private fun TemplateCard(
             )
         )
 
+        if (template.usedCount > 0) {
+            Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
+                modifier = Modifier.align(Alignment.TopStart).padding(12.dp),
+            ) {
+                Text(
+                    LocalStrings.current.usedByN.replace("%d", template.usedCount.toString()),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                )
+            }
+        }
         Surface(
             shape = CircleShape,
             color = Color.Black.copy(alpha = 0.4f),
@@ -671,5 +690,16 @@ private fun TemplateCard(
                 }
             }
         }
+    }
+}
+
+/** The "Curated | Community" switch shared by Discover and the Community feed. */
+@Composable
+internal fun FeedSwitch(communitySelected: Boolean, onCurated: () -> Unit, onCommunity: () -> Unit) {
+    val s = LocalStrings.current
+    val colors = tonalChipColors()
+    Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FilterChip(selected = !communitySelected, onClick = onCurated, label = { Text(s.curatedTab) }, colors = colors, border = null)
+        FilterChip(selected = communitySelected, onClick = onCommunity, label = { Text(s.communityTab) }, colors = colors, border = null)
     }
 }

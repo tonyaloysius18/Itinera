@@ -3,7 +3,10 @@ package com.itinera.app.data
 import com.itinera.app.model.SharedItinerary
 import com.itinera.app.model.SharedLinkRecord
 import dev.gitlive.firebase.Firebase
+import dev.gitlive.firebase.firestore.Direction
+import dev.gitlive.firebase.firestore.FieldValue
 import dev.gitlive.firebase.firestore.firestore
+import kotlinx.serialization.Serializable
 
 /** Where a shared itinerary's preview page lives (Firebase Hosting serves one page for every path under s). */
 const val SHARE_BASE_URL = "https://itinera-ae020.web.app/s/"
@@ -42,6 +45,31 @@ class SharedItineraryService {
         mineRef(uid).document(id).delete()
     }
 
+    /** The community feed: approved, listed itineraries, most-copied or newest first. One page (no cursor yet). */
+    suspend fun feed(popular: Boolean, limit: Int = 50): List<SharedItinerary> =
+        publicRef().where { "feed" equalTo true }
+            .orderBy(if (popular) "copyCount" else "approvedAt", Direction.DESCENDING)
+            .limit(limit)
+            .get().documents.mapNotNull { runCatching { it.data(SharedItinerary.serializer()) }.getOrNull() }
+
+    /**
+     * Counts one copy per traveller. The marker doc and the +1 go in one batch, and the security rules only accept the
+     * increment when that marker is created in the same batch, so repeated taps by one person can't inflate the count.
+     * Quietly does nothing if this person already counted.
+     */
+    suspend fun recordCopy(uid: String, id: String, nowMillis: Long) {
+        val doc = publicRef().document(id)
+        val marker = doc.collection("copies").document(uid)
+        if (marker.get().exists) return
+        val batch = db.batch()
+        batch.set(marker, CopyMarker(at = nowMillis))
+        batch.update(doc, "copyCount" to FieldValue.increment(1))
+        batch.commit()
+    }
+
     suspend fun linkFor(uid: String, tripId: String): SharedLinkRecord? =
         mineRef(uid).where { "tripId" equalTo tripId }.get().documents.firstOrNull()?.data(SharedLinkRecord.serializer())
 }
+
+@Serializable
+private data class CopyMarker(val at: Long = 0L)

@@ -126,6 +126,8 @@ fun TripTemplateDetailScreen(
     onEditWithNera: (LocalDate) -> Unit,
     /** Set for user-shared itineraries only (user-generated content must be reportable): called with the chosen reason. */
     onReport: ((reason: String) -> Unit)? = null,
+    /** Set for community itineraries by someone else: lets the user block that author. */
+    onBlockAuthor: (() -> Unit)? = null,
 ) {
     val s = LocalStrings.current
     var showDatePicker by remember { mutableStateOf(false) }
@@ -321,6 +323,9 @@ fun TripTemplateDetailScreen(
                 Column {
                     listOf("spam" to s.reportReasonSpam, "inappropriate" to s.reportReasonInappropriate, "other" to s.reportReasonOther).forEach { (code, label) ->
                         TextButton(onClick = { showReport = false; onReport(code) }, modifier = Modifier.fillMaxWidth()) { Text(label) }
+                    }
+                    if (onBlockAuthor != null) {
+                        TextButton(onClick = { showReport = false; onBlockAuthor() }, modifier = Modifier.fillMaxWidth()) { Text(s.blockAuthor) }
                     }
                 }
             },
