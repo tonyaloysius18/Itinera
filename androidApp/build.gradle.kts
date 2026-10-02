@@ -36,7 +36,7 @@ android {
         applicationId = "com.itinera.app"
         minSdk = 24
         targetSdk = 36
-        versionCode = 28
+        versionCode = 40
         versionName = "1.1.1"
     }
     packaging {
