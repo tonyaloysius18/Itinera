@@ -92,12 +92,14 @@ struct iOSApp: App {
         WindowGroup {
             ContentView()
                 .onOpenURL { url in
-                    // itinera://s/<id> opens a shared itinerary; everything else is the Google sign-in callback.
-                    if url.scheme == "itinera", url.host == "s" {
-                        let id = url.pathComponents.filter { $0 != "/" }.first
-                        if let id = id, !id.isEmpty {
-                            PendingDeepLink.shared.sharedId = id
-                        }
+                    // A shared itinerary arrives two ways: itinera://s/<id> (the page's "Open in Itinera" button) and,
+                    // once Universal Links are verified, https://itinera-ae020.web.app/s/<id> tapped from Messages,
+                    // WhatsApp, etc. Everything else is the Google sign-in callback.
+                    let parts = url.pathComponents.filter { $0 != "/" }
+                    if url.scheme == "itinera", url.host == "s", let id = parts.first, !id.isEmpty {
+                        PendingDeepLink.shared.sharedId = id
+                    } else if url.scheme == "https", url.host == "itinera-ae020.web.app", parts.count >= 2, parts[0] == "s", !parts[1].isEmpty {
+                        PendingDeepLink.shared.sharedId = parts[1]
                     } else {
                         GIDSignIn.sharedInstance.handle(url)
                     }

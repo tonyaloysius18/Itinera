@@ -1,0 +1,23 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": [
+          "YJ586F8Y45.dev.ynotlabs.itinera"
+        ],
+        "components": [
+          {
+            "/": "/s/*",
+            "comment": "Shared itineraries"
+          }
+        ]
+      },
+      {
+        "appID": "YJ586F8Y45.dev.ynotlabs.itinera",
+        "paths": [
+          "/s/*"
+        ]
+      }
+    ]
+  }
+}

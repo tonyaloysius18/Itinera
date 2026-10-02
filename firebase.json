@@ -12,7 +12,7 @@
     "public": "hosting",
     "ignore": [
       "firebase.json",
-      "**/.*"
+      "**/.DS_Store"
     ],
     "headers": [
       {
@@ -21,6 +21,32 @@
           {
             "key": "Cache-Control",
             "value": "public, max-age=604800, immutable"
+          }
+        ]
+      },
+      {
+        "source": "/.well-known/apple-app-site-association",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/.well-known/assetlinks.json",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
           }
         ]
       }

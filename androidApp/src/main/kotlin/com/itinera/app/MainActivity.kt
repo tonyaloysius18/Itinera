@@ -47,12 +47,16 @@ class MainActivity : ComponentActivity() {
         handleShareLink(intent)
     }
 
-    /** itinera://s/<id> opens a shared itinerary. */
+    /** itinera://s/<id> and https://itinera-ae020.web.app/s/<id> open a shared itinerary. */
     private fun handleShareLink(intent: Intent?) {
         val uri = intent?.data ?: return
-        if (uri.scheme == "itinera" && uri.host == "s") {
-            uri.pathSegments.firstOrNull()?.takeIf { it.isNotBlank() }?.let { PendingDeepLink.sharedId = it }
+        val segments = uri.pathSegments
+        val id = when {
+            uri.scheme == "itinera" && uri.host == "s" -> segments.firstOrNull()
+            uri.scheme == "https" && uri.host == "itinera-ae020.web.app" && segments.firstOrNull() == "s" -> segments.getOrNull(1)
+            else -> null
         }
+        id?.takeIf { it.isNotBlank() }?.let { PendingDeepLink.sharedId = it }
     }
 }
 
