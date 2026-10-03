@@ -948,13 +948,14 @@ class TripRepository {
         if (doc != null) ioScope.launch { runCatching { docService.deleteDocument(doc.tripId, docId) } }
     }
 
-    fun updateDocument(docId: String, title: String, category: String, legId: String, segmentIndex: Int = -1, travellerId: String = "") {
+    fun updateDocument(docId: String, title: String, category: String, legId: String, segmentIndex: Int = -1, travellerId: String = "", activityId: String = "") {
         val i = documents.indexOfFirst { it.id == docId }
         if (i < 0) return
         val updated = documents[i].copy(
             title = title.trim(),
             category = category,
             legId = legId,
+            activityId = activityId,
             memberIds = memberIdsForTrip(documents[i].tripId),
             segmentIndex = segmentIndex,
             travellerId = travellerId,
@@ -974,7 +975,8 @@ class TripRepository {
         file: PickedFile,
         legId: String = "",
         segmentIndex: Int = -1,
-        travellerId: String = ""
+        travellerId: String = "",
+        activityId: String = "",
     ): Boolean {
         return try {
             val url = uploadFileToStorage(uploadClient, file.bytes, file.fileName, file.mimeType)
@@ -1004,6 +1006,7 @@ class TripRepository {
                 title = title,
                 category = category,
                 legId = legId,
+                activityId = activityId,
                 fileName = file.fileName,
                 fileUrl = url,
                 mimeType = file.mimeType,

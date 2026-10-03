@@ -233,6 +233,7 @@ fun TripDetailScreen(
     // ── ticket wallet viewer ──
     var walletTickets by remember { mutableStateOf<List<WalletTicket>>(emptyList()) }
     var walletLeg by remember { mutableStateOf<Leg?>(null) }
+    var walletAct by remember { mutableStateOf<Activity?>(null) }
     var barcodeLoading by remember { mutableStateOf(false) }
     val legTicketCache = remember { mutableStateMapOf<String, List<WalletTicket>>() }
     val myTravellerId = remember(currentUid, travellers, trip.ownerId) {
@@ -241,29 +242,30 @@ fun TripDetailScreen(
             ?: ""
     }
 
-    fun openLegTickets(leg: Leg, legDocs: List<DocItem>) {
-        if (legDocs.isEmpty()) return
+    /**
+     * Pulls every barcode out of [docs] and opens the wallet via [show]; falls back to
+     * opening the first file when none has a code. [routeTime] gives a doc's own
+     * route/time override ("" to "" = use the header's).
+     */
+    fun openTickets(
+        ownerId: String,
+        docs: List<DocItem>,
+        routeTime: (DocItem) -> Pair<String, String>,
+        show: (List<WalletTicket>) -> Unit,
+    ) {
+        if (docs.isEmpty()) return
         scope.launch {
             barcodeLoading = true
             try {
                 val cacheKey = buildString {
-                    append(leg.id)
-                    legDocs.forEach { append('|').append(it.id).append(':').append(it.travellerId).append(':').append(it.fileUrl) }
+                    append(ownerId)
+                    docs.forEach { append('|').append(it.id).append(':').append(it.travellerId).append(':').append(it.fileUrl) }
                 }
                 val tickets = legTicketCache.getOrPut(cacheKey) {
-                    legDocs.flatMap { d ->
+                    docs.flatMap { d ->
                         val bytes = onLoadImageBytes?.invoke(d.fileUrl)
                         val codes = bytes?.let { extractAllBarcodes(it, d.mimeType) }.orEmpty()
-
-                        // derive this doc's segment route/times if it's bound to one   // ⬅ ADD
-                        val cities = listOf(leg.fromCity) + leg.stops.map { it.city } + listOf(leg.toCity)
-                        val depTimes = listOf(leg.timeLabel) + leg.stops.map { it.departureTime }
-                        val arrTimes = leg.stops.map { it.arrivalTime } + listOf(leg.endTimeLabel)
-                        val si = d.segmentIndex
-                        val (route, time) = if (si in 0..leg.stops.size) {
-                            "${cities[si]} → ${cities[si + 1]}" to
-                                    listOf(depTimes[si], arrTimes[si]).filter { it.isNotBlank() }.joinToString(" - ")
-                        } else "" to ""
+                        val (route, time) = routeTime(d)
 
                         // A document with several codes cannot safely use one document-level
                         // traveller assignment for every code. Keep those codes group-only until
@@ -288,15 +290,41 @@ fun TripDetailScreen(
                     }
                 }
                 if (tickets.isNotEmpty()) {
-                    walletTickets = tickets; walletLeg = leg
+                    show(tickets)
                 } else {
-                    onOpenDoc(legDocs.first().id)   // no codes anywhere → open the file
+                    onOpenDoc(docs.first().id)   // no codes anywhere → open the file
                 }
             } finally {
                 barcodeLoading = false
             }
         }
     }
+
+    fun openLegTickets(leg: Leg, legDocs: List<DocItem>) =
+        openTickets(
+            ownerId = leg.id,
+            docs = legDocs,
+            routeTime = { d ->
+                // derive this doc's segment route/times if it's bound to one
+                val cities = listOf(leg.fromCity) + leg.stops.map { it.city } + listOf(leg.toCity)
+                val depTimes = listOf(leg.timeLabel) + leg.stops.map { it.departureTime }
+                val arrTimes = leg.stops.map { it.arrivalTime } + listOf(leg.endTimeLabel)
+                val si = d.segmentIndex
+                if (si in 0..leg.stops.size) {
+                    "${cities[si]} → ${cities[si + 1]}" to
+                            listOf(depTimes[si], arrTimes[si]).filter { it.isNotBlank() }.joinToString(" - ")
+                } else "" to ""
+            },
+            show = { walletTickets = it; walletAct = null; walletLeg = leg },
+        )
+
+    fun openActivityTickets(act: Activity, actDocs: List<DocItem>) =
+        openTickets(
+            ownerId = act.id,
+            docs = actDocs,
+            routeTime = { "" to "" },
+            show = { walletTickets = it; walletLeg = null; walletAct = act },
+        )
 
     // Postcard unlocks when every LEG is travelled (places/activities don't gate it).
     val allComplete = trip.legs.isNotEmpty() && trip.legs.all { it.completed }
@@ -732,6 +760,7 @@ fun TripDetailScreen(
                                             is DayEntry.ActEntry -> {
                                                 val act = entry.act
                                                 var showMenu by remember { mutableStateOf(false) }
+                                                val actDocs = documents.filter { it.activityId == act.id }
                                                 val tail = listOf(act.time, act.location)
                                                     .filter { it.isNotBlank() }.joinToString(" · ")
 
@@ -769,6 +798,15 @@ fun TripDetailScreen(
                                                                     color = MaterialTheme.colorScheme.onSurface.copy(
                                                                         alpha = if (act.completed) 0.4f else 0.6f
                                                                     ),
+                                                                )
+                                                            }
+                                                            if (actDocs.isNotEmpty()) {
+                                                                Spacer(Modifier.height(7.dp))
+                                                                MetaChip(
+                                                                    icon = Icons.Filled.QrCode2,
+                                                                    label = s.viewTicket,
+                                                                    loading = barcodeLoading,
+                                                                    onClick = { openActivityTickets(act, actDocs) },
                                                                 )
                                                             }
                                                         }
@@ -967,7 +1005,7 @@ fun TripDetailScreen(
             )
         }
 
-        // ── ticket wallet (swipeable codes for the tapped leg) ──
+        // ── ticket wallet (swipeable codes for the tapped leg or place) ──
         walletLeg?.let { leg ->
             if (walletTickets.isNotEmpty()) {
                 TicketWalletDialog(
@@ -986,6 +1024,27 @@ fun TripDetailScreen(
                     },
                     onOpenFullTicket = { docId -> onOpenDoc(docId) },
                     onDismiss = { walletTickets = emptyList(); walletLeg = null },
+                )
+            }
+        }
+        walletAct?.let { act ->
+            if (walletTickets.isNotEmpty()) {
+                TicketWalletDialog(
+                    legRoute = act.title,
+                    legDateLabel = act.date.label(),
+                    legTime = act.time,
+                    operator = "",
+                    transport = null,
+                    tickets = walletTickets,
+                    myTravellerId = myTravellerId,
+                    canManagePasses = canEdit,
+                    onManagePasses = {
+                        walletTickets = emptyList()
+                        walletAct = null
+                        onDocuments()
+                    },
+                    onOpenFullTicket = { docId -> onOpenDoc(docId) },
+                    onDismiss = { walletTickets = emptyList(); walletAct = null },
                 )
             }
         }

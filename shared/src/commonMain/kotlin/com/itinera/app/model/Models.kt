@@ -122,7 +122,7 @@ fun Trip.canEdit(uid: String): Boolean =
 /** True if this user owns the trip. */
 fun Trip.isOwnedBy(uid: String): Boolean = members[uid] == "owner"
 
-/** A document attached either to a whole trip or to a specific leg. */
+/** A document attached to a whole trip, a specific leg, or a specific place (activity). */
 @Serializable
 data class DocItem(
     val id: String,
@@ -132,7 +132,8 @@ data class DocItem(
     val fileUrl: String = "",
     val mimeType: String = "",
     val category: String = "OTHER",    // ⬅ NEW — "TRANSPORT" | "ACCOMMODATION" | "OTHER"
-    val legId: String = "",            // kept for back-compat (unused now)
+    val legId: String = "",            // leg this ticket belongs to ("" = none)
+    val activityId: String = "",       // place/attraction this ticket belongs to ("" = none)
     val type: DocType = DocType.IMAGE, // legacy
     val attachedToLabel: String = "",  // legacy
     val memberIds: List<String> = emptyList(),

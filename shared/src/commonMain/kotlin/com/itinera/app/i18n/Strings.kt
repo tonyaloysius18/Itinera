@@ -689,6 +689,9 @@ class Strings {
     var accountNotLinkedToTraveller: String = "Your account is not linked to a traveller on this trip."
     var passAssignmentHelp: String = "Assign each pass to its traveller in Documents before scanning."
     var assignPasses: String = "Assign passes"
+    var noTicketAssigned: String = "No ticket is assigned to you"
+    var ticketAssignmentHelp: String = "Assign each ticket to its traveller in Documents, or leave it unassigned to share it with the group."
+    var assignTickets: String = "Assign tickets"
     var unassignedPass: String = "Unassigned pass — verify the passenger"
     var multipleCodesWarning: String = "Multiple codes in one document — verify the passenger"
 
@@ -1468,6 +1471,9 @@ class Strings {
         c.accountNotLinkedToTraveller = this.accountNotLinkedToTraveller
         c.passAssignmentHelp = this.passAssignmentHelp
         c.assignPasses = this.assignPasses
+        c.noTicketAssigned = this.noTicketAssigned
+        c.ticketAssignmentHelp = this.ticketAssignmentHelp
+        c.assignTickets = this.assignTickets
         c.unassignedPass = this.unassignedPass
         c.multipleCodesWarning = this.multipleCodesWarning
 

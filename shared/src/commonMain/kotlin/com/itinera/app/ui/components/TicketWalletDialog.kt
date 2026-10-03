@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Flight
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Train
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -85,7 +86,7 @@ fun TicketWalletDialog(
     legDateLabel: String,      // e.g. "10 Jul"
     legTime: String,           // e.g. "10:27" (may be blank)
     operator: String,          // e.g. "SNCF" (may be blank)
-    transport: TransportType,
+    transport: TransportType?,  // null = a place/attraction ticket (pin icon)
     tickets: List<WalletTicket>,
     myTravellerId: String,
     canManagePasses: Boolean,
@@ -95,8 +96,13 @@ fun TicketWalletDialog(
 ) {
     if (tickets.isEmpty()) return
     val s = LocalStrings.current
-    val myTickets = remember(tickets, myTravellerId) {
-        if (myTravellerId.isBlank()) emptyList()
+    // Transport passes are personal: only ones explicitly assigned to me count as mine.
+    // A place ticket left unassigned is a group ticket (one QR for everyone), so it
+    // belongs to every traveller's pass.
+    val isPlace = transport == null
+    val myTickets = remember(tickets, myTravellerId, isPlace) {
+        if (isPlace) tickets.filter { it.travellerId.isBlank() || (myTravellerId.isNotBlank() && it.travellerId == myTravellerId) }
+        else if (myTravellerId.isBlank()) emptyList()
         else tickets.filter { it.travellerId == myTravellerId && !it.assignmentAmbiguous }
     }
     var showGroupPasses by remember(tickets, myTravellerId) { mutableStateOf(false) }
@@ -135,6 +141,7 @@ fun TicketWalletDialog(
 
                 if (visibleTickets.isEmpty()) {
                     MissingPersonalPass(
+                        isPlace = isPlace,
                         accountLinked = myTravellerId.isNotBlank(),
                         canManagePasses = canManagePasses,
                         onManagePasses = { onDismiss(); onManagePasses() },
@@ -155,8 +162,9 @@ fun TicketWalletDialog(
                             legDateLabel = legDateLabel,
                             legTime = legTime,
                             operator = operator,
-                            icon = transportIconFor(transport),
+                            icon = transport?.let { transportIconFor(it) } ?: Icons.Filled.Place,
                             ticket = ticket,
+                            groupTicketOk = isPlace,
                             showDocTitle = multiDoc && ticket.docTitle.isNotBlank(),
                             onOpenFullTicket = { onDismiss(); onOpenFullTicket(ticket.docId) },
                             modifier = Modifier.graphicsLayer {
@@ -225,6 +233,7 @@ fun TicketWalletDialog(
 
 @Composable
 private fun MissingPersonalPass(
+    isPlace: Boolean,          // attraction ticket → "ticket" wording, not "boarding pass"
     accountLinked: Boolean,
     canManagePasses: Boolean,
     onManagePasses: () -> Unit,
@@ -247,7 +256,7 @@ private fun MissingPersonalPass(
             }
             Spacer(Modifier.height(16.dp))
             Text(
-                s.noPassAssigned,
+                if (isPlace) s.noTicketAssigned else s.noPassAssigned,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -255,7 +264,11 @@ private fun MissingPersonalPass(
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                if (accountLinked) s.passAssignmentHelp else s.accountNotLinkedToTraveller,
+                when {
+                    !accountLinked -> s.accountNotLinkedToTraveller
+                    isPlace -> s.ticketAssignmentHelp
+                    else -> s.passAssignmentHelp
+                },
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White.copy(alpha = 0.72f),
                 textAlign = TextAlign.Center,
@@ -263,7 +276,7 @@ private fun MissingPersonalPass(
             if (canManagePasses) {
                 Spacer(Modifier.height(14.dp))
                 TextButton(onClick = onManagePasses, modifier = Modifier.heightIn(min = 48.dp)) {
-                    Text(s.assignPasses, color = Color.White, fontWeight = FontWeight.SemiBold)
+                    Text(if (isPlace) s.assignTickets else s.assignPasses, color = Color.White, fontWeight = FontWeight.SemiBold)
                 }
             }
         }
@@ -278,6 +291,7 @@ private fun WalletCard(
     operator: String,
     icon: ImageVector,
     ticket: WalletTicket,
+    groupTicketOk: Boolean,
     showDocTitle: Boolean,
     onOpenFullTicket: () -> Unit,
     modifier: Modifier = Modifier,
@@ -330,6 +344,7 @@ private fun WalletCard(
             )
 
             val assignmentMessage = when {
+                groupTicketOk -> ""   // place tickets may be shared; nothing to verify
                 ticket.assignmentAmbiguous -> s.multipleCodesWarning
                 ticket.travellerName.isBlank() -> s.unassignedPass
                 else -> ""

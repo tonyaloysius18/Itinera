@@ -726,18 +726,20 @@ private fun AppContent(
                                     DocumentsScreen(
                                     trip = trip,
                                     documents = repository.documentsForTrip(screen.tripId),
+                                    activities = repository.activitiesForTrip(screen.tripId),
                                     isLoading = !repository.documentsSyncedOnce,
                                     onBack = { navigator.back() },
                                     onOpenDoc = { navigator.push(Screen.DocViewer(it)) },
                                     onDeleteDocument = { repository.deleteDocument(it) },
-                                    onUpdateDocument = { docId, title, category, legId, segmentIndex, travellerId ->
-                                        repository.updateDocument(docId, title, category, legId, segmentIndex, travellerId)
+                                    onUpdateDocument = { docId, title, category, legId, segmentIndex, travellerId, activityId ->
+                                        repository.updateDocument(docId, title, category, legId, segmentIndex, travellerId, activityId)
                                     },
                                     onMessage = { pillMessage = it },
-                                    onUpload = { file, title, category, legId, segmentIndex, travellerId ->
+                                    onUpload = { file, title, category, legId, segmentIndex, travellerId, activityId ->
                                         repository.addDocumentWithFile(
                                             tripId = screen.tripId, title = title, category = category,
                                             file = file, legId = legId, segmentIndex = segmentIndex, travellerId = travellerId,
+                                            activityId = activityId,
                                         )
                                     },
                                     canEdit = trip.canEdit(repository.authService.currentUid ?: "")

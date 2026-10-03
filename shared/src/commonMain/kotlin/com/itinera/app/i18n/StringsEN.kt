@@ -574,6 +574,9 @@ internal val EN: Strings by lazy { Strings().apply {
     accountNotLinkedToTraveller = "Your account is not linked to a traveller on this trip."
     passAssignmentHelp = "Assign each pass to its traveller in Documents before scanning."
     assignPasses = "Assign passes"
+    noTicketAssigned = "No ticket is assigned to you"
+    ticketAssignmentHelp = "Assign each ticket to its traveller in Documents, or leave it unassigned to share it with the group."
+    assignTickets = "Assign tickets"
     unassignedPass = "Unassigned pass — verify the passenger"
     multipleCodesWarning = "Multiple codes in one document — verify the passenger"
 
