@@ -288,22 +288,21 @@ fun TripsHomeScreen(
                     }
 
                     val inProgressGroup = grouped[TripPhase.IN_PROGRESS].orEmpty()
-                    val showDiscoverOnInProgress = inProgressGroup.isNotEmpty()
+                    val upcomingGroup = grouped[TripPhase.UPCOMING].orEmpty()
+                    val pastGroup = grouped[TripPhase.PAST].orEmpty()
+
+                    val discoverPhase = when {
+                        inProgressGroup.isNotEmpty() -> TripPhase.IN_PROGRESS
+                        upcomingGroup.isNotEmpty() -> TripPhase.UPCOMING
+                        pastGroup.isNotEmpty() -> TripPhase.PAST
+                        else -> TripPhase.UPCOMING
+                    }
 
                     fun cardsFor(phase: TripPhase) {
                         val group = grouped[phase].orEmpty()
-                        val shouldShowHeader = when (phase) {
-                            TripPhase.IN_PROGRESS -> group.isNotEmpty()
-                            TripPhase.UPCOMING -> true
-                            TripPhase.PAST -> group.isNotEmpty()
-                        }
-                        if (!shouldShowHeader) return
+                        if (group.isEmpty()) return
 
-                        val hasDiscover = if (showDiscoverOnInProgress) {
-                            phase == TripPhase.IN_PROGRESS
-                        } else {
-                            phase == TripPhase.UPCOMING
-                        }
+                        val hasDiscover = phase == discoverPhase
 
                         item(key = "hdr-$phase") {
                             SectionHeader(
