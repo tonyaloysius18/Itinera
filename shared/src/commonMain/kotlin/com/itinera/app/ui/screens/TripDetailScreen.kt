@@ -143,6 +143,7 @@ import com.itinera.app.ui.components.ImageCropScreen
 import com.itinera.app.ui.components.PostcardBack
 import com.itinera.app.ui.components.PostcardFront
 import com.itinera.app.ui.components.Progress
+import com.itinera.app.ui.components.SwipeRevealRow
 import com.itinera.app.ui.components.TicketWalletDialog
 import com.itinera.app.ui.components.TopBar
 import com.itinera.app.ui.components.rememberPostcardExporter
@@ -226,6 +227,7 @@ fun TripDetailScreen(
 
 
     var showAddChooser by remember { mutableStateOf(false) }
+    var openRowId by remember { mutableStateOf<String?>(null) }   // the leg/place row swiped open, if any
     var showPostcard by remember { mutableStateOf(false) }
     val bodyScroll = rememberSaveable(saver = ScrollState.Saver) { ScrollState(0) }
 
@@ -586,7 +588,6 @@ fun TripDetailScreen(
                                             is DayEntry.LegEntry -> {
                                                 val leg = entry.leg
                                                 val isNext = leg.id == nextLegId
-                                                var showMenu by remember { mutableStateOf(false) }
                                                 var stopsExpanded by remember(leg.id) { mutableStateOf(false) }
                                                 val legDocs = documents.filter { it.legId == leg.id }
 
@@ -613,14 +614,21 @@ fun TripDetailScreen(
                                                     if (duration.isNotBlank()) add(duration)
                                                 }.joinToString(" · ")
 
-                                                Box {
+                                                SwipeRevealRow(
+                                                    enabled = canEdit,
+                                                    isOpen = openRowId == leg.id,
+                                                    onOpenChange = { open -> openRowId = if (open) leg.id else openRowId.takeIf { it != leg.id } },
+                                                    onEdit = { onEditLeg(leg.id) },
+                                                    onDelete = { onDeleteLeg(leg.id) },
+                                                ) {
                                                     Row(
                                                         Modifier
                                                             .fillMaxWidth()
-                                                            .combinedClickable(
-                                                                onClick = { if (canEdit) onToggleLeg(leg.id) },
-                                                                onLongClick = { if (canEdit) showMenu = true },
-                                                            )
+                                                            .clickable {
+                                                                // A tap while a row is open just closes it.
+                                                                if (openRowId != null) openRowId = null
+                                                                else if (canEdit) onToggleLeg(leg.id)
+                                                            }
                                                             .padding(vertical = 9.dp),
                                                         verticalAlignment = Alignment.Top,
                                                     ) {
@@ -735,43 +743,29 @@ fun TripDetailScreen(
                                                         }
                                                     }
 
-                                                    MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(14.dp))) {
-                                                        DropdownMenu(
-                                                            expanded = showMenu,
-                                                            onDismissRequest = { showMenu = false },
-                                                            offset = DpOffset(x = 250.dp, y = 0.dp),
-                                                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                                        ) {
-                                                            DropdownMenuItem(
-                                                                text = { Text(s.edit) },
-                                                                leadingIcon = { Icon(Icons.Filled.Edit, null) },
-                                                                onClick = { showMenu = false; onEditLeg(leg.id) },
-                                                            )
-                                                            DropdownMenuItem(
-                                                                text = { Text(s.delete, color = MaterialTheme.itinera.destructive) },
-                                                                leadingIcon = { Icon(Icons.Filled.Delete, null, tint = MaterialTheme.itinera.destructive) },
-                                                                onClick = { showMenu = false; onDeleteLeg(leg.id) },
-                                                            )
-                                                        }
-                                                    }
                                                 }
                                             }
 
                                             is DayEntry.ActEntry -> {
                                                 val act = entry.act
-                                                var showMenu by remember { mutableStateOf(false) }
                                                 val actDocs = documents.filter { it.activityId == act.id }
                                                 val tail = listOf(act.time, act.location)
                                                     .filter { it.isNotBlank() }.joinToString(" · ")
 
-                                                Box {
+                                                SwipeRevealRow(
+                                                    enabled = canEdit,
+                                                    isOpen = openRowId == act.id,
+                                                    onOpenChange = { open -> openRowId = if (open) act.id else openRowId.takeIf { it != act.id } },
+                                                    onEdit = { onEditActivity(act.id) },
+                                                    onDelete = { onDeleteActivity(act.id) },
+                                                ) {
                                                     Row(
                                                         Modifier
                                                             .fillMaxWidth()
-                                                            .combinedClickable(
-                                                                onClick = { if (canEdit) onToggleActivity(act.id) },
-                                                                onLongClick = { if (canEdit) showMenu = true },
-                                                            )
+                                                            .clickable {
+                                                                if (openRowId != null) openRowId = null
+                                                                else if (canEdit) onToggleActivity(act.id)
+                                                            }
                                                             .padding(vertical = 9.dp),
                                                         verticalAlignment = Alignment.Top,
                                                     ) {
@@ -839,25 +833,6 @@ fun TripDetailScreen(
                                                         }
                                                     }
 
-                                                    MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(14.dp))) {
-                                                        DropdownMenu(
-                                                            expanded = showMenu,
-                                                            onDismissRequest = { showMenu = false },
-                                                            offset = DpOffset(x = 16.dp, y = 0.dp),
-                                                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                                        ) {
-                                                            DropdownMenuItem(
-                                                                text = { Text(s.edit) },
-                                                                leadingIcon = { Icon(Icons.Filled.Edit, null) },
-                                                                onClick = { showMenu = false; onEditActivity(act.id) },
-                                                            )
-                                                            DropdownMenuItem(
-                                                                text = { Text(s.delete, color = MaterialTheme.itinera.destructive) },
-                                                                leadingIcon = { Icon(Icons.Filled.Delete, null, tint = MaterialTheme.itinera.destructive) },
-                                                                onClick = { showMenu = false; onDeleteActivity(act.id) },
-                                                            )
-                                                        }
-                                                    }
                                                 }
                                             }
                                         }
