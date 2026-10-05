@@ -2,6 +2,29 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // ── Trip roles, for the trip's subcollections ──
+    function tripData(tripId) {
+      return get(/databases/$(database)/documents/trips/$(tripId)).data;
+    }
+    function isTripMember(tripId) {
+      return request.auth != null && request.auth.uid in tripData(tripId).memberIds;
+    }
+    // Owners and editors change trip content; viewers only look.
+    function canEditTrip(tripId) {
+      return request.auth != null
+        && tripData(tripId).members.get(request.auth.uid, '') in ['owner', 'editor'];
+    }
+    // Joining/leaving fans the caller's uid into/out of every item's memberIds
+    // (InviteService.fanOutToSubcollections / removeSelfFromSubcollections). That's the
+    // one write any member may make: memberIds only, and only their own uid.
+    function onlyTogglesSelf() {
+      let before = resource.data.memberIds.toSet();
+      let after = request.resource.data.memberIds.toSet();
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberIds'])
+        && after.difference(before).hasOnly([request.auth.uid])
+        && before.difference(after).hasOnly([request.auth.uid]);
+    }
+
     // ── Profiles ──
     match /users/{userId}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
@@ -114,21 +137,27 @@ service cloud.firestore {
       allow delete: if request.auth != null
         && resource.data.members[request.auth.uid] == 'owner';
 
+      // Documents, expenses and places: owners/editors write; viewers read and may only
+      // add/remove themselves in memberIds when joining or leaving.
       match /documents/{docId} {
-        allow read, write: if request.auth != null
-          && request.auth.uid in get(/databases/$(database)/documents/trips/$(tripId)).data.memberIds;
+        allow read: if isTripMember(tripId);
+        allow create, delete: if canEditTrip(tripId);
+        allow update: if canEditTrip(tripId) || (isTripMember(tripId) && onlyTogglesSelf());
       }
       match /expenses/{expId} {
-        allow read, write: if request.auth != null
-          && request.auth.uid in get(/databases/$(database)/documents/trips/$(tripId)).data.memberIds;
+        allow read: if isTripMember(tripId);
+        allow create, delete: if canEditTrip(tripId);
+        allow update: if canEditTrip(tripId) || (isTripMember(tripId) && onlyTogglesSelf());
       }
-       match /payments/{payId} {
-        allow read, write: if request.auth != null
-          && request.auth.uid in get(/databases/$(database)/documents/trips/$(tripId)).data.memberIds;
+      // Settle-up repayments stay open to every member: the app lets any traveller
+      // record "I paid you back", not just editors.
+      match /payments/{payId} {
+        allow read, write: if isTripMember(tripId);
       }
       match /activities/{actId} {
-        allow read, write: if request.auth != null
-          && request.auth.uid in get(/databases/$(database)/documents/trips/$(tripId)).data.memberIds;
+        allow read: if isTripMember(tripId);
+        allow create, delete: if canEditTrip(tripId);
+        allow update: if canEditTrip(tripId) || (isTripMember(tripId) && onlyTogglesSelf());
       }
       match /neraMessages/{msgId} {
         allow read, write: if request.auth != null
