@@ -91,6 +91,7 @@ import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.i18n.stringsFor
 import com.itinera.app.i18n.systemLanguage
 import com.itinera.app.model.ExpenseCategory
+import com.itinera.app.model.isForeign
 import com.itinera.app.model.Trip
 import com.itinera.app.model.toNeraItinerary
 import com.itinera.app.model.canEdit
@@ -823,7 +824,7 @@ private fun AppContent(
                                         onAddExpense = { navigator.push(Screen.AddExpense(screen.tripId)) },
                                         onEditExpense = { navigator.push(Screen.AddExpense(screen.tripId, it)) },
                                         onDeleteExpense = { id -> repository.deleteExpenseUndoable(id)?.let { undo -> undoRequest = UndoRequest(s.expenseDeleted, undo) } },
-                                        onSetCurrency = { repository.setTripCurrency(screen.tripId, it) },
+                                        onSetCurrency = { repository.changeTripCurrency(screen.tripId, it) },
                                         canEdit = trip.canEdit(repository.authService.currentUid ?: ""),
                                         currentUid = repository.authService.currentUid ?: "",
                                         onSetSettled = { repository.setTripSettled(screen.tripId, it) },
@@ -843,6 +844,12 @@ private fun AppContent(
                                     AddExpenseScreen(
                                         trip = trip,
                                         existing = existing,
+                                        // New expenses start in the currency of the latest one (HUF while in Budapest).
+                                        defaultCurrency = repository.expensesForTrip(screen.tripId)
+                                            .maxByOrNull { it.createdAt }
+                                            ?.let { if (it.isForeign) it.originalCurrency else trip.currencyCode }
+                                            ?: trip.currencyCode,
+                                        fetchRate = { from, to, day -> repository.currencyApi.fetchRateOn(from, to, day) },
                                         onBack = { navigator.back() },
                                         onSave = { rawExp ->
                                             val exp = if (rawExp.category == ExpenseCategory.OTHER) {

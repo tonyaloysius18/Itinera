@@ -33,6 +33,15 @@ data class TimeSeriesResponse(
     val rates: Map<String, Map<String, Double>> = emptyMap(),  // date -> { symbol -> rate }
 )
 
+// ===== Frankfurter single-day rate (ECB reference rates, any past date) =====
+@Serializable
+data class DayRateResponse(
+    val amount: Double = 1.0,
+    val base: String = "",
+    val date: String = "",
+    val rates: Map<String, Double> = emptyMap(),
+)
+
 class CurrencyApi {
     private val client = HttpClient {
         install(ContentNegotiation) {
@@ -78,6 +87,40 @@ class CurrencyApi {
         } catch (_: Exception) {
             emptyList()   // currency not supported by Frankfurter → no chart, no crash
         }
+    }
+
+    private val dayRateCache = mutableMapOf<String, Pair<Double, String>>()
+
+    /**
+     * How much 1 [from] was worth in [to] on [date] (ISO yyyy-MM-dd), plus the date the
+     * rate is actually from. Frankfurter serves ECB rates for any past day (weekends and
+     * holidays roll back to the last business day); for currencies the ECB doesn't cover,
+     * or a date that hasn't published yet, falls back to today's rate. Throws if neither
+     * source answers, e.g. offline.
+     */
+    suspend fun fetchRateOn(from: String, to: String, date: String): Pair<Double, String> {
+        if (from == to) return 1.0 to date
+        val key = "$from>$to@$date"
+        dayRateCache[key]?.let { return it }
+        val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
+        val result = runCatching {
+            val path = if (date >= today) "latest" else date
+            // Ask for to→from and invert: Frankfurter rounds to ~5 decimals, so
+            // HUF→EUR comes back as 0.00271 (±0.2%) while EUR→HUF is 369.13.
+            val r: DayRateResponse = client
+                .get("https://api.frankfurter.dev/v1/$path") {
+                    parameter("base", to)
+                    parameter("symbols", from)
+                }
+                .body()
+            val inverse = r.rates[from]?.takeIf { it > 0.0 } ?: error("Rate unavailable")
+            (1.0 / inverse) to r.date.ifBlank { date }
+        }.getOrElse {
+            val (rate, updated) = fetchRate(from, to)
+            rate to updated.ifBlank { today }
+        }
+        dayRateCache[key] = result
+        return result
     }
 
     private fun startDate(days: Int): String {

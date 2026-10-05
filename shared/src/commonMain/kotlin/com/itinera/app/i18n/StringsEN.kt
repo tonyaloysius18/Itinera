@@ -577,6 +577,12 @@ internal val EN: Strings by lazy { Strings().apply {
     noTicketAssigned = "No ticket is assigned to you"
     ticketAssignmentHelp = "Assign each ticket to its traveller in Documents, or leave it unassigned to share it with the group."
     assignTickets = "Assign tickets"
+    rateLoading = "Getting the exchange rate…"
+    rateUnavailable = "Couldn't get the exchange rate. Enter it yourself:"
+    convertExpensesTitle = "Convert all expenses to %s?"
+    convertExpensesBody = "Every expense and settle-up payment will be converted into %s at the exchange rate from its own day. Amounts paid in other currencies keep their original value."
+    convertingExpenses = "Converting expenses…"
+    convertFailed = "Couldn't convert the expenses. Check your connection and try again."
     unassignedPass = "Unassigned pass — verify the passenger"
     multipleCodesWarning = "Multiple codes in one document — verify the passenger"
 

@@ -11,6 +11,10 @@ import com.itinera.app.model.Activity
 import com.itinera.app.model.ChecklistItem
 import com.itinera.app.model.DocItem
 import com.itinera.app.model.Expense
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.TimeZone
+import com.itinera.app.model.isForeign
+import com.itinera.app.model.ExpenseShare
 import com.itinera.app.model.Leg
 import com.itinera.app.model.Traveller
 import com.itinera.app.model.TransportType
@@ -88,6 +92,8 @@ class TripRepository {
     val expenses = mutableStateListOf<Expense>()
 
     val paymentService = PaymentService()
+
+    val currencyApi = CurrencyApi()
 
     val payments = mutableStateListOf<com.itinera.app.model.Payment>()
 
@@ -1286,13 +1292,88 @@ class TripRepository {
     /** No longer needed for live sync; kept as a no-op so Backup "Sync Now" compiles. */
     suspend fun loadExpenses(uid: String) { /* handled by live collection-group sync */ }
 
-    fun setTripCurrency(tripId: String, code: String) {
+    /**
+     * Switches the trip's shared currency and converts every expense, payment and the
+     * budget into it, each at the rate from its own day. Rates are all fetched before
+     * anything changes, so a failure (e.g. offline) leaves the trip untouched and
+     * returns false.
+     */
+    suspend fun changeTripCurrency(tripId: String, code: String): Boolean {
+        val trip = tripById(tripId) ?: return false
+        val from = trip.currencyCode
+        if (from == code) return true
+        val tripExpenses = expenses.filter { it.tripId == tripId }
+        val tripPayments = payments.filter { it.tripId == tripId }
+        val today = isoDayOf(nowMillis())
+
+        // date -> (rate, date the rate is from)
+        val rates = mutableMapOf<String, Pair<Double, String>>()
+        try {
+            val days = (tripExpenses.map { isoDayOf(it.createdAt) } +
+                    tripPayments.map { isoDayOf(it.createdAt) } + today).distinct()
+            for (d in days) rates[d] = currencyApi.fetchRateOn(from, code, d)
+        } catch (e: Exception) {
+            println("ITINERA: currency change $from→$code failed — ${e.message}")
+            return false
+        }
+
+        val convertedExpenses = tripExpenses.map { e ->
+            val (factor, rateDate) = rates.getValue(isoDayOf(e.createdAt))
+            if (e.isForeign && e.originalCurrency == code) {
+                // Paid in the new currency: use the exact original, no round trip.
+                e.copy(
+                    amount = e.originalAmount,
+                    shares = scaleShares(e.shares, if (e.amount > 0) e.originalAmount / e.amount else 1.0, e.originalAmount),
+                    originalAmount = 0.0, originalCurrency = "", fxRate = 1.0, fxDate = "",
+                )
+            } else {
+                val newAmount = round2(e.amount * factor)
+                e.copy(
+                    amount = newAmount,
+                    shares = scaleShares(e.shares, factor, newAmount),
+                    originalAmount = if (e.isForeign) e.originalAmount else e.amount,
+                    originalCurrency = if (e.isForeign) e.originalCurrency else from,
+                    fxRate = if (e.isForeign) e.fxRate * factor else factor,
+                    fxDate = if (e.isForeign) e.fxDate else rateDate,
+                )
+            }
+        }
+        val convertedPayments = tripPayments.map { p ->
+            p.copy(amount = round2(p.amount * rates.getValue(isoDayOf(p.createdAt)).first))
+        }
+
+        convertedExpenses.forEach { c -> expenses.indexOfFirst { it.id == c.id }.takeIf { it >= 0 }?.let { expenses[it] = c } }
+        convertedPayments.forEach { c -> payments.indexOfFirst { it.id == c.id }.takeIf { it >= 0 }?.let { payments[it] = c } }
         val i = trips.indexOfFirst { it.id == tripId }
         if (i >= 0) {
-            trips[i] = trips[i].copy(currencyCode = code)
+            trips[i] = trips[i].copy(
+                currencyCode = code,
+                budget = if (trips[i].budget > 0) round2(trips[i].budget * rates.getValue(today).first) else 0.0,
+            )
             persist(trips[i])
         }
+        ioScope.launch {
+            convertedExpenses.forEach { runCatching { expenseService.saveExpense(it) } }
+            convertedPayments.forEach { runCatching { paymentService.savePayment(it) } }
+        }
+        return true
     }
+
+    /** Scales each share by [factor], then nudges the largest so they still sum to [total]. */
+    private fun scaleShares(shares: List<ExpenseShare>, factor: Double, total: Double): List<ExpenseShare> {
+        if (shares.isEmpty()) return shares
+        val scaled = shares.map { it.copy(amount = round2(it.amount * factor)) }
+        val diff = round2(total - scaled.sumOf { it.amount })
+        if (diff == 0.0) return scaled
+        val biggest = scaled.indices.maxBy { scaled[it].amount }
+        return scaled.mapIndexed { idx, sh -> if (idx == biggest) sh.copy(amount = round2(sh.amount + diff)) else sh }
+    }
+
+    private fun round2(x: Double): Double = kotlin.math.round(x * 100) / 100
+
+    private fun isoDayOf(epochMillis: Long): String =
+        kotlinx.datetime.Instant.fromEpochMilliseconds(epochMillis)
+            .toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
 
     fun setTripSettled(tripId: String, settled: Boolean) {
         val uid = authService.currentUid ?: return

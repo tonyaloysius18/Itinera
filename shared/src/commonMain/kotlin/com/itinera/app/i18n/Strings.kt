@@ -692,6 +692,12 @@ class Strings {
     var noTicketAssigned: String = "No ticket is assigned to you"
     var ticketAssignmentHelp: String = "Assign each ticket to its traveller in Documents, or leave it unassigned to share it with the group."
     var assignTickets: String = "Assign tickets"
+    var rateLoading: String = "Getting the exchange rate…"
+    var rateUnavailable: String = "Couldn't get the exchange rate. Enter it yourself:"
+    var convertExpensesTitle: String = "Convert all expenses to %s?"
+    var convertExpensesBody: String = "Every expense and settle-up payment will be converted into %s at the exchange rate from its own day. Amounts paid in other currencies keep their original value."
+    var convertingExpenses: String = "Converting expenses…"
+    var convertFailed: String = "Couldn't convert the expenses. Check your connection and try again."
     var unassignedPass: String = "Unassigned pass — verify the passenger"
     var multipleCodesWarning: String = "Multiple codes in one document — verify the passenger"
 
@@ -1474,6 +1480,12 @@ class Strings {
         c.noTicketAssigned = this.noTicketAssigned
         c.ticketAssignmentHelp = this.ticketAssignmentHelp
         c.assignTickets = this.assignTickets
+        c.rateLoading = this.rateLoading
+        c.rateUnavailable = this.rateUnavailable
+        c.convertExpensesTitle = this.convertExpensesTitle
+        c.convertExpensesBody = this.convertExpensesBody
+        c.convertingExpenses = this.convertingExpenses
+        c.convertFailed = this.convertFailed
         c.unassignedPass = this.unassignedPass
         c.multipleCodesWarning = this.multipleCodesWarning
 

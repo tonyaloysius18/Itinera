@@ -92,6 +92,9 @@ import kotlin.math.abs
 import kotlin.math.round
 import kotlin.random.Random
 import kotlin.time.Clock
+import androidx.compose.material.icons.filled.ArrowDropDown
+import com.itinera.app.model.isForeign
+import kotlinx.datetime.toLocalDateTime
 import kotlin.time.ExperimentalTime
 
 private fun parseAmount(text: String): Double =
@@ -129,12 +132,56 @@ fun AddExpenseScreen(
     existing: Expense?,
     onBack: () -> Unit,
     onSave: (Expense) -> Unit,
+    defaultCurrency: String = trip.currencyCode,   // currency a new expense starts in
+    fetchRate: suspend (from: String, to: String, isoDate: String) -> Pair<Double, String> = { _, _, d -> 1.0 to d },
 ) {
     val s = LocalStrings.current
     val travellers = trip.travellers
+    val tripCurrency = trip.currencyCode
+
+    // The amount and split are entered in [inputCurrency]; on save they're converted into
+    // the trip's currency at the rate for the expense's day. Editing a foreign expense
+    // shows what was actually paid (15000 HUF), not the converted figure.
+    val existingForeign = existing?.isForeign == true
+    var inputCurrency by remember(existing?.id) {
+        mutableStateOf(if (existingForeign) existing!!.originalCurrency else if (existing != null) tripCurrency else defaultCurrency)
+    }
+    // Trip currency per 1 unit of inputCurrency; null while unknown.
+    var rate by remember(existing?.id) { mutableStateOf<Double?>(if (existingForeign) existing!!.fxRate else null) }
+    var rateDate by remember(existing?.id) { mutableStateOf(if (existingForeign) existing!!.fxDate else "") }
+    var rateLoading by remember { mutableStateOf(false) }
+    var rateFailed by remember { mutableStateOf(false) }
+    var manualRateText by remember { mutableStateOf("") }
+    var showCurrencyPicker by remember { mutableStateOf(false) }
+    val isForeignInput = inputCurrency != tripCurrency
+    val expenseDay = remember(existing?.id) { isoDay(existing?.createdAt ?: nowMillis()) }
+
+    LaunchedEffect(inputCurrency) {
+        rateFailed = false
+        manualRateText = ""
+        when {
+            !isForeignInput -> { rate = 1.0; rateDate = "" }
+            existingForeign && inputCurrency == existing!!.originalCurrency -> {
+                rate = existing.fxRate; rateDate = existing.fxDate   // keep the locked-in rate
+            }
+            else -> {
+                rate = null
+                rateLoading = true
+                runCatching { fetchRate(inputCurrency, tripCurrency, expenseDay) }
+                    .onSuccess { (r, d) -> rate = r; rateDate = d }
+                    .onFailure { rateFailed = true }
+                rateLoading = false
+            }
+        }
+    }
+    // Offline fallback: the person types "1 EUR = x HUF".
+    val effectiveRate: Double? = rate ?: parseAmount(manualRateText).takeIf { it > 0.0 }?.let { 1.0 / it }
+
+    fun toTrip(v: Double): Double = if (!isForeignInput) v else round(v * (effectiveRate ?: 0.0) * 100) / 100
 
     var amountText by remember(existing?.id) {
-        mutableStateOf(existing?.amount?.let { if (it == 0.0) "" else twoDecimalsPlain(it) } ?: "")
+        val start = if (existingForeign) existing!!.originalAmount else existing?.amount ?: 0.0
+        mutableStateOf(if (start == 0.0) "" else twoDecimalsPlain(start))
     }
     var description by remember(existing?.id) { mutableStateOf(existing?.description ?: "") }
     var paidById by remember(existing?.id) {
@@ -160,7 +207,9 @@ fun AddExpenseScreen(
         mutableStateMapOf<String, String>().apply {
             travellers.forEach { t ->
                 val share = existing?.shares?.firstOrNull { it.travellerId == t.id }
-                put(t.id, share?.amount?.let { twoDecimalsPlain(it) } ?: "")
+                // Shares are stored in the trip currency; show them in what was paid.
+                val shown = share?.amount?.let { a -> if (existingForeign && existing!!.fxRate > 0) a / existing.fxRate else a }
+                put(t.id, shown?.let { twoDecimalsPlain(it) } ?: "")
             }
         }
     }
@@ -180,12 +229,13 @@ fun AddExpenseScreen(
 
     val blocker: String? = when {
         amount <= 0.0 -> s.enterAmount
+        isForeignInput && effectiveRate == null -> if (rateLoading) s.rateLoading else s.rateUnavailable
         description.isBlank() -> s.enterDescription
         paidById.isBlank() || involved.isEmpty() -> s.selectSomeone
         customMode && !customMatches -> {
             val diff = amount - customSum
-            if (diff > 0) s.stillToAssign.replace("%s", formatMoney(diff, trip.currencyCode))
-            else s.overAssigned.replace("%s", formatMoney(-diff, trip.currencyCode))
+            if (diff > 0) s.stillToAssign.replace("%s", formatMoney(diff, inputCurrency))
+            else s.overAssigned.replace("%s", formatMoney(-diff, inputCurrency))
         }
         else -> null
     }
@@ -196,21 +246,34 @@ fun AddExpenseScreen(
             word.replaceFirstChar { c -> if (c.isLowerCase()) c.titlecase() else c.toString() }
         }
 
-    fun buildShares(): List<ExpenseShare> =
-        if (customMode) involved.map { ExpenseShare(it, parseAmount(customText[it] ?: "")) }
-        else equalShares(amount, involved)
+    /** Shares in the trip currency, summing exactly to [total]. */
+    fun buildShares(total: Double): List<ExpenseShare> {
+        if (!customMode) return equalShares(total, involved)
+        val converted = involved.map { ExpenseShare(it, toTrip(parseAmount(customText[it] ?: ""))) }
+        // Converting each share rounds separately; put any leftover cent on the largest.
+        val diff = round((total - converted.sumOf { it.amount }) * 100) / 100
+        if (diff == 0.0 || converted.isEmpty()) return converted
+        val biggest = converted.indices.maxBy { converted[it].amount }
+        return converted.mapIndexed { i, sh -> if (i == biggest) sh.copy(amount = round((sh.amount + diff) * 100) / 100) else sh }
+    }
 
     fun save() {
+        val total = toTrip(amount)
         onSave(
             Expense(
                 id = existing?.id ?: "exp_${Random.nextLong()}",
                 tripId = trip.id,
                 description = description.trim().toTitleCase(),
-                amount = amount,
+                amount = total,
                 paidByTravellerId = paidById,
-                shares = buildShares(),
+                shares = buildShares(total),
                 createdAt = existing?.createdAt ?: nowMillis(),
                 category = effectiveCategory,
+                createdBy = existing?.createdBy ?: "",
+                originalAmount = if (isForeignInput) amount else 0.0,
+                originalCurrency = if (isForeignInput) inputCurrency else "",
+                fxRate = if (isForeignInput) effectiveRate ?: 1.0 else 1.0,
+                fxDate = if (isForeignInput) rateDate.ifBlank { expenseDay } else "",
             )
         )
     }
@@ -240,8 +303,23 @@ fun AddExpenseScreen(
                 AmountField(
                     value = amountText,
                     onValueChange = { amountText = sanitizeAmount(amountText, it) },
-                    currencyCode = trip.currencyCode,
+                    currencyCode = inputCurrency,
+                    onPickCurrency = { showCurrencyPicker = true },
                 )
+
+                if (isForeignInput) {
+                    ConversionLine(
+                        tripCurrency = tripCurrency,
+                        inputCurrency = inputCurrency,
+                        converted = if (amount > 0.0 && effectiveRate != null) toTrip(amount) else null,
+                        rate = effectiveRate,
+                        rateDate = rateDate,
+                        loading = rateLoading,
+                        failed = rateFailed && rate == null,
+                        manualRateText = manualRateText,
+                        onManualRateChange = { manualRateText = sanitizeAmount(manualRateText, it) },
+                    )
+                }
 
                 Spacer(Modifier.height(20.dp))
 
@@ -287,7 +365,7 @@ fun AddExpenseScreen(
                     amount = amount,
                     customSum = customSum,
                     perPerson = perPerson,
-                    currencyCode = trip.currencyCode,
+                    currencyCode = inputCurrency,
                     onSplitEvenly = {
                         equalShares(amount, involved).forEach { share ->
                             customText[share.travellerId] = twoDecimalsPlain(share.amount)
@@ -324,13 +402,92 @@ fun AddExpenseScreen(
             }
         }
     }
+
+    if (showCurrencyPicker) {
+        CurrencyPickerDialog(
+            current = inputCurrency,
+            title = s.currency,
+            onPick = { inputCurrency = it; showCurrencyPicker = false },
+            onDismiss = { showCurrencyPicker = false },
+        )
+    }
 }
+
+/**
+ * Under a foreign amount: "≈ €38.42 · 1 EUR = 390.40 HUF · 2026-10-05", or a loading
+ * line, or — when the rate couldn't be fetched — a field to type "1 EUR = x HUF".
+ */
+@Composable
+private fun ConversionLine(
+    tripCurrency: String,
+    inputCurrency: String,
+    converted: Double?,
+    rate: Double?,
+    rateDate: String,
+    loading: Boolean,
+    failed: Boolean,
+    manualRateText: String,
+    onManualRateChange: (String) -> Unit,
+) {
+    val s = LocalStrings.current
+    val muted = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+    Column(
+        Modifier.fillMaxWidth().padding(top = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        when {
+            loading -> Text(s.rateLoading, style = MaterialTheme.typography.bodySmall, color = muted)
+            failed -> {
+                Text(s.rateUnavailable, style = MaterialTheme.typography.bodySmall, color = muted, textAlign = TextAlign.Center)
+                Spacer(Modifier.height(6.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("1 $tripCurrency = ", style = MaterialTheme.typography.bodyLarge)
+                    ShareAmountField(value = manualRateText, onValueChange = onManualRateChange)
+                    Text(" $inputCurrency", style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+        }
+        if (converted != null) {
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "≈ ${formatMoney(converted, tripCurrency)}",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
+        if (rate != null && rate > 0.0 && !failed) {
+            Text(
+                listOf("1 $tripCurrency = ${rateText(1.0 / rate)} $inputCurrency", rateDate)
+                    .filter { it.isNotBlank() }.joinToString(" · "),
+                style = MaterialTheme.typography.bodySmall,
+                color = muted,
+            )
+        }
+    }
+}
+
+/** Enough digits to be useful for both 390.40 and 0.8567. */
+private fun rateText(v: Double): String {
+    val decimals = if (v >= 100) 2 else 4
+    var factor = 1.0
+    repeat(decimals) { factor *= 10 }
+    val scaled = round(v * factor).toLong()
+    val whole = scaled / factor.toLong()
+    val frac = (scaled % factor.toLong()).toString().padStart(decimals, '0')
+    return "$whole.$frac"
+}
+
+private fun isoDay(epochMillis: Long): String =
+    kotlinx.datetime.Instant.fromEpochMilliseconds(epochMillis)
+        .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault()).date.toString()
 
 @Composable
 private fun AmountField(
     value: String,
     onValueChange: (String) -> Unit,
     currencyCode: String,
+    onPickCurrency: () -> Unit,
 ) {
     val amountTextStyle = MaterialTheme.typography.displaySmall.copy(
         fontSize = 44.sp,
@@ -388,17 +545,29 @@ private fun AmountField(
         }
 
         Spacer(Modifier.height(8.dp))
+        // Tap to pay in another currency (converted to the trip's on save).
         Surface(
+            onClick = onPickCurrency,
             shape = RoundedCornerShape(20.dp),
             color = Color.Transparent,
-            border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
+            border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
         ) {
-            Text(
-                currencyCode,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(start = 12.dp, end = 6.dp, top = 4.dp, bottom = 4.dp),
+            ) {
+                Text(
+                    currencyCode,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                )
+                Icon(
+                    Icons.Filled.ArrowDropDown,
+                    contentDescription = LocalStrings.current.currency,
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    modifier = Modifier.size(18.dp),
+                )
+            }
         }
     }
 }

@@ -96,6 +96,7 @@ import com.itinera.app.model.computeBalances
 import com.itinera.app.model.computePairwiseDebts
 import com.itinera.app.model.computeSettlements
 import com.itinera.app.model.effectiveCategory
+import com.itinera.app.model.isForeign
 import com.itinera.app.model.isOwnedBy
 import com.itinera.app.model.label
 import com.itinera.app.ui.components.CardShape
@@ -124,7 +125,7 @@ fun TripExpensesScreen(
     onAddExpense: () -> Unit,
     onEditExpense: (String) -> Unit,
     onDeleteExpense: (String) -> Unit,
-    onSetCurrency: (String) -> Unit,
+    onSetCurrency: suspend (String) -> Boolean,   // converts every expense; false = failed, nothing changed
     canEdit: Boolean = true,
     currentUid: String = "",
     onSetSettled: (Boolean) -> Unit = {},
@@ -137,6 +138,10 @@ fun TripExpensesScreen(
     var lensOrdinal by rememberSaveable { mutableStateOf(ExpenseLens.Timeline.ordinal) }
     var selectedCategoryName by rememberSaveable { mutableStateOf<String?>(null) }
     var showCurrencyPicker by rememberSaveable { mutableStateOf(false) }
+    var pendingCurrency by rememberSaveable { mutableStateOf<String?>(null) }
+    var converting by remember { mutableStateOf(false) }
+    var convertFailed by remember { mutableStateOf(false) }
+    val currencyScope = rememberCoroutineScope()
     var expandedId by rememberSaveable { mutableStateOf<String?>(null) }
     var openSwipeId by rememberSaveable { mutableStateOf<String?>(null) }
 
@@ -364,8 +369,56 @@ fun TripExpensesScreen(
     if (showCurrencyPicker) {
         CurrencyPickerDialog(
             current = trip.currencyCode,
-            onPick = { onSetCurrency(it); showCurrencyPicker = false },
+            onPick = { code ->
+                showCurrencyPicker = false
+                if (code != trip.currencyCode) pendingCurrency = code
+            },
             onDismiss = { showCurrencyPicker = false },
+        )
+    }
+
+    // Changing the shared currency converts everything, so say so before doing it.
+    pendingCurrency?.let { code ->
+        AlertDialog(
+            onDismissRequest = { if (!converting) { pendingCurrency = null; convertFailed = false } },
+            title = { Text(s.convertExpensesTitle.replace("%s", code)) },
+            text = {
+                Column {
+                    Text(s.convertExpensesBody.replace("%s", code))
+                    if (converting) {
+                        Spacer(Modifier.height(14.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                            Spacer(Modifier.width(10.dp))
+                            Text(s.convertingExpenses, style = MaterialTheme.typography.bodyMedium)
+                        }
+                    }
+                    if (convertFailed) {
+                        Spacer(Modifier.height(14.dp))
+                        Text(s.convertFailed, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = !converting,
+                    onClick = {
+                        currencyScope.launch {
+                            converting = true
+                            convertFailed = false
+                            val ok = onSetCurrency(code)
+                            converting = false
+                            if (ok) pendingCurrency = null else convertFailed = true
+                        }
+                    },
+                ) { Text(s.convert) }
+            },
+            dismissButton = {
+                TextButton(
+                    enabled = !converting,
+                    onClick = { pendingCurrency = null; convertFailed = false },
+                ) { Text(s.cancel) }
+            },
         )
     }
 }
@@ -771,11 +824,21 @@ private fun ExpenseRow(
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                         )
                     }
-                    Text(
-                        formatMoney(expense.amount, currencyCode),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                    )
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(
+                            formatMoney(expense.amount, currencyCode),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        // What was actually paid, e.g. "15000.00 HUF" under "€38.42".
+                        if (expense.isForeign && expense.originalCurrency != currencyCode) {
+                            Text(
+                                formatMoney(expense.originalAmount, expense.originalCurrency),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            )
+                        }
+                    }
                 }
 
                 if (expanded) {
@@ -1305,10 +1368,11 @@ private fun SettledBanner(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-private fun CurrencyPickerDialog(
+internal fun CurrencyPickerDialog(
     current: String,
     onPick: (String) -> Unit,
     onDismiss: () -> Unit,
+    title: String? = null,     // defaults to "Trip currency"
 ) {
     val s = LocalStrings.current
     var query by rememberSaveable { mutableStateOf("") }
@@ -1357,7 +1421,7 @@ private fun CurrencyPickerDialog(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    s.tripCurrency,
+                    title ?: s.tripCurrency,
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.weight(1f),

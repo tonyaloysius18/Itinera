@@ -223,7 +223,7 @@ data class Expense(
     val id: String,
     val tripId: String,
     val description: String,
-    val amount: Double,            // total
+    val amount: Double,            // total, always in the trip's currency
     val paidByTravellerId: String,
     val shares: List<ExpenseShare> = emptyList(),   // sums to amount
     val createdAt: Long = 0L,
@@ -231,7 +231,18 @@ data class Expense(
     // Absent on existing documents, so they decode to OTHER. No migration.  ⬅ ADD
     val category: ExpenseCategory = ExpenseCategory.OTHER,
     val createdBy: String = "",        // uid of the member who added this — for block-filtering
+    // What was actually paid, when it wasn't in the trip's currency (e.g. 15000 HUF on a
+    // EUR trip). `amount` holds the converted figure, so balances, older app versions and
+    // everything else keep reading `amount`. Blank currency = paid in the trip's currency.
+    val originalAmount: Double = 0.0,
+    val originalCurrency: String = "",
+    val fxRate: Double = 1.0,          // trip currency per 1 unit of originalCurrency
+    val fxDate: String = "",           // ISO date the rate is from ("" = not converted)
 )
+
+/** True when this expense was paid in a currency other than the trip's. */
+val Expense.isForeign: Boolean
+    get() = originalCurrency.isNotBlank() && originalAmount > 0.0
 
 @Serializable
 data class Payment(
