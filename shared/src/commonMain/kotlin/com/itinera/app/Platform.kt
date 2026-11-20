@@ -16,3 +16,6 @@ expect fun prefersReducedMotion(): Boolean
 
 /** Open the phone dialer pre-filled with [number]. The user still taps to call. */
 expect fun dial(number: String)
+
+/** The installed app's version name (e.g. "1.1.3"), read from the platform so it never goes stale. */
+expect fun appVersionName(): String

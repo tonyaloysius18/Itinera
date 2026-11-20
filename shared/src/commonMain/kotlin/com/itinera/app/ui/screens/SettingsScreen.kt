@@ -126,7 +126,7 @@ fun SettingsScreen(
     appearanceValue: String = "",
     languageValue: String = "",
     notificationsValue: String = "",
-    appVersion: String = "Itinera 1.1.0",
+    appVersion: String = "Itinera ${com.itinera.app.appVersionName()}",
 ) {
     val s = LocalStrings.current
     val scrollState = rememberSaveable(saver = ScrollState.Saver) { ScrollState(0) }

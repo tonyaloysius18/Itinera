@@ -122,6 +122,33 @@ fun Trip.canEdit(uid: String): Boolean =
 /** True if this user owns the trip. */
 fun Trip.isOwnedBy(uid: String): Boolean = members[uid] == "owner"
 
+/** The traveller row that stands for [uid] on this trip ("" if they have none). */
+fun Trip.travellerIdFor(uid: String): String =
+    travellers.firstOrNull { uid.isNotBlank() && it.userId == uid }?.id
+        ?: travellers.firstOrNull { uid.isNotBlank() && uid == ownerId && it.isOwner }?.id
+        ?: ""
+
+/**
+ * Passes are personal: the trip owner sees every document, everyone else sees only
+ * documents assigned to their own traveller plus unassigned ones (shared bookings,
+ * group place tickets). Someone else's boarding pass is never shown to another member.
+ */
+fun Trip.canSeeDocument(doc: DocItem, uid: String): Boolean =
+    isOwnedBy(uid) || doc.travellerId.isBlank() || doc.travellerId == travellerIdFor(uid)
+
+/**
+ * Who a document assigned to [travellerId] is shared with (its memberIds), and the account
+ * it belongs to (travellerUid). Unassigned: every member. Assigned: only the owner and that
+ * traveller's own account, so no other member's device ever receives someone else's pass.
+ * Must match the documents rule in firestore.rules.
+ */
+fun Trip.documentAccess(travellerId: String): Pair<List<String>, String> {
+    if (travellerId.isBlank()) return memberIds to ""
+    val uid = travellers.firstOrNull { it.id == travellerId }?.userId.orEmpty()
+        .takeIf { it in memberIds }.orEmpty()
+    return listOf(ownerId, uid).filter { it.isNotBlank() }.distinct() to uid
+}
+
 /** A document attached to a whole trip, a specific leg, or a specific place (activity). */
 @Serializable
 data class DocItem(
@@ -139,6 +166,10 @@ data class DocItem(
     val memberIds: List<String> = emptyList(),
     val segmentIndex: Int = -1,
     val travellerId: String = "",
+    // Account (uid) of the traveller this pass is assigned to, "" when unassigned or the
+    // traveller has no account. The Firestore rules use it: an assigned pass is shared only
+    // with the trip owner and this uid.
+    val travellerUid: String = "",
     val traveller: String = "",
     val thumbUrl: String = "",
     val createdBy: String = "",        // uid of the member who added this — for block-filtering

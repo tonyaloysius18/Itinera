@@ -26,3 +26,7 @@ actual fun dial(number: String) {
     }
     AndroidApp.context.startActivity(intent)
 }
+actual fun appVersionName(): String = runCatching {
+    val ctx = AndroidApp.context
+    ctx.packageManager.getPackageInfo(ctx.packageName, 0).versionName
+}.getOrNull().orEmpty()

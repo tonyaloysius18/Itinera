@@ -31,3 +31,5 @@ actual fun dial(number: String) {
     // modern API (iOS 10+); the bare openURL(url) is deprecated and can silently fail
     app.openURL(url, options = mapOf<Any?, Any?>(), completionHandler = null)
 }
+actual fun appVersionName(): String =
+    (platform.Foundation.NSBundle.mainBundle.infoDictionary?.get("CFBundleShortVersionString") as? String).orEmpty()

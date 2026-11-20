@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -74,6 +75,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
@@ -95,6 +97,7 @@ import com.itinera.app.model.isForeign
 import com.itinera.app.model.Trip
 import com.itinera.app.model.toNeraItinerary
 import com.itinera.app.model.canEdit
+import com.itinera.app.model.canSeeDocument
 import com.itinera.app.model.isOwnedBy
 import com.itinera.app.model.inferExpenseCategory
 import com.itinera.app.ui.BackHandler
@@ -559,6 +562,7 @@ private fun AppContent(
                                     LaunchedEffect(screen.tripId) {
                                         repository.ensureOwnerTraveller(screen.tripId)
                                         repository.reconcileMembersToTravellers(screen.tripId)
+                                        repository.restampDocumentAccess(screen.tripId)
                                     }
                                     TripDetailScreen(
                                     trip = trip,
@@ -658,6 +662,7 @@ private fun AppContent(
                                     LaunchedEffect(screen.tripId) {
                                         repository.ensureOwnerTraveller(screen.tripId)
                                         repository.reconcileMembersToTravellers(screen.tripId)
+                                        repository.restampDocumentAccess(screen.tripId)
                                     }
                                     TravellersScreen(
                                         travellers = trip.travellers,
@@ -723,10 +728,13 @@ private fun AppContent(
                                     LaunchedEffect(screen.tripId) {
                                         repository.ensureOwnerTraveller(screen.tripId)
                                         repository.reconcileMembersToTravellers(screen.tripId)
+                                        repository.restampDocumentAccess(screen.tripId)
                                     }
                                     DocumentsScreen(
                                     trip = trip,
-                                    documents = repository.documentsForTrip(screen.tripId),
+                                    // Other travellers' passes stay private: only the owner sees every document.
+                                    documents = repository.documentsForTrip(screen.tripId)
+                                        .filter { trip.canSeeDocument(it, repository.authService.currentUid ?: "") },
                                     activities = repository.activitiesForTrip(screen.tripId),
                                     isLoading = !repository.documentsSyncedOnce,
                                     onBack = { navigator.back() },
@@ -814,6 +822,7 @@ private fun AppContent(
                                     LaunchedEffect(screen.tripId) {
                                         repository.ensureOwnerTraveller(screen.tripId)
                                         repository.reconcileMembersToTravellers(screen.tripId)
+                                        repository.restampDocumentAccess(screen.tripId)
                                     }
                                     TripExpensesScreen(
                                         trip = trip,
@@ -1193,7 +1202,7 @@ private fun AppContent(
                                 tripCount = repository.trips.size,
                                 expenseCount = repository.expenses.size,
                                 documentCount = repository.documents.size,
-                                lastSyncedLabel = syncLabel(lastSyncedAt, s),
+                                lastSyncedLabel = syncLabel(maxOf(lastSyncedAt ?: 0L, repository.lastSyncedAt ?: 0L).takeIf { it > 0L }, s),
                                 syncing = syncing,
                                 onSyncNow = {
                                     val uid = repository.authService.currentUid
@@ -1272,7 +1281,10 @@ private fun AppContent(
         }
 
         // Floating pill nav bar (only on top-level screens).
-        if (showBottomBar) {
+        // Hidden while the keyboard is up: it used to ride up on the keyboard and cover
+        // the list being searched.
+        val keyboardOpen = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+        if (showBottomBar && !keyboardOpen) {
             val profilePhoto = repository.profile.photoUrl.takeIf { it.isNotBlank() }
             val items = listOf(
                 NavItem(Icons.Filled.CurrencyExchange, s.currencyUnits, Screen.Currency),
@@ -1311,11 +1323,14 @@ private fun AppContent(
             request = undoRequest,
             actionLabel = s.undo,
             onAction = { undoRequest?.onUndo?.invoke(); undoRequest = null },
+            onDismiss = { undoRequest = null },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
                 .padding(horizontal = 16.dp)
-                .padding(bottom = 96.dp),
+                // The trip page has its own floating "Before You Go / + Add" buttons; sit
+                // above them there, or the Undo button ends up half under "+ Add".
+                .padding(bottom = if (current is Screen.TripDetail) 132.dp else 96.dp),
         )
 
         // Message pill overlay
@@ -1665,9 +1680,24 @@ private class UndoRequest(val message: String, val onUndo: () -> Unit)
 
 /** A bottom snackbar with an action button, for reversible actions such as deleting a trip or an expense. */
 @Composable
-private fun UndoSnackbar(request: UndoRequest?, actionLabel: String, onAction: () -> Unit, modifier: Modifier = Modifier) {
+private fun UndoSnackbar(
+    request: UndoRequest?,
+    actionLabel: String,
+    onAction: () -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     var last by remember { mutableStateOf<UndoRequest?>(null) }
     if (request != null) last = request
+
+    // Swipe down to dismiss: the bar follows the finger (downwards only) and fades;
+    // past the threshold it's dismissed, otherwise it springs back.
+    val density = LocalDensity.current
+    val dismissPx = with(density) { 40.dp.toPx() }
+    val fadePx = with(density) { 90.dp.toPx() }
+    val dragY = remember { Animatable(0f) }
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(request) { if (request != null) dragY.snapTo(0f) }
 
     val dark = MaterialTheme.itinera.isDark
     val primary = MaterialTheme.colorScheme.primary
@@ -1679,7 +1709,24 @@ private fun UndoSnackbar(request: UndoRequest?, actionLabel: String, onAction: (
     ) {
         // A translucent card in the theme's own surface colour (so light and dark both fit), with a hairline border.
         Surface(
-            modifier = Modifier.widthIn(max = 560.dp).fillMaxWidth(),
+            modifier = Modifier.widthIn(max = 560.dp).fillMaxWidth()
+                .graphicsLayer {
+                    translationY = dragY.value
+                    alpha = 1f - (dragY.value / fadePx).coerceIn(0f, 0.7f)
+                }
+                .pointerInput(Unit) {
+                    detectVerticalDragGestures(
+                        onVerticalDrag = { change, dy ->
+                            change.consume()
+                            scope.launch { dragY.snapTo((dragY.value + dy).coerceAtLeast(0f)) }
+                        },
+                        onDragEnd = {
+                            if (dragY.value > dismissPx) onDismiss()
+                            else scope.launch { dragY.animateTo(0f, spring()) }
+                        },
+                        onDragCancel = { scope.launch { dragY.animateTo(0f, spring()) } },
+                    )
+                },
             shape = RoundedCornerShape(18.dp),
             color = (if (dark) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surface).copy(alpha = 0.92f),
             // No shadowElevation: a shadow is drawn under a translucent surface and shows through as a lighter inner block.

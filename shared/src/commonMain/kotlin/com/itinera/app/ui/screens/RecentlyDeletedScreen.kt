@@ -69,8 +69,6 @@ fun RecentlyDeletedScreen(
                         s.recentlyDeletedInfo,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
-                        maxLines = 1,
-                        softWrap = false,
                         modifier = Modifier.padding(horizontal = 16.dp),
                     )
                 }
@@ -86,8 +84,6 @@ fun RecentlyDeletedScreen(
                         s.recentlyDeletedInfo,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                        maxLines = 1,
-                        softWrap = false,
                         modifier = Modifier.padding(horizontal = 4.dp),
                     )
                 }

@@ -22,7 +22,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,6 +63,10 @@ fun SwipeRevealRow(
     val scope = rememberCoroutineScope()
     val offsetX = remember { Animatable(0f) }
     val progress = (-offsetX.value / panelPx).coerceIn(0f, 1f)
+    // The drag detector below is installed once; read the latest callbacks through these
+    // so it never reports to a stale lambda (e.g. one for a row that has since been deleted).
+    val currentIsOpen by rememberUpdatedState(isOpen)
+    val currentOnOpenChange by rememberUpdatedState(onOpenChange)
 
     LaunchedEffect(isOpen) {
         val target = if (isOpen) -panelPx else 0f
@@ -98,7 +104,7 @@ fun SwipeRevealRow(
                     if (!enabled) Modifier
                     else Modifier.pointerInput(Unit) {
                         detectHorizontalDragGestures(
-                            onDragStart = { if (!isOpen) onOpenChange(false) },
+                            onDragStart = { if (!currentIsOpen) currentOnOpenChange(false) },
                             onHorizontalDrag = { change, dragAmount ->
                                 change.consume()
                                 scope.launch {
@@ -106,8 +112,12 @@ fun SwipeRevealRow(
                                 }
                             },
                             onDragEnd = {
+                                val open = offsetX.value < -panelPx / 2
+                                // Report the new state right away, not after the settle
+                                // animation: a quick tap on Delete during the bounce used to be
+                                // followed by a late onOpenChange(true) that reopened the row.
+                                currentOnOpenChange(open)
                                 scope.launch {
-                                    val open = offsetX.value < -panelPx / 2
                                     offsetX.animateTo(
                                         if (open) -panelPx else 0f,
                                         spring(
@@ -115,7 +125,6 @@ fun SwipeRevealRow(
                                             stiffness = Spring.StiffnessMediumLow,
                                         ),
                                     )
-                                    onOpenChange(open)
                                 }
                             },
                         )
@@ -140,7 +149,7 @@ private fun RevealAction(icon: ImageVector, label: String, bg: Color, progress: 
             .clip(CircleShape)
             .background(bg)
             .clickable(
-                enabled = progress > 0.9f,
+                enabled = progress > 0.6f,
                 onClick = onClick,
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() },

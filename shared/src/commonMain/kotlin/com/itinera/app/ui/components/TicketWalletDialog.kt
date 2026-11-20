@@ -89,6 +89,9 @@ fun TicketWalletDialog(
     transport: TransportType?,  // null = a place/attraction ticket (pin icon)
     tickets: List<WalletTicket>,
     myTravellerId: String,
+    notOnThisLeg: Boolean = false,
+    // Only the trip owner may look at other travellers' passes; everyone else sees their own.
+    canSeeAllPasses: Boolean = false,
     canManagePasses: Boolean,
     onManagePasses: () -> Unit,
     onOpenFullTicket: (docId: String) -> Unit,
@@ -105,7 +108,7 @@ fun TicketWalletDialog(
         else if (myTravellerId.isBlank()) emptyList()
         else tickets.filter { it.travellerId == myTravellerId && !it.assignmentAmbiguous }
     }
-    var showGroupPasses by remember(tickets, myTravellerId) { mutableStateOf(false) }
+    var showGroupPasses by remember(tickets, myTravellerId) { mutableStateOf(canSeeAllPasses && notOnThisLeg && myTickets.isEmpty()) }
     val visibleTickets = if (showGroupPasses) tickets else myTickets
     val pagerState = rememberPagerState(pageCount = { visibleTickets.size })
     val multiDoc = visibleTickets.map { it.docId }.distinct().size > 1
@@ -143,6 +146,9 @@ fun TicketWalletDialog(
                     MissingPersonalPass(
                         isPlace = isPlace,
                         accountLinked = myTravellerId.isNotBlank(),
+                        // Who the passes on this leg do belong to, so "none for you" doesn't
+                        // read as "the ticket is broken" when it's simply someone else's.
+                        holders = if (canSeeAllPasses) tickets.map { it.travellerName }.filter { it.isNotBlank() }.distinct() else emptyList(),
                         canManagePasses = canManagePasses,
                         onManagePasses = { onDismiss(); onManagePasses() },
                     )
@@ -195,8 +201,11 @@ fun TicketWalletDialog(
                     }
                 }
 
-                val canSwitchToGroup = !showGroupPasses && myTickets.size < tickets.size
-                if (showGroupPasses || canSwitchToGroup) {
+                val canSwitchToGroup = canSeeAllPasses && !showGroupPasses && myTickets.size < tickets.size
+                // Off this leg with no pass of your own, "Back to my pass" would only lead to
+                // an empty card, so don't offer it.
+                val canSwitchBack = canSeeAllPasses && showGroupPasses && !(notOnThisLeg && myTickets.isEmpty())
+                if (canSwitchBack || canSwitchToGroup) {
                     Spacer(Modifier.height(12.dp))
                     TextButton(
                         onClick = { showGroupPasses = !showGroupPasses },
@@ -235,6 +244,7 @@ fun TicketWalletDialog(
 private fun MissingPersonalPass(
     isPlace: Boolean,          // attraction ticket → "ticket" wording, not "boarding pass"
     accountLinked: Boolean,
+    holders: List<String>,
     canManagePasses: Boolean,
     onManagePasses: () -> Unit,
 ) {
@@ -273,6 +283,22 @@ private fun MissingPersonalPass(
                 color = Color.White.copy(alpha = 0.72f),
                 textAlign = TextAlign.Center,
             )
+            if (holders.isNotEmpty()) {
+                Spacer(Modifier.height(14.dp))
+                holders.forEach { name ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .padding(vertical = 3.dp)
+                            .background(Color.White.copy(alpha = 0.12f), RoundedCornerShape(50))
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                    ) {
+                        Icon(Icons.Filled.Person, contentDescription = null, tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(name, style = MaterialTheme.typography.bodyMedium, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
+                }
+            }
             if (canManagePasses) {
                 Spacer(Modifier.height(14.dp))
                 TextButton(onClick = onManagePasses, modifier = Modifier.heightIn(min = 48.dp)) {

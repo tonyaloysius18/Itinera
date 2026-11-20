@@ -45,7 +45,12 @@ class InviteService {
      * under the trip so the collection-group listeners include them.
      */
     suspend fun fanOutToSubcollections(tripId: String, uid: String) {
-        val docs = tripsRef().document(tripId).collection("documents").get()
+        // Only unassigned documents: passes assigned to a traveller are private to the owner
+        // and that traveller (firestore.rules refuses listing them). The owner's device adds
+        // the joiner to their own passes once they're linked (TripRepository.restampDocumentAccess).
+        val docs = tripsRef().document(tripId).collection("documents")
+            .where { "travellerId" equalTo "" }
+            .get()
         docs.documents.forEach { d ->
             tripsRef().document(tripId).collection("documents").document(d.id)
                 .update("memberIds" to FieldValue.arrayUnion(uid))
@@ -69,7 +74,10 @@ class InviteService {
      * so the nested writes are still permitted).
      */
     suspend fun removeSelfFromSubcollections(tripId: String, uid: String) {
-        val docs = tripsRef().document(tripId).collection("documents").get()
+        // Only the documents shared with us — the others (someone else's pass) we can't list.
+        val docs = tripsRef().document(tripId).collection("documents")
+            .where { "memberIds" contains uid }
+            .get()
         docs.documents.forEach { d ->
             tripsRef().document(tripId).collection("documents").document(d.id)
                 .update("memberIds" to FieldValue.arrayRemove(uid))

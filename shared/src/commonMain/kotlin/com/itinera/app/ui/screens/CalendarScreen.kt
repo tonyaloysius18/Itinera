@@ -416,7 +416,7 @@ private fun DayHeaderRow(date: LocalDate, today: LocalDate, count: Int) {
         }
         Spacer(Modifier.weight(1f))
         Text(
-            "$count ${s.legs}",
+            "$count ${if (count == 1) s.leg else s.legs}",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
         )

@@ -74,6 +74,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -115,6 +116,7 @@ import com.itinera.app.model.Leg
 import com.itinera.app.model.Traveller
 import com.itinera.app.model.Trip
 import com.itinera.app.model.isOwnedBy
+import com.itinera.app.model.canSeeDocument
 import com.itinera.app.model.WalletTicket
 import com.itinera.app.model.label
 import com.itinera.app.parseHourMinute
@@ -238,6 +240,7 @@ fun TripDetailScreen(
     var walletAct by remember { mutableStateOf<Activity?>(null) }
     var barcodeLoading by remember { mutableStateOf(false) }
     val legTicketCache = remember { mutableStateMapOf<String, List<WalletTicket>>() }
+    val isOwner = trip.isOwnedBy(currentUid)
     val myTravellerId = remember(currentUid, travellers, trip.ownerId) {
         travellers.firstOrNull { currentUid.isNotBlank() && it.userId == currentUid }?.id
             ?: travellers.firstOrNull { currentUid == trip.ownerId && it.isOwner }?.id
@@ -584,12 +587,24 @@ fun TripDetailScreen(
 
                                 Column(Modifier.fillMaxWidth()) {
                                     entries.forEach { entry ->
+                                        // Key each row by its item so its swipe offset and
+                                        // gesture state stay with it: unkeyed, deleting a row
+                                        // handed its (open) state to the row that moved up.
+                                        val entryKey = when (entry) {
+                                            is DayEntry.LegEntry -> "leg-${entry.leg.id}"
+                                            is DayEntry.ActEntry -> "act-${entry.act.id}"
+                                        }
+                                        key(entryKey) {
                                         when (entry) {
                                             is DayEntry.LegEntry -> {
                                                 val leg = entry.leg
                                                 val isNext = leg.id == nextLegId
                                                 var stopsExpanded by remember(leg.id) { mutableStateOf(false) }
-                                                val legDocs = documents.filter { it.legId == leg.id }
+                                                // Owner sees every pass on the leg; anyone else only the pass assigned to them
+                                                // (no chip at all when there's none of theirs).
+                                                val legDocs = documents.filter {
+                                                    it.legId == leg.id && (isOwner || it.travellerId == myTravellerId)
+                                                }
 
                                                 val duration = if (leg.timeLabel.isNotBlank() && leg.endTimeLabel.isNotBlank()) {
                                                     val (h1, m1) = parseHourMinute(leg.timeLabel)
@@ -748,7 +763,7 @@ fun TripDetailScreen(
 
                                             is DayEntry.ActEntry -> {
                                                 val act = entry.act
-                                                val actDocs = documents.filter { it.activityId == act.id }
+                                                val actDocs = documents.filter { it.activityId == act.id && trip.canSeeDocument(it, currentUid) }
                                                 val tail = listOf(act.time, act.location)
                                                     .filter { it.isNotBlank() }.joinToString(" · ")
 
@@ -835,6 +850,7 @@ fun TripDetailScreen(
 
                                                 }
                                             }
+                                        }
                                         }
                                     }
                                 }
@@ -991,6 +1007,11 @@ fun TripDetailScreen(
                     transport = leg.transport,
                     tickets = walletTickets,
                     myTravellerId = myTravellerId,
+                    // Not travelling on this leg yourself (e.g. the owner checking the pass
+                    // they assigned to someone else): open on the leg's passes rather than
+                    // an empty "no pass for you".
+                    notOnThisLeg = leg.travellerIds.isNotEmpty() && myTravellerId !in leg.travellerIds,
+                    canSeeAllPasses = isOwner,
                     canManagePasses = canEdit,
                     onManagePasses = {
                         walletTickets = emptyList()
@@ -1012,6 +1033,7 @@ fun TripDetailScreen(
                     transport = null,
                     tickets = walletTickets,
                     myTravellerId = myTravellerId,
+                    canSeeAllPasses = isOwner,
                     canManagePasses = canEdit,
                     onManagePasses = {
                         walletTickets = emptyList()

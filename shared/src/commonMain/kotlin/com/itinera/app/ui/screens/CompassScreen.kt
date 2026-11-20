@@ -73,7 +73,7 @@ fun CompassScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            val deg = (((heading % 360f) + 360f) % 360f).roundToInt()
+            val deg = (((heading % 360f) + 360f) % 360f).roundToInt() % 360   // 359.6° shows 0°, not 360°
             Text("$deg°", style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.Bold)
             Text(
                 cardinal(heading),

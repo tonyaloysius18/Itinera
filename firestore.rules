@@ -139,10 +139,42 @@ service cloud.firestore {
 
       // Documents, expenses and places: owners/editors write; viewers read and may only
       // add/remove themselves in memberIds when joining or leaving.
+      //
+      // Passes are private. A document assigned to a traveller (travellerId set) is shared
+      // only with the trip owner and that traveller's own account (travellerUid): its
+      // memberIds may hold nobody else, and only they can read it. Unassigned documents
+      // (shared bookings, group place tickets) stay visible to every member.
+      // Mirrors Trip.documentAccess in the app.
+      function isAssigned(d) {
+        return d.get('travellerId', '') != '';
+      }
+      function sharingIsPrivate(tripId, d) {
+        let trip = tripData(tripId);
+        let holder = d.get('travellerUid', '');
+        return !isAssigned(d)
+          || ((holder == '' || holder in trip.memberIds)
+              && d.memberIds.toSet().hasOnly([trip.ownerId, holder]));
+      }
+      // Joining may add yourself only to unassigned documents or to your own pass;
+      // leaving may always take yourself out.
+      function mayHoldDoc(d) {
+        return !(request.auth.uid in request.resource.data.memberIds)
+          || !isAssigned(d)
+          || d.get('travellerUid', '') == request.auth.uid;
+      }
       match /documents/{docId} {
-        allow read: if isTripMember(tripId);
-        allow create, delete: if canEditTrip(tripId);
-        allow update: if canEditTrip(tripId) || (isTripMember(tripId) && onlyTogglesSelf());
+        allow get: if isTripMember(tripId)
+          && (!isAssigned(resource.data) || request.auth.uid in resource.data.memberIds);
+        // Queries must say which documents they want: the join fan-out asks for unassigned
+        // ones (travellerId == ""), everything else for its own (memberIds contains uid).
+        // Plain field checks, so Firestore can prove a query from its filters; an unfiltered
+        // list would otherwise hand a member someone else's pass.
+        allow list: if isTripMember(tripId)
+          && (resource.data.travellerId == '' || request.auth.uid in resource.data.memberIds);
+        allow create: if canEditTrip(tripId) && sharingIsPrivate(tripId, request.resource.data);
+        allow delete: if canEditTrip(tripId);
+        allow update: if (canEditTrip(tripId) && sharingIsPrivate(tripId, request.resource.data))
+          || (isTripMember(tripId) && onlyTogglesSelf() && mayHoldDoc(resource.data));
       }
       match /expenses/{expId} {
         allow read: if isTripMember(tripId);

@@ -26,6 +26,8 @@ expect class Compass() {
 /** "N", "NE", "E", … from a heading in degrees. */
 fun cardinal(degrees: Float): String {
     val dirs = listOf("N", "NE", "E", "SE", "S", "SW", "W", "NW")
-    val idx = (((degrees % 360f) + 360f) % 360f / 45f).toInt() % 8
+    // Nearest sector (each is centred on its direction, ±22.5°). Truncating made 359.6° read
+    // "NW" while the number beside it rounded to 360°.
+    val idx = ((((degrees % 360f) + 360f) % 360f + 22.5f) / 45f).toInt() % 8
     return dirs[idx]
 }

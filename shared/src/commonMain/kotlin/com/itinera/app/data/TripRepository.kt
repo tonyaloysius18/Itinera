@@ -24,6 +24,7 @@ import com.itinera.app.model.TripTemplate
 import com.itinera.app.model.toTemplate
 import com.itinera.app.model.UserProfile
 import com.itinera.app.model.isOwnedBy
+import com.itinera.app.model.documentAccess
 import com.itinera.app.model.label
 import com.itinera.app.model.toNeraItinerary
 import io.ktor.client.HttpClient
@@ -939,11 +940,35 @@ class TripRepository {
     }
 
     // ===== documents (now under trips/{tripId}/documents) =====
+
+    /** Stamps who may receive this document (memberIds) and whose pass it is (travellerUid). */
+    private fun DocItem.withAccess(): DocItem {
+        val trip = trips.firstOrNull { it.id == tripId } ?: return copy(memberIds = memberIdsForTrip(tripId))
+        val (ids, ownerOfPass) = trip.documentAccess(travellerId)
+        return copy(memberIds = ids, travellerUid = ownerOfPass)
+    }
+
+    /**
+     * Owner only, on opening a trip: brings every document's sharing in line with
+     * [documentAccess] — passes uploaded before passes went private, members who joined or
+     * left, and travellers who got linked to an account since.
+     */
+    fun restampDocumentAccess(tripId: String) {
+        val trip = trips.firstOrNull { it.id == tripId } ?: return
+        if (!trip.isOwnedBy(authService.currentUid ?: return)) return
+        documents.toList().forEachIndexed { i, d ->
+            if (d.tripId != tripId) return@forEachIndexed
+            val fixed = d.withAccess()
+            if (fixed.memberIds.toSet() != d.memberIds.toSet() || fixed.travellerUid != d.travellerUid) {
+                documents[i] = fixed
+                ioScope.launch { runCatching { docService.saveDocument(fixed) } }
+            }
+        }
+    }
     fun addDocument(doc: DocItem) {
         val stamped = doc.copy(
-            memberIds = memberIdsForTrip(doc.tripId),
             createdBy = doc.createdBy.ifEmpty { authService.currentUid ?: "" },
-        )
+        ).withAccess()
         documents.add(stamped)
         ioScope.launch { runCatching { docService.saveDocument(stamped) } }
     }
@@ -962,10 +987,9 @@ class TripRepository {
             category = category,
             legId = legId,
             activityId = activityId,
-            memberIds = memberIdsForTrip(documents[i].tripId),
             segmentIndex = segmentIndex,
             travellerId = travellerId,
-        )
+        ).withAccess()
         documents[i] = updated
         ioScope.launch { runCatching { docService.saveDocument(updated) } }
     }
@@ -1016,12 +1040,11 @@ class TripRepository {
                 fileName = file.fileName,
                 fileUrl = url,
                 mimeType = file.mimeType,
-                memberIds = memberIdsForTrip(tripId),
                 segmentIndex = segmentIndex,
                 travellerId = travellerId,
                 thumbUrl = thumb,                 // ⬅ ADD
                 createdBy = authService.currentUid ?: "",
-            )
+            ).withAccess()
             documents.add(doc)
             docService.saveDocument(doc)
             true
@@ -1449,8 +1472,8 @@ class TripRepository {
         try {
             val legacyDocs = docService.loadLegacyDocuments(uid)
             for (d in legacyDocs) {
-                val ids = memberIdsForTrip(d.tripId).ifEmpty { listOf(uid) }
-                docService.saveDocument(d.copy(memberIds = ids))
+                val shared = d.withAccess()
+                docService.saveDocument(if (shared.memberIds.isEmpty()) shared.copy(memberIds = listOf(uid)) else shared)
             }
             val legacyExp = expenseService.loadLegacyExpenses(uid)
             for (e in legacyExp) {
@@ -1468,6 +1491,10 @@ class TripRepository {
 
     // ===== real-time sync =====
 
+    /** When trips last arrived from the cloud (null until the first snapshot). Shown on Sync & Backup. */
+    var lastSyncedAt by mutableStateOf<Long?>(null)
+        private set
+
     /** Start live sync for trips, documents, and expenses (collection-group for the latter two). */
     fun startSync() {
         val uid = authService.currentUid ?: return
@@ -1475,7 +1502,7 @@ class TripRepository {
         syncJobs += ioScope.launch {
             tripService.tripsFlow(uid)
                 .catch { e -> println("ITINERA: trips sync error — ${e.message}") }
-                .collect { remote -> applyTrips(remote); tripsSyncedOnce = true }
+                .collect { remote -> applyTrips(remote); tripsSyncedOnce = true; lastSyncedAt = nowMillis() }
         }
         syncJobs += ioScope.launch {
             docService.documentsFlow(uid)

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -412,6 +413,7 @@ fun AddPlaceScreen(
         // state and no indication of what was missing.
         Column(
             Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+                .imePadding()   // keep Save above the keyboard while typing
                 .background(
                     Brush.verticalGradient(
                         0f to Color.Transparent,

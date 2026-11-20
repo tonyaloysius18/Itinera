@@ -71,7 +71,33 @@ suspend fun extractAllBarcodes(bytes: ByteArray, mimeType: String): List<Barcode
     return codes
         .sortedByDescending { it.area }
         .distinctBy { it.rawValue.ifBlank { "${it.left},${it.top},${it.right},${it.bottom}" } }
+        .withoutAppPromoCodes()
         .map { BarcodeExtraction(cropTo(detectImage, it), it.rawValue) }   // crop the same image we detected on
+}
+
+/**
+ * Tickets often print a second QR that only opens the operator's app (FlixBus puts a
+ * flixbus.go.link "manage your booking in the app" code next to the real pass). Counting
+ * it as another pass made a one-passenger ticket look like a multi-passenger one, so it
+ * was never shown as the assigned traveller's own pass. Drop those app/deep-link codes
+ * whenever some other code is present; keep everything if that's all there is.
+ */
+internal fun List<DetectedBarcode>.withoutAppPromoCodes(): List<DetectedBarcode> {
+    val real = filterNot { isAppPromoLink(it.rawValue) }
+    return if (real.isEmpty()) this else real
+}
+
+private val appPromoMarkers = listOf(
+    // deep-link / attribution services (Adjust, Branch, AppsFlyer, Firebase)
+    ".go.link/", "adj_t=", "adjust.com/", "app.adjust.", ".app.link/", "onelink.me/", ".page.link/",
+    // app stores
+    "apps.apple.com/", "itunes.apple.com/", "play.google.com/store", "appgallery.huawei.com/",
+)
+
+internal fun isAppPromoLink(raw: String): Boolean {
+    val v = raw.trim().lowercase()
+    if (!(v.startsWith("http://") || v.startsWith("https://"))) return false
+    return appPromoMarkers.any { it in v }
 }
 
 /** Scales an ImageBitmap by [factor] (nearest-ish via CanvasDrawScope) for better decoding. */

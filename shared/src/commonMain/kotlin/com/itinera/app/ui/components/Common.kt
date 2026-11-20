@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -62,6 +63,7 @@ fun TopBar(
             modifier = Modifier.padding(start = if (onBack != null) 4.dp else 12.dp)
                 .weight(1f),
             color = MaterialTheme.colorScheme.onSurface,
+            minFontSize = 16.sp,
         )
 
         if (trailing != null) {
@@ -86,6 +88,9 @@ fun AutoResizeText(
 ) {
     var fontSizeValue by remember(text) { mutableStateOf(style.fontSize.value) }
     var readyToDraw by remember(text) { mutableStateOf(false) }
+    // Once the text is as small as it may get, cut it with "…" instead of letting it
+    // draw past its slot (it used to run under the top bar's trailing icons).
+    val atMinSize = fontSizeValue <= minFontSize.value
 
     Text(
         text = text,
@@ -94,8 +99,8 @@ fun AutoResizeText(
         fontWeight = fontWeight ?: style.fontWeight,
         maxLines = 1,
         softWrap = false,
-        overflow = TextOverflow.Visible,
-        modifier = modifier.drawWithContent {
+        overflow = if (atMinSize) TextOverflow.Ellipsis else TextOverflow.Visible,
+        modifier = modifier.clipToBounds().drawWithContent {
             if (readyToDraw) drawContent()
         },
         onTextLayout = { textLayoutResult: TextLayoutResult ->

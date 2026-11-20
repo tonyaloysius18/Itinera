@@ -59,6 +59,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -532,6 +533,8 @@ private fun SwipeableTripCard(
     val scope = rememberCoroutineScope()
     val offsetX = remember { Animatable(0f) }
     val exitOffsetX = remember { Animatable(0f) }   // slides the WHOLE card (incl. icons) off on archive
+    val currentIsOpen by rememberUpdatedState(isOpen)
+    val currentOnOpenChange by rememberUpdatedState(onOpenChange)
 
     val progress = ((-offsetX.value - with(density) { gap.toPx() }) / (panelPx - with(density) { gap.toPx() })).coerceIn(0f, 1f)
 
@@ -610,7 +613,7 @@ private fun SwipeableTripCard(
                 .pointerInput(trip.id) {
                     detectHorizontalDragGestures(
                         onDragStart = {
-                            if (!isOpen) onOpenChange(false)
+                            if (!currentIsOpen) currentOnOpenChange(false)
                         },
                         onHorizontalDrag = { _, dragAmount ->
                             scope.launch {
@@ -619,13 +622,15 @@ private fun SwipeableTripCard(
                             }
                         },
                         onDragEnd = {
+                            // Report open/closed before the settle animation so a quick tap on
+                            // an action during the bounce isn't undone by a late onOpenChange.
+                            val open = offsetX.value < -panelPx / 2
+                            currentOnOpenChange(open)
                             scope.launch {
-                                if (offsetX.value < -panelPx / 2) {
+                                if (open) {
                                     offsetX.animateTo(-panelPx, spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow))
-                                    onOpenChange(true)
                                 } else {
                                     offsetX.animateTo(0f, spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium))
-                                    onOpenChange(false)
                                 }
                             }
                         },

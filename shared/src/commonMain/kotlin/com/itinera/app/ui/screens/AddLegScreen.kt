@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -604,6 +605,7 @@ fun AddLegScreen(
         val canSave = from.isNotBlank() && to.isNotBlank() && date != null
         Column(
             Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+                .imePadding()   // keep Save above the keyboard while typing
                 .background(
                     Brush.verticalGradient(
                         0f to Color.Transparent,
