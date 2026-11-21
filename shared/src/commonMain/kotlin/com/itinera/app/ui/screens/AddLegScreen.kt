@@ -17,6 +17,9 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -137,7 +140,11 @@ fun AddLegScreen(
             }
         }
 
-    Box(Modifier.fillMaxSize()) {
+    // The whole screen shrinks above the keyboard, so the field being typed in and the
+    // Save button both stay visible. (Padding only the Save button doubled up on iOS,
+    // which also slides the screen up to reveal a hidden field: Save floated mid-screen.)
+    val keyboardOpen = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+    Box(Modifier.fillMaxSize().imePadding()) {
         Column(Modifier.fillMaxSize()) {
             Row(
                 Modifier.fillMaxWidth().padding(8.dp),
@@ -148,7 +155,12 @@ fun AddLegScreen(
             }
 
             Column(
-                Modifier.weight(1f).padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
+                Modifier.weight(1f)
+                    // With the keyboard up, end the scroll area above the floating Save button
+                    // (~button + its padding) so the field being typed in scrolls into view
+                    // above it instead of hiding behind it.
+                    .padding(bottom = if (keyboardOpen) 96.dp else 0.dp)
+                    .padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
             ) {
                 // ⬅ CHANGED — transport moved to the top and gained labels. It sets
                 // the operator field's label further down, so choosing it last was
@@ -605,7 +617,6 @@ fun AddLegScreen(
         val canSave = from.isNotBlank() && to.isNotBlank() && date != null
         Column(
             Modifier.align(Alignment.BottomCenter).fillMaxWidth()
-                .imePadding()   // keep Save above the keyboard while typing
                 .background(
                     Brush.verticalGradient(
                         0f to Color.Transparent,
@@ -614,7 +625,7 @@ fun AddLegScreen(
                 )
                 .padding(horizontal = 16.dp)
                 // ⬅ CHANGED — lifted off the bottom edge so it reads as floating.
-                .padding(top = 24.dp, bottom = 56.dp),
+                .padding(top = 24.dp, bottom = if (keyboardOpen) 12.dp else 56.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Button(

@@ -15,6 +15,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -155,7 +158,11 @@ fun AddPlaceScreen(
 
     val canSave = title.isNotBlank() && date != null
 
-    Box(Modifier.fillMaxSize()) {
+    // The whole screen shrinks above the keyboard, so the field being typed in and the
+    // Save button both stay visible. (Padding only the Save button doubled up on iOS,
+    // which also slides the screen up to reveal a hidden field: Save floated mid-screen.)
+    val keyboardOpen = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+    Box(Modifier.fillMaxSize().imePadding()) {
         Column(Modifier.fillMaxSize()) {
             Row(
                 Modifier.fillMaxWidth().padding(8.dp),
@@ -169,7 +176,12 @@ fun AddPlaceScreen(
             }
 
             Column(
-                Modifier.weight(1f).padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
+                Modifier.weight(1f)
+                    // With the keyboard up, end the scroll area above the floating Save button
+                    // (~button + its padding) so the field being typed in scrolls into view
+                    // above it instead of hiding behind it.
+                    .padding(bottom = if (keyboardOpen) 96.dp else 0.dp)
+                    .padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
             ) {
                 // ⬅ CHANGED — the name is what the screen is for, so it gets its
                 // own card and a larger type size rather than being the first of
@@ -413,7 +425,6 @@ fun AddPlaceScreen(
         // state and no indication of what was missing.
         Column(
             Modifier.align(Alignment.BottomCenter).fillMaxWidth()
-                .imePadding()   // keep Save above the keyboard while typing
                 .background(
                     Brush.verticalGradient(
                         0f to Color.Transparent,
@@ -421,7 +432,7 @@ fun AddPlaceScreen(
                     )
                 )
                 .padding(horizontal = 16.dp)
-                .padding(top = 24.dp, bottom = 56.dp),
+                .padding(top = 24.dp, bottom = if (keyboardOpen) 12.dp else 56.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Button(
