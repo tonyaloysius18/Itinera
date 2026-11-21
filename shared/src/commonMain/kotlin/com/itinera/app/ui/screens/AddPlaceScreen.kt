@@ -162,6 +162,28 @@ fun AddPlaceScreen(
     // Save button both stay visible. (Padding only the Save button doubled up on iOS,
     // which also slides the screen up to reveal a hidden field: Save floated mid-screen.)
     val keyboardOpen = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+    val saveButton: @Composable () -> Unit = {
+            Button(
+                onClick = {
+                    date?.let {
+                        onSave(
+                            it,
+                            title.trim().toTitleCase(),
+                            time,
+                            endTime,
+                            location.trim().toTitleCase(),
+                            note.trim(),
+                        )
+                    }
+                },
+                enabled = canSave,
+                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
+                shape = RoundedCornerShape(26.dp),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp),
+                contentPadding = PaddingValues(horizontal = 48.dp, vertical = 0.dp),
+                modifier = Modifier.height(52.dp),
+            ) { Text(s.savePlace) }
+    }
     Box(Modifier.fillMaxSize().imePadding()) {
         Column(Modifier.fillMaxSize()) {
             Row(
@@ -177,10 +199,6 @@ fun AddPlaceScreen(
 
             Column(
                 Modifier.weight(1f)
-                    // With the keyboard up, end the scroll area above the floating Save button
-                    // (~button + its padding) so the field being typed in scrolls into view
-                    // above it instead of hiding behind it.
-                    .padding(bottom = if (keyboardOpen) 96.dp else 0.dp)
                     .padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
             ) {
                 // ⬅ CHANGED — the name is what the screen is for, so it gets its
@@ -417,44 +435,36 @@ fun AddPlaceScreen(
                     }
                 }
 
-                Spacer(Modifier.height(150.dp))
+                if (keyboardOpen) {
+                    // Typing: Save scrolls with the form, at its end, rather than floating.
+                    Spacer(Modifier.height(28.dp))
+                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { saveButton() }
+                    Spacer(Modifier.height(24.dp))
+                } else {
+                    Spacer(Modifier.height(150.dp))
+                }
             }
         }
 
         // ⬅ CHANGED — was full width at the bottom edge with a dimmed disabled
         // state and no indication of what was missing.
-        Column(
-            Modifier.align(Alignment.BottomCenter).fillMaxWidth()
-                .background(
-                    Brush.verticalGradient(
-                        0f to Color.Transparent,
-                        0.4f to MaterialTheme.colorScheme.background,
-                    )
-                )
-                .padding(horizontal = 16.dp)
-                .padding(top = 24.dp, bottom = if (keyboardOpen) 12.dp else 56.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Button(
-                onClick = {
-                    date?.let {
-                        onSave(
-                            it,
-                            title.trim().toTitleCase(),
-                            time,
-                            endTime,
-                            location.trim().toTitleCase(),
-                            note.trim(),
+        // While typing, Save lives at the end of the form instead (see saveButton()),
+        // so it never sits on top of the keyboard.
+        if (!keyboardOpen) {
+            Column(
+                Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+                    .background(
+                        Brush.verticalGradient(
+                            0f to Color.Transparent,
+                            0.4f to MaterialTheme.colorScheme.background,
                         )
-                    }
-                },
-                enabled = canSave,
-                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
-                shape = RoundedCornerShape(26.dp),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp),
-                contentPadding = PaddingValues(horizontal = 48.dp, vertical = 0.dp),
-                modifier = Modifier.height(52.dp),
-            ) { Text(s.savePlace) }
+                    )
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 24.dp, bottom = 56.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                saveButton()
+            }
         }
     }
 

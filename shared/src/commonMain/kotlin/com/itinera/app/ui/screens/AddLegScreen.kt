@@ -144,6 +144,49 @@ fun AddLegScreen(
     // Save button both stay visible. (Padding only the Save button doubled up on iOS,
     // which also slides the screen up to reveal a hidden field: Save floated mid-screen.)
     val keyboardOpen = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+    val canSave = from.isNotBlank() && to.isNotBlank() && date != null
+    val saveButton: @Composable () -> Unit = {
+            Button(
+                onClick = {
+                    onSave(
+                        Leg(
+                            id = existing?.id ?: "leg_${kotlin.random.Random.nextLong()}",
+                            completed = existing?.completed ?: false,
+                            addedToCalendar = existing?.addedToCalendar ?: false,
+                            // ⬅ CHANGED — cased once here. Running toTitleCase on
+                            // every keystroke fought anyone typing "kempten (allgau)".
+                            fromCity = from.trim().toTitleCase().ifBlank { "—" },
+                            toCity = to.trim().toTitleCase().ifBlank { "—" },
+                            transport = transport,
+                            date = date!!,
+                            timeLabel = startTime.ifBlank { "" },
+                            endTimeLabel = endTime.ifBlank { "" },
+                            operator = operator.trim().toTitleCase(),
+                            country = country.trim(),
+                            bookingRef = null,
+                            travellerIds = selectedTravellerIds.toList(),
+                            // keep coords when the city didn't change (edit shouldn't wipe them)
+                            fromLat = if (existing?.fromCity == from) existing.fromLat else 0.0,
+                            fromLng = if (existing?.fromCity == from) existing.fromLng else 0.0,
+                            toLat = if (existing?.toCity == to) existing.toLat else 0.0,
+                            toLng = if (existing?.toCity == to) existing.toLng else 0.0,
+                            stops = stops.mapNotNull { st ->
+                                st.city.trim().ifBlank { null }?.let { st.copy(city = it.toTitleCase()) }
+                            },
+                        )
+                    )
+                },
+                enabled = canSave,
+                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
+                shape = RoundedCornerShape(26.dp),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp),
+                // ⬅ CHANGED — was fillMaxWidth().height(50.dp). Wraps its label with
+                // generous padding instead, so it reads as a floating action rather
+                // than a bar.
+                contentPadding = PaddingValues(horizontal = 56.dp, vertical = 0.dp),
+                modifier = Modifier.height(52.dp),
+            ) { Text(s.saveLeg) }
+    }
     Box(Modifier.fillMaxSize().imePadding()) {
         Column(Modifier.fillMaxSize()) {
             Row(
@@ -156,10 +199,6 @@ fun AddLegScreen(
 
             Column(
                 Modifier.weight(1f)
-                    // With the keyboard up, end the scroll area above the floating Save button
-                    // (~button + its padding) so the field being typed in scrolls into view
-                    // above it instead of hiding behind it.
-                    .padding(bottom = if (keyboardOpen) 96.dp else 0.dp)
                     .padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
             ) {
                 // ⬅ CHANGED — transport moved to the top and gained labels. It sets
@@ -445,7 +484,14 @@ fun AddLegScreen(
                     }
                 }
 
-                Spacer(Modifier.height(120.dp))
+                if (keyboardOpen) {
+                    // Typing: Save scrolls with the form, at its end, rather than floating.
+                    Spacer(Modifier.height(28.dp))
+                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { saveButton() }
+                    Spacer(Modifier.height(24.dp))
+                } else {
+                    Spacer(Modifier.height(120.dp))
+                }
             }
 
             // Calendar dialog
@@ -614,60 +660,24 @@ fun AddLegScreen(
         } // End of Column
 
         // Save
-        val canSave = from.isNotBlank() && to.isNotBlank() && date != null
-        Column(
-            Modifier.align(Alignment.BottomCenter).fillMaxWidth()
-                .background(
-                    Brush.verticalGradient(
-                        0f to Color.Transparent,
-                        0.4f to MaterialTheme.colorScheme.background,
-                    )
-                )
-                .padding(horizontal = 16.dp)
-                // ⬅ CHANGED — lifted off the bottom edge so it reads as floating.
-                .padding(top = 24.dp, bottom = if (keyboardOpen) 12.dp else 56.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Button(
-                onClick = {
-                    onSave(
-                        Leg(
-                            id = existing?.id ?: "leg_${kotlin.random.Random.nextLong()}",
-                            completed = existing?.completed ?: false,
-                            addedToCalendar = existing?.addedToCalendar ?: false,
-                            // ⬅ CHANGED — cased once here. Running toTitleCase on
-                            // every keystroke fought anyone typing "kempten (allgau)".
-                            fromCity = from.trim().toTitleCase().ifBlank { "—" },
-                            toCity = to.trim().toTitleCase().ifBlank { "—" },
-                            transport = transport,
-                            date = date!!,
-                            timeLabel = startTime.ifBlank { "" },
-                            endTimeLabel = endTime.ifBlank { "" },
-                            operator = operator.trim().toTitleCase(),
-                            country = country.trim(),
-                            bookingRef = null,
-                            travellerIds = selectedTravellerIds.toList(),
-                            // keep coords when the city didn't change (edit shouldn't wipe them)
-                            fromLat = if (existing?.fromCity == from) existing.fromLat else 0.0,
-                            fromLng = if (existing?.fromCity == from) existing.fromLng else 0.0,
-                            toLat = if (existing?.toCity == to) existing.toLat else 0.0,
-                            toLng = if (existing?.toCity == to) existing.toLng else 0.0,
-                            stops = stops.mapNotNull { st ->
-                                st.city.trim().ifBlank { null }?.let { st.copy(city = it.toTitleCase()) }
-                            },
+        // While typing, Save lives at the end of the form instead (see saveButton()),
+        // so it never sits on top of the keyboard.
+        if (!keyboardOpen) {
+            Column(
+                Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+                    .background(
+                        Brush.verticalGradient(
+                            0f to Color.Transparent,
+                            0.4f to MaterialTheme.colorScheme.background,
                         )
                     )
-                },
-                enabled = canSave,
-                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
-                shape = RoundedCornerShape(26.dp),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp),
-                // ⬅ CHANGED — was fillMaxWidth().height(50.dp). Wraps its label with
-                // generous padding instead, so it reads as a floating action rather
-                // than a bar.
-                contentPadding = PaddingValues(horizontal = 56.dp, vertical = 0.dp),
-                modifier = Modifier.height(52.dp),
-            ) { Text(s.saveLeg) }
+                    .padding(horizontal = 16.dp)
+                    // ⬅ CHANGED — lifted off the bottom edge so it reads as floating.
+                    .padding(top = 24.dp, bottom = 56.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                saveButton()
+            }
         }
     }
 }
