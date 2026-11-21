@@ -63,7 +63,34 @@ https://ynotlabs.dev/privacy    <!-- TODO: must be live before submission -->
 - **Content Rights:** Does your app contain, show, or access third-party content? — Yes (Unsplash imagery, exchange-rate data, AI-generated trip suggestions from Nera, Google Places and Open-Meteo data)
 
 ## Age Rating
-Expected 4+ (no objectionable content). Complete the questionnaire in App Store Connect — all "None" unless something changes.
+Questionnaire as set in App Store Connect (updated 21 Nov 2026). Keep these in sync with the app.
+
+**Step 1 — Features**
+
+| Question | Answer | Why |
+|---|---|---|
+| Parental Controls | No | |
+| Age Assurance | No | |
+| Unrestricted Web Access | No | |
+| User-Generated Content | **Yes** | Shared trips members edit together, and the Community feed of shared itineraries (moderated, with report/block) |
+| Social Media | No | The Community feed only shows itineraries approved by the developer; nothing spreads virally |
+| Social Media Disabled for Users Under 13 | No | |
+| Messaging and Chat | No | Nera is an AI planner; users can't message each other |
+| Shared Location | No | Added by Apple in 2026. No location permission on Android; on iOS CoreLocation is used only for the compass heading. Nobody's location is shared |
+| Advertising | No | |
+
+**Step 2 — Mature Themes:** all None. Dating and Relationships (added by Apple in 2026): **No** — no dating features, and Nera is a trip planner, not a companion.
+
+**Steps 3–6** (Medical/Wellness, Sexuality/Nudity, Violence, Chance-Based Activities): all None / No.
+
+**Step 7:** no age category or override; no Age Suitability URL.
+
+**Resulting ratings:** 4+ in 172 countries or regions; Brazil A6 (was AL until UGC was set to Yes); Korea ALL; Vietnam 00+.
+Age-rating changes in App Information ship with the next app version, not one already in review.
+
+## Distribution notes
+- **China mainland removed** from availability on 21 Nov 2026 (now 174 countries or regions). Selling there needs a Security Assessment and an AI-generated content (AIGC) declaration by 31 Jan 2027, and the app depends on Firebase/Google services that are blocked there. Re-add under Pricing and Availability only after doing both filings.
+- **EU Digital Services Act:** trader. Declared on Google Play (account and app level, with the terms page as Terms of Service URL) and on App Store Connect.
 
 ---
 
