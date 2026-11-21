@@ -129,24 +129,42 @@ fun Trip.travellerIdFor(uid: String): String =
         ?: ""
 
 /**
- * Passes are personal: the trip owner sees every document, everyone else sees only
- * documents assigned to their own traveller plus unassigned ones (shared bookings,
- * group place tickets). Someone else's boarding pass is never shown to another member.
+ * The travellers a pass is for. A pass can cover several people (one QR for a whole
+ * booking); older passes only have the single [DocItem.travellerId].
  */
-fun Trip.canSeeDocument(doc: DocItem, uid: String): Boolean =
-    isOwnedBy(uid) || doc.travellerId.isBlank() || doc.travellerId == travellerIdFor(uid)
+val DocItem.assignedTravellerIds: List<String>
+    get() = travellerIds.filter { it.isNotBlank() }.ifEmpty { listOfNotNull(travellerId.takeIf { it.isNotBlank() }) }
 
 /**
- * Who a document assigned to [travellerId] is shared with (its memberIds), and the account
- * it belongs to (travellerUid). Unassigned: every member. Assigned: only the owner and that
- * traveller's own account, so no other member's device ever receives someone else's pass.
+ * Passes are personal: the trip owner sees every document, everyone else sees only
+ * documents assigned to them (alone or together with others) plus unassigned ones (shared
+ * bookings, group place tickets). Someone else's boarding pass is never shown to another member.
+ */
+fun Trip.canSeeDocument(doc: DocItem, uid: String): Boolean {
+    if (isOwnedBy(uid)) return true
+    val assigned = doc.assignedTravellerIds
+    return assigned.isEmpty() || travellerIdFor(uid).let { it.isNotBlank() && it in assigned }
+}
+
+/** Who a pass for [travellerIds] goes to: the members it's shared with, and the holders' accounts. */
+data class DocumentAccess(
+    val memberIds: List<String>,
+    /** Accounts (uids) of the assigned travellers who are trip members, in assignment order. */
+    val holderUids: List<String>,
+)
+
+/**
+ * Unassigned: every member. Assigned: only the owner and the assigned travellers' own
+ * accounts, so no other member's device ever receives someone else's pass.
  * Must match the documents rule in firestore.rules.
  */
-fun Trip.documentAccess(travellerId: String): Pair<List<String>, String> {
-    if (travellerId.isBlank()) return memberIds to ""
-    val uid = travellers.firstOrNull { it.id == travellerId }?.userId.orEmpty()
-        .takeIf { it in memberIds }.orEmpty()
-    return listOf(ownerId, uid).filter { it.isNotBlank() }.distinct() to uid
+fun Trip.documentAccess(travellerIds: List<String>): DocumentAccess {
+    val assigned = travellerIds.filter { it.isNotBlank() }
+    if (assigned.isEmpty()) return DocumentAccess(memberIds, emptyList())
+    val holders = assigned.mapNotNull { id ->
+        travellers.firstOrNull { it.id == id }?.userId?.takeIf { it.isNotBlank() && it in memberIds }
+    }.distinct()
+    return DocumentAccess((listOf(ownerId) + holders).filter { it.isNotBlank() }.distinct(), holders)
 }
 
 /** A document attached to a whole trip, a specific leg, or a specific place (activity). */
@@ -170,6 +188,10 @@ data class DocItem(
     // traveller has no account. The Firestore rules use it: an assigned pass is shared only
     // with the trip owner and this uid.
     val travellerUid: String = "",
+    // A pass can cover several travellers (one QR for a whole booking). When set, these are
+    // authoritative; travellerId/travellerUid still hold the first one, for older app versions.
+    val travellerIds: List<String> = emptyList(),
+    val travellerUids: List<String> = emptyList(),
     val traveller: String = "",
     val thumbUrl: String = "",
     val createdBy: String = "",        // uid of the member who added this — for block-filtering
@@ -346,7 +368,9 @@ data class WalletTicket(
     val docTitle: String = "",
     val routeOverride: String = "",
     val timeOverride: String = "",
-    val travellerId: String = "",
+    /** Travellers this code is for (several when one QR covers a whole booking). */
+    val travellerIds: List<String> = emptyList(),
+    /** Their names, joined for display ("Tony Aloysius + Jow Robinson"). */
     val travellerName: String = "",
     val assignmentAmbiguous: Boolean = false,
 )

@@ -117,6 +117,7 @@ import com.itinera.app.model.Traveller
 import com.itinera.app.model.Trip
 import com.itinera.app.model.isOwnedBy
 import com.itinera.app.model.canSeeDocument
+import com.itinera.app.model.assignedTravellerIds
 import com.itinera.app.model.WalletTicket
 import com.itinera.app.model.label
 import com.itinera.app.parseHourMinute
@@ -264,7 +265,7 @@ fun TripDetailScreen(
             try {
                 val cacheKey = buildString {
                     append(ownerId)
-                    docs.forEach { append('|').append(it.id).append(':').append(it.travellerId).append(':').append(it.fileUrl) }
+                    docs.forEach { append('|').append(it.id).append(':').append(it.assignedTravellerIds.joinToString(",")).append(':').append(it.fileUrl) }
                 }
                 val tickets = legTicketCache.getOrPut(cacheKey) {
                     docs.flatMap { d ->
@@ -276,9 +277,11 @@ fun TripDetailScreen(
                         // traveller assignment for every code. Keep those codes group-only until
                         // they are split into individually assigned documents.
                         val assignmentAmbiguous = codes.size > 1
-                        val ticketTravellerId = d.travellerId.takeUnless { assignmentAmbiguous }.orEmpty()
-                        val travName = travellers.firstOrNull { it.id == ticketTravellerId }
-                            ?.let { "${it.firstName} ${it.surname}".trim() } ?: ""
+                        // One code can be for several travellers (a single QR for a whole booking).
+                        val ticketTravellerIds = if (assignmentAmbiguous) emptyList() else d.assignedTravellerIds
+                        val travName = ticketTravellerIds
+                            .mapNotNull { id -> travellers.firstOrNull { it.id == id } }
+                            .joinToString(" + ") { "${it.firstName} ${it.surname}".trim() }
 
                         codes.map {
                             WalletTicket(
@@ -287,7 +290,7 @@ fun TripDetailScreen(
                                 docTitle = d.title,
                                 routeOverride = route,
                                 timeOverride = time,
-                                travellerId = ticketTravellerId,
+                                travellerIds = ticketTravellerIds,
                                 travellerName = travName,
                                 assignmentAmbiguous = assignmentAmbiguous,
                             )
@@ -603,7 +606,7 @@ fun TripDetailScreen(
                                                 // Owner sees every pass on the leg; anyone else only the pass assigned to them
                                                 // (no chip at all when there's none of theirs).
                                                 val legDocs = documents.filter {
-                                                    it.legId == leg.id && (isOwner || it.travellerId == myTravellerId)
+                                                    it.legId == leg.id && (isOwner || myTravellerId in it.assignedTravellerIds)
                                                 }
 
                                                 val duration = if (leg.timeLabel.isNotBlank() && leg.endTimeLabel.isNotBlank()) {

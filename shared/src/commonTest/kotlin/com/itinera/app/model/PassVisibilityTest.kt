@@ -46,12 +46,32 @@ class PassVisibilityTest {
     }
 
     @Test fun assignedPassIsSharedWithOwnerAndHolderOnly() {
-        val tripWithIds = trip.copy(memberIds = listOf("uOwner", "uJow", "uSam"))
-        assertEquals(listOf("uOwner", "uJow") to "uJow", tripWithIds.documentAccess("m_uJow"))
-        assertEquals(listOf("uOwner") to "uOwner", tripWithIds.documentAccess("owner_uOwner"))
-        assertEquals(listOf("uOwner", "uJow", "uSam") to "", tripWithIds.documentAccess(""))
+        val t = trip.copy(memberIds = listOf("uOwner", "uJow", "uSam"))
+        assertEquals(DocumentAccess(listOf("uOwner", "uJow"), listOf("uJow")), t.documentAccess(listOf("m_uJow")))
+        assertEquals(DocumentAccess(listOf("uOwner"), listOf("uOwner")), t.documentAccess(listOf("owner_uOwner")))
+        assertEquals(DocumentAccess(listOf("uOwner", "uJow", "uSam"), emptyList()), t.documentAccess(emptyList()))
         // A traveller with no account: only the owner gets it.
-        assertEquals(listOf("uOwner") to "", tripWithIds.documentAccess("someone_offline"))
+        assertEquals(DocumentAccess(listOf("uOwner"), emptyList()), t.documentAccess(listOf("someone_offline")))
+    }
+
+    @Test fun onePassForTwoTravellers() {
+        val t = trip.copy(memberIds = listOf("uOwner", "uJow", "uSam"))
+        // One QR for the whole booking: the owner and both passengers get it, Sam doesn't.
+        assertEquals(DocumentAccess(listOf("uOwner", "uJow"), listOf("uOwner", "uJow")),
+            t.documentAccess(listOf("owner_uOwner", "m_uJow")))
+        val shared = DocItem(id = "d", tripId = "t1", title = "FlixBus", legId = "leg1",
+            travellerIds = listOf("owner_uOwner", "m_uJow"))
+        assertTrue(t.canSeeDocument(shared, "uJow"))
+        assertTrue(t.canSeeDocument(shared, "uOwner"))
+        assertFalse(t.canSeeDocument(shared, "uSam"))
+        assertEquals(listOf("owner_uOwner", "m_uJow"), shared.assignedTravellerIds)
+    }
+
+    @Test fun olderSingleTravellerPassesStillWork() {
+        val old = DocItem(id = "d", tripId = "t1", title = "Pass", travellerId = "m_uJow")
+        assertEquals(listOf("m_uJow"), old.assignedTravellerIds)
+        assertTrue(trip.canSeeDocument(old, "uJow"))
+        assertFalse(trip.canSeeDocument(old, "uSam"))
     }
 
     @Test fun travellerLookup() {

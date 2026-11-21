@@ -747,7 +747,7 @@ private fun AppContent(
                                     onUpload = { file, title, category, legId, segmentIndex, travellerId, activityId ->
                                         repository.addDocumentWithFile(
                                             tripId = screen.tripId, title = title, category = category,
-                                            file = file, legId = legId, segmentIndex = segmentIndex, travellerId = travellerId,
+                                            file = file, legId = legId, segmentIndex = segmentIndex, travellerIds = travellerId,
                                             activityId = activityId,
                                         )
                                     },

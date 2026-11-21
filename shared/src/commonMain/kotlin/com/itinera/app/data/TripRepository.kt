@@ -25,6 +25,7 @@ import com.itinera.app.model.toTemplate
 import com.itinera.app.model.UserProfile
 import com.itinera.app.model.isOwnedBy
 import com.itinera.app.model.documentAccess
+import com.itinera.app.model.assignedTravellerIds
 import com.itinera.app.model.label
 import com.itinera.app.model.toNeraItinerary
 import io.ktor.client.HttpClient
@@ -941,11 +942,25 @@ class TripRepository {
 
     // ===== documents (now under trips/{tripId}/documents) =====
 
-    /** Stamps who may receive this document (memberIds) and whose pass it is (travellerUid). */
+    /**
+     * Stamps who may receive this document (memberIds) and whose pass it is. A pass can be
+     * for several travellers; travellerId/travellerUid keep the first one so older app
+     * versions (which only know a single traveller) still treat it as assigned.
+     */
     private fun DocItem.withAccess(): DocItem {
         val trip = trips.firstOrNull { it.id == tripId } ?: return copy(memberIds = memberIdsForTrip(tripId))
-        val (ids, ownerOfPass) = trip.documentAccess(travellerId)
-        return copy(memberIds = ids, travellerUid = ownerOfPass)
+        val assigned = assignedTravellerIds
+        val access = trip.documentAccess(assigned)
+        val firstUid = assigned.firstOrNull()
+            ?.let { id -> trip.travellers.firstOrNull { it.id == id }?.userId }
+            ?.takeIf { it.isNotBlank() && it in trip.memberIds }.orEmpty()
+        return copy(
+            memberIds = access.memberIds,
+            travellerId = assigned.firstOrNull().orEmpty(),
+            travellerUid = firstUid,
+            travellerIds = assigned,
+            travellerUids = access.holderUids,
+        )
     }
 
     /**
@@ -959,7 +974,9 @@ class TripRepository {
         documents.toList().forEachIndexed { i, d ->
             if (d.tripId != tripId) return@forEachIndexed
             val fixed = d.withAccess()
-            if (fixed.memberIds.toSet() != d.memberIds.toSet() || fixed.travellerUid != d.travellerUid) {
+            if (fixed.memberIds.toSet() != d.memberIds.toSet() || fixed.travellerUid != d.travellerUid ||
+                fixed.travellerIds != d.travellerIds || fixed.travellerUids != d.travellerUids
+            ) {
                 documents[i] = fixed
                 ioScope.launch { runCatching { docService.saveDocument(fixed) } }
             }
@@ -979,7 +996,7 @@ class TripRepository {
         if (doc != null) ioScope.launch { runCatching { docService.deleteDocument(doc.tripId, docId) } }
     }
 
-    fun updateDocument(docId: String, title: String, category: String, legId: String, segmentIndex: Int = -1, travellerId: String = "", activityId: String = "") {
+    fun updateDocument(docId: String, title: String, category: String, legId: String, segmentIndex: Int = -1, travellerIds: List<String> = emptyList(), activityId: String = "") {
         val i = documents.indexOfFirst { it.id == docId }
         if (i < 0) return
         val updated = documents[i].copy(
@@ -988,7 +1005,8 @@ class TripRepository {
             legId = legId,
             activityId = activityId,
             segmentIndex = segmentIndex,
-            travellerId = travellerId,
+            travellerId = "",
+            travellerIds = travellerIds,
         ).withAccess()
         documents[i] = updated
         ioScope.launch { runCatching { docService.saveDocument(updated) } }
@@ -1005,7 +1023,7 @@ class TripRepository {
         file: PickedFile,
         legId: String = "",
         segmentIndex: Int = -1,
-        travellerId: String = "",
+        travellerIds: List<String> = emptyList(),
         activityId: String = "",
     ): Boolean {
         return try {
@@ -1041,7 +1059,7 @@ class TripRepository {
                 fileUrl = url,
                 mimeType = file.mimeType,
                 segmentIndex = segmentIndex,
-                travellerId = travellerId,
+                travellerIds = travellerIds,
                 thumbUrl = thumb,                 // ⬅ ADD
                 createdBy = authService.currentUid ?: "",
             ).withAccess()

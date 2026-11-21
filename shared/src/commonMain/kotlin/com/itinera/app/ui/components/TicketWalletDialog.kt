@@ -104,9 +104,9 @@ fun TicketWalletDialog(
     // belongs to every traveller's pass.
     val isPlace = transport == null
     val myTickets = remember(tickets, myTravellerId, isPlace) {
-        if (isPlace) tickets.filter { it.travellerId.isBlank() || (myTravellerId.isNotBlank() && it.travellerId == myTravellerId) }
+        if (isPlace) tickets.filter { it.travellerIds.isEmpty() || (myTravellerId.isNotBlank() && myTravellerId in it.travellerIds) }
         else if (myTravellerId.isBlank()) emptyList()
-        else tickets.filter { it.travellerId == myTravellerId && !it.assignmentAmbiguous }
+        else tickets.filter { myTravellerId in it.travellerIds && !it.assignmentAmbiguous }
     }
     var showGroupPasses by remember(tickets, myTravellerId) { mutableStateOf(canSeeAllPasses && notOnThisLeg && myTickets.isEmpty()) }
     val visibleTickets = if (showGroupPasses) tickets else myTickets
@@ -378,7 +378,7 @@ private fun WalletCard(
             if (ticket.travellerName.isNotBlank()) {
                 Spacer(Modifier.height(6.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.Person, null, tint = PassInkMuted, modifier = Modifier.size(16.dp))
+                    Icon(if (ticket.travellerIds.size > 1) Icons.Filled.People else Icons.Filled.Person, null, tint = PassInkMuted, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(4.dp))
                     Text(ticket.travellerName, style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium, color = PassInk)

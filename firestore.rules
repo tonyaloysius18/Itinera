@@ -145,22 +145,34 @@ service cloud.firestore {
       // memberIds may hold nobody else, and only they can read it. Unassigned documents
       // (shared bookings, group place tickets) stay visible to every member.
       // Mirrors Trip.documentAccess in the app.
+      //
+      // A pass can be for several travellers (one QR for a whole booking): travellerUids
+      // lists their accounts, and memberIds may then hold the owner plus any of them.
+      // travellerUid is the first holder, kept for older app versions.
       function isAssigned(d) {
-        return d.get('travellerId', '') != '';
+        return d.get('travellerId', '') != '' || d.get('travellerIds', []).size() > 0;
+      }
+      function holders(d) {
+        return d.get('travellerUids', []).concat([d.get('travellerUid', '')]);
       }
       function sharingIsPrivate(tripId, d) {
         let trip = tripData(tripId);
-        let holder = d.get('travellerUid', '');
+        let uids = d.get('travellerUids', []);
+        let first = d.get('travellerUid', '');
         return !isAssigned(d)
-          || ((holder == '' || holder in trip.memberIds)
-              && d.memberIds.toSet().hasOnly([trip.ownerId, holder]));
+          || ((first == '' || first in trip.memberIds)
+              // travellerId mirrors the first traveller, so "travellerId == ''" (what the
+              // join fan-out lists) can never match a pass assigned to anyone.
+              && (d.get('travellerIds', []).size() == 0 || d.get('travellerId', '') == d.travellerIds[0])
+              && trip.memberIds.toSet().hasAll(uids)
+              && d.memberIds.toSet().hasOnly(holders(d).concat([trip.ownerId])));
       }
-      // Joining may add yourself only to unassigned documents or to your own pass;
+      // Joining may add yourself only to unassigned documents or to a pass that's yours;
       // leaving may always take yourself out.
       function mayHoldDoc(d) {
         return !(request.auth.uid in request.resource.data.memberIds)
           || !isAssigned(d)
-          || d.get('travellerUid', '') == request.auth.uid;
+          || request.auth.uid in holders(d);
       }
       match /documents/{docId} {
         allow get: if isTripMember(tripId)

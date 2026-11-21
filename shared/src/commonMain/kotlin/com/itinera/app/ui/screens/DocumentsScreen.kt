@@ -43,6 +43,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -80,6 +82,7 @@ import com.itinera.app.data.rememberFilePicker
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.i18n.Strings
 import com.itinera.app.model.Activity
+import com.itinera.app.model.assignedTravellerIds
 import com.itinera.app.model.DocItem
 import com.itinera.app.model.Leg
 import com.itinera.app.model.Traveller
@@ -145,10 +148,10 @@ fun DocumentsScreen(
     isLoading: Boolean = false,               // ⬅ ADDED
     onBack: () -> Unit,
     onOpenDoc: (String) -> Unit,
-    onUpload: suspend (PickedFile, title: String, category: String, legId: String, segmentIndex: Int, travellerId: String, activityId: String) -> Boolean,
+    onUpload: suspend (PickedFile, title: String, category: String, legId: String, segmentIndex: Int, travellerIds: List<String>, activityId: String) -> Boolean,
     onMessage: (String) -> Unit,
     onDeleteDocument: (String) -> Unit,
-    onUpdateDocument: (String, String, String, String, Int, String, String) -> Unit,
+    onUpdateDocument: (String, String, String, String, Int, List<String>, String) -> Unit,
     canEdit: Boolean = true,
 ) {
     val s = LocalStrings.current
@@ -254,8 +257,8 @@ fun DocumentsScreen(
                             val textOk = q.isBlank() ||
                                     doc.title.contains(q, ignoreCase = true) ||
                                     doc.traveller.contains(q, ignoreCase = true) ||
-                                    trip.travellers.firstOrNull { it.id == doc.travellerId }
-                                        ?.let { "${it.firstName} ${it.surname}".contains(q, ignoreCase = true) } == true
+                                    trip.travellers.any { it.id in doc.assignedTravellerIds &&
+                                        "${it.firstName} ${it.surname}".contains(q, ignoreCase = true) }
                             catOk && textOk
                         }
                     }
@@ -306,10 +309,12 @@ fun DocumentsScreen(
                             items(visible, key = { it.id }) { doc ->
                                 var showMenu by remember { mutableStateOf(false) }
 
-                                val travellerName = remember(doc.traveller, doc.travellerId, trip.travellers) {
+                                val travellerName = remember(doc.traveller, doc.travellerId, doc.travellerIds, trip.travellers) {
                                     if (doc.traveller.isNotBlank()) doc.traveller
-                                    else trip.travellers.find { it.id == doc.travellerId }
-                                        ?.let { "${it.firstName} ${it.surname}".trim() }
+                                    else doc.assignedTravellerIds
+                                        .mapNotNull { id -> trip.travellers.find { it.id == id } }
+                                        .joinToString(" + ") { "${it.firstName} ${it.surname}".trim() }
+                                        .takeIf { it.isNotBlank() }
                                         .orEmpty()
                                 }
 
@@ -449,13 +454,13 @@ fun DocumentsScreen(
             activities = activities,
             travellers = trip.travellers,
             onDismiss = { showDialog = false; pickedFile = null },
-            onConfirm = { title, category, legId, segmentIndex, travellerId, activityId ->
+            onConfirm = { title, category, legId, segmentIndex, travellerIds, activityId ->
                 val f = pickedFile!!
                 showDialog = false
                 pickedFile = null
                 scope.launch {
                     uploading = true
-                    val ok = onUpload(f, title.toTitleCase(), category, legId, segmentIndex, travellerId, activityId)
+                    val ok = onUpload(f, title.toTitleCase(), category, legId, segmentIndex, travellerIds, activityId)
                     uploading = false
                     if (!ok) onMessage(s.uploadFailed)
                 }
@@ -484,10 +489,10 @@ fun DocumentsScreen(
             activities = activities,
             travellers = trip.travellers,
             onDismiss = { editingDoc = null },
-            onConfirm = { title, category, legId, segmentIndex, travellerId, activityId ->
+            onConfirm = { title, category, legId, segmentIndex, travellerIds, activityId ->
                 val docId = editingDoc?.id ?: return@EditDocumentDialog
                 editingDoc = null
-                onUpdateDocument(docId, title, category, legId, segmentIndex, travellerId, activityId)
+                onUpdateDocument(docId, title, category, legId, segmentIndex, travellerIds, activityId)
             }
         )
     }
@@ -859,7 +864,7 @@ private fun AddDocumentDialog(
     activities: List<Activity>,
     travellers: List<Traveller>,
     onDismiss: () -> Unit,
-    onConfirm: (title: String, category: String, legId: String, segmentIndex: Int, travellerId: String, activityId: String) -> Unit,
+    onConfirm: (title: String, category: String, legId: String, segmentIndex: Int, travellerIds: List<String>, activityId: String) -> Unit,
 ) {
     val s = LocalStrings.current
     var title by remember { mutableStateOf(nameWithoutExtension(file.fileName)) }
@@ -871,8 +876,7 @@ private fun AddDocumentDialog(
     var activityId by remember { mutableStateOf("") }
     var segmentIndex by remember { mutableStateOf(-1) }
     var segMenuOpen by remember { mutableStateOf(false) }
-    var travellerId by remember { mutableStateOf("") }
-    var travMenuOpen by remember { mutableStateOf(false) }
+    var travellerIds by remember { mutableStateOf(emptyList<String>()) }
     fun String.toTitleCase(): String =
         split(" ").joinToString(" ") { word ->
             word.replaceFirstChar { c ->
@@ -943,7 +947,7 @@ private fun AddDocumentDialog(
                     activityId = activityId,
                     onPick = { pickedLeg, pickedActivity ->
                         legId = pickedLeg; activityId = pickedActivity
-                        segmentIndex = -1; travellerId = ""
+                        segmentIndex = -1; travellerIds = emptyList()
                     },
                 )
 
@@ -992,45 +996,17 @@ private fun AddDocumentDialog(
                 } ?: if (activityId.isNotBlank()) travellers else emptyList()
                 if (legTravs.isNotEmpty()) {
                     Spacer(Modifier.height(12.dp))
-                    ExposedDropdownMenuBox(
-                        expanded = travMenuOpen,
-                        onExpandedChange = { travMenuOpen = it },
-                    ) {
-                        OutlinedTextField(
-                            value = legTravs.firstOrNull { it.id == travellerId }
-                                ?.let { "${it.firstName} ${it.surname}".trim() } ?: s.anyone,
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text(s.travellerSingular) },
-                            leadingIcon = { Icon(Icons.Filled.Person, contentDescription = null) },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = travMenuOpen) },
-                            modifier = Modifier.menuAnchor().fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                        )
-                        ExposedDropdownMenu(
-                            expanded = travMenuOpen,
-                            onDismissRequest = { travMenuOpen = false },
-                            modifier = Modifier.background(MaterialTheme.colorScheme.surface),
-                            shape = RoundedCornerShape(12.dp),
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text(s.anyone) },
-                                onClick = { travellerId = ""; travMenuOpen = false },
-                            )
-                            legTravs.forEach { t ->
-                                DropdownMenuItem(
-                                    text = { Text("${t.firstName} ${t.surname}".trim()) },
-                                    onClick = { travellerId = t.id; travMenuOpen = false },
-                                )
-                            }
-                        }
-                    }
+                    TravellerMultiPicker(
+                        travellers = legTravs,
+                        selected = travellerIds,
+                        onChange = { travellerIds = it },
+                    )
                 }
             }
         },
         confirmButton = {
             TextButton(
-                onClick = { if (title.isNotBlank()) onConfirm(title.trim(), category, legId, segmentIndex, travellerId, activityId) },
+                onClick = { if (title.isNotBlank()) onConfirm(title.trim(), category, legId, segmentIndex, travellerIds, activityId) },
                 enabled = title.isNotBlank(),
             ) { Text(s.add) }
         },
@@ -1046,7 +1022,7 @@ private fun EditDocumentDialog(
     activities: List<Activity>,
     travellers: List<Traveller>,
     onDismiss: () -> Unit,
-    onConfirm: (title: String, category: String, legId: String, segmentIndex: Int, travellerId: String, activityId: String) -> Unit,
+    onConfirm: (title: String, category: String, legId: String, segmentIndex: Int, travellerIds: List<String>, activityId: String) -> Unit,
 ) {
     val s = LocalStrings.current
     var title by remember { mutableStateOf(doc.title) }
@@ -1057,8 +1033,7 @@ private fun EditDocumentDialog(
     var activityId by remember { mutableStateOf(doc.activityId) }
     var segmentIndex by remember { mutableStateOf(doc.segmentIndex) }
     var segMenuOpen by remember { mutableStateOf(false) }
-    var travellerId by remember { mutableStateOf(doc.travellerId) }
-    var travMenuOpen by remember { mutableStateOf(false) }
+    var travellerIds by remember { mutableStateOf(doc.assignedTravellerIds) }
     fun String.toTitleCase(): String =
         split(" ").joinToString(" ") { word ->
             word.replaceFirstChar { c ->
@@ -1117,7 +1092,7 @@ private fun EditDocumentDialog(
                     activityId = activityId,
                     onPick = { pickedLeg, pickedActivity ->
                         legId = pickedLeg; activityId = pickedActivity
-                        segmentIndex = -1; travellerId = ""
+                        segmentIndex = -1; travellerIds = emptyList()
                     },
                 )
 
@@ -1166,48 +1141,76 @@ private fun EditDocumentDialog(
                 } ?: if (activityId.isNotBlank()) travellers else emptyList()
                 if (legTravs.isNotEmpty()) {
                     Spacer(Modifier.height(12.dp))
-                    ExposedDropdownMenuBox(
-                        expanded = travMenuOpen,
-                        onExpandedChange = { travMenuOpen = it },
-                    ) {
-                        OutlinedTextField(
-                            value = legTravs.firstOrNull { it.id == travellerId }
-                                ?.let { "${it.firstName} ${it.surname}".trim() } ?: s.anyone,
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text(s.travellerSingular) },
-                            leadingIcon = { Icon(Icons.Filled.Person, contentDescription = null) },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = travMenuOpen) },
-                            modifier = Modifier.menuAnchor().fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                        )
-                        ExposedDropdownMenu(
-                            expanded = travMenuOpen,
-                            onDismissRequest = { travMenuOpen = false },
-                            modifier = Modifier.background(MaterialTheme.colorScheme.surface),
-                            shape = RoundedCornerShape(12.dp),
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text(s.anyone) },
-                                onClick = { travellerId = ""; travMenuOpen = false },
-                            )
-                            legTravs.forEach { t ->
-                                DropdownMenuItem(
-                                    text = { Text("${t.firstName} ${t.surname}".trim()) },
-                                    onClick = { travellerId = t.id; travMenuOpen = false },
-                                )
-                            }
-                        }
-                    }
+                    TravellerMultiPicker(
+                        travellers = legTravs,
+                        selected = travellerIds,
+                        onChange = { travellerIds = it },
+                    )
                 }
             }
         },
         confirmButton = {
             TextButton(
-                onClick = { if (title.isNotBlank()) onConfirm(title.trim(), category, legId, segmentIndex, travellerId, activityId) },
+                onClick = { if (title.isNotBlank()) onConfirm(title.trim(), category, legId, segmentIndex, travellerIds, activityId) },
                 enabled = title.isNotBlank(),
             ) { Text(s.save) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(s.cancel) } },
     )
+}
+
+
+/**
+ * Who a pass is for. Several travellers can share one pass (a single QR for a whole
+ * booking); none selected means it's for anyone. The menu stays open while ticking.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TravellerMultiPicker(
+    travellers: List<Traveller>,
+    selected: List<String>,
+    onChange: (List<String>) -> Unit,
+) {
+    val s = LocalStrings.current
+    var open by remember { mutableStateOf(false) }
+    val chosen = travellers.filter { it.id in selected }
+    ExposedDropdownMenuBox(expanded = open, onExpandedChange = { open = it }) {
+        OutlinedTextField(
+            value = if (chosen.isEmpty()) s.anyone
+                else chosen.joinToString(" + ") { "${it.firstName} ${it.surname}".trim() },
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(if (chosen.size > 1) s.travellers else s.travellerSingular) },
+            leadingIcon = {
+                Icon(if (chosen.size > 1) Icons.Filled.People else Icons.Filled.Person, contentDescription = null)
+            },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = open) },
+            modifier = Modifier.menuAnchor().fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+        )
+        ExposedDropdownMenu(
+            expanded = open,
+            onDismissRequest = { open = false },
+            modifier = Modifier.background(MaterialTheme.colorScheme.surface),
+            shape = RoundedCornerShape(12.dp),
+        ) {
+            DropdownMenuItem(
+                text = { Text(s.anyone) },
+                leadingIcon = { Checkbox(checked = chosen.isEmpty(), onCheckedChange = null) },
+                onClick = { onChange(emptyList()); open = false },
+            )
+            travellers.forEach { t ->
+                val isOn = t.id in selected
+                DropdownMenuItem(
+                    text = { Text("${t.firstName} ${t.surname}".trim()) },
+                    leadingIcon = { Checkbox(checked = isOn, onCheckedChange = null) },
+                    // Keep traveller order stable, and keep the menu open for ticking several.
+                    onClick = {
+                        val next = if (isOn) selected - t.id else selected + t.id
+                        onChange(travellers.map { it.id }.filter { it in next })
+                    },
+                )
+            }
+        }
+    }
 }
