@@ -39,6 +39,8 @@ import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Phone
@@ -132,6 +134,10 @@ fun TravellersScreen(
     onBlock: (String) -> Unit = {},
     onUnblock: (String) -> Unit = {},
     onMessage: (String) -> Unit = {},
+    // Trip roles (uid -> "owner" | "editor" | "viewer"); the owner can change members' roles here.
+    memberRoles: Map<String, String> = emptyMap(),
+    isOwner: Boolean = false,
+    onSetRole: (uid: String, role: String) -> Unit = { _, _ -> },
 ) {
     val s = LocalStrings.current
     var showAdd by remember { mutableStateOf(false) }
@@ -194,6 +200,9 @@ fun TravellersScreen(
                         onReport = { uid -> reportTarget = uid },
                         onBlock = { uid -> blockTarget = uid },
                         onUnblock = { uid -> unblockTarget = uid },
+                        memberRoles = memberRoles,
+                        canSetRoles = isOwner,
+                        onSetRole = onSetRole,
                     )
                     Spacer(Modifier.height(18.dp))
                 }
@@ -447,6 +456,9 @@ private fun TravellerCard(
     onReport: (String) -> Unit = {},
     onBlock: (String) -> Unit = {},
     onUnblock: (String) -> Unit = {},
+    memberRoles: Map<String, String> = emptyMap(),
+    canSetRoles: Boolean = false,
+    onSetRole: (uid: String, role: String) -> Unit = { _, _ -> },
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -469,6 +481,11 @@ private fun TravellerCard(
                     onReport = { onReport(t.userId) },
                     onBlock = { onBlock(t.userId) },
                     onUnblock = { onUnblock(t.userId) },
+                    role = memberRoles[t.userId],
+                    // The owner sets each other member's role; owners themselves can't be changed.
+                    canSetRole = canSetRoles && !isMe && t.userId.isNotBlank() &&
+                        memberRoles[t.userId].let { it != null && it != "owner" },
+                    onSetRole = { role -> onSetRole(t.userId, role) },
                 )
                 if (index < travellers.lastIndex) {
                     HorizontalDivider(
@@ -494,6 +511,9 @@ private fun TravellerRow(
     onReport: () -> Unit = {},
     onBlock: () -> Unit = {},
     onUnblock: () -> Unit = {},
+    role: String? = null,
+    canSetRole: Boolean = false,
+    onSetRole: (String) -> Unit = {},
 ) {
     val s = LocalStrings.current
     val onSurface = MaterialTheme.colorScheme.onSurface
@@ -533,6 +553,9 @@ private fun TravellerRow(
                 if (traveller.isOwner) {
                     Spacer(Modifier.width(8.dp))
                     Badge(s.owner, accent = false)
+                } else if (role == "editor" || role == "viewer") {
+                    Spacer(Modifier.width(8.dp))
+                    Badge(if (role == "editor") s.roleEditor else s.roleViewer, accent = false)
                 }
             }
 
@@ -594,8 +617,9 @@ private fun TravellerRow(
             }
         }
 
-        // Moderation menu: report/block any app member but yourself (Apple UGC safety).
-        if (canModerate) {
+        // Member menu: the owner sets the role; report/block any app member but yourself
+        // (Apple UGC safety).
+        if (canModerate || canSetRole) {
             Spacer(Modifier.width(4.dp))
             Box {
                 IconButton(onClick = { moderateOpen = true }) {
@@ -606,23 +630,40 @@ private fun TravellerRow(
                     onDismissRequest = { moderateOpen = false },
                     shape = RoundedCornerShape(16.dp),
                 ) {
-                    DropdownMenuItem(
+                    if (canSetRole) {
+                        DropdownMenuItem(
+                            text = { Text(s.roleEditor) },
+                            leadingIcon = { Icon(Icons.Filled.Edit, null) },
+                            trailingIcon = { if (role == "editor") Icon(Icons.Filled.Check, null) },
+                            onClick = { moderateOpen = false; if (role != "editor") onSetRole("editor") },
+                        )
+                        DropdownMenuItem(
+                            text = { Text(s.roleViewer) },
+                            leadingIcon = { Icon(Icons.Filled.Visibility, null) },
+                            trailingIcon = { if (role == "viewer") Icon(Icons.Filled.Check, null) },
+                            onClick = { moderateOpen = false; if (role != "viewer") onSetRole("viewer") },
+                        )
+                        if (canModerate) HorizontalDivider()
+                    }
+                    if (canModerate) DropdownMenuItem(
                         text = { Text(s.reportMember) },
                         leadingIcon = { Icon(Icons.Filled.Flag, null) },
                         onClick = { moderateOpen = false; onReport() },
                     )
-                    if (isBlocked) {
-                        DropdownMenuItem(
-                            text = { Text(s.unblock) },
-                            leadingIcon = { Icon(Icons.Filled.LockOpen, null) },
-                            onClick = { moderateOpen = false; onUnblock() },
-                        )
-                    } else {
-                        DropdownMenuItem(
-                            text = { Text(s.block, color = MaterialTheme.colorScheme.error) },
-                            leadingIcon = { Icon(Icons.Filled.Block, null, tint = MaterialTheme.colorScheme.error) },
-                            onClick = { moderateOpen = false; onBlock() },
-                        )
+                    if (canModerate) {
+                        if (isBlocked) {
+                            DropdownMenuItem(
+                                text = { Text(s.unblock) },
+                                leadingIcon = { Icon(Icons.Filled.LockOpen, null) },
+                                onClick = { moderateOpen = false; onUnblock() },
+                            )
+                        } else {
+                            DropdownMenuItem(
+                                text = { Text(s.block, color = MaterialTheme.colorScheme.error) },
+                                leadingIcon = { Icon(Icons.Filled.Block, null, tint = MaterialTheme.colorScheme.error) },
+                                onClick = { moderateOpen = false; onBlock() },
+                            )
+                        }
                     }
                 }
             }
@@ -650,23 +691,21 @@ private fun Badge(label: String, accent: Boolean) {
 }
 
 /**
- * Illustrated avatar when the traveller has picked one, coloured initials
- * otherwise. Initials stay the default: a list of ten cartoons where nobody has
- * chosen is harder to scan than initials, since the pictures say nothing about
- * who's who until they're deliberate.
+ * The traveller's chosen picture, or a plain person icon on a neutral circle when they
+ * haven't picked one (e.g. someone who just joined).
  */
 @Composable
 internal fun TravellerAvatarImage(
-    traveller: Traveller,
+    traveller: Traveller?,
     size: Dp,
     modifier: Modifier = Modifier,
-    showPersonPlaceholder: Boolean = false,
+    @Suppress("UNUSED_PARAMETER") showPersonPlaceholder: Boolean = false,
 ) {
-    val avatar = TravellerAvatar.fromId(traveller.avatarId)
+    val avatar = traveller?.let { TravellerAvatar.fromId(it.avatarId) }
+    val onSurface = MaterialTheme.colorScheme.onSurface
     Box(
         modifier.size(size).clip(CircleShape).background(
-            if (avatar == null) colorFor(traveller.id)
-            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f)
+            if (avatar == null) onSurface.copy(alpha = 0.12f) else onSurface.copy(alpha = 0.06f)
         ),
         contentAlignment = Alignment.Center,
     ) {
@@ -677,23 +716,12 @@ internal fun TravellerAvatarImage(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.matchParentSize(),
             )
-        } else if (
-            showPersonPlaceholder &&
-            traveller.firstName.isBlank() &&
-            traveller.surname.isBlank()
-        ) {
+        } else {
             Icon(
                 imageVector = Icons.Filled.Person,
                 contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.fillMaxSize(0.5f),
-            )
-        } else {
-            Text(
-                initials(traveller.firstName, traveller.surname),
-                color = Color.White,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold,
+                tint = onSurface.copy(alpha = 0.55f),
+                modifier = Modifier.fillMaxSize(0.55f),
             )
         }
     }

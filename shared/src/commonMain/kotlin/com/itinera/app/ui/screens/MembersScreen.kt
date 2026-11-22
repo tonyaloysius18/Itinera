@@ -65,6 +65,7 @@ import androidx.compose.ui.unit.dp
 import com.itinera.app.data.rememberFileSharer
 import com.itinera.app.i18n.LocalStrings
 import com.itinera.app.model.Trip
+import com.itinera.app.model.Traveller
 import com.itinera.app.ui.components.PlaneLoader
 import kotlinx.coroutines.launch
 
@@ -172,13 +173,15 @@ fun MembersScreen(
                     )
 
                     MemberRow(
+                        // Their profile picture, from their traveller entry on this trip.
+                        traveller = trip.travellers.firstOrNull { it.userId == uid }
+                            ?: trip.travellers.firstOrNull { uid == trip.ownerId && it.isOwner },
                         name = displayName + if (isMe) " (${s.you})" else "",
                         email = if (isBlocked) "" else (info?.email ?: ""),
                         role = role,
-                        canEdit = isOwner && !isThisOwner,   // owner edits everyone except the owner row
+                        canEdit = isOwner && !isThisOwner,   // owner can remove everyone except the owner row
                         canModerate = !isMe,                 // report/block anyone but yourself
                         isBlocked = isBlocked,
-                        onSetRole = { newRole -> onSetRole(uid, newRole) },
                         onRemove = { onRemoveMember(uid) },
                         onReport = { reportTarget = uid },
                         onBlock = { blockTarget = uid },
@@ -432,20 +435,19 @@ private fun InviteDialog(
 
 @Composable
 private fun MemberRow(
+    traveller: Traveller?,
     name: String,
     email: String,
     role: String,
     canEdit: Boolean,
     canModerate: Boolean,
     isBlocked: Boolean,
-    onSetRole: (String) -> Unit,
     onRemove: () -> Unit,
     onReport: () -> Unit,
     onBlock: () -> Unit,
     onUnblock: () -> Unit,
 ) {
     val s = LocalStrings.current
-    var menuOpen by remember { mutableStateOf(false) }
     var moderateOpen by remember { mutableStateOf(false) }
     var confirmRemove by remember { mutableStateOf(false) }
 
@@ -459,18 +461,8 @@ private fun MemberRow(
         Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Avatar circle with initial
-        Box(
-            Modifier.size(42.dp).clip(CircleShape)
-                .background(MaterialTheme.colorScheme.secondaryContainer),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                name.firstOrNull()?.uppercase() ?: "?",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSecondaryContainer,
-            )
-        }
+        // Same picture as on the Travellers screen (person icon when they haven't picked one).
+        TravellerAvatarImage(traveller = traveller, size = 42.dp)
         Spacer(Modifier.width(14.dp))
         Column(Modifier.weight(1f)) {
             Text(name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
@@ -483,46 +475,15 @@ private fun MemberRow(
             }
         }
 
-        if (canEdit) {
-            // Role chip that opens a menu
-            Box {
-                AssistChip(
-                    onClick = { menuOpen = true },
-                    label = { Text(roleLabel) },
-                )
-                val shape: Shape = RoundedCornerShape(16.dp)
-                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }, shape = shape) {
-                    DropdownMenuItem(
-                        text = { Text(s.roleEditor) },
-                        trailingIcon = { if (role == "editor") Icon(Icons.Filled.Check, null) },
-                        onClick = { menuOpen = false; onSetRole("editor") },
-                    )
-                    DropdownMenuItem(
-                        text = { Text(s.roleViewer) },
-                        trailingIcon = { if (role == "viewer") Icon(Icons.Filled.Check, null) },
-                        onClick = { menuOpen = false; onSetRole("viewer") },
-                    )
-                    HorizontalDivider()
-                    DropdownMenuItem(
-                        text = { Text(s.removeMember, color = MaterialTheme.colorScheme.error) },
-                        leadingIcon = {
-                            Icon(Icons.Filled.RemoveCircleOutline, null, tint = MaterialTheme.colorScheme.error)
-                        },
-                        onClick = { menuOpen = false; confirmRemove = true },
-                    )
-                }
-            }
-        } else {
-            // Read-only role label
-            Text(
-                roleLabel,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-            )
-        }
+        // Role is shown here, but changed from the Travellers screen.
+        Text(
+            roleLabel,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+        )
 
-        // Moderation overflow menu: report / block any member but yourself.
-        if (canModerate) {
+        // Overflow menu: report / block any member but yourself; the owner can also remove them.
+        if (canModerate || canEdit) {
             Box {
                 IconButton(onClick = { moderateOpen = true }) {
                     Icon(Icons.Filled.MoreVert, contentDescription = s.report)
@@ -532,24 +493,36 @@ private fun MemberRow(
                     onDismissRequest = { moderateOpen = false },
                     shape = RoundedCornerShape(16.dp),
                 ) {
-                    DropdownMenuItem(
-                        text = { Text(s.reportMember) },
-                        leadingIcon = { Icon(Icons.Filled.Flag, null) },
-                        onClick = { moderateOpen = false; onReport() },
-                    )
-                    if (isBlocked) {
+                    if (canModerate) {
                         DropdownMenuItem(
-                            text = { Text(s.unblock) },
-                            leadingIcon = { Icon(Icons.Filled.LockOpen, null) },
-                            onClick = { moderateOpen = false; onUnblock() },
+                            text = { Text(s.reportMember) },
+                            leadingIcon = { Icon(Icons.Filled.Flag, null) },
+                            onClick = { moderateOpen = false; onReport() },
                         )
-                    } else {
+                        if (isBlocked) {
+                            DropdownMenuItem(
+                                text = { Text(s.unblock) },
+                                leadingIcon = { Icon(Icons.Filled.LockOpen, null) },
+                                onClick = { moderateOpen = false; onUnblock() },
+                            )
+                        } else {
+                            DropdownMenuItem(
+                                text = { Text(s.block, color = MaterialTheme.colorScheme.error) },
+                                leadingIcon = {
+                                    Icon(Icons.Filled.Block, null, tint = MaterialTheme.colorScheme.error)
+                                },
+                                onClick = { moderateOpen = false; onBlock() },
+                            )
+                        }
+                    }
+                    if (canEdit) {
+                        if (canModerate) HorizontalDivider()
                         DropdownMenuItem(
-                            text = { Text(s.block, color = MaterialTheme.colorScheme.error) },
+                            text = { Text(s.removeMember, color = MaterialTheme.colorScheme.error) },
                             leadingIcon = {
-                                Icon(Icons.Filled.Block, null, tint = MaterialTheme.colorScheme.error)
+                                Icon(Icons.Filled.RemoveCircleOutline, null, tint = MaterialTheme.colorScheme.error)
                             },
-                            onClick = { moderateOpen = false; onBlock() },
+                            onClick = { moderateOpen = false; confirmRemove = true },
                         )
                     }
                 }

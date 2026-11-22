@@ -686,6 +686,9 @@ private fun AppContent(
                                             pillMessage = s.memberUnblocked
                                         },
                                         onMessage = { pillMessage = it },
+                                        memberRoles = trip.members,
+                                        isOwner = trip.ownerId == repository.authService.currentUid,
+                                        onSetRole = { uid, role -> repository.setMemberRole(screen.tripId, uid, role) },
                                     )
                                 }
                             }
