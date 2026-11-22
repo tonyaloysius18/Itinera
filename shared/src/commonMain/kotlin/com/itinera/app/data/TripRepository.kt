@@ -16,6 +16,7 @@ import kotlinx.datetime.TimeZone
 import com.itinera.app.model.isForeign
 import com.itinera.app.model.ExpenseShare
 import com.itinera.app.model.Leg
+import com.itinera.app.model.DayMove
 import com.itinera.app.model.Traveller
 import com.itinera.app.model.TransportType
 import com.itinera.app.model.Trip
@@ -690,6 +691,32 @@ class TripRepository {
         geocodeLegAsync(tripId, leg.id)
     }
 
+    /**
+     * Applies a drag on the trip page: each moved leg/place gets its new day and order key.
+     * All leg changes go out in one trip write; places are saved one by one. A leg moved to
+     * another day gets its reminder rescheduled.
+     */
+    fun moveDayEntries(tripId: String, legMoves: Map<String, DayMove>, activityMoves: Map<String, DayMove>) {
+        val index = trips.indexOfFirst { it.id == tripId }
+        if (index >= 0 && legMoves.isNotEmpty()) {
+            val trip = trips[index]
+            val moved = trip.copy(legs = trip.legs.map { leg ->
+                legMoves[leg.id]?.let { leg.copy(date = it.date, sortKey = it.sortKey) } ?: leg
+            })
+            trips[index] = moved
+            persist(moved)
+            moved.legs.filter { it.id in legMoves && trip.legs.firstOrNull { o -> o.id == it.id }?.date != it.date }
+                .forEach { scheduleLegReminder(moved, it) }
+        }
+        activityMoves.forEach { (id, move) ->
+            val i = activities.indexOfFirst { it.id == id }
+            if (i < 0) return@forEach
+            val updated = activities[i].copy(date = move.date, sortKey = move.sortKey)
+            activities[i] = updated
+            ioScope.launch { runCatching { activityService.saveActivity(updated) } }
+        }
+    }
+
     fun deleteLeg(tripId: String, legId: String) {
         val index = trips.indexOfFirst { it.id == tripId }
         if (index < 0) return
@@ -760,9 +787,12 @@ class TripRepository {
     fun updateActivity(id: String, date: LocalDate, title: String, time: String, endTime: String, location: String, note:String) {
         val i = activities.indexOfFirst { it.id == id }
         if (i < 0) return
-        val updated = activities[i].copy(
+        val before = activities[i]
+        val updated = before.copy(
             date = date, title = title.trim(), time = time.trim(), endTime = endTime.trim(), location = location.trim(), note = note.trim(),
-            memberIds = memberIdsForTrip(activities[i].tripId),
+            memberIds = memberIdsForTrip(before.tripId),
+            // A dragged position stays unless the day or time changed.
+            sortKey = before.sortKey.takeIf { before.date == date && before.time == time.trim() },
         )
         activities[i] = updated
         ioScope.launch { runCatching { activityService.saveActivity(updated) } }

@@ -173,6 +173,11 @@ fun AddLegScreen(
                             stops = stops.mapNotNull { st ->
                                 st.city.trim().ifBlank { null }?.let { st.copy(city = it.toTitleCase()) }
                             },
+                            // Keep a dragged position unless the day or start time changed;
+                            // then it goes back to sorting by time.
+                            sortKey = existing?.sortKey?.takeIf {
+                                existing.date == date && existing.timeLabel == startTime.ifBlank { "" }
+                            },
                         )
                     )
                 },

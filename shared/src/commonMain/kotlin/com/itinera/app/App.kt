@@ -586,6 +586,7 @@ private fun AppContent(
                                     onDeleteLeg = { legId -> repository.deleteLegUndoable(screen.tripId, legId)?.let { undo -> undoRequest = UndoRequest(s.legDeleted, undo) } },
                                     onToggleActivity = { repository.toggleActivity(it) },
                                     onDeleteActivity = { id -> repository.deleteActivityUndoable(id)?.let { undo -> undoRequest = UndoRequest(s.placeDeleted, undo) } },
+                                    onMoveEntries = { legs, acts -> repository.moveDayEntries(screen.tripId, legs, acts) },
                                     canEdit = trip.canEdit(repository.authService.currentUid ?: ""),
                                     //onMembers = { navigator.push(Screen.Members(screen.tripId)) },
                                     onMap = { navigator.push(Screen.TripMap(screen.tripId)) },

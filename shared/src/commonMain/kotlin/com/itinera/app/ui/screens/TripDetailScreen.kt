@@ -78,6 +78,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -90,6 +91,30 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Dp
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.zIndex
+import com.itinera.app.model.DayMove
+import com.itinera.app.model.dayOrderKey
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.TimeSource
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -187,6 +212,8 @@ fun TripDetailScreen(
     onDeleteLeg: (String) -> Unit,
     onToggleActivity: (String) -> Unit,
     onDeleteActivity: (String) -> Unit,
+    // A leg/place dragged on the page: new day + order key per moved leg and place.
+    onMoveEntries: (legMoves: Map<String, DayMove>, activityMoves: Map<String, DayMove>) -> Unit = { _, _ -> },
     canEdit: Boolean = true,
     //onMembers: () -> Unit,
     onMap: () -> Unit,
@@ -389,7 +416,126 @@ fun TripDetailScreen(
         dates.associateWith { d ->
             val legEntries = trip.legs.filter { it.date == d }.map { DayEntry.LegEntry(it) as DayEntry }
             val actEntries = activities.filter { it.date == d }.map { DayEntry.ActEntry(it) as DayEntry }
-            (legEntries + actEntries).sortedWith(compareBy({ it.sortH }, { it.sortM }))
+            // Clock time, unless an item was dragged into place (see dayOrderKey).
+            (legEntries + actEntries).sortedBy { it.orderKey }
+        }
+    }
+
+    // ── drag to reorder (long-press a leg/place, drop it anywhere in any day) ──
+    var dragKey by remember { mutableStateOf<String?>(null) }
+    var dragFingerY by remember { mutableStateOf(0f) }        // finger, in root coordinates
+    var dragStartFingerY by remember { mutableStateOf(0f) }
+    var dragGrabOffset by remember { mutableStateOf(0f) }       // finger's offset inside the row
+    var dragHeightPx by remember { mutableStateOf(0f) }         // the dragged row's height
+    var snapGaps by remember { mutableStateOf(true) }           // no gap animation on pick-up/drop
+    // The dragged row's slot top and the open gap's top, as state so the floating card is
+    // re-placed every frame the rows shift (not only when the finger moves).
+    var dragSlotTop by remember { mutableFloatStateOf(0f) }
+    var gapTop by remember { mutableFloatStateOf(Float.NaN) }
+    // After release the card glides into the gap; the drop spot is frozen meanwhile.
+    var settleTarget by remember { mutableStateOf<DropTarget?>(null) }
+    // Pick-up/put-down: 0 = resting row, 1 = lifted card (scale + shadow).
+    val lift by animateFloatAsState(
+        targetValue = if (dragKey != null && settleTarget == null) 1f else 0f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow),
+        label = "dragLift",
+    )
+    var dragEndedAt by remember { mutableStateOf<TimeSource.Monotonic.ValueTimeMark?>(null) }
+    var viewport by remember { mutableStateOf(0f to 0f) }
+    val rowBounds = remember { mutableMapOf<String, Pair<Float, Float>>() }
+    val dayBounds = remember { mutableMapOf<kotlinx.datetime.LocalDate, Pair<Float, Float>>() }
+    val haptics = LocalHapticFeedback.current
+    val autoScrollEdge = with(LocalDensity.current) { 72.dp.toPx() }
+    val dragHeightDp = with(LocalDensity.current) { dragHeightPx.toDp() }
+    // The gap opens instantly where the row was picked up, then animates as it moves.
+    LaunchedEffect(dragKey) { snapGaps = true; if (dragKey != null) { delay(60); snapGaps = false } }
+    fun justDragged() = dragEndedAt?.elapsedNow()?.let { it < 400.milliseconds } == true
+
+    fun dropTargetFor(y: Float): DropTarget? {
+        if (allDates.isEmpty()) return null
+        // The day under the finger: the first one that ends below it (a gap or a day's
+        // header counts as the top of the next day).
+        val date = allDates.firstOrNull { d -> dayBounds[d]?.let { y <= it.second } == true } ?: allDates.last()
+        val others = entriesByDate[date].orEmpty().filter { it.key != dragKey }
+        return DropTarget(date, others.count { e -> rowBounds[e.key]?.let { (t, b) -> (t + b) / 2 < y } == true })
+    }
+
+    fun applyDrop(target: DropTarget) {
+        val dragged = entriesByDate.values.flatten().firstOrNull { it.key == dragKey } ?: return
+        val fromDate = entriesByDate.entries.first { (_, l) -> dragged in l }.key
+        if (fromDate == target.date &&
+            entriesByDate[fromDate].orEmpty().indexOf(dragged) == target.index) return   // dropped where it was
+        val day = entriesByDate[target.date].orEmpty().filter { it != dragged }.toMutableList()
+        day.add(target.index, dragged)
+        // The moved item takes a key between its new neighbours; neighbours keep theirs unless
+        // they tie (e.g. several untimed items), in which case the fewest get nudged.
+        val prev = day.getOrNull(target.index - 1)?.orderKey
+        val next = day.getOrNull(target.index + 1)?.orderKey
+        val keys = day.map { it.orderKey }.toMutableList()
+        keys[target.index] = when {
+            prev != null && next != null -> (prev + next) / 2
+            prev != null -> prev + 1
+            next != null -> next - 1
+            else -> dragged.orderKey
+        }
+        val newKeys = mutableMapOf(dragged.key to keys[target.index])
+        var last = Double.NEGATIVE_INFINITY
+        keys.forEachIndexed { i, k ->
+            val v = if (k > last) k else last + 1
+            if (v != day[i].orderKey || day[i] == dragged) newKeys[day[i].key] = v
+            last = v
+        }
+        val legMoves = mutableMapOf<String, DayMove>()
+        val actMoves = mutableMapOf<String, DayMove>()
+        day.filter { it.key in newKeys }.forEach { e ->
+            val move = DayMove(target.date, newKeys.getValue(e.key))
+            when (e) {
+                is DayEntry.LegEntry -> legMoves[e.leg.id] = move
+                is DayEntry.ActEntry -> actMoves[e.act.id] = move
+            }
+        }
+        onMoveEntries(legMoves, actMoves)
+    }
+
+    val dropTarget = settleTarget ?: if (dragKey != null) dropTargetFor(dragFingerY) else null
+    // A light tick each time the drop spot moves to another slot.
+    LaunchedEffect(dropTarget) {
+        if (dragKey != null && settleTarget == null && !snapGaps) haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+    }
+    // Each row's long-press handler is set up once, so it must reach the drop logic through
+    // this: calling applyDrop directly would use the order from when the row first appeared,
+    // and every drag after the first would be worked out against stale positions.
+    val dropLatest by rememberUpdatedState { t: DropTarget -> applyDrop(t) }
+    val targetLatest by rememberUpdatedState { y: Float -> dropTargetFor(y) }
+
+    // Release: glide the card into the open gap, then save the new order and let go.
+    fun endDrag() {
+        val target = targetLatest(dragFingerY) ?: run { dragKey = null; return }
+        settleTarget = target
+        scope.launch {
+            val goal = gapTop.takeIf { !it.isNaN() }?.plus(dragGrabOffset)
+            if (goal != null) {
+                Animatable(dragFingerY).animateTo(goal, tween(200, easing = FastOutSlowInEasing)) { dragFingerY = value }
+            }
+            dropLatest(target)
+            dragKey = null; settleTarget = null
+            dragEndedAt = TimeSource.Monotonic.markNow()
+        }
+    }
+    val endDragLatest by rememberUpdatedState { endDrag() }
+
+    // Scroll while the finger is held near the top or bottom edge of the itinerary.
+    LaunchedEffect(dragKey) {
+        while (dragKey != null) {
+            if (settleTarget != null) { delay(16); continue }
+            val (top, bottom) = viewport
+            val speed = when {
+                dragFingerY < top + autoScrollEdge -> -(top + autoScrollEdge - dragFingerY) / autoScrollEdge * 22f
+                dragFingerY > bottom - autoScrollEdge -> (dragFingerY - (bottom - autoScrollEdge)) / autoScrollEdge * 22f
+                else -> 0f
+            }
+            if (speed != 0f) bodyScroll.scrollBy(speed)
+            delay(16)
         }
     }
 
@@ -562,6 +708,7 @@ fun TripDetailScreen(
                         .fillMaxSize()
                         // ⬅ CHANGED — was always scrollable, even with nothing to
                         // scroll to; the empty state doesn't need it.
+                        .onGloballyPositioned { c -> val b = c.boundsInRoot(); viewport = b.top to b.bottom }
                         .then(if (allDates.isNotEmpty()) Modifier.verticalScroll(bodyScroll) else Modifier)
                         .padding(horizontal = 16.dp)
                         .padding(bottom = if (allDates.isNotEmpty()) floatingBarHeight + 16.dp else 0.dp)
@@ -598,7 +745,15 @@ fun TripDetailScreen(
 
                             DayHeader(dayNumber, date.label())
 
-                            Box(Modifier.fillMaxWidth()) {
+                            val dayOthers = entries.filter { it.key != dragKey }
+                            Box(
+                                Modifier.fillMaxWidth()
+                                    // The dragged row draws above the days after its own.
+                                    .zIndex(if (entries.any { it.key == dragKey }) 1f else 0f)
+                                    .onGloballyPositioned { c ->
+                                        val b = c.boundsInRoot(); dayBounds[date] = b.top to b.bottom
+                                    }
+                            ) {
                                 // ⬅ ADD — timeline spine. Drawn before the entries so the
                                 // markers paint over it; matchParentSize keeps it out of
                                 // the Box's size calculation.
@@ -621,11 +776,72 @@ fun TripDetailScreen(
                                         // Key each row by its item so its swipe offset and
                                         // gesture state stay with it: unkeyed, deleting a row
                                         // handed its (open) state to the row that moved up.
-                                        val entryKey = when (entry) {
-                                            is DayEntry.LegEntry -> "leg-${entry.leg.id}"
-                                            is DayEntry.ActEntry -> "act-${entry.act.id}"
-                                        }
+                                        val entryKey = entry.key
+                                        val isDragged = entryKey == dragKey
                                         key(entryKey) {
+                                        // Long-press and drag to move a leg/place within its day
+                                        // or onto another day.
+                                        // The rows part to open a gap where the dragged one will land.
+                                        if (!isDragged) DropGap(
+                                            open = dropTarget?.date == date && dropTarget.index == dayOthers.indexOf(entry),
+                                            height = dragHeightDp, snap = snapGaps || dragKey == null,
+                                            onTop = { gapTop = it },
+                                        )
+                                        Box(
+                                            Modifier
+                                                .onGloballyPositioned { c ->
+                                                    val b = c.boundsInRoot(); rowBounds[entryKey] = b.top to b.bottom
+                                                    if (isDragged) dragSlotTop = b.top
+                                                }
+                                                // While dragged the row gives up its slot (the gap shows where
+                                                // it'll land) and is drawn floating under the finger. The move
+                                                // sits outside the collapsed slot; the card look sits inside it,
+                                                // at the row's full size.
+                                                .zIndex(if (isDragged) 1f else 0f)
+                                                .graphicsLayer {
+                                                    translationY = if (isDragged) dragFingerY - dragGrabOffset - dragSlotTop else 0f
+                                                }
+                                                .layout { measurable, constraints ->
+                                                    val placeable = measurable.measure(constraints)
+                                                    // 1px, not 0: a zero-height row isn't drawn at all.
+                                                    layout(placeable.width, if (isDragged) 1 else placeable.height) {
+                                                        placeable.place(0, 0)
+                                                    }
+                                                }
+                                                .graphicsLayer {
+                                                    if (isDragged) {
+                                                        shadowElevation = 12.dp.toPx() * lift
+                                                        scaleX = 1f + 0.03f * lift; scaleY = 1f + 0.03f * lift
+                                                        shape = RoundedCornerShape(12.dp); clip = true
+                                                    }
+                                                }
+                                                .background(
+                                                    if (isDragged) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = lift.coerceIn(0f, 1f))
+                                                    else Color.Transparent,
+                                                    RoundedCornerShape(12.dp),
+                                                )
+                                                .then(if (!canEdit) Modifier else Modifier.pointerInput(entryKey) {
+                                                    detectDragGesturesAfterLongPress(
+                                                        onDragStart = { off ->
+                                                            openRowId = null
+                                                            dragStartFingerY = (rowBounds[entryKey]?.first ?: 0f) + off.y
+                                                            dragFingerY = dragStartFingerY
+                                                            dragGrabOffset = off.y
+                                                            dragSlotTop = rowBounds[entryKey]?.first ?: 0f
+                                                            gapTop = Float.NaN
+                                                            dragHeightPx = rowBounds[entryKey]?.let { it.second - it.first } ?: 0f
+                                                            dragKey = entryKey
+                                                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                        },
+                                                        onDrag = { change, amount ->
+                                                            change.consume()
+                                                            if (settleTarget == null) dragFingerY += amount.y
+                                                        },
+                                                        onDragEnd = { endDragLatest() },
+                                                        onDragCancel = { dragKey = null; dragEndedAt = TimeSource.Monotonic.markNow() },
+                                                    )
+                                                }),
+                                        ) {
                                         when (entry) {
                                             is DayEntry.LegEntry -> {
                                                 val leg = entry.leg
@@ -662,7 +878,7 @@ fun TripDetailScreen(
                                                 }.joinToString(" · ")
 
                                                 SwipeRevealRow(
-                                                    enabled = canEdit,
+                                                    enabled = canEdit && dragKey == null,
                                                     isOpen = openRowId == leg.id,
                                                     onOpenChange = { open -> openRowId = if (open) leg.id else openRowId.takeIf { it != leg.id } },
                                                     onEdit = { onEditLeg(leg.id) },
@@ -672,6 +888,8 @@ fun TripDetailScreen(
                                                         Modifier
                                                             .fillMaxWidth()
                                                             .clickable {
+                                                                // Releasing a long-press drag isn't a tap.
+                                                                if (justDragged()) return@clickable
                                                                 // A tap while a row is open just closes it.
                                                                 if (openRowId != null) openRowId = null
                                                                 else if (canEdit) onToggleLeg(leg.id)
@@ -803,7 +1021,7 @@ fun TripDetailScreen(
                                                     .filter { it.isNotBlank() }.joinToString(" · ")
 
                                                 SwipeRevealRow(
-                                                    enabled = canEdit,
+                                                    enabled = canEdit && dragKey == null,
                                                     isOpen = openRowId == act.id,
                                                     onOpenChange = { open -> openRowId = if (open) act.id else openRowId.takeIf { it != act.id } },
                                                     onEdit = { onEditActivity(act.id) },
@@ -813,6 +1031,7 @@ fun TripDetailScreen(
                                                         Modifier
                                                             .fillMaxWidth()
                                                             .clickable {
+                                                                if (justDragged()) return@clickable
                                                                 if (openRowId != null) openRowId = null
                                                                 else if (canEdit) onToggleActivity(act.id)
                                                             }
@@ -889,7 +1108,13 @@ fun TripDetailScreen(
                                             }
                                         }
                                         }
+                                        }
                                     }
+                                    DropGap(
+                                        open = dropTarget?.date == date && dropTarget.index == dayOthers.size,
+                                        height = dragHeightDp, snap = snapGaps || dragKey == null,
+                                        onTop = { gapTop = it },
+                                    )
                                 }
                             }
                         }
@@ -1460,16 +1685,35 @@ private data class LegSegment(
 
 
 private sealed interface DayEntry {
-    val sortH: Int
-    val sortM: Int
+    val key: String
+    val orderKey: Double
     data class LegEntry(val leg: com.itinera.app.model.Leg) : DayEntry {
-        private val hm = parseHourMinute(leg.timeLabel)
-        override val sortH get() = hm.first
-        override val sortM get() = hm.second
+        override val key get() = "leg-${leg.id}"
+        override val orderKey = dayOrderKey(leg.sortKey, leg.timeLabel)
     }
     data class ActEntry(val act: com.itinera.app.model.Activity) : DayEntry {
-        private val hm = parseHourMinute(act.time)
-        override val sortH get() = hm.first
-        override val sortM get() = hm.second
+        override val key get() = "act-${act.id}"
+        override val orderKey = dayOrderKey(act.sortKey, act.time)
     }
+}
+
+/** Where a dragged row would land: a day, and its position among that day's other rows. */
+private data class DropTarget(val date: kotlinx.datetime.LocalDate, val index: Int)
+
+/** The space a dragged row will drop into; springs open/closed as the drop spot moves. */
+@Composable
+private fun DropGap(open: Boolean, height: Dp, snap: Boolean, onTop: (Float) -> Unit) {
+    val target = if (open) height else 0.dp
+    val animated by animateDpAsState(
+        targetValue = target,
+        animationSpec = if (snap) snap() else spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow),
+        label = "dropGap",
+    )
+    // On pick-up/drop use the target straight away: even snap() lags one frame, which let
+    // the next row jump into the lifted row's place for a frame.
+    val h = if (snap) target else animated
+    if (h > 0.dp) Spacer(
+        Modifier.fillMaxWidth().height(h)
+            .onGloballyPositioned { c -> if (open) onTop(c.boundsInRoot().top) }
+    )
 }

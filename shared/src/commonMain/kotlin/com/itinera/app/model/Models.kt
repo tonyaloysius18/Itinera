@@ -49,6 +49,8 @@ data class Leg(
     val toLng: Double = 0.0,            // ⬅ ADD
     val travellerIds: List<String> = emptyList(),
     val stops: List<LegStop> = emptyList(),
+    /** Position in its day set by dragging; null = sorted by its time. See [dayOrderKey]. */
+    val sortKey: Double? = null,
 )
 
 /** A trip groups together an ordered list of legs and its documents/checklist. */
@@ -212,7 +214,20 @@ data class Activity(
     val lat: Double = 0.0,
     val lng: Double = 0.0,
     val createdBy: String = "",        // uid of the member who added this — for block-filtering
+    /** Position in its day set by dragging; null = sorted by its time. See [dayOrderKey]. */
+    val sortKey: Double? = null,
 )
+
+/**
+ * Where an item sits within its day on the trip page. Untouched items sort by clock time
+ * (minutes since midnight, 9:00 when there's no time); once dragged, the stored key wins.
+ * Keys share one scale with times so new items still slot in by time among moved ones.
+ */
+fun dayOrderKey(sortKey: Double?, timeLabel: String): Double =
+    sortKey ?: com.itinera.app.parseHourMinute(timeLabel).let { (h, m) -> (h * 60 + m).toDouble() }
+
+/** A leg or place moved on the trip page: its (possibly new) day and its order key there. */
+data class DayMove(val date: LocalDate, val sortKey: Double)
 
 @Serializable
 data class Traveller(
