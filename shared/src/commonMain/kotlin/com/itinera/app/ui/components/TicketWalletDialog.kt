@@ -61,6 +61,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -106,7 +109,9 @@ fun TicketWalletDialog(
     val myTickets = remember(tickets, myTravellerId, isPlace) {
         if (isPlace) tickets.filter { it.travellerIds.isEmpty() || (myTravellerId.isNotBlank() && myTravellerId in it.travellerIds) }
         else if (myTravellerId.isBlank()) emptyList()
-        else tickets.filter { myTravellerId in it.travellerIds && !it.assignmentAmbiguous }
+        else tickets.filter {
+            !it.assignmentAmbiguous && (myTravellerId in it.travellerIds || (it.sharedWithAll && !notOnThisLeg))
+        }
     }
     var showGroupPasses by remember(tickets, myTravellerId) { mutableStateOf(canSeeAllPasses && notOnThisLeg && myTickets.isEmpty()) }
     val visibleTickets = if (showGroupPasses) tickets else myTickets
@@ -377,12 +382,7 @@ private fun WalletCard(
             }
             if (ticket.travellerName.isNotBlank()) {
                 Spacer(Modifier.height(6.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(if (ticket.travellerIds.size > 1) Icons.Filled.People else Icons.Filled.Person, null, tint = PassInkMuted, modifier = Modifier.size(16.dp))
-                    Spacer(Modifier.width(4.dp))
-                    Text(ticket.travellerName, style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium, color = PassInk)
-                }
+                PassHolders(ticket)
             }
 
             if (assignmentMessage.isNotBlank()) {
@@ -454,3 +454,52 @@ private fun transportIconFor(t: TransportType): ImageVector = when (t) {
     TransportType.FERRY  -> Icons.Filled.DirectionsBoat
     TransportType.CAR    -> Icons.Filled.DirectionsCar
 }
+
+
+/**
+ * Who a pass is for, kept to one line so a booking for five people doesn't crowd the card:
+ * one person shows their full name, two show first names ("Tony + Jow"), more show the
+ * first two and a count ("Tony, Jow +3"). Tapping a group expands to everyone's full name.
+ */
+@Composable
+private fun PassHolders(ticket: WalletTicket) {
+    val names = ticket.travellerNames
+    val isGroup = names.size > 1 || ticket.sharedWithAll
+    var expanded by remember(ticket.docId, ticket.extraction.rawValue) { mutableStateOf(false) }
+    val summary = when {
+        names.isEmpty() -> ticket.travellerName
+        names.size == 1 -> names[0].second
+        names.size == 2 -> "${names[0].first} + ${names[1].first}"
+        else -> "${names[0].first}, ${names[1].first} +${names.size - 2}"
+    }
+    val canExpand = names.size > 2
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .clip(RoundedCornerShape(50))
+                .then(if (canExpand) Modifier.clickable { expanded = !expanded } else Modifier)
+                .padding(horizontal = 8.dp, vertical = 2.dp),
+        ) {
+            Icon(if (isGroup) Icons.Filled.People else Icons.Filled.Person, null, tint = PassInkMuted, modifier = Modifier.size(16.dp))
+            Spacer(Modifier.width(4.dp))
+            Text(summary, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium,
+                color = PassInk, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (canExpand) {
+                Spacer(Modifier.width(2.dp))
+                Icon(if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore, null,
+                    tint = PassInkMuted, modifier = Modifier.size(18.dp))
+            }
+        }
+        if (expanded) {
+            Spacer(Modifier.height(4.dp))
+            Text(
+                names.joinToString("\n") { it.second },
+                style = MaterialTheme.typography.bodySmall,
+                color = PassInkMuted,
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
+}
+

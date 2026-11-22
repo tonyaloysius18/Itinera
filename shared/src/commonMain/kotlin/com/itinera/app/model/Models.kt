@@ -372,5 +372,9 @@ data class WalletTicket(
     val travellerIds: List<String> = emptyList(),
     /** Their names, joined for display ("Tony Aloysius + Jow Robinson"). */
     val travellerName: String = "",
+    /** The same people as a list of (first name, full name), for the compact pass label. */
+    val travellerNames: List<Pair<String, String>> = emptyList(),
     val assignmentAmbiguous: Boolean = false,
+    /** Left as "Anyone" on a leg: one ticket for every passenger on that leg. */
+    val sharedWithAll: Boolean = false,
 )

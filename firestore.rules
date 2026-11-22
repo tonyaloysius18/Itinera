@@ -185,7 +185,11 @@ service cloud.firestore {
           && (resource.data.travellerId == '' || request.auth.uid in resource.data.memberIds);
         allow create: if canEditTrip(tripId) && sharingIsPrivate(tripId, request.resource.data);
         allow delete: if canEditTrip(tripId);
-        allow update: if (canEditTrip(tripId) && sharingIsPrivate(tripId, request.resource.data))
+        // A shared pass (travellerIds) must keep that field: app versions from before shared
+        // passes rewrite the whole document without it and would silently drop the other
+        // travellers. Newer versions always write it (an empty list when unassigned).
+        allow update: if (canEditTrip(tripId) && sharingIsPrivate(tripId, request.resource.data)
+            && (!('travellerIds' in resource.data) || 'travellerIds' in request.resource.data))
           || (isTripMember(tripId) && onlyTogglesSelf() && mayHoldDoc(resource.data));
       }
       match /expenses/{expId} {

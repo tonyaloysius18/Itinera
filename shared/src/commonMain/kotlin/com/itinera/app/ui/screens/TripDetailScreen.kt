@@ -241,6 +241,21 @@ fun TripDetailScreen(
     var walletAct by remember { mutableStateOf<Activity?>(null) }
     var barcodeLoading by remember { mutableStateOf(false) }
     val legTicketCache = remember { mutableStateMapOf<String, List<WalletTicket>>() }
+
+    // Places (hostels, attractions) only offer "View ticket" when an attached file really
+    // holds a QR/barcode. A booking confirmation without one would otherwise open as a
+    // whole PDF, which isn't a ticket. Checked once per file in the background.
+    val placeDocHasCode = remember { mutableStateMapOf<String, Boolean>() }
+    val placeDocs = documents.filter { it.activityId.isNotBlank() }
+    LaunchedEffect(placeDocs.map { it.id to it.fileUrl }) {
+        placeDocs.forEach { d ->
+            val key = d.id + "|" + d.fileUrl
+            if (key in placeDocHasCode) return@forEach
+            val bytes = runCatching { onLoadImageBytes?.invoke(d.fileUrl) }.getOrNull()
+            placeDocHasCode[key] = bytes != null &&
+                runCatching { extractAllBarcodes(bytes, d.mimeType) }.getOrNull().orEmpty().isNotEmpty()
+        }
+    }
     val isOwner = trip.isOwnedBy(currentUid)
     val myTravellerId = remember(currentUid, travellers, trip.ownerId) {
         travellers.firstOrNull { currentUid.isNotBlank() && it.userId == currentUid }?.id
@@ -258,13 +273,16 @@ fun TripDetailScreen(
         docs: List<DocItem>,
         routeTime: (DocItem) -> Pair<String, String>,
         show: (List<WalletTicket>) -> Unit,
+        // Travellers an "Anyone" ticket belongs to (a leg's passengers). Empty for places,
+        // which already treat unassigned tickets as the group's.
+        everyoneIds: List<String> = emptyList(),
     ) {
         if (docs.isEmpty()) return
         scope.launch {
             barcodeLoading = true
             try {
                 val cacheKey = buildString {
-                    append(ownerId)
+                    append(ownerId).append('#').append(everyoneIds.joinToString(","))
                     docs.forEach { append('|').append(it.id).append(':').append(it.assignedTravellerIds.joinToString(",")).append(':').append(it.fileUrl) }
                 }
                 val tickets = legTicketCache.getOrPut(cacheKey) {
@@ -279,9 +297,15 @@ fun TripDetailScreen(
                         val assignmentAmbiguous = codes.size > 1
                         // One code can be for several travellers (a single QR for a whole booking).
                         val ticketTravellerIds = if (assignmentAmbiguous) emptyList() else d.assignedTravellerIds
-                        val travName = ticketTravellerIds
+                        // "Anyone" on a leg = this ticket is every passenger's pass.
+                        val sharedWithAll = !assignmentAmbiguous && ticketTravellerIds.isEmpty() && everyoneIds.isNotEmpty()
+                        val holders = (if (sharedWithAll) everyoneIds else ticketTravellerIds)
                             .mapNotNull { id -> travellers.firstOrNull { it.id == id } }
-                            .joinToString(" + ") { "${it.firstName} ${it.surname}".trim() }
+                        val travName = holders.joinToString(" + ") { "${it.firstName} ${it.surname}".trim() }
+                        val travNames = holders.map { t ->
+                            val full = "${t.firstName} ${t.surname}".trim()
+                            t.firstName.trim().ifBlank { full } to full
+                        }
 
                         codes.map {
                             WalletTicket(
@@ -292,7 +316,9 @@ fun TripDetailScreen(
                                 timeOverride = time,
                                 travellerIds = ticketTravellerIds,
                                 travellerName = travName,
+                                travellerNames = travNames,
                                 assignmentAmbiguous = assignmentAmbiguous,
+                                sharedWithAll = sharedWithAll,
                             )
                         }
                     }
@@ -324,6 +350,8 @@ fun TripDetailScreen(
                 } else "" to ""
             },
             show = { walletTickets = it; walletAct = null; walletLeg = leg },
+            // The leg's passengers; a leg that doesn't list any is for everyone on the trip.
+            everyoneIds = leg.travellerIds.ifEmpty { travellers.map { it.id } },
         )
 
     fun openActivityTickets(act: Activity, actDocs: List<DocItem>) =
@@ -606,7 +634,8 @@ fun TripDetailScreen(
                                                 // Owner sees every pass on the leg; anyone else only the pass assigned to them
                                                 // (no chip at all when there's none of theirs).
                                                 val legDocs = documents.filter {
-                                                    it.legId == leg.id && (isOwner || myTravellerId in it.assignedTravellerIds)
+                                                    it.legId == leg.id && (isOwner || it.assignedTravellerIds.isEmpty() ||
+                                                        myTravellerId in it.assignedTravellerIds)
                                                 }
 
                                                 val duration = if (leg.timeLabel.isNotBlank() && leg.endTimeLabel.isNotBlank()) {
@@ -766,7 +795,10 @@ fun TripDetailScreen(
 
                                             is DayEntry.ActEntry -> {
                                                 val act = entry.act
-                                                val actDocs = documents.filter { it.activityId == act.id && trip.canSeeDocument(it, currentUid) }
+                                                val actDocs = documents.filter {
+                                                    it.activityId == act.id && trip.canSeeDocument(it, currentUid) &&
+                                                        placeDocHasCode[it.id + "|" + it.fileUrl] == true
+                                                }
                                                 val tail = listOf(act.time, act.location)
                                                     .filter { it.isNotBlank() }.joinToString(" · ")
 
@@ -834,7 +866,9 @@ fun TripDetailScreen(
                                                                     .clip(CircleShape)
                                                                     .clickable {
                                                                         openInMaps(
-                                                                            label = listOf(act.title, act.location).filter { it.isNotBlank() }.joinToString(", "),
+                                                                            // Search by the address alone: Google Maps reads a title like
+                                                                            // "Fly back to Toulouse" as a route request and opens directions.
+                                                                            label = act.location.ifBlank { act.title },
                                                                             latitude = act.lat.takeIf { it != 0.0 },
                                                                             longitude = act.lng.takeIf { it != 0.0 },
                                                                         )

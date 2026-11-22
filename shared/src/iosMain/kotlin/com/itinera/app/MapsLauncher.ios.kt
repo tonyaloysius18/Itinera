@@ -36,7 +36,8 @@ actual fun openInMaps(label: String, latitude: Double?, longitude: Double?) {
     // a genuine fallback rather than the primary path.
     val candidates = buildList {
         if (hasCoords) {
-            add("comgooglemaps://?q=$encoded&center=$latitude,$longitude&zoom=16")
+            // Exact coordinates as the query drop a pin; a text query can be read as a route.
+            add("comgooglemaps://?q=$latitude,$longitude&center=$latitude,$longitude&zoom=16")
             add("maps://?ll=$latitude,$longitude&q=$encoded")
         } else {
             add("comgooglemaps://?q=$encoded")
